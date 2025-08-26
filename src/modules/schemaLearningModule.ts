@@ -1,6 +1,21 @@
 import { CognitiveItem, CognitiveSchema, WorldModel, SemanticAtom } from '../interfaces/types';
 import { v4 as uuidv4 } from 'uuid';
 
+// Define the structure for schema usage records
+interface SchemaUsageRecord {
+    applications: number;
+    successes: number;
+    lastUsed: number;
+    pattern: SchemaPattern;
+}
+
+// Define the structure for extracted patterns
+interface SchemaPattern {
+    types: string[];
+    relationships: any;
+    domains: string[];
+}
+
 /**
  * SchemaLearningModule - Automatically generates new schemas based on successful reasoning patterns
  * 
@@ -10,15 +25,16 @@ import { v4 as uuidv4 } from 'uuid';
  */
 export class SchemaLearningModule {
     private worldModel: WorldModel;
-    private schemaUsageHistory: Map<string, {
-        applications: number;
-        successes: number;
-        lastUsed: number;
-        pattern: any;
-    }>;
+    private schemaUsageHistory: Map<string, SchemaUsageRecord>;
     private learningThreshold: number; // Minimum success rate to create new schema
     private minApplications: number;   // Minimum applications before considering learning
 
+    /**
+     * Create a new schema learning module
+     * @param worldModel The world model to use for schema registration
+     * @param learningThreshold Minimum success rate to create new schema (default: 0.7)
+     * @param minApplications Minimum applications before considering learning (default: 5)
+     */
     constructor(worldModel: WorldModel, learningThreshold: number = 0.7, minApplications: number = 5) {
         this.worldModel = worldModel;
         this.schemaUsageHistory = new Map();
@@ -68,7 +84,7 @@ export class SchemaLearningModule {
                 if (newSchema) {
                     // Add the new schema to the world model
                     const atomId = this.worldModel.add_atom(newSchema.atom);
-                    const cognitiveSchema = this.worldModel.register_schema_atom(newSchema.atom);
+                    this.worldModel.register_schema_atom(newSchema.atom);
                     newSchemaIds.push(atomId);
                     
                     // Reset the usage history for this pattern to avoid infinite learning
@@ -86,15 +102,26 @@ export class SchemaLearningModule {
      * @param items The items to extract a pattern from
      * @returns A pattern representation
      */
-    private extractPattern(items: CognitiveItem[]): any {
+    private extractPattern(items: CognitiveItem[]): SchemaPattern {
         // Simple pattern extraction - in a real implementation, this would be more sophisticated
         return {
             types: items.map(item => item.type),
             relationships: this.extractRelationships(items),
-            domains: items.map(item => item.label?.toLowerCase().includes('medical') ? 'medical' : 
-                                 item.label?.toLowerCase().includes('financial') ? 'financial' : 
-                                 item.label?.toLowerCase().includes('legal') ? 'legal' : 'general')
+            domains: items.map(item => this.extractDomain(item))
         };
+    }
+
+    /**
+     * Extract the domain from a cognitive item based on its label
+     * @param item The cognitive item to extract the domain from
+     * @returns The domain of the item
+     */
+    private extractDomain(item: CognitiveItem): string {
+        const label = item.label?.toLowerCase() || '';
+        if (label.includes('medical')) return 'medical';
+        if (label.includes('financial')) return 'financial';
+        if (label.includes('legal')) return 'legal';
+        return 'general';
     }
 
     /**
@@ -119,21 +146,11 @@ export class SchemaLearningModule {
      * @param pattern The pattern to generalize
      * @returns A new schema or null if generalization fails
      */
-    private generalizePattern(originalSchemaId: string, pattern: any): {atom: SemanticAtom} | null {
+    private generalizePattern(originalSchemaId: string, pattern: SchemaPattern): {atom: SemanticAtom} | null {
         try {
-            // Create a generalized schema based on the pattern
-            const generalizedSchema: CognitiveSchema = {
-                atom_id: uuidv4(),
-                apply: (a: CognitiveItem, b: CognitiveItem, worldModel: WorldModel) => {
-                    // This is a placeholder implementation
-                    // In a real system, this would contain the generalized logic
-                    return this.applyGeneralizedSchema(a, b, pattern);
-                }
-            };
-
             // Create a semantic atom for this schema
             const atom: SemanticAtom = {
-                id: generalizedSchema.atom_id,
+                id: uuidv4(),
                 content: `Generalized schema based on pattern: ${JSON.stringify(pattern)}`,
                 embedding: this.generateEmbedding(pattern),
                 meta: {
@@ -160,7 +177,7 @@ export class SchemaLearningModule {
      * @param pattern The pattern this schema is based on
      * @returns Derived cognitive items
      */
-    private applyGeneralizedSchema(a: CognitiveItem, b: CognitiveItem, pattern: any): CognitiveItem[] {
+    private applyGeneralizedSchema(a: CognitiveItem, b: CognitiveItem, pattern: SchemaPattern): CognitiveItem[] {
         // This is a simplified implementation
         // A real implementation would contain more sophisticated logic
         
@@ -198,7 +215,7 @@ export class SchemaLearningModule {
      * @param pattern The pattern to generate an embedding for
      * @returns A placeholder embedding
      */
-    private generateEmbedding(pattern: any): number[] {
+    private generateEmbedding(pattern: SchemaPattern): number[] {
         // In a real implementation, this would use a neural network
         // For now, we'll generate a placeholder embedding
         return Array(768).fill(0).map(() => Math.random());

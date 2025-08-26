@@ -1,6 +1,10 @@
 import { v4 as uuidv4 } from 'uuid';
 import { Agenda, CognitiveItem, AttentionValue, UUID } from '../interfaces/types';
 
+/**
+ * PriorityAgenda - A priority-based agenda implementation for cognitive items
+ * Items are sorted by priority, with higher priority items processed first
+ */
 export class PriorityAgenda implements Agenda {
     private items: CognitiveItem[] = [];
     private itemMap: Map<UUID, CognitiveItem> = new Map(); // For O(1) lookups
@@ -8,6 +12,10 @@ export class PriorityAgenda implements Agenda {
     private lastPopTime: number = 0;
     private popCount: number = 0;
 
+    /**
+     * Add or update an item in the agenda
+     * @param item The cognitive item to add or update
+     */
     push(item: CognitiveItem): void {
         // Check if item already exists
         if (this.itemMap.has(item.id)) {
@@ -16,14 +24,14 @@ export class PriorityAgenda implements Agenda {
             if (index !== -1) {
                 this.items[index] = item;
                 this.itemMap.set(item.id, item);
-                this.items.sort((a, b) => b.attention.priority - a.attention.priority);
+                this.sortItemsByPriority();
             }
             return;
         }
         
         this.items.push(item);
         this.itemMap.set(item.id, item);
-        this.items.sort((a, b) => b.attention.priority - a.attention.priority);
+        this.sortItemsByPriority();
         
         // Resolve any waiting pop promises
         if (this.waitingQueue.length > 0) {
@@ -32,6 +40,10 @@ export class PriorityAgenda implements Agenda {
         }
     }
 
+    /**
+     * Remove and return the highest priority item from the agenda
+     * @returns A promise that resolves to the highest priority cognitive item
+     */
     async pop(): Promise<CognitiveItem> {
         if (this.items.length > 0) {
             const item = this.items.shift()!;
@@ -51,22 +63,40 @@ export class PriorityAgenda implements Agenda {
         });
     }
 
+    /**
+     * Peek at the highest priority item without removing it
+     * @returns The highest priority cognitive item or null if agenda is empty
+     */
     peek(): CognitiveItem | null {
         return this.items.length > 0 ? this.items[0] : null;
     }
 
+    /**
+     * Get the current size of the agenda
+     * @returns The number of items in the agenda
+     */
     size(): number {
         return this.items.length;
     }
 
+    /**
+     * Update the attention value of an item and re-sort the agenda
+     * @param id The ID of the item to update
+     * @param newVal The new attention value
+     */
     updateAttention(id: UUID, newVal: AttentionValue): void {
         const index = this.items.findIndex(item => item.id === id);
         if (index !== -1) {
             this.items[index].attention = newVal;
-            this.items.sort((a, b) => b.attention.priority - a.attention.priority);
+            this.sortItemsByPriority();
         }
     }
 
+    /**
+     * Remove an item from the agenda
+     * @param id The ID of the item to remove
+     * @returns True if the item was removed, false otherwise
+     */
     remove(id: UUID): boolean {
         const initialLength = this.items.length;
         this.items = this.items.filter(item => item.id !== id);
@@ -77,12 +107,19 @@ export class PriorityAgenda implements Agenda {
         return removed;
     }
     
-    // Get item by ID without removing it
+    /**
+     * Get an item by ID without removing it from the agenda
+     * @param id The ID of the item to retrieve
+     * @returns The cognitive item or null if not found
+     */
     get(id: UUID): CognitiveItem | null {
         return this.itemMap.get(id) || null;
     }
     
-    // Get statistics about agenda usage
+    /**
+     * Get statistics about agenda usage
+     * @returns Object containing size, pop rate, and average wait time
+     */
     getStatistics(): { 
         size: number; 
         popRate: number; 
@@ -104,6 +141,16 @@ export class PriorityAgenda implements Agenda {
         };
     }
     
+    /**
+     * Sort items by priority in descending order (highest first)
+     */
+    private sortItemsByPriority(): void {
+        this.items.sort((a, b) => b.attention.priority - a.attention.priority);
+    }
+    
+    /**
+     * Track statistics for pop operations
+     */
     private trackPopStatistics(): void {
         this.popCount++;
         this.lastPopTime = Date.now();

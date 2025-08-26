@@ -27,30 +27,52 @@ import {
 } from '../interfaces/types';
 import { v4 as uuidv4 } from 'uuid';
 
+/**
+ * DecentralizedCognitiveCore - The main cognitive processing engine
+ * Implements a hybrid symbolic and semantic reasoning system with attention dynamics
+ */
 export class DecentralizedCognitiveCore {
     private agenda: Agenda;
-    private worldModel: WorldModel;
-    private beliefRevisionEngine: BeliefRevisionEngine;
-    private attentionModule: AttentionModule;
-    private resonanceModule: ResonanceModule;
-    private schemaMatcher: SchemaMatcher;
-    private goalTreeManager: GoalTreeManager;
-    private reflectionLoop: ReflectionLoop;
-    private actionSubsystem: ActionSubsystem;
-    private schemaLearningModule: SchemaLearningModule;
+    private worldModel!: WorldModel;
+    private beliefRevisionEngine!: BeliefRevisionEngine;
+    private attentionModule!: AttentionModule;
+    private resonanceModule!: ResonanceModule;
+    private schemaMatcher!: SchemaMatcher;
+    private goalTreeManager!: GoalTreeManager;
+    private reflectionLoop!: ReflectionLoop;
+    private actionSubsystem!: ActionSubsystem;
+    private schemaLearningModule!: SchemaLearningModule;
     private workerCount: number;
     private isRunning: boolean = false;
     private reflectionInterval: NodeJS.Timeout | null = null;
     private workerStatistics: Map<number, { itemsProcessed: number; errors: number }> = new Map();
     private useEnhancedComponents: boolean;
 
+    /**
+     * Create a new cognitive core
+     * @param workerCount Number of worker threads to use for processing
+     * @param useEnhancedComponents Whether to use enhanced versions of components
+     */
     constructor(workerCount: number = 4, useEnhancedComponents: boolean = false) {
         this.useEnhancedComponents = useEnhancedComponents;
         
         this.agenda = new PriorityAgenda();
         
+        // Initialize components based on enhancement flag
+        this.initializeComponents();
+        
+        this.workerCount = workerCount;
+        
+        // Initialize worker statistics
+        this.initializeWorkerStatistics();
+    }
+
+    /**
+     * Initialize all cognitive components
+     */
+    private initializeComponents(): void {
         // Optionally use enhanced components
-        if (useEnhancedComponents) {
+        if (this.useEnhancedComponents) {
             this.worldModel = new EnhancedWorldModel();
             this.attentionModule = new EnhancedAttentionModule();
         } else {
@@ -65,14 +87,20 @@ export class DecentralizedCognitiveCore {
         this.reflectionLoop = new ReflectionLoop(this.worldModel, this.agenda);
         this.actionSubsystem = new ActionSubsystem();
         this.schemaLearningModule = new SchemaLearningModule(this.worldModel);
-        this.workerCount = workerCount;
-        
-        // Initialize worker statistics
-        for (let i = 0; i < workerCount; i++) {
+    }
+
+    /**
+     * Initialize worker statistics tracking
+     */
+    private initializeWorkerStatistics(): void {
+        for (let i = 0; i < this.workerCount; i++) {
             this.workerStatistics.set(i, { itemsProcessed: 0, errors: 0 });
         }
     }
 
+    /**
+     * Start the cognitive core processing
+     */
     async start(): Promise<void> {
         this.isRunning = true;
         console.log(`Starting cognitive core with ${this.workerCount} workers`);
@@ -85,6 +113,9 @@ export class DecentralizedCognitiveCore {
         await Promise.all(workers);
     }
 
+    /**
+     * Stop the cognitive core processing
+     */
     stop(): void {
         this.isRunning = false;
         if (this.reflectionInterval) {
@@ -94,6 +125,10 @@ export class DecentralizedCognitiveCore {
         this.printWorkerStatistics();
     }
 
+    /**
+     * Create a worker thread for processing cognitive items
+     * @param workerId The ID of the worker to create
+     */
     private async createWorker(workerId: number): Promise<void> {
         console.log(`Worker ${workerId} started`);
         let itemCounter = 0;
@@ -119,105 +154,172 @@ export class DecentralizedCognitiveCore {
         console.log(`Worker ${workerId} stopped`);
     }
 
+    /**
+     * Process a cognitive item through the cognitive cycle
+     * @param itemA The cognitive item to process
+     * @param workerId The ID of the worker processing the item
+     */
     private async processItem(itemA: CognitiveItem, workerId: number): Promise<void> {
         // Update worker statistics
-        const stats = this.workerStatistics.get(workerId) || { itemsProcessed: 0, errors: 0 };
-        stats.itemsProcessed++;
-        this.workerStatistics.set(workerId, stats);
+        this.updateWorkerStatistics(workerId);
         
         try {
             // Contextualize: Find relevant context via hybrid retrieval
             const contextItems = this.resonanceModule.find_context(itemA, this.worldModel, 10);
 
             // Reason: Apply applicable schemas to generate new items
-            let derivedCount = 0;
-            for (const itemB of contextItems) {
-                const schemas = this.schemaMatcher.find_applicable(itemA, itemB, this.worldModel);
-                for (const schema of schemas) {
-                    try {
-                        // Record schema usage for reflection
-                        this.reflectionLoop.recordSchemaUsage(schema.atom_id);
-                        
-                        // Apply schema to generate new items
-                        const derived = schema.apply(itemA, itemB, this.worldModel);
-                        derivedCount += derived.length;
-                        
-                        for (const newItem of derived) {
-                            // Calculate attention for derived items
-                            const schemaAtom = this.worldModel.get_atom(schema.atom_id);
-                            const sourceTrust = schemaAtom?.meta.trust_score || 0.5;
-                            
-                            newItem.attention = this.attentionModule.calculate_derived(
-                                [itemA, itemB],
-                                schema,
-                                sourceTrust
-                            );
-                            
-                            // Create derivation stamp
-                            newItem.stamp = {
-                                timestamp: Date.now(),
-                                parent_ids: [itemA.id, itemB.id],
-                                schema_id: schema.atom_id
-                            };
-                            
-                            // Add derived item to agenda
-                            this.agenda.push(newItem);
-                        }
-                        
-                        // Record successful schema usage for learning
-                        this.schemaLearningModule.recordSchemaUsage(schema.atom_id, true, [itemA, itemB]);
-                    } catch (error) {
-                        console.warn(`Schema ${schema.atom_id} failed:`, error);
-                        // Record failed schema usage for learning
-                        this.schemaLearningModule.recordSchemaUsage(schema.atom_id, false, [itemA, itemB]);
-                    }
-                }
-            }
+            await this.reasonWithSchemas(itemA, contextItems);
 
             // Memorize: Revise beliefs in world model
-            if (itemA.type === "BELIEF") {
-                const revised = this.worldModel.revise_belief(itemA);
-                if (revised) {
-                    this.agenda.push(revised);
-                }
-            }
+            this.memorizeBelief(itemA);
 
             // Reinforce: Update attention based on access
             this.attentionModule.update_on_access([itemA, ...contextItems]);
 
             // Update goal tree and handle action goals
-            if (itemA.type === "GOAL" && itemA.goal_status === "active") {
-                // Check if this is an action goal
-                if (this.isActionGoal(itemA)) {
-                    // Execute the action goal
-                    const result = await this.actionSubsystem.executeGoal(itemA);
-                    if (result) {
-                        // Add the result back to the agenda
-                        this.agenda.push(result);
-                        // Mark the goal as achieved
-                        itemA.goal_status = "achieved";
-                        this.goalTreeManager.mark_achieved(itemA.id);
-                    }
-                } else {
-                    // Check if goal is achieved
-                    if (this.isGoalAchieved(itemA)) {
-                        itemA.goal_status = "achieved";
-                        this.goalTreeManager.mark_achieved(itemA.id);
-                    } else {
-                        // Decompose complex goals into subgoals
-                        const subgoals = this.goalTreeManager.decompose(itemA);
-                        for (const subgoal of subgoals) {
-                            this.agenda.push(subgoal);
-                        }
-                    }
-                }
-            }
+            await this.processGoals(itemA);
         } catch (error) {
             console.error("Worker failed processing item", itemA.id, error);
             throw error;
         }
     }
 
+    /**
+     * Update worker statistics for an item processing operation
+     * @param workerId The ID of the worker to update statistics for
+     */
+    private updateWorkerStatistics(workerId: number): void {
+        const stats = this.workerStatistics.get(workerId) || { itemsProcessed: 0, errors: 0 };
+        stats.itemsProcessed++;
+        this.workerStatistics.set(workerId, stats);
+    }
+
+    /**
+     * Apply reasoning schemas to generate new cognitive items
+     * @param itemA The first cognitive item
+     * @param contextItems Contextual items to use in reasoning
+     */
+    private async reasonWithSchemas(itemA: CognitiveItem, contextItems: CognitiveItem[]): Promise<void> {
+        for (const itemB of contextItems) {
+            const schemas = this.schemaMatcher.find_applicable(itemA, itemB, this.worldModel);
+            for (const schema of schemas) {
+                await this.applySchema(itemA, itemB, schema);
+            }
+        }
+    }
+
+    /**
+     * Apply a schema to two cognitive items to generate new items
+     * @param itemA The first cognitive item
+     * @param itemB The second cognitive item
+     * @param schema The schema to apply
+     */
+    private async applySchema(itemA: CognitiveItem, itemB: CognitiveItem, schema: CognitiveSchema): Promise<void> {
+        try {
+            // Record schema usage for reflection
+            this.reflectionLoop.recordSchemaUsage(schema.atom_id);
+            
+            // Apply schema to generate new items
+            const derived = schema.apply(itemA, itemB, this.worldModel);
+            
+            for (const newItem of derived) {
+                // Calculate attention for derived items
+                const schemaAtom = this.worldModel.get_atom(schema.atom_id);
+                const sourceTrust = schemaAtom?.meta.trust_score || 0.5;
+                
+                newItem.attention = this.attentionModule.calculate_derived(
+                    [itemA, itemB],
+                    schema,
+                    sourceTrust
+                );
+                
+                // Create derivation stamp
+                newItem.stamp = {
+                    timestamp: Date.now(),
+                    parent_ids: [itemA.id, itemB.id],
+                    schema_id: schema.atom_id
+                };
+                
+                // Add derived item to agenda
+                this.agenda.push(newItem);
+            }
+            
+            // Record successful schema usage for learning
+            this.schemaLearningModule.recordSchemaUsage(schema.atom_id, true, [itemA, itemB]);
+        } catch (error) {
+            console.warn(`Schema ${schema.atom_id} failed:`, error);
+            // Record failed schema usage for learning
+            this.schemaLearningModule.recordSchemaUsage(schema.atom_id, false, [itemA, itemB]);
+        }
+    }
+
+    /**
+     * Revise beliefs in the world model if the item is a belief
+     * @param itemA The cognitive item to potentially revise
+     */
+    private memorizeBelief(itemA: CognitiveItem): void {
+        if (itemA.type === "BELIEF") {
+            const revised = this.worldModel.revise_belief(itemA);
+            if (revised) {
+                this.agenda.push(revised);
+            }
+        }
+    }
+
+    /**
+     * Process goals in the cognitive item
+     * @param itemA The cognitive item to process as a goal
+     */
+    private async processGoals(itemA: CognitiveItem): Promise<void> {
+        if (itemA.type === "GOAL" && itemA.goal_status === "active") {
+            // Check if this is an action goal
+            if (this.isActionGoal(itemA)) {
+                await this.executeActionGoal(itemA);
+            } else {
+                await this.processCognitiveGoal(itemA);
+            }
+        }
+    }
+
+    /**
+     * Execute an action goal using the action subsystem
+     * @param goal The action goal to execute
+     */
+    private async executeActionGoal(goal: CognitiveItem): Promise<void> {
+        // Execute the action goal
+        const result = await this.actionSubsystem.executeGoal(goal);
+        if (result) {
+            // Add the result back to the agenda
+            this.agenda.push(result);
+            // Mark the goal as achieved
+            goal.goal_status = "achieved";
+            this.goalTreeManager.mark_achieved(goal.id);
+        }
+    }
+
+    /**
+     * Process a cognitive goal (non-action)
+     * @param goal The cognitive goal to process
+     */
+    private async processCognitiveGoal(goal: CognitiveItem): Promise<void> {
+        // Check if goal is achieved
+        if (this.isGoalAchieved(goal)) {
+            goal.goal_status = "achieved";
+            this.goalTreeManager.mark_achieved(goal.id);
+        } else {
+            // Decompose complex goals into subgoals
+            const subgoals = this.goalTreeManager.decompose(goal);
+            for (const subgoal of subgoals) {
+                this.agenda.push(subgoal);
+            }
+        }
+    }
+
+    /**
+     * Determine if a goal is an action goal based on its content
+     * @param goal The goal to check
+     * @returns True if the goal is an action goal, false otherwise
+     */
     private isActionGoal(goal: CognitiveItem): boolean {
         // Determine if a goal is an action goal based on its content
         const label = goal.label || '';
@@ -230,6 +332,11 @@ export class DecentralizedCognitiveCore {
                label.toLowerCase().includes('run');
     }
 
+    /**
+     * Check if a goal is achieved (simplified implementation)
+     * @param goal The goal to check
+     * @returns True if the goal is achieved, false otherwise
+     */
     private isGoalAchieved(goal: CognitiveItem): boolean {
         // Check if a goal is achieved (simplified implementation)
         // In a real implementation, this would check if the goal's conditions are met
@@ -244,7 +351,13 @@ export class DecentralizedCognitiveCore {
         return Math.random() > 0.8; // 20% chance of being achieved
     }
 
-    // Public methods for external interaction
+    /**
+     * Add an initial belief to the cognitive system
+     * @param content The content of the belief
+     * @param truth The truth value of the belief
+     * @param attention The attention value of the belief
+     * @param meta Optional metadata for the belief
+     */
     public addInitialBelief(content: any, truth: TruthValue, attention: AttentionValue, meta?: Record<string, any>): void {
         const atom: SemanticAtom = {
             id: uuidv4(),
@@ -264,6 +377,12 @@ export class DecentralizedCognitiveCore {
         this.agenda.push(belief);
     }
 
+    /**
+     * Add an initial goal to the cognitive system
+     * @param content The content of the goal
+     * @param attention The attention value of the goal
+     * @param meta Optional metadata for the goal
+     */
     public addInitialGoal(content: any, attention: AttentionValue, meta?: Record<string, any>): void {
         const atom: SemanticAtom = {
             id: uuidv4(),
@@ -283,6 +402,11 @@ export class DecentralizedCognitiveCore {
         this.agenda.push(goal);
     }
 
+    /**
+     * Add a schema to the cognitive system
+     * @param content The content of the schema
+     * @param meta Optional metadata for the schema
+     */
     public addSchema(content: any, meta?: Record<string, any>): void {
         const atom: SemanticAtom = {
             id: uuidv4(),
@@ -301,7 +425,10 @@ export class DecentralizedCognitiveCore {
         this.schemaMatcher.register_schema(atom, this.worldModel);
     }
     
-    // System monitoring methods
+    /**
+     * Get the current system status
+     * @returns Object containing system status information
+     */
     public getSystemStatus(): {
         agendaSize: number;
         worldModelStats: any;
@@ -314,6 +441,9 @@ export class DecentralizedCognitiveCore {
         };
     }
     
+    /**
+     * Print worker statistics to the console
+     */
     private printWorkerStatistics(): void {
         console.log("Worker Statistics:");
         for (const [workerId, stats] of this.workerStatistics.entries()) {
@@ -321,6 +451,11 @@ export class DecentralizedCognitiveCore {
         }
     }
 
+    /**
+     * Generate a placeholder embedding for content
+     * @param content The content to generate an embedding for
+     * @returns A placeholder embedding array
+     */
     private generateEmbedding(content: any): number[] {
         // Generate placeholder embeddings
         // In a real implementation, this would use a neural network
