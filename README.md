@@ -1,10 +1,34 @@
 # Senars3 Cognitive System
 
-A verifiable, goal-directed, and self-reflective reasoning system that integrates symbolic and semantic cognition.
+A next-generation agentic reasoning system that uses Non-Axiomatic Logic (NAL) principles to implement the ultimate fusion of symbolic reasoning and Language Model technology.
 
 ## Overview
 
-This system implements a decentralized, event-driven cognitive engine centered on a prioritized agenda. It integrates perception, memory, reasoning, action, and metacognition into a coherent loop.
+The Senars3 cognitive system combines symbolic reasoning with Language Model technology to create a system capable of learning, adaptation, and self-improvement through interaction with its environment. It features:
+
+- Experience-grounded reasoning instead of fixed axioms
+- Explicit uncertainty management through truth values (frequency and confidence)
+- Goal-directed cognition with attention mechanisms (priority and durability)
+- Self-reflective operation and adaptation
+- Unified interface with both CLI and Web UI access through a WebSocket backend
+
+## Core Concepts
+
+### Non-Axiomatic Logic Principles
+
+1. **Experience-Grounded Reasoning**: All reasoning is grounded in experience rather than fixed axioms
+2. **Uncertainty Management**: Knowledge carries explicit uncertainty measures through truth values:
+   - **Frequency (f)**: Relative frequency of evidence supporting a statement (0.0 to 1.0)
+   - **Confidence (c)**: Amount of evidence available (0.0 to 1.0)
+3. **Goal-Directed Cognition**: All cognitive processes are driven by goals with attention values:
+   - **Priority (p)**: Current importance of pursuing the goal (0.0 to 1.0)
+   - **Durability (d)**: How long the goal remains important (0.0 to 1.0)
+4. **Self-Reflective Operation**: Continuous monitoring and adaptation of reasoning processes
+
+### Core Data Model
+
+1. **SemanticAtom**: Fundamental unit of knowledge representation with content and semantic embedding
+2. **CognitiveItem**: Contextualized thoughts (beliefs, goals, queries) with associated truth and attention values
 
 ## Architecture
 
@@ -24,10 +48,30 @@ The system follows a modular architecture with the following key components:
    - PerceptionSubsystem
    - ActionSubsystem
 
-## Core Data Model
+## Features
 
-- **SemanticAtom** - Immutable knowledge unit with content and embedding
-- **CognitiveItem** - Contextualized thought (belief, goal, or query) with attention and truth values
+- **Non-Axiomatic Logic Principles**: Reasoning with uncertainty management and experience-grounded conclusions
+- **Hybrid Cognition**: Combines symbolic logic with semantic vectors
+- **Concurrency-Native**: Built on asynchronous, parallel processing
+- **Verifiable Provenance**: Every derived item traces back to its source
+- **Modular Abstraction**: Swappable modules with strict interfaces
+- **Goal-Agentic Flow**: All cognition driven by goals
+- **Trust-Aware Inference**: Knowledge weighted by credibility
+- **Self-Reflective Operation**: System audits its own performance
+- **Unified Interface Access**: Single interface for CLI and Web through WebSocket backend
+- **Metaprogramming Capabilities**: System can represent and modify itself
+- **Enhanced Usability**: Improved error handling, status monitoring, and user feedback
+- **Schema Learning**: Automatic evolution of reasoning patterns through experience
+- **Self-Development**: System can analyze its own performance and generate enhancements
+
+## Available Interfaces
+
+The system provides a unified interface that works seamlessly across both CLI and Web environments:
+
+1. **Unified Command-Line Interface (CLI)** - Interactive text-based interface that connects to the WebSocket backend
+2. **Unified Web Interface** - Browser-based graphical interface with real-time feedback and metaprogramming capabilities
+3. **WebSocket API** - Programmatic interface for custom applications
+4. **REST API** - HTTP-based interface for programmatic access
 
 ## Getting Started
 
@@ -45,36 +89,18 @@ npm run build
 
 ### Running Tests
 
-We have implemented a comprehensive unit test suite with Jest:
-
 ```bash
 # Run all unit tests
 npm test
 
 # Run tests in watch mode
 npm run test:watch
-
-# Run tests with coverage report
-npm run test:coverage
-
-# Run only unit tests
-npm run test:unit
-
-# Run only integration tests
-npm run test:integration
 ```
 
-### Viewing Usability Documentation
+### Starting the System
 
 ```bash
-# View usability enhancements documentation
-npm run docs:usability
-```
-
-### Running the System
-
-```bash
-# Run the main system (CLI interface)
+# Run the main system (Unified CLI interface)
 npm start
 
 # Run the WebSocket server for web interface
@@ -83,100 +109,57 @@ npm run start:ws
 # Run the combined HTTP + WebSocket server for web interface
 npm run start:web
 
-# Run basic component tests
-npx ts-node src/basicTest.ts
-
-# Run comprehensive system test
-npx ts-node src/comprehensiveTest.ts
-
-# Run full system test
-npx ts-node src/fullSystemTest.ts
-
-# Run benchmark
-npx ts-node src/benchmark.ts
+# Run the unified server with both WebSocket and REST interfaces
+npm run start:unified
 ```
 
-### User Interfaces
+## Using the Unified Interface
 
-The system provides multiple interfaces for interaction:
+### CLI Interface
 
-1. **Command-Line Interface (CLI)** - Interactive text-based interface
-2. **Web Interface** - Browser-based graphical interface with real-time feedback
-3. **WebSocket API** - Programmatic interface for custom applications
-4. **REST API** - HTTP-based interface for programmatic access
+To start the interactive CLI that connects to the WebSocket backend:
+
+```bash
+npm start
+```
+
+Once in the CLI, you can use commands like:
+- `help` - Show help message with available commands and examples
+- `status` - Show system status including agenda size and world model statistics
+- `process <input>` - Process natural language input through non-axiomatic logic
+- `core.getSystemStatus {}` - Direct access to system components
 
 ### Web Interface
 
-The enhanced web interface provides a rich, interactive experience with:
-
-- Real-time connection status monitoring
-- Interactive demos for different domains
-- Custom input processing with keyboard shortcuts
-- System status monitoring with live statistics
-- Comprehensive help and examples
-
-To access the web interface:
-
-1. Start the combined server: `npm run start:web`
-2. Open your browser to: `http://localhost:3000`
-
-### User Guide
-
-For detailed instructions on using the system, see our [User Guide](USER_GUIDE.md).
-
-## WebSocket Interface
-
-The system includes a metaprogrammatic WebSocket interface that exposes the cognitive system's capabilities for flexible and adaptable web UI integration.
-
-### Starting the WebSocket Server
+To start the unified web interface:
 
 ```bash
-# Start only the WebSocket server
-npm run start:ws
-
-# Start combined HTTP + WebSocket server
 npm run start:web
 ```
 
-### WebSocket API
+Once the server is running, open your browser and navigate to:
 
-The WebSocket interface uses a request-response pattern with the following message structure:
-
-```json
-{
-  "id": "unique-message-id",
-  "type": "request",
-  "target": "component-name",
-  "method": "method-name",
-  "payload": { /* method-specific data */ }
-}
+```
+http://localhost:3000
 ```
 
-#### Available Components and Methods
+The unified web interface provides several tabs for different functionalities:
+1. **Cognitive Demos** - Pre-built examples for different domains
+2. **Custom Input** - Enter your own text for processing
+3. **System Status** - Real-time monitoring of system statistics
+4. **Metaprogramming** - Direct component access and self-modification interface
+5. **Help & Examples** - Comprehensive guide and input examples
 
-1. **core**
-   - `start` - Start the cognitive core
-   - `stop` - Stop the cognitive core
-   - `getSystemStatus` - Get system status information
-   - `addInitialBelief` - Add an initial belief to the system
-   - `addInitialGoal` - Add an initial goal to the system
-   - `addSchema` - Add a cognitive schema to the system
+### WebSocket API
 
-2. **perception**
-   - `processInput` - Process natural language input into cognitive items
+The WebSocket API provides programmatic access to the cognitive system's capabilities. It uses a request-response pattern with JSON messages.
 
-3. **agenda**
-   - `size` - Get the current size of the agenda
-   - `peek` - Peek at the top item in the agenda
+To connect to the WebSocket server:
+```
+ws://localhost:8080
+```
 
-4. **worldModel**
-   - `getStatistics` - Get world model statistics
-
-5. **actionSubsystem**
-   - `getStatistics` - Get action subsystem statistics
-
-### Example WebSocket Communication
-
+Example usage:
 ```javascript
 // Connect to the WebSocket server
 const ws = new WebSocket('ws://localhost:8080');
@@ -188,7 +171,7 @@ ws.send(JSON.stringify({
   target: 'perception',
   method: 'processInput',
   payload: {
-    input: 'My cat seems sick after eating chocolate. What should I do?'
+    input: 'My cat seems sick after eating chocolate. What should I do considering uncertainty?'
   }
 }));
 
@@ -201,18 +184,16 @@ ws.onmessage = function(event) {
 };
 ```
 
-## REST API
+### REST API
 
-The system also provides a REST API for programmatic access:
+The system provides a REST API for programmatic access:
 
-### Endpoints
-
+Endpoints:
 - `GET /health` - Health check endpoint
 - `GET /api/status` - Get server status information
 - `POST /api/process` - Process input (asynchronous)
 
-### Example REST API Usage
-
+Example usage:
 ```bash
 # Health check
 curl http://localhost:3000/health
@@ -223,32 +204,67 @@ curl http://localhost:3000/api/status
 # Process input
 curl -X POST http://localhost:3000/api/process \
   -H "Content-Type: application/json" \
-  -d '{"input": "My cat seems sick after eating chocolate. What should I do?"}'
+  -d '{"input": "My cat seems sick after eating chocolate. What should I do considering uncertainty?"}'
 ```
 
-## Key Features
+## Input Guidelines
 
-- **Hybrid Cognition**: Combines symbolic logic with semantic vectors
-- **Concurrency-Native**: Built on asynchronous, parallel processing
-- **Verifiable Provenance**: Every derived item traces back to its source
-- **Modular Abstraction**: Swappable modules with strict interfaces
-- **Goal-Agentic Flow**: All cognition driven by goals
-- **Trust-Aware Inference**: Knowledge weighted by credibility
-- **Self-Reflective Operation**: System audits its own performance
-- **Multi-Interface Access**: CLI, Web, WebSocket, and REST APIs
-- **Enhanced Usability**: Improved error handling, status monitoring, and user feedback
+The system can process different types of input through its non-axiomatic logic framework:
 
-## Implementation Status
+1. **Uncertain Statements** - Information with implicit uncertainty like "Chocolate is likely toxic to dogs"
+2. **Probabilistic Questions** - Queries that require uncertainty-aware answers
+3. **Conditional Commands** - Action requests with uncertainty considerations
+4. **Exploratory Goals** - Complex objectives with uncertainty evaluation
+5. **Adaptive Requests** - Multi-part requests that adapt based on uncertainty
 
-✅ Complete implementation of all core components according to specification.
+### Best Practices
 
-## Test Coverage
+1. **Express Uncertainty Explicitly** - Include phrases like "likely", "possibly", "with high probability"
+2. **Use Conditional Language** - Frame requests with "if-then" constructs
+3. **Specify Confidence Requirements** - Indicate when you need high-confidence answers
+4. **Break Down Complex Requests** - For complex tasks, consider breaking them into simpler sub-tasks
+5. **Monitor System Status** - Use status commands to monitor system performance
+6. **Be Specific and Clear** - Use clear, unambiguous language while acknowledging uncertainties
 
-The system includes comprehensive unit tests covering:
+## Demos
 
-- All core components (Agenda, WorldModel, CognitiveCore, etc.)
-- All pluggable modules (AttentionModule, ResonanceModule, etc.)
-- Domain-specific scenarios (Medical, Financial, Educational, Legal, Environmental, Cybersecurity)
-- Integration tests verifying component interactions
+The system includes several demos that showcase its capabilities:
 
-See [TEST_SUMMARY.md](TEST_SUMMARY.md) for detailed test coverage information.
+- **Basic Demo** - Shows basic functionality of the system
+- **Comprehensive Demo** - Demonstrates natural language processing and system status
+- **Advanced Demo** - Showcases analogical reasoning capabilities
+- **Adaptive Learning Demo** - Demonstrates the system's ability to evolve its knowledge base
+- **Web Interface Demo** - Provides a user-friendly web interface
+
+To run the demos:
+1. Start the unified server: `npm run start:unified`
+2. In another terminal, run: `node unifiedDemo.js`
+
+## Self-Development Capabilities
+
+The system can analyze its own test results and code coverage data to identify areas for improvement and generate enhancement proposals. It can:
+
+- Monitor and analyze unit test results in real-time
+- Parse and interpret code coverage reports
+- Represent its own architecture and components as knowledge
+- Generate enhancement proposals based on analysis
+- Implement changes to its own codebase
+- Learn new reasoning patterns from successful schema applications
+
+## Schema Learning
+
+The system can automatically learn and evolve its reasoning patterns through experience:
+
+- Tracks schema usage patterns across reasoning cycles
+- Identifies frequently successful schema applications
+- Generalizes patterns into new schemas when success thresholds are met
+- Adds new schemas to the world model for future use
+
+## Metaprogramming and Self-Modification
+
+The unified interface enables direct interaction with the system's self-representational capabilities:
+
+1. **Component Introspection** - Examine internal state of cognitive modules
+2. **Parameter Adjustment** - Modify system parameters that affect reasoning
+3. **Schema Evolution** - Add or modify cognitive patterns that guide reasoning
+4. **Reflection Control** - Configure how the system monitors and adapts itself
