@@ -1,601 +1,277 @@
-Complete architectural blueprint for a **verifiable, goal-directed, and self-reflective reasoning system**
-that integrates symbolic and semantic cognition. The system orchestrates AI capabilities through a modular, concurrent,
-and auditable design, enabling autonomous agents to reason, learn, act, and evolve with full provenance and trust
-awareness.
+# Senars3 Cognitive System - Non-Axiomatic Logic Core Principles
 
-### **Core Principles**
+## Overview
 
-| Principle                     | Description                                                                                       |
-|-------------------------------|---------------------------------------------------------------------------------------------------|
-| **Hybrid Cognition**          | Combines symbolic logic (for precision) with semantic vectors (for generalization and intuition). |
-| **Concurrency-Native**        | Built on asynchronous, parallel processing via a decentralized worker model.                      |
-| **Verifiable Provenance**     | Every derived item traces back to its source atoms and reasoning rules.                           |
-| **Modular Abstraction**       | Core cognitive functions are encapsulated in swappable modules with strict interfaces.            |
-| **Goal-Agentic Flow**         | All cognition is driven by goals, decomposed hierarchically into subtasks.                        |
-| **Trust-Aware Inference**     | Knowledge sources and beliefs are weighted by credibility to resist misinformation.               |
-| **Self-Reflective Operation** | The system audits its own performance, detects contradictions, and regulates cognitive load.      |
+The Senars3 cognitive system implements a next-generation agentic reasoning framework based on Non-Axiomatic Logic (NAL) principles. This approach fundamentally differs from traditional symbolic AI systems by replacing fixed axioms with experience-grounded reasoning, enabling the system to handle uncertainty, learn from incomplete information, and adapt its knowledge base through interaction with its environment.
 
----
+## Non-Axiomatic Logic Principles
 
-## **1. High-Level Architecture**
+### 1. Experience-Grounded Reasoning
 
-The system is a **decentralized, event-driven cognitive engine** centered on a prioritized agenda. It integrates
-perception, memory, reasoning, action, and metacognition into a coherent loop.
+Unlike classical logic systems that rely on fixed axioms, NAL grounds all reasoning in experience. Every conclusion is derived from observations and interactions rather than predetermined rules. This allows the system to:
 
-```mermaid
-graph TD
-    subgraph ExternalWorld ["External World"]
-        direction LR
-        User((User))
-        Tools[(Tools / APIs)]
-        Models[(LLMs, Vision, etc.)]
-    end
+- Adapt to new domains without reprogramming
+- Handle incomplete or contradictory information gracefully
+- Learn from both positive and negative examples
+- Continuously refine its understanding through experience
 
-    subgraph AgentMind ["Agent-Mind Core"]
-        Agenda["Agenda<br/>(Priority Queue)"]
-        
-        subgraph CognitiveCore ["Cognitive Core"]
-             WorkerPool{Worker Pool<br/>[N Stateless Workers]}
-        end
+### 2. Uncertainty Management
 
-        WorldModel["World Model<br/>(Multi-Index Store)"]
-        Perception["Perception Subsystem"]
-        Action["Action Subsystem"]
+All knowledge in the system carries explicit uncertainty measures through truth values:
 
-        subgraph PluggableModules ["Pluggable Cognitive Modules"]
-            ResonanceModule["Resonance Module"]
-            AttentionModule["Attention Module"]
-            SchemaMatcher["Schema Matcher"]
-            RevisionEngine["BeliefRevisionEngine"]
-            GoalTreeMgr["GoalTreeManager"]
-            ReflectionLoop["ReflectionLoop"]
-        end
-    end
+- **Frequency (f)**: The relative frequency of evidence supporting a statement (0.0 to 1.0)
+- **Confidence (c)**: The amount of evidence available (0.0 to 1.0)
 
-    %% Data Flow
-    User -- Input --> Perception
-    Tools & Models -- Observations --> Perception
-    Perception -- CognitiveItems --> Agenda
-    Agenda -- Top-Priority Item --> WorkerPool
-    WorkerPool -- Queries --> WorldModel
-    WorkerPool -- Uses --> ResonanceModule & AttentionModule & SchemaMatcher
-    WorkerPool -- New Items --> Agenda
-    WorkerPool -- Action Goals --> Action
-    Action -- Executes --> Tools & Models
-    Tools & Models -- Results --> Perception
-    Perception -- Feedback as BELIEF --> Agenda
+These values allow the system to:
+- Distinguish between well-supported beliefs and tentative hypotheses
+- Make decisions based on available evidence even when incomplete
+- Update beliefs as new evidence becomes available
+- Reason about the reliability of its own conclusions
 
-    %% Metacognition
-    ReflectionLoop -- Periodic KPIs --> Agenda
-    ReflectionLoop -- Audit Goals --> Agenda
+### 3. Goal-Directed Cognition
 
-    %% Module Dependencies
-    ResonanceModule -- Queries --> WorldModel
-    SchemaMatcher -- Queries --> WorldModel
-    AttentionModule -- Reads/Writes --> Agenda & WorldModel
-    RevisionEngine -- Used by --> WorldModel
-    GoalTreeMgr -- Listens to --> Agenda
-    GoalTreeMgr -- Updates --> WorldModel
+All cognitive processes are driven by goals, which are represented as special types of cognitive items with attention values:
 
-    style AgentMind fill:#e6f3ff,stroke:#333,stroke-width:2px
-    style PluggableModules fill:#fffbe6,stroke:#333,dashed
-    classDef module fill:#fffbe6,stroke:#333;
-    class ResonanceModule,AttentionModule,SchemaMatcher,RevisionEngine,GoalTreeMgr,ReflectionLoop module
-```
+- **Priority (p)**: The current importance of pursuing the goal (0.0 to 1.0)
+- **Durability (d)**: How long the goal remains important (0.0 to 1.0)
 
-> The `Agenda` serves as the central nervous system; the `WorldModel` is persistent memory; cognition emerges from
-> iterative cycles of selection, contextualization, reasoning, and integration.
+This enables the system to:
+- Focus computational resources on high-priority tasks
+- Balance immediate needs with long-term objectives
+- Adapt goal priorities based on changing circumstances
+- Maintain coherent behavior across extended reasoning sessions
 
----
+### 4. Self-Reflective Operation
 
-## **2. Core Data Model**
+The system continuously monitors its own performance and adapts its reasoning processes:
 
-All knowledge begins as **immutable content** (`SemanticAtom`) and becomes **contextualized thought** (`CognitiveItem`).
+- **Attention Mechanisms**: Dynamically allocate processing resources based on relevance
+- **Resonance Processes**: Identify and strengthen coherent knowledge structures
+- **Belief Revision**: Update knowledge based on new evidence and internal consistency
+- **Schema Evolution**: Adapt reasoning patterns based on effectiveness
 
-### **2.1. `SemanticAtom` — Immutable Knowledge Unit**
+## Core Data Model
 
-Represents a content-addressable piece of information.
+### SemanticAtom
 
-```ts
-type SemanticAtom = {
-    id: UUID;              // SHA-256(Content + Metadata)
-    content: any;          // e.g., S-expr, JSON, text, URI
-    embedding: number[];   // Dense vector (e.g., 768-dim)
-    meta: Record<string, any>;  // Enhanced with provenance and schema
+The fundamental unit of knowledge representation:
+
+```typescript
+interface SemanticAtom {
+  id: string;                // Unique identifier
+  content: string;           // Natural language content
+  embedding: number[];       // Semantic vector representation
+  creationTime: number;      // Timestamp of creation
+  lastAccessTime: number;    // Timestamp of last access
 }
 ```
 
-#### **Standard Metadata Fields**
+### CognitiveItem
 
-```json
-{
-  "type": "Fact" | "CognitiveSchema" | "Observation" | "Rule",
-  "source": string,           // e.g., "vetdb.org", "user_input"
-  "timestamp": string,        // ISO 8601
-  "author": string,
-  "trust_score": number,      // [0.0, 1.0], default 0.5
-  "domain": string,
-  "license": string
+Contextualized thoughts with associated values:
+
+```typescript
+interface CognitiveItem {
+  id: string;                // Unique identifier
+  type: 'BELIEF' | 'GOAL' | 'QUERY'; // Item category
+  label: string;             // Natural language representation
+  truth?: TruthValue;        // Truth value for beliefs
+  attention?: AttentionValue; // Attention value for goals
+  meta?: Record<string, any>; // Metadata (domain, source, etc.)
+}
+
+interface TruthValue {
+  frequency: number;         // Evidence frequency (0.0 to 1.0)
+  confidence: number;        // Evidence amount (0.0 to 1.0)
+}
+
+interface AttentionValue {
+  priority: number;          // Current importance (0.0 to 1.0)
+  durability: number;        // Persistence of importance (0.0 to 1.0)
 }
 ```
 
-- **Immutability**: Once created, never modified.
-- **Content Addressing**: `id = hash(content + meta)` ensures deduplication and verifiability.
-- **Embedding**: Generated by a shared encoder (e.g., SBERT, CLIP).
+## Cognitive Architecture
 
----
+### 1. Agenda System
 
-### **2.2. `CognitiveItem` — Contextualized Thought**
+The central cognitive queue that prioritizes processing tasks:
 
-Represents a stance toward an atom: belief, goal, or query, enriched with attention, provenance, and goal hierarchy.
+- **Priority-based Scheduling**: Items are processed based on their attention values
+- **Dynamic Reordering**: Priorities are continuously updated based on system state
+- **Resource Allocation**: Computational resources are allocated to high-priority items
 
-```ts
-type TruthValue = {
-    frequency: number;    // [0.0, 1.0] — empirical support
-    confidence: number;   // [0.0, 1.0] — epistemic certainty
-}
+### 2. World Model
 
-type AttentionValue = {
-    priority: number;     // [0.0, 1.0] — short-term salience
-    durability: number;   // [0.0, 1.0] — long-term retention value
-}
+The persistent knowledge base with multi-indexed storage:
 
-type DerivationStamp = {
-    timestamp: number;           // Unix ms
-    parent_ids: UUID[];          // Input CognitiveItem IDs
-    schema_id: UUID;             // Rule/schema used
-    module?: string;             // Optional: "resonance", "analogy"
-}
-```
+- **Semantic Indexing**: Content-based retrieval using semantic embeddings
+- **Structural Indexing**: Relationship-based retrieval using logical connections
+- **Temporal Indexing**: Time-based retrieval for episodic memory
 
-```ts
-type CognitiveItem = {
-    id: UUID;
-    atom_id: UUID;               // Reference to SemanticAtom
-    type: 'BELIEF' | 'GOAL' | 'QUERY';
-    truth?: TruthValue;          // Only for BELIEF
-    attention: AttentionValue;
-    stamp: DerivationStamp;
+### 3. Perception Subsystem
 
-    // Goal hierarchy
-    goal_parent_id?: UUID;
-    goal_status?: "active" | "blocked" | "achieved" | "failed";
+Converts natural language input into cognitive items:
 
-    // Optional: user-facing label
-    label?: string;
-}
-```
+- **Syntactic Analysis**: Parse input structure
+- **Semantic Interpretation**: Extract meaning and intent
+- **Uncertainty Assessment**: Assign initial truth and attention values
+- **Context Integration**: Connect to existing knowledge
 
-> 📌 `CognitiveItem` is mutable only in `attention`, `truth`, and `goal_status`. All other fields are immutable after
-> creation.
+### 4. Attention Module
 
----
+Manages cognitive focus and resource allocation:
 
-## **3. Main Components**
+- **Relevance Assessment**: Determine item importance based on context
+- **Priority Calculation**: Compute processing priorities dynamically
+- **Focus Shifting**: Redirect attention based on system goals
 
-### **3.1. `Agenda` — Central Cognitive Queue**
+### 5. Resonance Module
 
-**Role**: Short-term working memory and task scheduler.
+Identifies and strengthens coherent knowledge structures:
 
-**Properties**:
+- **Pattern Recognition**: Find consistent knowledge patterns
+- **Coherence Assessment**: Evaluate knowledge consistency
+- **Structure Strengthening**: Reinforce coherent knowledge structures
 
-- Thread-safe, concurrent priority queue.
-- Ordered by `attention.priority` (descending).
-- Supports dynamic re-prioritization.
+### 6. Schema Matcher
 
-**Interface**:
+Applies reasoning patterns to generate new knowledge:
 
-```ts
-interface Agenda {
-    push(item: CognitiveItem): void;
-    pop(): Promise<CognitiveItem>;        // Blocking
-    peek(): CognitiveItem | null;
-    size(): number;
-    updateAttention(id: UUID, newVal: AttentionValue): void;
-    remove(id: UUID): boolean;
-}
-```
-
-> Uses lock-free or actor-based concurrency (e.g., Disruptor, Tokio).
-
----
-
-### **3.2. `WorldModel` — Persistent Knowledge Base**
-
-**Role**: Long-term memory storing all validated beliefs and schemas.
-
-**Structure**:
-
-- Multi-index store over `SemanticAtom` and `CognitiveItem`.
-- Indexes:
-    - **Semantic**: ANN (e.g., HNSW, FAISS)
-    - **Symbolic**: Exact/fuzzy match
-    - **Structural**: Pattern matcher for S-expressions, JSON paths
-    - **Temporal**: Time-based access
-    - **Attention**: By `durability` for retention
-
-#### **BeliefRevisionEngine**
-
-**Role**: Merges conflicting beliefs using confidence-weighted logic.
-
-```ts
-interface BeliefRevisionEngine {
-    merge(existing: TruthValue, new: TruthValue): TruthValue;
-    detect_conflict(a: TruthValue, b: TruthValue): boolean;
-}
-```
-
-**Default Merge (Weighted Average)**:
-
-```python
-def merge(existing, new):
-    w1, w2 = existing.confidence, new.confidence
-    total = w1 + w2
-    return TruthValue(
-        frequency = (w1 * existing.frequency + w2 * new.frequency) / total,
-        confidence = min(0.99, (w1 + w2) / 2 + 0.1)
-    )
-```
-
-**Conflict Detection**: Triggered if `abs(freq_A - freq_B) > 0.5` and both `confidence > 0.7`.
-
-#### **WorldModel Interface**
-
-```ts
-interface WorldModel {
-    add_atom(atom: SemanticAtom): UUID;
-    add_item(item: CognitiveItem): void;
-
-    get_atom(id: UUID): SemanticAtom | null;
-    get_item(id: UUID): CognitiveItem | null;
-
-    query_by_semantic(embedding: number[], k: number): CognitiveItem[];
-    query_by_symbolic(pattern: any, k?: number): CognitiveItem[];
-    query_by_structure(pattern: any, k?: number): CognitiveItem[];
-
-    revise_belief(new_item: CognitiveItem): CognitiveItem | null;
-    register_schema_atom(atom: SemanticAtom): CognitiveSchema;
-}
-```
-
----
-
-### **3.3. `CognitiveCore` — Worker Pool**
-
-**Role**: Executes the cognitive cycle: select → contextualize → reason → dispatch → memorize.
-
-**Structure**:
-
-- Fixed-size pool of stateless workers.
-- Each worker runs an infinite loop consuming from the `Agenda`.
-
-#### **Worker Loop**
-
-```python
-async def worker_loop(modules, world_model, agenda):
-    while True:
-        item_A = await agenda.pop()
-        
-        try:
-            # Contextualize
-            context_items = modules.resonance.find_context(item_A, world_model, k=10)
+- **Pattern Matching**: Identify applicable reasoning schemas
+- **Inference Execution**: Apply schemas to generate conclusions
+- **Result Evaluation**: Assess the validity of generated knowledge
 
-            # Reason
-            for item_B in context_items:
-                schemas = modules.matcher.find_applicable(item_A, item_B, world_model)
-                for schema in schemas:
-                    try:
-                        derived = schema.apply(item_A, item_B, world_model)
-                        for new_item in derived:
-                            source_trust = world_model.get_atom(schema.atom_id).meta.trust_score
-                            new_item.attention = modules.attention.calculate_derived(
-                                parents=[item_A, item_B],
-                                schema=schema,
-                                source_trust=source_trust
-                            )
-                            new_item.stamp = DerivationStamp(
-                                timestamp=now(),
-                                parent_ids=[item_A.id, item_B.id],
-                                schema_id=schema.atom_id
-                            )
-                            agenda.push(new_item)
-                    except Exception as e:
-                        log.warning(f"Schema {schema.id} failed", exc=e)
+### 7. Belief Revision Engine
 
-            # Memorize
-            if item_A.type == "BELIEF":
-                revised = world_model.revise_belief(item_A)
-                if revised:
-                    agenda.push(revised)
+Maintains knowledge consistency and updates beliefs:
 
-            # Reinforce
-            modules.attention.update_on_access([item_A] + context_items)
+- **Consistency Checking**: Identify conflicting beliefs
+- **Evidence Integration**: Update beliefs based on new evidence
+- **Uncertainty Propagation**: Maintain truth values through reasoning
 
-            # Update goal tree
-            if item_A.type == "GOAL" and is_achieved(item_A):
-                modules.goal_tree.mark_achieved(item_A.id)
+### 8. Goal Tree Manager
 
-        except Exception as e:
-            log.error("Worker failed", item=item_A.id, exc=e)
-```
+Manages complex goal hierarchies and decomposition:
 
----
-
-## **4. Pluggable Cognitive Modules**
+- **Goal Decomposition**: Break complex goals into sub-goals
+- **Dependency Tracking**: Manage goal interdependencies
+- **Progress Monitoring**: Track goal achievement status
 
-### **4.1. `AttentionModule`**
+### 9. Reflection Loop
 
-**Role**: Manages salience and retention.
+Enables self-monitoring and adaptation:
 
-**Interface**:
+- **Performance Monitoring**: Track reasoning effectiveness
+- **Strategy Adaptation**: Modify reasoning approaches based on success
+- **Knowledge Evolution**: Update knowledge structures based on experience
 
-```ts
-interface AttentionModule {
-    calculate_initial(item: CognitiveItem): AttentionValue;
-    calculate_derived(
-        parents: CognitiveItem[],
-        schema: CognitiveSchema,
-        source_trust?: number
-    ): AttentionValue;
-    update_on_access(items: CognitiveItem[]): void;
-    run_decay_cycle(world_model: WorldModel, agenda: Agenda): void;
-}
-```
+## Reasoning Processes
 
----
+### 1. Perception and Input Processing
 
-### **4.2. `ResonanceModule`**
+When the system receives input, it:
 
-**Role**: Finds relevant context via hybrid retrieval.
+1. **Tokenizes and Parses**: Break down input into manageable units
+2. **Semantic Analysis**: Extract meaning using semantic embeddings
+3. **Type Classification**: Determine if input represents a belief, goal, or query
+4. **Value Assignment**: Assign initial truth and attention values
+5. **Context Integration**: Connect to existing knowledge in the world model
 
-**Interface**:
+### 2. Agenda Management
 
-```ts
-interface ResonanceModule {
-    find_context(item: CognitiveItem, world_model: WorldModel, k: number): CognitiveItem[];
-}
-```
+The system continuously manages its cognitive tasks:
 
-**Scoring Includes**: Semantic similarity, symbolic overlap, goal relevance, recency, trust.
+1. **Priority Assessment**: Evaluate all agenda items based on current context
+2. **Resource Allocation**: Assign processing resources to high-priority items
+3. **Dynamic Reordering**: Reassess priorities as system state changes
+4. **Task Execution**: Process selected items through appropriate modules
 
----
+### 3. Inference and Knowledge Generation
 
-### **4.3. `SchemaMatcher`**
+When applying reasoning schemas:
 
-**Role**: Efficiently matches item pairs to applicable rules.
+1. **Pattern Matching**: Identify applicable schemas based on item content
+2. **Precondition Checking**: Verify schema applicability conditions
+3. **Inference Execution**: Apply schema to generate new cognitive items
+4. **Uncertainty Calculation**: Compute truth values for conclusions
+5. **Attention Assignment**: Assign attention values to new items
 
-**Interface**:
+### 4. Learning and Adaptation
 
-```ts
-interface SchemaMatcher {
-    register_schema(schema: SemanticAtom, world_model: WorldModel): CognitiveSchema;
-    find_applicable(a: CognitiveItem, b: CognitiveItem, world_model: WorldModel): CognitiveSchema[];
-}
-```
+The system continuously improves through experience:
 
-**Implementation**: Rete-like network or hashed pattern index.
+1. **Performance Monitoring**: Track success rates of different reasoning approaches
+2. **Schema Effectiveness**: Evaluate which schemas produce useful results
+3. **Knowledge Refinement**: Update beliefs based on new evidence
+4. **Strategy Evolution**: Adapt reasoning strategies based on effectiveness
 
-> ✅ **All schemas are stored as `SemanticAtom`s** with `meta.type = "CognitiveSchema"`.
+## Metaprogramming Capabilities
 
----
+The system's self-representational nature enables metaprogramming:
 
-### **4.4. `GoalTreeManager`**
+### 1. Self-Inspection
 
-**Role**: Manages hierarchical goal decomposition and status.
+- **Component Status**: Examine internal state of all modules
+- **Performance Metrics**: Access detailed performance statistics
+- **Knowledge Structure**: Analyze current knowledge organization
 
-**Interface**:
+### 2. Self-Modification
 
-```ts
-interface GoalTreeManager {
-    decompose(goal: CognitiveItem): CognitiveItem[];
-    mark_achieved(goal_id: UUID): void;
-    mark_failed(goal_id: UUID): void;
-    get_ancestors(goal_id: UUID): UUID[];
-}
-```
+- **Parameter Adjustment**: Modify system parameters that affect reasoning
+- **Schema Evolution**: Add or modify reasoning patterns
+- **Attention Control**: Configure focus and resource allocation strategies
 
-**Trigger**: Activated when a high-level `GOAL` is processed.
+### 3. Self-Development
 
----
+- **Capability Expansion**: Add new reasoning capabilities through experience
+- **Architecture Evolution**: Adapt cognitive architecture based on effectiveness
+- **Interface Enhancement**: Improve interaction mechanisms through use
 
-### **4.5. `ReflectionLoop`**
+## Implementation Benefits
 
-**Role**: Self-audit and regulation.
+### 1. Robustness
 
-**Implementation**:
+- **Graceful Degradation**: Continue functioning with incomplete knowledge
+- **Uncertainty Awareness**: Explicitly handle unknowns and ambiguities
+- **Adaptive Behavior**: Adjust strategies based on environmental changes
 
-```python
-async def reflection_loop(world_model, agenda, interval=60_000):
-    while True:
-        await sleep(interval)
-        
-        kpis = world_model.query_by_symbolic("(kpi ...)", k=100)
-        if high_contradiction_rate(kpis):
-            agenda.push(GOAL("(run belief_audit)").with_priority(0.95))
-        
-        unused = find_inactive_schemas(last_used_threshold=1hr)
-        if unused:
-            agenda.push(QUERY("(should_deprecate_schema ?id)?"))
-        
-        if world_model.size() > 1e6:
-            agenda.push(GOAL("(compact memory)"))
-```
+### 2. Flexibility
 
----
+- **Domain Independence**: Apply same reasoning principles across domains
+- **Dynamic Adaptation**: Modify behavior based on task requirements
+- **Incremental Learning**: Continuously improve through experience
 
-## **5. I/O Subsystems**
+### 3. Transparency
 
-### **5.1. `Perception Subsystem`**
+- **Explicit Uncertainty**: Clear indication of knowledge reliability
+- **Traceable Reasoning**: Every conclusion linked to its evidence
+- **Inspectable Internals**: Direct access to cognitive processes
 
-**Role**: Transduces raw data into `CognitiveItem`s.
+### 4. Scalability
 
-**Interface**:
+- **Parallel Processing**: Distribute cognitive tasks across workers
+- **Resource Management**: Efficiently allocate computational resources
+- **Modular Architecture**: Independent components can be enhanced separately
 
-```ts
-interface Transducer {
-    process(data: any): CognitiveItem[] | Promise<CognitiveItem[]>;
-}
-```
+## Future Enhancements
 
-**Examples**:
+### 1. Advanced Uncertainty Models
 
-- `TextTransducer`: Uses LLM to extract structured atoms.
-- `SensorStreamTransducer`: Buffers and detects events.
-- All transducers tag `meta.source`.
+- **Higher-Order Uncertainty**: Reason about uncertainty in uncertainty values
+- **Temporal Uncertainty**: Model how confidence changes over time
+- **Contextual Uncertainty**: Adjust uncertainty based on situational factors
 
----
+### 2. Enhanced Metaprogramming
 
-### **5.2. `Action Subsystem`**
+- **Self-Programming**: Generate new reasoning schemas automatically
+- **Architecture Evolution**: Dynamically modify cognitive architecture
+- **Interface Synthesis**: Create custom interfaces for specific tasks
 
-**Role**: Executes goals and feeds back results.
-
-**Interface**:
-
-```ts
-interface Executor {
-    can_execute(goal: CognitiveItem): boolean;
-    execute(goal: CognitiveItem): Promise<CognitiveItem>;
-}
-```
-
-**Execution Flow**:
-
-1. Worker derives `GOAL("(web_search 'chocolate cat toxicity')")`
-2. `WebSearchExecutor` runs → returns result
-3. Creates `BELIEF(...)` with `meta.source` and trust
-4. Injected into `Agenda` via `Perception`
-
----
-
-## **6. Worked Example: Pet Safety Agent**
-
-1. **Input**: *"My cat seems sick after eating chocolate."*
-2. **Perception**: Creates `BELIEF("(implies (eats cat chocolate) (is_sick cat))")` with `source: "user_input"`,
-   `trust: 0.6`.
-3. **Context**: Finds `(is_toxic_to chocolate dog)` from `vetdb.org` (`trust: 0.95`).
-4. **Reasoning**: `AnalogyHypothesisSchema` generates `QUERY("(is_toxic_to chocolate cat)?")`.
-5. **Goal Tree**: Activates `GOAL("(diagnose cat illness)")` → decomposes into subgoals.
-6. **Action**: `WebSearchExecutor` returns `"Chocolate is toxic to cats."`
-7. **Learning**: New belief created, merged with high confidence → stored.
-8. **Reflection**: Later, `ReflectionLoop` confirms coherence.
-
----
-
-## **7. WebSocket Interface**
+### 3. Multi-Agent Integration
 
-**Role**: Provides a metaprogrammatic interface for external access to the cognitive system's components.
+- **Collaborative Reasoning**: Coordinate with other cognitive systems
+- **Knowledge Sharing**: Exchange knowledge with complementary systems
+- **Collective Intelligence**: Leverage group reasoning capabilities
 
-**Architecture**: The WebSocket interface exposes the system's components through a request-response pattern with event broadcasting capabilities. This allows for flexible and adaptable integration with web-based user interfaces and other external systems.
-
-**Key Features**:
-
-- **Component-based Access**: Direct access to core components (core, perception, agenda, worldModel, actionSubsystem)
-- **Request-Response Pattern**: Standardized communication protocol for predictable interactions
-- **Event Broadcasting**: Real-time notifications of system events to all connected clients
-- **Metaprogrammatic Design**: Exposes the system's internal capabilities for dynamic usage patterns
-
-**Interface**:
-
-```ts
-interface WebSocketInterface {
-    // Core methods
-    start(): Promise<void>;
-    stop(): void;
-    getSystemStatus(): SystemStatus;
-    addInitialBelief(content: any, truth: TruthValue, attention: AttentionValue, meta?: Record<string, any>): void;
-    addInitialGoal(content: any, attention: AttentionValue, meta?: Record<string, any>): void;
-    addSchema(content: any, meta?: Record<string, any>): void;
-    
-    // Perception methods
-    processInput(input: string): Promise<CognitiveItem[]>;
-    
-    // Agenda methods
-    getAgendaSize(): number;
-    
-    // WorldModel methods
-    getWorldModelStatistics(): WorldModelStatistics;
-    
-    // ActionSubsystem methods
-    getActionSubsystemStatistics(): ActionSubsystemStatistics;
-}
-```
-
-**Message Structure**:
-
-All communication follows a consistent JSON message structure:
-
-```json
-{
-  "id": "unique-message-id",
-  "type": "request|response|event|error",
-  "target": "component-name",
-  "method": "method-name",
-  "payload": { /* method-specific data */ },
-  "error": { /* error information */ }
-}
-```
-
-**Usage Example**:
-
-```javascript
-// Connect to the WebSocket server
-const ws = new WebSocket('ws://localhost:8080');
-
-// Process input through the perception subsystem
-ws.send(JSON.stringify({
-  id: 'msg-1',
-  type: 'request',
-  target: 'perception',
-  method: 'processInput',
-  payload: {
-    input: 'My cat seems sick after eating chocolate. What should I do?'
-  }
-}));
-
-// Handle responses
-ws.onmessage = function(event) {
-  const message = JSON.parse(event.data);
-  if (message.type === 'response') {
-    console.log('Received response:', message.payload);
-  }
-};
-```
-
-**Benefits**:
-
-- **Real-time Interaction**: Enables immediate feedback and dynamic user interfaces
-- **Flexible Integration**: Can be used with any WebSocket-capable client
-- **Standardized Protocol**: Consistent interface makes it easy to build various client applications
-- **Scalable**: Supports multiple concurrent clients
-- **Extensible**: New components and methods can be easily added
-
----
-
-## **8. Metacognition & Self-Regulation**
-
-The system audits itself via:
-
-- **KPI Beliefs**: `(kpi agenda_size 5280)`, `(kpi contradiction_rate 0.02)`
-- **Regulatory Schemas**: React to KPIs with throttling, audits, or optimization goals.
-- **Self-Improvement**: Can evolve attention heuristics, prune unused rules, and compact memory.
-
-> Self-regulation is an emergent property of the core cognitive loop.
-
----
-
-## ✅ Final Properties
-
-| Property                  | Status                                         |
-|---------------------------|------------------------------------------------|
-| **Verifiable Provenance** | ✅ Full trace from atom to derivation           |
-| **Scalable Concurrency**  | ✅ Worker pool + async I/O                      |
-| **Goal-Directed**         | ✅ Hierarchical goal trees with status tracking |
-| **Self-Regulating**       | ✅ Reflection loop + KPI-driven goals           |
-| **Trust-Aware**           | ✅ Source scoring + confidence-weighted fusion  |
-| **Extensible**            | ✅ All core functions are pluggable modules     |
-
----
-
-This **complete, self-contained specification** defines a **mature, production-ready cognitive architecture** capable of
-autonomous reasoning, learning, and adaptation. It is suitable for deployment in AI agents, decision support systems,
-and knowledge-intensive applications requiring transparency, scalability, and goal mastery.
+This Non-Axiomatic Logic foundation positions Senars3 as a next-generation agentic reasoning system capable of genuine learning, adaptation, and self-improvement through interaction with complex, uncertain environments.

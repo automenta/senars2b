@@ -1,37 +1,39 @@
 # Senars3 Cognitive System - User Guide
 
-This guide provides comprehensive instructions for using the Senars3 cognitive system through its various interfaces.
+This guide provides comprehensive instructions for using the Senars3 cognitive system through its unified interface that works across both CLI and Web environments.
 
 ## System Overview
 
-The Senars3 cognitive system is a verifiable, goal-directed, and self-reflective reasoning system that integrates symbolic and semantic cognition. It processes natural language input by:
+The Senars3 cognitive system is a next-generation agentic reasoning system that uses non-axiomatic logic principles to fuse symbolic reasoning with Language Model technology. It processes natural language input through:
 
-1. **Perceiving** - Converting text into cognitive items (beliefs, goals, queries)
-2. **Contextualizing** - Finding relevant knowledge in its memory
-3. **Reasoning** - Applying cognitive schemas to generate new insights
-4. **Acting** - Executing goals like searching or diagnosing
-5. **Learning** - Updating its knowledge base with new information
+1. **Perceiving** - Converting text into cognitive items (beliefs, goals, queries) with uncertainty values
+2. **Contextualizing** - Finding relevant knowledge in its memory using resonance mechanisms
+3. **Reasoning** - Applying cognitive schemas to generate new insights with confidence assessment
+4. **Acting** - Executing goals like searching or diagnosing with attention prioritization
+5. **Learning** - Updating its knowledge base with new information through belief revision
 
 ## Available Interfaces
 
-The system provides four main interfaces for interaction:
+The system now provides a **unified interface** that works seamlessly across both CLI and Web environments:
 
-1. **Command-Line Interface (CLI)** - Interactive text-based interface
-2. **Web Interface** - Browser-based graphical interface with enhanced features
+1. **Unified Command-Line Interface (CLI)** - Interactive text-based interface that connects to the WebSocket backend
+2. **Unified Web Interface** - Browser-based graphical interface with real-time feedback and metaprogramming capabilities
 3. **WebSocket API** - Programmatic interface for custom applications
 4. **REST API** - HTTP-based interface for programmatic access
 
-## Command-Line Interface (CLI)
+## Unified Command-Line Interface (CLI)
 
-### Starting the CLI
+### Starting the Unified CLI
 
-To start the interactive CLI:
+To start the interactive CLI that connects to the WebSocket backend:
 
 ```bash
 npm start
 # or
 npm run cli
 ```
+
+This will automatically start the WebSocket server in the background and connect the CLI to it.
 
 ### CLI Navigation
 
@@ -45,29 +47,51 @@ Once in the CLI, you can use the following commands:
 - `help` - Show help message with available commands and examples
 - `status` - Show system status including agenda size and world model statistics
 - `stats` - Show processing statistics
-- `examples` - Show input examples for different types of input
+- `process <input>` - Process natural language input through non-axiomatic logic
 - `clear` - Clear the screen
 - `quit` or `exit` - Exit the system
 
+### Direct Component Access
+
+The unified CLI allows direct access to system components:
+
+- `core.<method> <json>` - Call core methods
+- `perception.<method> <json>` - Call perception methods
+- `agenda.<method> <json>` - Call agenda methods
+- `worldModel.<method> <json>` - Call world model methods
+
+Examples:
+```bash
+# Process input
+process My cat seems sick after eating chocolate. What should I do considering uncertainty?
+
+# Get system status
+core.getSystemStatus {}
+
+# Process input with perception subsystem
+perception.processInput {"input": "Example input for processing"}
+
+# Get world model statistics
+worldModel.getStatistics {}
+```
+
 ### Providing Input
 
-You can enter natural language statements or questions for the system to process. Examples:
+You can enter natural language statements or questions for the system to process through its non-axiomatic logic framework. Examples:
 
-- Statements: "Chocolate is toxic to dogs"
-- Questions: "My cat seems sick after eating chocolate. What should I do?"
-- Commands: "Can you search for information about pet nutrition?"
-- Goals: "Diagnose why my plant is wilting"
-- Complex requests: "Create a comprehensive health plan for my pet including diet, exercise, and medical checkups"
+- Uncertain Statements: "Chocolate is likely toxic to dogs"
+- Probabilistic Questions: "What is the probability my cat is sick after eating chocolate?"
+- Conditional Commands: "If my plant is wilting due to overwatering, reduce watering frequency"
+- Exploratory Goals: "Diagnose why my plant is wilting considering multiple possible causes"
+- Adaptive Requests: "Create a health plan for my pet that adjusts based on ongoing symptoms"
 
-The system will process your input and add the extracted cognitive items to its agenda for further processing.
+The system will process your input and add the extracted cognitive items to its agenda for further processing through its non-axiomatic reasoning engine.
 
-Type `examples` to see more detailed examples of different input types.
-
-## Web Interface
+## Unified Web Interface
 
 ### Starting the Web Server
 
-To start the web interface:
+To start the unified web interface:
 
 ```bash
 npm run start:web
@@ -85,20 +109,23 @@ http://localhost:3000
 
 ### Using the Web Interface
 
-The enhanced web interface provides several tabs for different functionalities:
+The unified web interface provides several tabs for different functionalities:
 
-1. **Interactive Demos** - Pre-built examples for different domains
+1. **Cognitive Demos** - Pre-built examples for different domains using non-axiomatic logic
 2. **Custom Input** - Enter your own text for processing (supports Ctrl+Enter)
 3. **System Status** - Real-time monitoring of system statistics
-4. **Help & Examples** - Comprehensive guide and input examples
+4. **Metaprogramming** - Direct component access and self-modification interface
+5. **Help & Examples** - Comprehensive guide and input examples
 
 #### Features:
 
 - Real-time connection status monitoring
-- Interactive demos for different domains (Medical, Scientific, Business, etc.)
+- Interactive demos for different domains (Medical, Scientific, Business, etc.) with uncertainty management
 - Custom input processing with keyboard shortcuts (Ctrl+Enter)
+- CLI mode toggle for command-line experience in the browser
 - System status monitoring with live statistics
-- Comprehensive help and examples
+- Metaprogramming interface for self-representation and modification
+- Comprehensive help and examples for non-axiomatic logic principles
 - Enhanced error handling and user feedback
 - Responsive design for different screen sizes
 
@@ -159,17 +186,17 @@ ws.send(JSON.stringify({
   payload: {}
 }));
 
-// Add an initial belief
+// Add an initial belief with uncertainty values
 ws.send(JSON.stringify({
   id: 'msg-2',
   type: 'request',
   target: 'core',
   method: 'addInitialBelief',
   payload: {
-    content: 'Chocolate is toxic to pets',
-    truth: { frequency: 0.9, confidence: 0.95 },
+    content: 'Chocolate is toxic to pets with high probability',
+    truth: { frequency: 0.9, confidence: 0.85 },
     attention: { priority: 0.8, durability: 0.7 },
-    meta: { domain: 'veterinary', author: 'vetdb.org' }
+    meta: { domain: 'veterinary', author: 'vetdb.org', uncertainty: 'high' }
   }
 }));
 ```
@@ -181,14 +208,14 @@ Methods:
 
 Example:
 ```javascript
-// Process natural language input
+// Process natural language input with uncertainty consideration
 ws.send(JSON.stringify({
   id: 'msg-3',
   type: 'request',
   target: 'perception',
   method: 'processInput',
   payload: {
-    input: 'My cat seems sick after eating chocolate. What should I do?'
+    input: 'My cat seems sick after eating chocolate. What should I do considering uncertainty?'
   }
 }));
 ```
@@ -303,23 +330,23 @@ curl http://localhost:3000/health
 # Get server status
 curl http://localhost:3000/api/status
 
-# Process input
+# Process input with uncertainty consideration
 curl -X POST http://localhost:3000/api/process \
   -H "Content-Type: application/json" \
-  -d '{"input": "My cat seems sick after eating chocolate. What should I do?"}'
+  -d '{"input": "My cat seems sick after eating chocolate. What should I do considering uncertainty?"}'
 ```
 
-## Input Types and Best Practices
+## Input Types and Best Practices for Non-Axiomatic Logic
 
 ### Input Types
 
-The system can process different types of input:
+The system can process different types of input through its non-axiomatic logic framework:
 
-1. **Statements** - Factual information like "Chocolate is toxic to dogs"
-2. **Questions** - Queries that require answers like "What should I do if my cat ate chocolate?"
-3. **Commands** - Action requests like "Search for information about pet nutrition"
-4. **Goals** - Complex objectives like "Diagnose why my plant is wilting"
-5. **Complex Requests** - Multi-part requests like "Create a comprehensive health plan for my pet"
+1. **Uncertain Statements** - Information with implicit uncertainty like "Chocolate is likely toxic to dogs"
+2. **Probabilistic Questions** - Queries that require uncertainty-aware answers like "What is the probability my cat is sick after eating chocolate?"
+3. **Conditional Commands** - Action requests with uncertainty considerations like "If my plant is wilting due to overwatering, reduce watering frequency"
+4. **Exploratory Goals** - Complex objectives with uncertainty evaluation like "Diagnose why my plant is wilting considering multiple possible causes"
+5. **Adaptive Requests** - Multi-part requests that adapt based on uncertainty like "Create a health plan for my pet that adjusts based on ongoing symptoms"
 
 ### Input Validation
 
@@ -328,24 +355,36 @@ The system validates all inputs:
 - Maximum length: 10,000 characters
 - Must be a string
 
-### Best Practices
+### Best Practices for Non-Axiomatic Logic Processing
 
-1. **Formulate clear inputs** - The system works best with specific, well-formulated statements and questions
-2. **Use domain-specific language** - When possible, use terminology relevant to the domain you're working in
-3. **Break down complex requests** - For very complex tasks, consider breaking them down into simpler sub-tasks
-4. **Monitor system status** - Use the status and stats commands to monitor system performance
-5. **Be specific and clear** - Use clear, unambiguous language
-6. **Check input length** - Ensure inputs are between 3-10,000 characters
+1. **Express Uncertainty Explicitly** - Include phrases like "likely", "possibly", "with high probability" to help the system understand uncertainty levels
+2. **Use Conditional Language** - Frame requests with "if-then" constructs to express conditional relationships
+3. **Specify Confidence Requirements** - Indicate when you need high-confidence answers vs. exploratory responses
+4. **Break Down Complex Requests** - For very complex tasks, consider breaking them down into simpler sub-tasks with explicit uncertainty handling
+5. **Monitor System Status** - Use the status and stats commands to monitor system performance and uncertainty processing
+6. **Be Specific and Clear** - Use clear, unambiguous language while acknowledging inherent uncertainties
+7. **Check Input Length** - Ensure inputs are between 3-10,000 characters
 
-## Understanding Output
+## Understanding Non-Axiomatic Logic Output
 
-The system categorizes output into three types:
+The system categorizes output through its non-axiomatic framework:
 
-1. **Beliefs** - Factual information the system has learned or inferred
-2. **Goals** - Tasks or objectives the system needs to accomplish
-3. **Queries** - Questions that require answers or exploration
+1. **Beliefs** - Factual information the system has learned or inferred with associated truth values (frequency and confidence)
+2. **Goals** - Tasks or objectives the system needs to accomplish with associated attention values (priority and durability)
+3. **Queries** - Questions that require answers or exploration with associated interest values
 
-Each cognitive item includes metadata about its truth value and attention value, which help determine its reliability and importance.
+Each cognitive item includes metadata about its truth value and attention value, which help determine its reliability and importance in the non-axiomatic framework.
+
+## Metaprogramming and Self-Modification
+
+The unified interface enables direct interaction with the system's self-representational capabilities:
+
+1. **Component Introspection** - Examine internal state of cognitive modules
+2. **Parameter Adjustment** - Modify system parameters that affect reasoning
+3. **Schema Evolution** - Add or modify cognitive patterns that guide reasoning
+4. **Reflection Control** - Configure how the system monitors and adapts itself
+
+Through the metaprogramming interface in both CLI and Web UI, users can directly modify system behavior and observe how the system adapts its reasoning processes.
 
 ## Troubleshooting
 
@@ -358,10 +397,10 @@ Each cognitive item includes metadata about its truth value and attention value,
    - Check the web interface for connection status indicators
 
 2. **No results from input processing**
-   - Try rephrasing your input
-   - Make sure your input contains clear statements, questions, or commands
+   - Try rephrasing your input to be more explicit about uncertainty
+   - Make sure your input contains clear statements, questions, or commands with uncertainty considerations
    - Check that the system is properly started
-   - Use the `examples` command in CLI or check the Help tab in the web interface
+   - Use the `help` command in CLI or check the Help tab in the web interface
 
 3. **Performance issues**
    - Monitor agenda size with the status command

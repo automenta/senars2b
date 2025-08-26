@@ -1,5 +1,5 @@
 // Simple test to verify WebSocket interface functionality
-import { WebSocketInterface } from '../../src/webSocketInterface';
+import { WebSocketInterface } from '../../src/web/webSocketInterface';
 import WebSocket = require('ws');
 
 describe('WebSocketInterface Integration', () => {

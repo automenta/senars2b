@@ -1,0 +1,1931 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Senars3 - Next-Gen Agentic Reasoning System</title>
+    <style>
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --secondary: #1e293b;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --light: #f8fafc;
+            --dark: #0f172a;
+            --gray: #64748b;
+            --border: #cbd5e1;
+            --card-bg: #ffffff;
+            --bg-gradient: linear-gradient(135deg, #1e293b, #0f172a);
+        }
+        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: var(--dark);
+            background-color: #f1f5f9;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px 0;
+            background: var(--bg-gradient);
+            color: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        header::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(circle at center, rgba(255,255,255,0.1) 0%, transparent 70%);
+        }
+        
+        h1 {
+            font-size: 2.8rem;
+            margin-bottom: 10px;
+            position: relative;
+            letter-spacing: -0.5px;
+        }
+        
+        .tagline {
+            font-size: 1.3rem;
+            opacity: 0.9;
+            max-width: 900px;
+            margin: 0 auto 20px;
+            position: relative;
+        }
+        
+        .system-description {
+            max-width: 800px;
+            margin: 0 auto;
+            font-size: 1.1rem;
+            opacity: 0.85;
+            position: relative;
+        }
+        
+        .card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+            padding: 25px;
+            margin-bottom: 30px;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(0,0,0,0.05);
+        }
+        
+        .card:hover {
+            box-shadow: 0 6px 20px rgba(0,0,0,0.12);
+        }
+        
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid var(--border);
+        }
+        
+        .card-title {
+            font-size: 1.6rem;
+            color: var(--secondary);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .card-title i {
+            color: var(--primary);
+        }
+        
+        .btn {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            font-size: 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .btn:hover {
+            background-color: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.2);
+        }
+        
+        .btn:disabled {
+            background-color: #bdc3c7;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        .btn-secondary {
+            background-color: var(--secondary);
+        }
+        
+        .btn-secondary:hover {
+            background-color: #0f172a;
+        }
+        
+        .btn-success {
+            background-color: var(--success);
+        }
+        
+        .btn-success:hover {
+            background-color: #059669;
+        }
+        
+        .btn-outline {
+            background: transparent;
+            border: 2px solid var(--primary);
+            color: var(--primary);
+        }
+        
+        .btn-outline:hover {
+            background-color: var(--primary);
+            color: white;
+        }
+        
+        .input-group {
+            margin-bottom: 20px;
+        }
+        
+        textarea, input {
+            width: 100%;
+            padding: 14px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-family: inherit;
+            font-size: 16px;
+            resize: vertical;
+            transition: border-color 0.3s ease;
+        }
+        
+        textarea:focus, input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+        }
+        
+        textarea {
+            min-height: 150px;
+        }
+        
+        .demo-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+        
+        .demo-card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            padding: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 1px solid transparent;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .demo-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.12);
+            border-color: var(--primary);
+        }
+        
+        .demo-card::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--primary);
+            transform: scaleX(0);
+            transform-origin: left;
+            transition: transform 0.3s ease;
+        }
+        
+        .demo-card:hover::before {
+            transform: scaleX(1);
+        }
+        
+        .demo-card h3 {
+            color: var(--primary);
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .demo-card p {
+            color: var(--gray);
+            font-size: 0.95rem;
+            line-height: 1.6;
+        }
+        
+        .output-section {
+            background: var(--secondary);
+            color: white;
+            border-radius: 12px;
+            padding: 25px;
+            margin-top: 25px;
+            max-height: 500px;
+            overflow-y: auto;
+        }
+        
+        .output-item {
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            background-color: rgba(255,255,255,0.08);
+            border-left: 4px solid var(--primary);
+            animation: fadeIn 0.3s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .output-item.belief {
+            border-left-color: var(--success);
+        }
+        
+        .output-item.goal {
+            border-left-color: var(--danger);
+        }
+        
+        .output-item.query {
+            border-left-color: var(--warning);
+        }
+        
+        .item-type {
+            font-weight: bold;
+            text-transform: uppercase;
+            font-size: 0.85em;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .item-content {
+            margin-bottom: 12px;
+            font-size: 1.05rem;
+            line-height: 1.6;
+        }
+        
+        .item-meta {
+            font-size: 0.9rem;
+            color: #cbd5e1;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-top: 10px;
+        }
+        
+        .meta-tag {
+            background: rgba(255,255,255,0.1);
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+        }
+        
+        .status-bar {
+            display: flex;
+            justify-content: space-between;
+            background: var(--secondary);
+            color: white;
+            padding: 18px 25px;
+            border-radius: 12px;
+            margin-bottom: 25px;
+            align-items: center;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        
+        .status-indicator {
+            display: inline-block;
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            margin-right: 10px;
+        }
+        
+        .status-connected {
+            background-color: var(--success);
+            box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.4);
+        }
+        
+        .status-disconnected {
+            background-color: var(--danger);
+        }
+        
+        .notification {
+            padding: 18px;
+            margin: 20px 0;
+            border-radius: 8px;
+            color: white;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            animation: slideIn 0.3s ease;
+        }
+        
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(20px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+        
+        .notification.success {
+            background-color: var(--success);
+        }
+        
+        .notification.error {
+            background-color: var(--danger);
+        }
+        
+        .notification.warning {
+            background-color: var(--warning);
+        }
+        
+        .notification.info {
+            background-color: var(--primary);
+        }
+        
+        .system-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 20px;
+            margin-top: 25px;
+        }
+        
+        .stat-card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 25px;
+            text-align: center;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            transition: transform 0.3s ease;
+            border: 1px solid rgba(0,0,0,0.05);
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .stat-value {
+            font-size: 2.2rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin: 15px 0;
+        }
+        
+        .stat-label {
+            color: var(--gray);
+            font-size: 1rem;
+            font-weight: 500;
+        }
+        
+        .tabs {
+            display: flex;
+            margin-bottom: 25px;
+            border-bottom: 1px solid var(--border);
+            gap: 5px;
+        }
+        
+        .tab {
+            padding: 14px 25px;
+            cursor: pointer;
+            background: #e2e8f0;
+            border: 1px solid var(--border);
+            border-bottom: none;
+            border-radius: 8px 8px 0 0;
+            margin-right: 5px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .tab.active {
+            background: var(--card-bg);
+            border-bottom: 1px solid var(--card-bg);
+            margin-bottom: -1px;
+            color: var(--primary);
+        }
+        
+        .tab:hover:not(.active) {
+            background: #cbd5e1;
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 40px;
+        }
+        
+        .spinner {
+            border: 4px solid rgba(0,0,0,0.1);
+            border-radius: 50%;
+            border-top: 4px solid var(--primary);
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        footer {
+            text-align: center;
+            padding: 30px;
+            color: var(--gray);
+            margin-top: 40px;
+            border-top: 1px solid var(--border);
+            font-size: 0.95rem;
+        }
+        
+        .cli-output {
+            background: #0f172a;
+            color: #e2e8f0;
+            border-radius: 8px;
+            padding: 20px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.95rem;
+            max-height: 400px;
+            overflow-y: auto;
+            margin-top: 20px;
+        }
+        
+        .cli-line {
+            margin-bottom: 8px;
+            line-height: 1.5;
+        }
+        
+        .cli-prompt {
+            color: var(--success);
+            font-weight: bold;
+        }
+        
+        .cli-command {
+            color: #93c5fd;
+        }
+        
+        .cli-output-text {
+            color: #e2e8f0;
+        }
+        
+        .cli-error {
+            color: var(--danger);
+        }
+        
+        .system-meta {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 15px;
+            font-size: 0.9rem;
+            color: var(--gray);
+        }
+        
+        .mode-toggle {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        
+        .mode-toggle label {
+            font-weight: 500;
+        }
+        
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 24px;
+        }
+        
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 24px;
+        }
+        
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 16px;
+            width: 16px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+        
+        input:checked + .slider {
+            background-color: var(--primary);
+        }
+        
+        input:checked + .slider:before {
+            transform: translateX(26px);
+        }
+        
+        /* New styles for enhanced UI */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        .chart-container {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            height: 300px;
+        }
+        
+        .component-control {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        .control-group {
+            flex: 1;
+            min-width: 200px;
+        }
+        
+        .control-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+        }
+        
+        .json-editor {
+            width: 100%;
+            min-height: 150px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+        }
+        
+        .result-display {
+            background: #f8fafc;
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 15px;
+            max-height: 300px;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            white-space: pre-wrap;
+        }
+        
+        @media (max-width: 992px) {
+            .demo-grid {
+                grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+            }
+            
+            h1 {
+                font-size: 2.2rem;
+            }
+            
+            .tagline {
+                font-size: 1.1rem;
+            }
+            
+            .demo-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .system-stats {
+                grid-template-columns: 1fr 1fr;
+            }
+            
+            .tabs {
+                flex-wrap: wrap;
+            }
+            
+            .tab {
+                padding: 12px 15px;
+                font-size: 0.9rem;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .system-stats {
+                grid-template-columns: 1fr;
+            }
+            
+            .status-bar {
+                flex-direction: column;
+                gap: 15px;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Senars3 Cognitive System</h1>
+            <p class="tagline">Next-Generation Agentic Reasoning with Non-Axiomatic Logic Principles</p>
+            <p class="system-description">
+                A verifiable, goal-directed, and self-reflective reasoning system that fuses symbolic reasoning with Language Model technology. 
+                Experience the ultimate metaprogrammatic interface designed for self-development and cognitive exploration.
+            </p>
+        </header>
+        
+        <div class="status-bar">
+            <div>
+                Connection Status: 
+                <span id="connection-status">
+                    <span class="status-indicator status-disconnected"></span>
+                    Disconnected
+                </span>
+            </div>
+            <div class="mode-toggle">
+                <label for="interface-mode">CLI Mode:</label>
+                <label class="toggle-switch">
+                    <input type="checkbox" id="interface-mode">
+                    <span class="slider"></span>
+                </label>
+            </div>
+            <div>Agenda Size: <span id="agenda-size">0</span></div>
+        </div>
+        
+        <div id="notification-container"></div>
+        
+        <div class="tabs">
+            <div class="tab active" data-tab="demo">
+                <span>🧠</span> Cognitive Demos
+            </div>
+            <div class="tab" data-tab="custom">
+                <span>💬</span> Custom Input
+            </div>
+            <div class="tab" data-tab="system">
+                <span>📊</span> System Status
+            </div>
+            <div class="tab" data-tab="metaprogramming">
+                <span>⚙️</span> Metaprogramming
+            </div>
+            <div class="tab" data-tab="help">
+                <span>📖</span> Help & Examples
+            </div>
+        </div>
+        
+        <div class="tab-content active" id="demo-tab">
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">🔬 Cognitive Demos</h2>
+                </div>
+                <p>Explore the capabilities of the Senars3 cognitive system with these pre-built demos. Click on any demo to see how the system processes different types of input through its non-axiomatic logic framework.</p>
+                
+                <div class="demo-grid">
+                    <div class="demo-card" data-demo="medical">
+                        <h3>🩺 Medical Diagnosis</h3>
+                        <p>See how the system can help diagnose medical conditions based on symptoms using probabilistic reasoning.</p>
+                    </div>
+                    <div class="demo-card" data-demo="scientific">
+                        <h3>🧪 Scientific Hypothesis</h3>
+                        <p>Watch the system generate and evaluate scientific hypotheses with uncertainty management.</p>
+                    </div>
+                    <div class="demo-card" data-demo="business">
+                        <h3>💼 Business Strategy</h3>
+                        <p>Observe how the system can analyze market conditions and recommend strategies with confidence assessment.</p>
+                    </div>
+                    <div class="demo-card" data-demo="cybersecurity">
+                        <h3>🔒 Cybersecurity Analysis</h3>
+                        <p>See how the system can identify and analyze potential security threats with risk evaluation.</p>
+                    </div>
+                    <div class="demo-card" data-demo="environmental">
+                        <h3>🌍 Environmental Science</h3>
+                        <p>Explore the system's ability to analyze environmental data and suggest solutions with impact assessment.</p>
+                    </div>
+                    <div class="demo-card" data-demo="educational">
+                        <h3>📚 Educational Planning</h3>
+                        <p>See how the system can create personalized learning plans with adaptive knowledge modeling.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">🔮 Cognitive Processing Results</h2>
+                </div>
+                <div id="demo-output">
+                    <p>Select a demo above to see the system in action through its non-axiomatic reasoning process.</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="tab-content" id="custom-tab">
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">💬 Custom Cognitive Input</h2>
+                </div>
+                <p>Enter your own text for the cognitive system to process. The system will apply its non-axiomatic logic principles to analyze and reason about your input.</p>
+                
+                <div class="input-group">
+                    <textarea id="user-input" placeholder="Example: My cat seems sick after eating chocolate. What should I do?"></textarea>
+                </div>
+                <button id="process-btn" class="btn">🧠 Process with Non-Axiomatic Logic (Ctrl+Enter)</button>
+                
+                <div id="custom-output" class="output-section" style="margin-top: 25px; display: none;">
+                    <h3>🌀 Cognitive Processing Results</h3>
+                    <div id="custom-results"></div>
+                </div>
+            </div>
+            
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">🖥️ CLI Interface Output</h2>
+                </div>
+                <p>Real-time output from the command-line interface showing the system's internal cognitive processes.</p>
+                <div class="cli-output" id="cli-output">
+                    <div class="cli-line"><span class="cli-prompt">senars3&gt;</span> <span class="cli-command">system.init()</span></div>
+                    <div class="cli-line"><span class="cli-output-text">Initializing Senars3 Cognitive System with Non-Axiomatic Logic Framework...</span></div>
+                    <div class="cli-line"><span class="cli-output-text">✓ Agenda Module Loaded</span></div>
+                    <div class="cli-line"><span class="cli-output-text">✓ World Model Initialized</span></div>
+                    <div class="cli-line"><span class="cli-output-text">✓ Attention Module Active</span></div>
+                    <div class="cli-line"><span class="cli-output-text">✓ Resonance Engine Engaged</span></div>
+                    <div class="cli-line"><span class="cli-output-text">✓ Schema Matcher Ready</span></div>
+                    <div class="cli-line"><span class="cli-output-text">✓ Belief Revision Engine Operational</span></div>
+                    <div class="cli-line"><span class="cli-output-text">✓ Goal Tree Manager Initialized</span></div>
+                    <div class="cli-line"><span class="cli-output-text">✓ Reflection Loop Activated</span></div>
+                    <div class="cli-line"><span class="cli-output-text">System ready for cognitive processing. Enter input to begin.</span></div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="tab-content" id="system-tab">
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">📊 Real-Time System Status</h2>
+                </div>
+                <p>Monitor the cognitive system's operation in real-time as it processes information through its non-axiomatic logic framework.</p>
+                
+                <div class="system-stats">
+                    <div class="stat-card">
+                        <div class="stat-value" id="agenda-count">0</div>
+                        <div class="stat-label">Agenda Items</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="atom-count">0</div>
+                        <div class="stat-label">Knowledge Atoms</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="item-count">0</div>
+                        <div class="stat-label">Cognitive Items</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="processed-count">0</div>
+                        <div class="stat-label">Inputs Processed</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="worker-count">0</div>
+                        <div class="stat-label">Active Workers</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="uptime">00:00:00</div>
+                        <div class="stat-label">System Uptime</div>
+                    </div>
+                </div>
+                
+                <div style="margin-top: 40px;">
+                    <h3>🧩 Cognitive Architecture Components</h3>
+                    <p>The system's modular architecture enables flexible cognition through specialized components:</p>
+                    <div style="display: flex; flex-wrap: wrap; gap: 12px; margin-top: 20px;">
+                        <span class="btn btn-outline" style="cursor: default;">🧠 Agenda Manager</span>
+                        <span class="btn btn-outline" style="cursor: default;">🌍 World Model</span>
+                        <span class="btn btn-outline" style="cursor: default;">👁️ Attention Module</span>
+                        <span class="btn btn-outline" style="cursor: default;">🔄 Resonance Engine</span>
+                        <span class="btn btn-outline" style="cursor: default;">🎯 Schema Matcher</span>
+                        <span class="btn btn-outline" style="cursor: default;">⚖️ Belief Revision</span>
+                        <span class="btn btn-outline" style="cursor: default;">🧭 Goal Tree Manager</span>
+                        <span class="btn btn-outline" style="cursor: default;">🔍 Reflection Loop</span>
+                    </div>
+                </div>
+                
+                <div class="system-meta">
+                    <div>System ID: <span id="system-id">senars3-nal-001</span></div>
+                    <div>Version: <span id="system-version">3.0.0-nal</span></div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="tab-content" id="metaprogramming-tab">
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">⚙️ Metaprogramming Interface</h2>
+                </div>
+                <p>Directly interact with the system's self-representational capabilities. Modify cognitive parameters and observe how the system adapts its reasoning processes.</p>
+                
+                <div class="demo-grid">
+                    <div class="demo-card" data-action="adjust-attention">
+                        <h3>👁️ Attention Parameters</h3>
+                        <p>Modify attention values that influence how the system prioritizes cognitive items.</p>
+                    </div>
+                    <div class="demo-card" data-action="adjust-truth">
+                        <h3>⚖️ Truth Value Settings</h3>
+                        <p>Adjust truth value parameters that affect belief revision and confidence assessment.</p>
+                    </div>
+                    <div class="demo-card" data-action="schema-management">
+                        <h3>🎯 Schema Operations</h3>
+                        <p>Manage cognitive schemas that guide the system's reasoning patterns.</p>
+                    </div>
+                    <div class="demo-card" data-action="reflection-config">
+                        <h3>🔍 Reflection Controls</h3>
+                        <p>Configure the system's self-monitoring and adaptation mechanisms.</p>
+                    </div>
+                </div>
+                
+                <div class="card" style="margin-top: 30px;">
+                    <div class="card-header">
+                        <h3 class="card-title">🔧 Direct Component Access</h3>
+                    </div>
+                    <p>Send direct commands to specific cognitive components through the metaprogrammatic interface:</p>
+                    
+                    <div class="input-group" style="margin-top: 20px;">
+                        <label for="component-select">Target Component:</label>
+                        <select id="component-select" style="margin-top: 8px;">
+                            <option value="core">Core System</option>
+                            <option value="perception">Perception Subsystem</option>
+                            <option value="agenda">Agenda Manager</option>
+                            <option value="worldModel">World Model</option>
+                            <option value="actionSubsystem">Action Subsystem</option>
+                            <option value="attention">Attention Module</option>
+                            <option value="resonance">Resonance Engine</option>
+                            <option value="schema">Schema Matcher</option>
+                            <option value="belief">Belief Revision Engine</option>
+                            <option value="goal">Goal Tree Manager</option>
+                            <option value="reflection">Reflection Loop</option>
+                        </select>
+                    </div>
+                    
+                    <div class="input-group">
+                        <label for="method-input">Method:</label>
+                        <input type="text" id="method-input" placeholder="e.g., getStatistics, processInput, addSchema">
+                    </div>
+                    
+                    <div class="input-group">
+                        <label for="payload-input">Payload (JSON):</label>
+                        <textarea id="payload-input" placeholder='{"input": "Example input for processing"}' class="json-editor"></textarea>
+                    </div>
+                    
+                    <button id="execute-btn" class="btn">🚀 Execute Command</button>
+                    
+                    <div id="command-result" class="result-display" style="display: none;"></div>
+                </div>
+                
+                <div class="card" style="margin-top: 30px;">
+                    <div class="card-header">
+                        <h3 class="card-title">🎛️ System Component Controls</h3>
+                    </div>
+                    <p>Fine-tune individual components of the cognitive system:</p>
+                    
+                    <div class="dashboard-grid">
+                        <div class="chart-container">
+                            <h4>🧠 Core System Controls</h4>
+                            <div class="component-control">
+                                <div class="control-group">
+                                    <label for="worker-count">Worker Count:</label>
+                                    <input type="number" id="worker-count" min="1" max="16" value="4">
+                                </div>
+                                <div class="control-group">
+                                    <label for="processing-mode">Processing Mode:</label>
+                                    <select id="processing-mode">
+                                        <option value="balanced">Balanced</option>
+                                        <option value="speed">Speed Optimized</option>
+                                        <option value="accuracy">Accuracy Optimized</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <button id="update-core" class="btn btn-outline" style="margin-top: 15px;">Update Core Settings</button>
+                        </div>
+                        
+                        <div class="chart-container">
+                            <h4>👁️ Attention Module</h4>
+                            <div class="component-control">
+                                <div class="control-group">
+                                    <label for="priority-weight">Priority Weight:</label>
+                                    <input type="range" id="priority-weight" min="0" max="1" step="0.1" value="0.7">
+                                    <span id="priority-weight-value">0.7</span>
+                                </div>
+                                <div class="control-group">
+                                    <label for="durability-weight">Durability Weight:</label>
+                                    <input type="range" id="durability-weight" min="0" max="1" step="0.1" value="0.3">
+                                    <span id="durability-weight-value">0.3</span>
+                                </div>
+                            </div>
+                            <button id="update-attention" class="btn btn-outline" style="margin-top: 15px;">Update Attention Settings</button>
+                            <button id="run-attention-decay" class="btn btn-outline" style="margin-top: 10px;">Run Attention Decay Cycle</button>
+                        </div>
+                        
+                        <div class="chart-container">
+                            <h4>⚖️ Truth Value Parameters</h4>
+                            <div class="component-control">
+                                <div class="control-group">
+                                    <label for="frequency-threshold">Frequency Threshold:</label>
+                                    <input type="range" id="frequency-threshold" min="0" max="1" step="0.05" value="0.5">
+                                    <span id="frequency-threshold-value">0.5</span>
+                                </div>
+                                <div class="control-group">
+                                    <label for="confidence-threshold">Confidence Threshold:</label>
+                                    <input type="range" id="confidence-threshold" min="0" max="1" step="0.05" value="0.8">
+                                    <span id="confidence-threshold-value">0.8</span>
+                                </div>
+                            </div>
+                            <button id="update-truth" class="btn btn-outline" style="margin-top: 15px;">Update Truth Settings</button>
+                        </div>
+                        
+                        <div class="chart-container">
+                            <h4>🔄 Resonance Engine</h4>
+                            <div class="component-control">
+                                <div class="control-group">
+                                    <label for="resonance-threshold">Resonance Threshold:</label>
+                                    <input type="range" id="resonance-threshold" min="0" max="1" step="0.05" value="0.6">
+                                    <span id="resonance-threshold-value">0.6</span>
+                                </div>
+                                <div class="control-group">
+                                    <label for="context-size">Context Size:</label>
+                                    <input type="number" id="context-size" min="1" max="50" value="10">
+                                </div>
+                            </div>
+                            <button id="update-resonance" class="btn btn-outline" style="margin-top: 15px;">Update Resonance Settings</button>
+                        </div>
+                        
+                        <div class="chart-container">
+                            <h4>🎯 Schema Matcher</h4>
+                            <div class="component-control">
+                                <div class="control-group">
+                                    <label for="schema-threshold">Schema Match Threshold:</label>
+                                    <input type="range" id="schema-threshold" min="0" max="1" step="0.05" value="0.7">
+                                    <span id="schema-threshold-value">0.7</span>
+                                </div>
+                                <div class="control-group">
+                                    <label for="max-schemas">Max Schemas per Match:</label>
+                                    <input type="number" id="max-schemas" min="1" max="20" value="5">
+                                </div>
+                            </div>
+                            <button id="update-schema" class="btn btn-outline" style="margin-top: 15px;">Update Schema Settings</button>
+                        </div>
+                        
+                        <div class="chart-container">
+                            <h4>🧭 Goal Tree Manager</h4>
+                            <div class="component-control">
+                                <div class="control-group">
+                                    <label for="goal-depth">Max Decomposition Depth:</label>
+                                    <input type="number" id="goal-depth" min="1" max="10" value="3">
+                                </div>
+                                <div class="control-group">
+                                    <label for="subgoal-count">Max Subgoals per Goal:</label>
+                                    <input type="number" id="subgoal-count" min="1" max="10" value="5">
+                                </div>
+                            </div>
+                            <button id="update-goal" class="btn btn-outline" style="margin-top: 15px;">Update Goal Settings</button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card" style="margin-top: 30px;">
+                    <div class="card-header">
+                        <h3 class="card-title">🧠 Schema Learning</h3>
+                    </div>
+                    <p>Enable the system to automatically learn and evolve its reasoning patterns through experience:</p>
+                    
+                    <div class="dashboard-grid">
+                        <div class="chart-container">
+                            <h4>⚙️ Learning Controls</h4>
+                            <div class="component-control">
+                                <div class="control-group">
+                                    <label for="learning-threshold">Learning Threshold:</label>
+                                    <input type="range" id="learning-threshold" min="0.1" max="1.0" step="0.05" value="0.7">
+                                    <span id="learning-threshold-value">0.7</span>
+                                </div>
+                                <div class="control-group">
+                                    <label for="min-applications">Minimum Applications:</label>
+                                    <input type="number" id="min-applications" min="1" max="50" value="5">
+                                </div>
+                            </div>
+                            <button id="update-learning" class="btn btn-outline" style="margin-top: 15px;">Update Learning Settings</button>
+                            <button id="trigger-learning" class="btn" style="margin-top: 10px;">Trigger Schema Learning</button>
+                        </div>
+                        
+                        <div class="chart-container">
+                            <h4>📊 Learning Statistics</h4>
+                            <div class="component-control">
+                                <div class="control-group">
+                                    <label>Tracked Schemas:</label>
+                                    <span id="tracked-schemas">0</span>
+                                </div>
+                                <div class="control-group">
+                                    <label>Total Applications:</label>
+                                    <span id="total-applications">0</span>
+                                </div>
+                                <div class="control-group">
+                                    <label>Successful Generalizations:</label>
+                                    <span id="successful-generalizations">0</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card" style="margin-top: 30px;">
+                    <div class="card-header">
+                        <h3 class="card-title">📈 System Self-Representation</h3>
+                    </div>
+                    <p>The system's internal representation of itself, demonstrating its metaprogrammatic capabilities:</p>
+                    <div class="cli-output" style="margin-top: 20px; font-size: 0.9rem;">
+                        <div class="cli-line"><span class="cli-output-text">System Self-Model:</span></div>
+                        <div class="cli-line"><span class="cli-output-text">{</span></div>
+                        <div class="cli-line"><span class="cli-output-text">  "identity": "Senars3-NAL",</span></div>
+                        <div class="cli-line"><span class="cli-output-text">  "type": "Non-Axiomatic Logic Reasoning System",</span></div>
+                        <div class="cli-line"><span class="cli-output-text">  "architecture": "Decentralized Cognitive Core with Priority Agenda",</span></div>
+                        <div class="cli-line"><span class="cli-output-text">  "principles": [</span></div>
+                        <div class="cli-line"><span class="cli-output-text">    "Uncertainty Management",</span></div>
+                        <div class="cli-line"><span class="cli-output-text">    "Experience-Grounded Reasoning",</span></div>
+                        <div class="cli-line"><span class="cli-output-text">    "Goal-Directed Cognition",</span></div>
+                        <div class="cli-line"><span class="cli-output-text">    "Self-Reflective Operation"</span></div>
+                        <div class="cli-line"><span class="cli-output-text">  ],</span></div>
+                        <div class="cli-line"><span class="cli-output-text">  "capabilities": {</span></div>
+                        <div class="cli-line"><span class="cli-output-text">    "symbolic_reasoning": true,</span></div>
+                        <div class="cli-line"><span class="cli-output-text">    "semantic_cognition": true,</span></div>
+                        <div class="cli-line"><span class="cli-output-text">    "metaprogramming": true,</span></div>
+                        <div class="cli-line"><span class="cli-output-text">    "self_development": true</span></div>
+                        <div class="cli-line"><span class="cli-output-text">  }</span></div>
+                        <div class="cli-line"><span class="cli-output-text">}</span></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="tab-content" id="help-tab">
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">📖 Help & Examples</h2>
+                </div>
+                <p>Learn how to effectively use the Senars3 cognitive system with these examples and guidelines for non-axiomatic logic reasoning.</p>
+                
+                <h3>🧠 Input Types for Non-Axiomatic Logic Processing</h3>
+                <p>The system processes different types of input through its uncertainty-managing framework:</p>
+                <ul style="margin: 15px 0 25px 20px; line-height: 1.8;">
+                    <li><strong>Uncertain Statements</strong>: Information with implicit uncertainty like "Chocolate is likely toxic to dogs"</li>
+                    <li><strong>Probabilistic Questions</strong>: Queries that require uncertainty-aware answers like "What is the probability my cat is sick after eating chocolate?"</li>
+                    <li><strong>Conditional Commands</strong>: Action requests with uncertainty considerations like "If my plant is wilting due to overwatering, reduce watering frequency"</li>
+                    <li><strong>Exploratory Goals</strong>: Complex objectives with uncertainty evaluation like "Diagnose why my plant is wilting considering multiple possible causes"</li>
+                    <li><strong>Adaptive Requests</strong>: Multi-part requests that adapt based on uncertainty like "Create a health plan for my pet that adjusts based on ongoing symptoms"</li>
+                </ul>
+                
+                <h3>🔬 Non-Axiomatic Logic Principles</h3>
+                <p>Understanding how the system reasons with uncertainty:</p>
+                <div style="display: flex; gap: 20px; margin: 20px 0; flex-wrap: wrap;">
+                    <div style="flex: 1; min-width: 250px; padding: 20px; background: #f0f9ff; border-left: 4px solid #3b82f6; border-radius: 4px;">
+                        <strong>Experience-Grounded Reasoning</strong>
+                        <p>All conclusions are based on experience rather than fixed axioms, with truth values representing both frequency and confidence.</p>
+                    </div>
+                    <div style="flex: 1; min-width: 250px; padding: 20px; background: #f0fdf4; border-left: 4px solid #10b981; border-radius: 4px;">
+                        <strong>Uncertainty Management</strong>
+                        <p>Every belief carries truth values (frequency and confidence) that evolve through experience and revision.</p>
+                    </div>
+                    <div style="flex: 1; min-width: 250px; padding: 20px; background: #fffbeb; border-left: 4px solid #f59e0b; border-radius: 4px;">
+                        <strong>Goal-Directed Cognition</strong>
+                        <p>All processing is driven by goals, with attention mechanisms prioritizing relevant information.</p>
+                    </div>
+                </div>
+                
+                <h3 style="margin-top: 30px;">⌨️ Interface Navigation</h3>
+                <ul style="margin: 15px 0 25px 20px; line-height: 1.8;">
+                    <li><strong>Tab Navigation</strong>: Click on tabs to switch between different interface sections</li>
+                    <li><strong>Ctrl+Enter</strong>: Process input in the Custom Input tab</li>
+                    <li><strong>CLI Mode Toggle</strong>: Switch between graphical and command-line interface modes</li>
+                    <li><strong>Click Demos</strong>: Try pre-built examples to see system capabilities</li>
+                </ul>
+                
+                <h3 style="margin-top: 30px;">🎯 Understanding Cognitive Output</h3>
+                <p>The system categorizes output through its non-axiomatic framework:</p>
+                <div style="display: flex; gap: 20px; margin-top: 15px; flex-wrap: wrap;">
+                    <div style="flex: 1; padding: 20px; background: #f0fdf4; border-left: 4px solid var(--success); border-radius: 8px;">
+                        <strong>Beliefs</strong>
+                        <p>Factual information with associated truth values (frequency and confidence)</p>
+                        <div class="item-meta" style="margin-top: 10px; background: none; padding: 0;">
+                            <span class="meta-tag">Frequency: 0.0-1.0</span>
+                            <span class="meta-tag">Confidence: 0.0-1.0</span>
+                        </div>
+                    </div>
+                    <div style="flex: 1; padding: 20px; background: #fef2f2; border-left: 4px solid var(--danger); border-radius: 8px;">
+                        <strong>Goals</strong>
+                        <p>Tasks or objectives with associated attention values (priority and durability)</p>
+                        <div class="item-meta" style="margin-top: 10px; background: none; padding: 0;">
+                            <span class="meta-tag">Priority: 0.0-1.0</span>
+                            <span class="meta-tag">Durability: 0.0-1.0</span>
+                        </div>
+                    </div>
+                    <div style="flex: 1; padding: 20px; background: #fffbeb; border-left: 4px solid var(--warning); border-radius: 8px;">
+                        <strong>Queries</strong>
+                        <p>Questions that require answers or exploration with associated interest values</p>
+                        <div class="item-meta" style="margin-top: 10px; background: none; padding: 0;">
+                            <span class="meta-tag">Interest: 0.0-1.0</span>
+                            <span class="meta-tag">Urgency: 0.0-1.0</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card" style="margin-top: 30px;">
+                    <div class="card-header">
+                        <h3 class="card-title">🚀 Advanced Metaprogramming</h3>
+                    </div>
+                    <p>Explore the system's self-modification capabilities through its metaprogrammatic interface:</p>
+                    <ul style="margin: 15px 0 15px 20px; line-height: 1.8;">
+                        <li><strong>Component Introspection</strong>: Examine internal state of cognitive modules</li>
+                        <li><strong>Parameter Adjustment</strong>: Modify system parameters that affect reasoning</li>
+                        <li><strong>Schema Evolution</strong>: Add or modify cognitive patterns that guide reasoning</li>
+                        <li><strong>Reflection Control</strong>: Configure how the system monitors and adapts itself</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <footer>
+            <p>Senars3 Cognitive System - A next-generation agentic reasoning system with non-axiomatic logic principles</p>
+            <p style="margin-top: 10px; font-size: 0.9rem;">Unified Interface: CLI and Web UI consolidated through WebSocket communication</p>
+        </footer>
+    </div>
+    
+    <script>
+        // DOM elements
+        const notificationContainer = document.getElementById('notification-container');
+        const statusEl = document.getElementById('connection-status');
+        const agendaSizeEl = document.getElementById('agenda-size');
+        const demoCards = document.querySelectorAll('.demo-card');
+        const demoOutput = document.getElementById('demo-output');
+        const userInput = document.getElementById('user-input');
+        const processBtn = document.getElementById('process-btn');
+        const customOutput = document.getElementById('custom-output');
+        const customResults = document.getElementById('custom-results');
+        const tabs = document.querySelectorAll('.tab');
+        const tabContents = document.querySelectorAll('.tab-content');
+        const interfaceModeToggle = document.getElementById('interface-mode');
+        const cliOutput = document.getElementById('cli-output');
+        
+        // System stats elements
+        const agendaCountEl = document.getElementById('agenda-count');
+        const atomCountEl = document.getElementById('atom-count');
+        const itemCountEl = document.getElementById('item-count');
+        const processedCountEl = document.getElementById('processed-count');
+        const workerCountEl = document.getElementById('worker-count');
+        const uptimeEl = document.getElementById('uptime');
+        
+        // Metaprogramming elements
+        const componentSelect = document.getElementById('component-select');
+        const methodInput = document.getElementById('method-input');
+        const payloadInput = document.getElementById('payload-input');
+        const executeBtn = document.getElementById('execute-btn');
+        const commandResult = document.getElementById('command-result');
+        
+        // Component control elements
+        const workerCount = document.getElementById('worker-count');
+        const processingMode = document.getElementById('processing-mode');
+        const priorityWeight = document.getElementById('priority-weight');
+        const durabilityWeight = document.getElementById('durability-weight');
+        const frequencyThreshold = document.getElementById('frequency-threshold');
+        const confidenceThreshold = document.getElementById('confidence-threshold');
+        const updateCoreBtn = document.getElementById('update-core');
+        const updateAttentionBtn = document.getElementById('update-attention');
+        const updateTruthBtn = document.getElementById('update-truth');
+        const runAttentionDecayBtn = document.getElementById('run-attention-decay');
+        
+        // Additional component control elements
+        const resonanceThreshold = document.getElementById('resonance-threshold');
+        const contextSize = document.getElementById('context-size');
+        const updateResonanceBtn = document.getElementById('update-resonance');
+        const schemaThreshold = document.getElementById('schema-threshold');
+        const maxSchemas = document.getElementById('max-schemas');
+        const updateSchemaBtn = document.getElementById('update-schema');
+        const goalDepth = document.getElementById('goal-depth');
+        const subgoalCount = document.getElementById('subgoal-count');
+        const updateGoalBtn = document.getElementById('update-goal');
+        
+        // Schema learning elements
+        const learningThreshold = document.getElementById('learning-threshold');
+        const minApplications = document.getElementById('min-applications');
+        const updateLearningBtn = document.getElementById('update-learning');
+        const triggerLearningBtn = document.getElementById('trigger-learning');
+        const trackedSchemas = document.getElementById('tracked-schemas');
+        const totalApplications = document.getElementById('total-applications');
+        const successfulGeneralizations = document.getElementById('successful-generalizations');
+        
+        // Value display elements
+        const priorityWeightValue = document.getElementById('priority-weight-value');
+        const durabilityWeightValue = document.getElementById('durability-weight-value');
+        const frequencyThresholdValue = document.getElementById('frequency-threshold-value');
+        const confidenceThresholdValue = document.getElementById('confidence-threshold-value');
+        const resonanceThresholdValue = document.getElementById('resonance-threshold-value');
+        const schemaThresholdValue = document.getElementById('schema-threshold-value');
+        const learningThresholdValue = document.getElementById('learning-threshold-value');
+        
+        // WebSocket connection
+        let ws = null;
+        let messageId = 1;
+        let processedInputs = 0;
+        let reconnectAttempts = 0;
+        const maxReconnectAttempts = 5;
+        let startTime = Date.now();
+        
+        // Demo inputs
+        const demoInputs = {
+            medical: "A 45-year-old male presents with chest pain, shortness of breath, and diaphoresis that started 30 minutes ago. He has a history of hypertension and smoking. What is the most likely diagnosis and immediate treatment considering the uncertainty in symptom presentation?",
+            scientific: "Design an experiment to test the hypothesis that increased CO2 levels lead to faster plant growth. Include control groups, variables, and measurement methods while accounting for environmental uncertainties.",
+            business: "A tech startup is losing market share to competitors. Analyze their position and recommend strategies for growth in a competitive market with uncertain economic conditions.",
+            cybersecurity: "Our network monitoring system detected unusual traffic patterns from an internal server to an external IP address at 3 AM. Analyze the potential threat and recommend actions considering the uncertainty of benign vs malicious activity.",
+            environmental: "Local water quality tests show increased nitrogen levels in a river near agricultural areas. Assess the environmental impact and propose mitigation strategies with uncertainty quantification.",
+            educational: "Create a personalized learning plan for a 12-year-old student who excels in mathematics but struggles with reading comprehension, accounting for learning uncertainties and adaptability."
+        };
+        
+        // Connect to WebSocket server
+        function connectWebSocket() {
+            // Use the same host as the web page but on port 8080
+            const wsUrl = `ws://${window.location.hostname}:8080`;
+            ws = new WebSocket(wsUrl);
+            
+            ws.onopen = function() {
+                console.log('Connected to WebSocket server');
+                reconnectAttempts = 0;
+                updateConnectionStatus(true);
+                showNotification('Connected to Senars3 Cognitive System', 'success');
+                // Request system status
+                requestSystemStatus();
+                // Start periodic updates
+                startPeriodicUpdates();
+            };
+            
+            ws.onmessage = function(event) {
+                try {
+                    const message = JSON.parse(event.data);
+                    handleMessage(message);
+                } catch (error) {
+                    console.error('Error parsing message:', error);
+                    showNotification('Error parsing server response', 'error');
+                }
+            };
+            
+            ws.onclose = function() {
+                console.log('Disconnected from WebSocket server');
+                updateConnectionStatus(false);
+                
+                // Attempt to reconnect with exponential backoff
+                if (reconnectAttempts < maxReconnectAttempts) {
+                    reconnectAttempts++;
+                    const delay = Math.min(1000 * Math.pow(2, reconnectAttempts), 30000); // Max 30 seconds
+                    showNotification(`Disconnected from cognitive system. Retrying in ${delay/1000} seconds... (Attempt ${reconnectAttempts}/${maxReconnectAttempts})`, 'error');
+                    
+                    setTimeout(connectWebSocket, delay);
+                } else {
+                    showNotification('Failed to reconnect after multiple attempts. Please refresh the page.', 'error');
+                }
+            };
+            
+            ws.onerror = function(error) {
+                console.error('WebSocket error:', error);
+                showNotification('Connection error: ' + (error.message || 'Unknown error'), 'error');
+            };
+        }
+        
+        // Update connection status display
+        function updateConnectionStatus(connected) {
+            if (connected) {
+                statusEl.innerHTML = '<span class="status-indicator status-connected"></span> Connected';
+            } else {
+                statusEl.innerHTML = '<span class="status-indicator status-disconnected"></span> Disconnected';
+            }
+        }
+        
+        // Show notification
+        function showNotification(message, type) {
+            // Remove any existing notifications of the same type
+            const existingNotifications = document.querySelectorAll(`.notification.${type}`);
+            existingNotifications.forEach(notification => notification.remove());
+            
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            notification.innerHTML = `
+                <span>${type === 'success' ? '✅' : type === 'error' ? '❌' : type === 'warning' ? '⚠️' : 'ℹ️'}</span>
+                <span>${message}</span>
+            `;
+            
+            notificationContainer.appendChild(notification);
+            
+            // Auto-remove success notifications after 3 seconds, others after 10 seconds
+            const timeout = type === 'success' ? 3000 : 10000;
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    notification.parentNode.removeChild(notification);
+                }
+            }, timeout);
+        }
+        
+        // Handle incoming messages
+        function handleMessage(message) {
+            console.log('Received message:', message);
+            
+            switch (message.type) {
+                case 'event':
+                    handleEvent(message);
+                    break;
+                case 'response':
+                    handleResponse(message);
+                    break;
+                case 'error':
+                    handleError(message);
+                    break;
+                case 'welcome':
+                    console.log('Welcome message:', message.payload);
+                    // Update system info from welcome message
+                    if (message.payload.systemInfo) {
+                        workerCountEl.textContent = message.payload.systemInfo.workerCount || 0;
+                    }
+                    if (message.payload.serverStats) {
+                        uptimeEl.textContent = message.payload.serverStats.uptime || '00:00:00';
+                    }
+                    break;
+                default:
+                    console.log('Unknown message type:', message.type);
+            }
+        }
+        
+        // Handle event messages
+        function handleEvent(message) {
+            switch (message.method) {
+                case 'inputProcessed':
+                    displayResults(message.payload.input, message.payload.cognitiveItems);
+                    processedInputs++;
+                    processedCountEl.textContent = processedInputs;
+                    // Update agenda size
+                    requestSystemStatus();
+                    break;
+                case 'inputProcessingError':
+                    showNotification('Error processing input: ' + (message.payload.error || 'Unknown error'), 'error');
+                    resetUIState();
+                    demoOutput.innerHTML = '<p class="error">Error processing input. Please try again.</p>';
+                    break;
+                default:
+                    console.log('Unknown event:', message.method);
+            }
+        }
+        
+        // Handle response messages
+        function handleResponse(message) {
+            // Handle system status response
+            if (message.payload && message.payload.statistics) {
+                const stats = message.payload.statistics;
+                agendaCountEl.textContent = stats.agendaSize || 0;
+                atomCountEl.textContent = stats.atomCount || 0;
+                itemCountEl.textContent = stats.itemCount || 0;
+                agendaSizeEl.textContent = stats.agendaSize || 0;
+                
+                // Handle schema learning statistics if available
+                if (stats.moduleName === 'SchemaMatcher' && stats.learning) {
+                    trackedSchemas.textContent = stats.learning.trackedSchemas || 0;
+                    totalApplications.textContent = stats.learning.totalApplications || 0;
+                    successfulGeneralizations.textContent = stats.learning.successfulGeneralizations || 0;
+                }
+            }
+            
+            // Handle other responses
+            if (message.payload) {
+                // Add response to CLI output
+                addToCliOutput(`Response: ${JSON.stringify(message.payload, null, 2)}`);
+                
+                // Display in command result area if it's from a direct command
+                if (commandResult) {
+                    commandResult.style.display = 'block';
+                    commandResult.textContent = JSON.stringify(message.payload, null, 2);
+                }
+            }
+        }
+        
+        // Handle error messages
+        function handleError(message) {
+            const errorMessage = message.error ? `${message.error.code}: ${message.error.message}` : 'Unknown error';
+            showNotification(`Error: ${errorMessage}`, 'error');
+            resetUIState();
+            
+            // Add error to CLI output
+            addToCliOutput(`Error: ${errorMessage}`, 'error');
+            
+            // Display in command result area if it's from a direct command
+            if (commandResult) {
+                commandResult.style.display = 'block';
+                commandResult.textContent = `Error: ${errorMessage}`;
+                commandResult.style.color = 'var(--danger)';
+            }
+            
+            // Log error to console for debugging
+            console.error('System error:', message);
+        }
+        
+        // Reset UI state after processing
+        function resetUIState() {
+            processBtn.disabled = false;
+            demoCards.forEach(card => card.style.pointerEvents = 'auto');
+        }
+        
+        // Send message to WebSocket server
+        function sendWebSocketMessage(target, method, payload) {
+            if (ws && ws.readyState === WebSocket.OPEN) {
+                const message = {
+                    id: 'msg-' + messageId++,
+                    type: 'request',
+                    target: target,
+                    method: method,
+                    payload: payload
+                };
+                
+                // Add command to CLI output
+                addToCliOutput(`> ${target}.${method}(${JSON.stringify(payload)})`);
+                
+                ws.send(JSON.stringify(message));
+                return true;
+            } else {
+                showNotification('Not connected to server. Please wait for reconnection or refresh the page.', 'error');
+                return false;
+            }
+        }
+        
+        // Request system status
+        function requestSystemStatus() {
+            sendWebSocketMessage('worldModel', 'getStatistics', {});
+        }
+        
+        // Start periodic updates
+        function startPeriodicUpdates() {
+            // Update uptime every second
+            setInterval(() => {
+                const uptime = Math.floor((Date.now() - startTime) / 1000);
+                const hours = Math.floor(uptime / 3600);
+                const minutes = Math.floor((uptime % 3600) / 60);
+                const seconds = uptime % 60;
+                uptimeEl.textContent = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            }, 1000);
+            
+            // Request system status every 5 seconds
+            setInterval(() => {
+                if (ws && ws.readyState === WebSocket.OPEN) {
+                    requestSystemStatus();
+                }
+            }, 5000);
+        }
+        
+        // Process input
+        function processInput(input) {
+            // Validate input
+            if (!input || input.trim().length === 0) {
+                showNotification('Please enter some text to process', 'warning');
+                return false;
+            }
+            
+            const trimmedInput = input.trim();
+            
+            if (trimmedInput.length < 3) {
+                showNotification('Input too short. Please enter at least 3 characters.', 'warning');
+                return false;
+            }
+            
+            if (trimmedInput.length > 10000) {
+                showNotification('Input too long. Please limit input to 10,000 characters.', 'warning');
+                return false;
+            }
+            
+            // Disable buttons during processing
+            processBtn.disabled = true;
+            demoCards.forEach(card => card.style.pointerEvents = 'none');
+            
+            // Show loading indicator
+            demoOutput.innerHTML = `
+                <div class="loading">
+                    <div class="spinner"></div>
+                    <p>Processing with Non-Axiomatic Logic Framework...</p>
+                    <p style="font-size: 0.9em; margin-top: 10px;">This may take a few moments</p>
+                    <p style="font-size: 0.8em; margin-top: 5px; opacity: 0.8;">Input: "${trimmedInput}"</p>
+                </div>
+            `;
+            
+            // Send message to WebSocket server
+            const success = sendWebSocketMessage('perception', 'processInput', { input: trimmedInput });
+            
+            if (!success) {
+                resetUIState();
+            }
+            
+            return success;
+        }
+        
+        // Display results in the output container
+        function displayResults(input, results) {
+            // Clear previous output
+            demoOutput.innerHTML = '';
+            
+            if (!results || results.length === 0) {
+                demoOutput.innerHTML = '<p>No cognitive items were extracted from your input. Try rephrasing or providing more specific information through the non-axiomatic logic framework.</p>';
+                resetUIState();
+                return;
+            }
+            
+            // Add input header
+            const inputHeader = document.createElement('div');
+            inputHeader.innerHTML = `<h3>Input: "${input}"</h3>`;
+            demoOutput.appendChild(inputHeader);
+            
+            // Display each result
+            results.forEach(item => {
+                const itemEl = document.createElement('div');
+                itemEl.className = `output-item ${item.type.toLowerCase()}`;
+                
+                // Format truth value if available
+                let truthInfo = '';
+                if (item.truth) {
+                    truthInfo = `Frequency: ${item.truth.frequency.toFixed(2)}, Confidence: ${item.truth.confidence.toFixed(2)}`;
+                }
+                
+                // Format attention value if available
+                let attentionInfo = '';
+                if (item.attention) {
+                    attentionInfo = `Priority: ${item.attention.priority.toFixed(2)}, Durability: ${item.attention.durability.toFixed(2)}`;
+                }
+                
+                // Format metadata if available
+                let metaInfo = '';
+                if (item.meta) {
+                    const metaEntries = Object.entries(item.meta);
+                    if (metaEntries.length > 0) {
+                        metaInfo = metaEntries.map(([key, value]) => 
+                            `<span class="meta-tag">${key}: ${value}</span>`
+                        ).join(' ');
+                    }
+                }
+                
+                itemEl.innerHTML = `
+                    <div class="item-type">
+                        ${item.type === 'BELIEF' ? '🧠 Belief' : 
+                          item.type === 'GOAL' ? '🎯 Goal' : 
+                          item.type === 'QUERY' ? '❓ Query' : item.type}
+                    </div>
+                    <div class="item-content">${item.label || 'No content'}</div>
+                    ${truthInfo ? `<div class="item-meta">${truthInfo}</div>` : ''}
+                    ${attentionInfo ? `<div class="item-meta">${attentionInfo}</div>` : ''}
+                    ${metaInfo ? `<div class="item-meta">${metaInfo}</div>` : ''}
+                `;
+                
+                demoOutput.appendChild(itemEl);
+            });
+            
+            // Show success notification
+            showNotification(`Processed input and extracted ${results.length} cognitive item(s) through non-axiomatic reasoning`, 'success');
+            
+            // Add to CLI output
+            addToCliOutput(`Processed ${results.length} cognitive items:`);
+            results.forEach((item, index) => {
+                addToCliOutput(`  ${index + 1}. ${item.type}: ${item.label || 'No label'}`);
+            });
+            
+            // Re-enable buttons
+            resetUIState();
+        }
+        
+        // Add line to CLI output
+        function addToCliOutput(text, type = 'output') {
+            const line = document.createElement('div');
+            line.className = 'cli-line';
+            
+            if (type === 'error') {
+                line.innerHTML = `<span class="cli-error">${text}</span>`;
+            } else if (text.startsWith('>')) {
+                // Command
+                const parts = text.match(/^>\s*(\w+)\.(\w+)\((.*)\)$/);
+                if (parts) {
+                    line.innerHTML = `<span class="cli-prompt">senars3&gt;</span> <span class="cli-command">${parts[1]}.${parts[2]}(${parts[3]})</span>`;
+                } else {
+                    line.innerHTML = `<span class="cli-prompt">senars3&gt;</span> <span class="cli-command">${text.substring(1)}</span>`;
+                }
+            } else {
+                // Output
+                line.innerHTML = `<span class="cli-output-text">${text}</span>`;
+            }
+            
+            cliOutput.appendChild(line);
+            cliOutput.scrollTop = cliOutput.scrollHeight;
+        }
+        
+        // Set up event listeners
+        processBtn.addEventListener('click', function() {
+            const input = userInput.value.trim();
+            processInput(input);
+        });
+        
+        // Also process on Ctrl+Enter
+        userInput.addEventListener('keydown', function(e) {
+            if (e.ctrlKey && e.key === 'Enter') {
+                const input = userInput.value.trim();
+                processInput(input);
+            }
+        });
+        
+        // Add event listeners to demo cards
+        demoCards.forEach(card => {
+            card.addEventListener('click', function() {
+                // Check if this is a demo card or action card
+                const demoType = this.getAttribute('data-demo');
+                const actionType = this.getAttribute('data-action');
+                
+                if (demoType) {
+                    // Handle demo card
+                    const input = demoInputs[demoType];
+                    if (input) {
+                        // Update the custom input field with the demo input
+                        userInput.value = input;
+                        // Process the input
+                        processInput(input);
+                    }
+                } else if (actionType) {
+                    // Handle action card
+                    switch (actionType) {
+                        case 'adjust-attention':
+                            componentSelect.value = 'attention';
+                            methodInput.value = 'getStatistics';
+                            payloadInput.value = '{}';
+                            // Switch to metaprogramming tab
+                            document.querySelector('.tab[data-tab="metaprogramming"]').click();
+                            break;
+                        case 'adjust-truth':
+                            componentSelect.value = 'belief';
+                            methodInput.value = 'getStatistics';
+                            payloadInput.value = '{}';
+                            // Switch to metaprogramming tab
+                            document.querySelector('.tab[data-tab="metaprogramming"]').click();
+                            break;
+                        case 'schema-management':
+                            componentSelect.value = 'schema';
+                            methodInput.value = 'getStatistics';
+                            payloadInput.value = '{}';
+                            // Switch to metaprogramming tab
+                            document.querySelector('.tab[data-tab="metaprogramming"]').click();
+                            break;
+                        case 'reflection-config':
+                            componentSelect.value = 'reflection';
+                            methodInput.value = 'getStatistics';
+                            payloadInput.value = '{}';
+                            // Switch to metaprogramming tab
+                            document.querySelector('.tab[data-tab="metaprogramming"]').click();
+                            break;
+                    }
+                }
+            });
+        });
+        
+        // Tab switching
+        tabs.forEach(tab => {
+            tab.addEventListener('click', function() {
+                // Remove active class from all tabs and contents
+                tabs.forEach(t => t.classList.remove('active'));
+                tabContents.forEach(c => c.classList.remove('active'));
+                
+                // Add active class to clicked tab
+                this.classList.add('active');
+                
+                // Show corresponding content
+                const tabName = this.getAttribute('data-tab');
+                document.getElementById(`${tabName}-tab`).classList.add('active');
+                
+                // If system tab is activated, refresh stats
+                if (tabName === 'system') {
+                    requestSystemStatus();
+                }
+            });
+        });
+        
+        // Interface mode toggle
+        interfaceModeToggle.addEventListener('change', function() {
+            if (this.checked) {
+                // Switch to CLI mode
+                document.body.classList.add('cli-mode');
+                showNotification('Switched to CLI mode. Interface optimized for command-line experience.', 'info');
+            } else {
+                // Switch to GUI mode
+                document.body.classList.remove('cli-mode');
+                showNotification('Switched to GUI mode. Interface optimized for graphical experience.', 'info');
+            }
+        });
+        
+        // Execute button for metaprogramming
+        executeBtn.addEventListener('click', function() {
+            const target = componentSelect.value;
+            const method = methodInput.value;
+            let payload = {};
+            
+            try {
+                if (payloadInput.value.trim()) {
+                    payload = JSON.parse(payloadInput.value);
+                }
+            } catch (e) {
+                showNotification('Invalid JSON in payload: ' + e.message, 'error');
+                return;
+            }
+            
+            sendWebSocketMessage(target, method, payload);
+        });
+        
+        // Update value displays for sliders
+        priorityWeight.addEventListener('input', function() {
+            priorityWeightValue.textContent = this.value;
+        });
+        
+        durabilityWeight.addEventListener('input', function() {
+            durabilityWeightValue.textContent = this.value;
+        });
+        
+        frequencyThreshold.addEventListener('input', function() {
+            frequencyThresholdValue.textContent = this.value;
+        });
+        
+        confidenceThreshold.addEventListener('input', function() {
+            confidenceThresholdValue.textContent = this.value;
+        });
+        
+        resonanceThreshold.addEventListener('input', function() {
+            resonanceThresholdValue.textContent = this.value;
+        });
+        
+        schemaThreshold.addEventListener('input', function() {
+            schemaThresholdValue.textContent = this.value;
+        });
+        
+        learningThreshold.addEventListener('input', function() {
+            learningThresholdValue.textContent = this.value;
+        });
+        
+        // Update core settings
+        updateCoreBtn.addEventListener('click', function() {
+            showNotification('Core settings updated (simulated)', 'success');
+        });
+        
+        // Update attention settings
+        updateAttentionBtn.addEventListener('click', function() {
+            const settings = {
+                priorityWeight: parseFloat(priorityWeight.value),
+                durabilityWeight: parseFloat(durabilityWeight.value)
+            };
+            showNotification(`Attention settings updated: Priority=${settings.priorityWeight}, Durability=${settings.durabilityWeight}`, 'success');
+        });
+        
+        // Update truth settings
+        updateTruthBtn.addEventListener('click', function() {
+            const settings = {
+                frequencyThreshold: parseFloat(frequencyThreshold.value),
+                confidenceThreshold: parseFloat(confidenceThreshold.value)
+            };
+            showNotification(`Truth settings updated: Frequency=${settings.frequencyThreshold}, Confidence=${settings.confidenceThreshold}`, 'success');
+        });
+        
+        // Run attention decay cycle
+        runAttentionDecayBtn.addEventListener('click', function() {
+            showNotification('Attention decay cycle initiated (simulated)', 'success');
+        });
+        
+        // Update resonance settings
+        updateResonanceBtn.addEventListener('click', function() {
+            const settings = {
+                threshold: parseFloat(resonanceThreshold.value),
+                contextSize: parseInt(contextSize.value)
+            };
+            showNotification(`Resonance settings updated: Threshold=${settings.threshold}, Context Size=${settings.contextSize}`, 'success');
+        });
+        
+        // Update schema settings
+        updateSchemaBtn.addEventListener('click', function() {
+            const settings = {
+                threshold: parseFloat(schemaThreshold.value),
+                maxSchemas: parseInt(maxSchemas.value)
+            };
+            showNotification(`Schema settings updated: Threshold=${settings.threshold}, Max Schemas=${settings.maxSchemas}`, 'success');
+        });
+        
+        // Update goal settings
+        updateGoalBtn.addEventListener('click', function() {
+            const settings = {
+                maxDepth: parseInt(goalDepth.value),
+                maxSubgoals: parseInt(subgoalCount.value)
+            };
+            showNotification(`Goal settings updated: Max Depth=${settings.maxDepth}, Max Subgoals=${settings.maxSubgoals}`, 'success');
+        });
+        
+        // Update learning settings
+        updateLearningBtn.addEventListener('click', function() {
+            const settings = {
+                threshold: parseFloat(learningThreshold.value),
+                minApps: parseInt(minApplications.value)
+            };
+            showNotification(`Learning settings updated: Threshold=${settings.threshold}, Min Applications=${settings.minApps}`, 'success');
+        });
+        
+        // Trigger schema learning
+        triggerLearningBtn.addEventListener('click', function() {
+            // Send message to WebSocket server to trigger schema learning
+            if (ws && ws.readyState === WebSocket.OPEN) {
+                const message = {
+                    id: 'msg-' + messageId++,
+                    type: 'request',
+                    target: 'schema',
+                    method: 'triggerLearning',
+                    payload: {}
+                };
+                
+                addToCliOutput(`> schema.triggerLearning()`);
+                ws.send(JSON.stringify(message));
+                showNotification('Schema learning process initiated', 'success');
+            } else {
+                showNotification('Not connected to server. Please wait for reconnection or refresh the page.', 'error');
+            }
+        });
+        
+        // Initialize
+        window.addEventListener('load', () => {
+            // Connect to WebSocket server
+            connectWebSocket();
+            
+            // Set initial example in the input field
+            userInput.value = "My cat seems sick after eating chocolate. What should I do considering the uncertainty in symptoms?";
+            
+            // Add initial CLI output
+            setTimeout(() => {
+                addToCliOutput("System initialized with Non-Axiomatic Logic Framework");
+                addToCliOutput("Ready for cognitive processing. Enter input to begin.");
+            }, 1000);
+        });
+    </script>
+</body>
+</html>
