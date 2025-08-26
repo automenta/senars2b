@@ -1,0 +1,76 @@
+import { DecentralizedCognitiveCore } from '../../dist/cognitiveCore';
+import { TruthValue, AttentionValue } from '../../dist/types';
+
+describe('Enhanced Components Integration Tests', () => {
+  let core: DecentralizedCognitiveCore;
+
+  beforeEach(() => {
+    core = new DecentralizedCognitiveCore(2);
+  });
+
+  it('should work with standard components and process multi-domain knowledge', () => {
+    // Add knowledge from multiple domains
+    const truth: TruthValue = { frequency: 0.8, confidence: 0.9 };
+    const attention: AttentionValue = { priority: 0.8, durability: 0.7 };
+
+    core.addInitialBelief("Machine learning algorithm achieves 95% accuracy", truth, attention, {
+      domain: "computer_science",
+      source: "research_paper",
+      trust_score: 0.9
+    });
+
+    core.addInitialBelief("Drug compound shows promising results in trials", truth, attention, {
+      domain: "pharmacology",
+      source: "clinical_study",
+      trust_score: 0.85
+    });
+
+    const status = core.getSystemStatus();
+    expect(status.worldModelStats.atomCount).toBeGreaterThan(0);
+  });
+
+  it('should handle cross-domain reasoning scenarios', () => {
+    const truth: TruthValue = { frequency: 0.7, confidence: 0.8 };
+    const attention: AttentionValue = { priority: 0.7, durability: 0.6 };
+
+    core.addInitialBelief("Economic indicator shows positive trend", truth, attention, {
+      domain: "economics",
+      source: "government_report",
+      trust_score: 0.8
+    });
+
+    core.addInitialGoal("Analyze market conditions for investment strategy", attention, {
+      domain: "finance",
+      source: "investment_firm"
+    });
+
+    const status = core.getSystemStatus();
+    expect(status.worldModelStats.atomCount).toBeGreaterThan(0);
+  });
+
+  it('should support analogical reasoning across domains', () => {
+    const truth: TruthValue = { frequency: 0.75, confidence: 0.85 };
+    const attention: AttentionValue = { priority: 0.8, durability: 0.7 };
+
+    // Add knowledge from different domains that could benefit from analogical reasoning
+    core.addInitialBelief("Neural networks learn through backpropagation", truth, attention, {
+      domain: "computer_science",
+      source: "textbook",
+      trust_score: 0.9
+    });
+
+    core.addInitialBelief("Human brains learn through synaptic plasticity", truth, attention, {
+      domain: "neuroscience",
+      source: "scientific_journal",
+      trust_score: 0.95
+    });
+
+    core.addInitialGoal("Apply insights from biological learning to improve AI algorithms", attention, {
+      domain: "cognitive_science",
+      source: "researcher"
+    });
+
+    const status = core.getSystemStatus();
+    expect(status.worldModelStats.atomCount).toBeGreaterThan(0);
+  });
+});
