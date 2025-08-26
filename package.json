@@ -1,31 +1,56 @@
 {
-  "name": "2b",
+  "name": "senars3",
   "version": "1.0.0",
-  "description": "Verifiable, goal-directed, and self-reflective reasoning system",
+  "description": "Verifiable, goal-directed, and self-reflective reasoning system with hybrid symbolic and semantic cognition",
   "main": "dist/index.js",
+  "bin": {
+    "senars3": "./dist/cli.js"
+  },
   "scripts": {
     "build": "tsc",
-    "start": "ts-node src/index.ts",
+    "start": "ts-node src/main.ts",
+    "start:ws": "ts-node src/webSocketServer.ts",
+    "start:web": "ts-node src/webServer.ts",
+    "cli": "ts-node src/cli.ts",
+    "demo": "ts-node src/demo.ts",
+    "demo:advanced": "ts-node src/advancedDemo.ts",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
     "test:unit": "jest test/unit",
-    "test:integration": "jest test/integration"
+    "test:integration": "jest test/integration",
+    "docs:usability": "cat USABILITY_ENHANCEMENTS.md",
+    "docs:enhanced": "cat ENHANCED_USABILITY_FEATURES.md"
   },
-  "keywords": ["ai", "cognitive", "reasoning", "goal-directed"],
-  "author": "",
+  "keywords": [
+    "ai",
+    "cognitive",
+    "reasoning",
+    "goal-directed",
+    "symbolic-ai",
+    "semantic-cognition",
+    "knowledge-representation",
+    "cognitive-architecture",
+    "artificial-intelligence",
+    "nlp",
+    "natural-language-processing"
+  ],
+  "author": "Senars3 Team",
   "license": "ISC",
   "type": "commonjs",
   "dependencies": {
+    "@types/express": "^5.0.0",
     "@types/node": "^24.3.0",
     "@types/uuid": "^10.0.0",
+    "express": "^4.21.1",
     "ts-node": "^10.9.2",
     "typescript": "^5.9.2",
-    "uuid": "^11.1.0"
+    "uuid": "^11.1.0",
+    "ws": "^8.18.3"
   },
   "devDependencies": {
-    "@types/jest": "^29.5.12",
+    "@types/jest": "^29.5.14",
     "jest": "^29.7.0",
-    "ts-jest": "^29.2.4"
+    "ts-jest": "^29.4.1"
   }
 }

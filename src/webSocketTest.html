@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>WebSocket Test</title>
+</head>
+<body>
+    <h1>WebSocket Interface Test</h1>
+    <button id="connectBtn">Connect</button>
+    <button id="disconnectBtn" disabled>Disconnect</button>
+    <br><br>
+    <input type="text" id="inputField" placeholder="Enter text to process" />
+    <button id="processBtn" disabled>Process Input</button>
+    <br><br>
+    <div id="output"></div>
+
+    <script>
+        let ws = null;
+
+        document.getElementById('connectBtn').addEventListener('click', () => {
+            if (ws) {
+                ws.close();
+            }
+            
+            ws = new WebSocket('ws://localhost:8080');
+            
+            ws.onopen = () => {
+                document.getElementById('output').innerHTML += '<p>Connected to server</p>';
+                document.getElementById('connectBtn').disabled = true;
+                document.getElementById('disconnectBtn').disabled = false;
+                document.getElementById('processBtn').disabled = false;
+            };
+            
+            ws.onmessage = (event) => {
+                const message = JSON.parse(event.data);
+                document.getElementById('output').innerHTML += `<p>Received: ${JSON.stringify(message)}</p>`;
+            };
+            
+            ws.onclose = () => {
+                document.getElementById('output').innerHTML += '<p>Disconnected from server</p>';
+                document.getElementById('connectBtn').disabled = false;
+                document.getElementById('disconnectBtn').disabled = true;
+                document.getElementById('processBtn').disabled = true;
+            };
+            
+            ws.onerror = (error) => {
+                document.getElementById('output').innerHTML += `<p>Error: ${error.message}</p>`;
+            };
+        });
+
+        document.getElementById('disconnectBtn').addEventListener('click', () => {
+            if (ws) {
+                ws.close();
+            }
+        });
+
+        document.getElementById('processBtn').addEventListener('click', () => {
+            const input = document.getElementById('inputField').value;
+            if (ws && ws.readyState === WebSocket.OPEN) {
+                const message = {
+                    id: 'test-' + Date.now(),
+                    type: 'request',
+                    target: 'perception',
+                    method: 'processInput',
+                    payload: {
+                        input: input
+                    }
+                };
+                ws.send(JSON.stringify(message));
+                document.getElementById('output').innerHTML += `<p>Sent: ${JSON.stringify(message)}</p>`;
+            }
+        });
+    </script>
+</body>
+</html>

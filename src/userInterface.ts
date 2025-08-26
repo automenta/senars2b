@@ -49,14 +49,19 @@ export class UserInterface {
     private promptUser(): void {
         if (!this.isRunning) return;
 
+        // Setup keypress event for command history navigation
+        let inputBuffer = '';
+        
         this.rl.question("> ", async (input) => {
             if (!this.isRunning) return;
 
-            // Add to command history (if not empty)
-            if (input.trim()) {
+            // Add to command history (if not empty and not a duplicate of last command)
+            if (input.trim() && 
+                (this.commandHistory.length === 0 || 
+                 this.commandHistory[this.commandHistory.length - 1] !== input.trim())) {
                 this.commandHistory.push(input.trim());
-                this.historyIndex = this.commandHistory.length;
             }
+            this.historyIndex = this.commandHistory.length;
 
             try {
                 await this.processUserInput(input.trim());
@@ -68,9 +73,38 @@ export class UserInterface {
             this.promptUser();
         });
 
-        // Add support for command history with up/down arrows
-        this.rl.on('line', (input) => {
-            // This is handled in the question callback above
+        // Handle keypress events for command history
+        process.stdin.on('keypress', (str, key) => {
+            // Only handle when we're waiting for input
+            if (!this.isRunning) return;
+            
+            // Handle Ctrl+C to exit
+            if (key && key.ctrl && key.name === 'c') {
+                this.stop();
+                return;
+            }
+            
+            // Handle up/down arrows for command history
+            if (key && key.name === 'up') {
+                if (this.commandHistory.length > 0) {
+                    this.historyIndex = Math.max(0, this.historyIndex - 1);
+                    const historyItem = this.commandHistory[this.historyIndex] || '';
+                    // Update the current input line
+                    process.stdout.write('\r> ' + historyItem);
+                    // Clear any extra characters if the new line is shorter
+                    process.stdout.write(' '.repeat(Math.max(0, inputBuffer.length - historyItem.length)));
+                    process.stdout.write('\r> ' + historyItem);
+                    inputBuffer = historyItem;
+                }
+            } else if (key && key.name === 'down') {
+                this.historyIndex = Math.min(this.commandHistory.length, this.historyIndex + 1);
+                const historyItem = this.commandHistory[this.historyIndex] || '';
+                process.stdout.write('\r> ' + historyItem);
+                // Clear any extra characters if the new line is shorter
+                process.stdout.write(' '.repeat(Math.max(0, inputBuffer.length - historyItem.length)));
+                process.stdout.write('\r> ' + historyItem);
+                inputBuffer = historyItem;
+            }
         });
     }
 
@@ -122,6 +156,10 @@ export class UserInterface {
         console.log("  - Goals: 'Diagnose why my plant is wilting'");
         console.log("  - Complex requests: 'Create a comprehensive health plan for my pet'");
         console.log("");
+        console.log("Navigation:");
+        console.log("  - Use ↑/↓ arrow keys to navigate command history");
+        console.log("  - Press Ctrl+C to exit the application");
+        console.log("");
         console.log("For a richer experience with real-time feedback and visualizations,");
         console.log("visit the web interface at http://localhost:3000");
         console.log("");
@@ -133,22 +171,33 @@ export class UserInterface {
         console.log("Statements (facts the system should learn):");
         console.log("  'Chocolate is toxic to dogs'");
         console.log("  'Water boils at 100 degrees Celsius at sea level'");
+        console.log("  'Regular exercise improves cardiovascular health'");
         console.log("");
         console.log("Questions (queries that require answers):");
         console.log("  'My cat seems sick after eating chocolate. What should I do?'");
         console.log("  'What are the symptoms of diabetes?'");
+        console.log("  'How does photosynthesis work?'");
         console.log("");
         console.log("Commands (action requests):");
         console.log("  'Can you search for information about pet nutrition?'");
         console.log("  'Find recent research on climate change'");
+        console.log("  'Look up the capital of France'");
         console.log("");
         console.log("Goals (complex objectives):");
         console.log("  'Diagnose why my plant is wilting'");
         console.log("  'Create a workout plan for beginners'");
+        console.log("  'Develop a study schedule for final exams'");
         console.log("");
         console.log("Complex requests (multi-part tasks):");
         console.log("  'Create a comprehensive health plan for my pet including diet, exercise, and medical checkups'");
         console.log("  'Analyze the impact of social media on mental health and suggest coping strategies'");
+        console.log("  'Plan a sustainable garden for my backyard with native plants and water conservation'");
+        console.log("");
+        console.log("Best Practices:");
+        console.log("  - Be specific and clear in your input");
+        console.log("  - Use domain-specific terminology when possible");
+        console.log("  - Break down complex requests into smaller parts if needed");
+        console.log("  - Check the system status to monitor performance");
         console.log("");
     }
 
@@ -181,9 +230,23 @@ export class UserInterface {
     }
 
     private async processCognitiveInput(input: string): Promise<void> {
+        // Validate input
+        if (input.length === 0) {
+            console.log("No input provided. Please enter some text to process.");
+            console.log("Type 'examples' to see input examples.");
+            console.log("");
+            return;
+        }
+        
         if (input.length < 3) {
             console.log("Input too short. Please enter at least 3 characters.");
             console.log("Type 'examples' to see input examples.");
+            console.log("");
+            return;
+        }
+        
+        if (input.length > 10000) {
+            console.log("Input too long. Please limit input to 10,000 characters.");
             console.log("");
             return;
         }
@@ -210,6 +273,14 @@ export class UserInterface {
                 }
                 if (item.attention) {
                     console.log(`     Attention - Priority: ${item.attention.priority.toFixed(2)}, Durability: ${item.attention.durability.toFixed(2)}`);
+                }
+                if (item.meta) {
+                    const metaStr = Object.entries(item.meta)
+                        .map(([key, value]) => `${key}: ${value}`)
+                        .join(', ');
+                    if (metaStr) {
+                        console.log(`     Meta: ${metaStr}`);
+                    }
                 }
             });
             

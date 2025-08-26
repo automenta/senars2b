@@ -64,11 +64,24 @@ npm run test:unit
 npm run test:integration
 ```
 
+### Viewing Usability Documentation
+
+```bash
+# View usability enhancements documentation
+npm run docs:usability
+```
+
 ### Running the System
 
 ```bash
-# Run the main system
+# Run the main system (CLI interface)
 npm start
+
+# Run the WebSocket server for web interface
+npm run start:ws
+
+# Run the combined HTTP + WebSocket server for web interface
+npm run start:web
 
 # Run basic component tests
 npx ts-node src/basicTest.ts
@@ -83,6 +96,136 @@ npx ts-node src/fullSystemTest.ts
 npx ts-node src/benchmark.ts
 ```
 
+### User Interfaces
+
+The system provides multiple interfaces for interaction:
+
+1. **Command-Line Interface (CLI)** - Interactive text-based interface
+2. **Web Interface** - Browser-based graphical interface with real-time feedback
+3. **WebSocket API** - Programmatic interface for custom applications
+4. **REST API** - HTTP-based interface for programmatic access
+
+### Web Interface
+
+The enhanced web interface provides a rich, interactive experience with:
+
+- Real-time connection status monitoring
+- Interactive demos for different domains
+- Custom input processing with keyboard shortcuts
+- System status monitoring with live statistics
+- Comprehensive help and examples
+
+To access the web interface:
+
+1. Start the combined server: `npm run start:web`
+2. Open your browser to: `http://localhost:3000`
+
+### User Guide
+
+For detailed instructions on using the system, see our [User Guide](USER_GUIDE.md).
+
+## WebSocket Interface
+
+The system includes a metaprogrammatic WebSocket interface that exposes the cognitive system's capabilities for flexible and adaptable web UI integration.
+
+### Starting the WebSocket Server
+
+```bash
+# Start only the WebSocket server
+npm run start:ws
+
+# Start combined HTTP + WebSocket server
+npm run start:web
+```
+
+### WebSocket API
+
+The WebSocket interface uses a request-response pattern with the following message structure:
+
+```json
+{
+  "id": "unique-message-id",
+  "type": "request",
+  "target": "component-name",
+  "method": "method-name",
+  "payload": { /* method-specific data */ }
+}
+```
+
+#### Available Components and Methods
+
+1. **core**
+   - `start` - Start the cognitive core
+   - `stop` - Stop the cognitive core
+   - `getSystemStatus` - Get system status information
+   - `addInitialBelief` - Add an initial belief to the system
+   - `addInitialGoal` - Add an initial goal to the system
+   - `addSchema` - Add a cognitive schema to the system
+
+2. **perception**
+   - `processInput` - Process natural language input into cognitive items
+
+3. **agenda**
+   - `size` - Get the current size of the agenda
+   - `peek` - Peek at the top item in the agenda
+
+4. **worldModel**
+   - `getStatistics` - Get world model statistics
+
+5. **actionSubsystem**
+   - `getStatistics` - Get action subsystem statistics
+
+### Example WebSocket Communication
+
+```javascript
+// Connect to the WebSocket server
+const ws = new WebSocket('ws://localhost:8080');
+
+// Process input through the perception subsystem
+ws.send(JSON.stringify({
+  id: 'msg-1',
+  type: 'request',
+  target: 'perception',
+  method: 'processInput',
+  payload: {
+    input: 'My cat seems sick after eating chocolate. What should I do?'
+  }
+}));
+
+// Handle responses
+ws.onmessage = function(event) {
+  const message = JSON.parse(event.data);
+  if (message.type === 'response') {
+    console.log('Received response:', message.payload);
+  }
+};
+```
+
+## REST API
+
+The system also provides a REST API for programmatic access:
+
+### Endpoints
+
+- `GET /health` - Health check endpoint
+- `GET /api/status` - Get server status information
+- `POST /api/process` - Process input (asynchronous)
+
+### Example REST API Usage
+
+```bash
+# Health check
+curl http://localhost:3000/health
+
+# Get server status
+curl http://localhost:3000/api/status
+
+# Process input
+curl -X POST http://localhost:3000/api/process \
+  -H "Content-Type: application/json" \
+  -d '{"input": "My cat seems sick after eating chocolate. What should I do?"}'
+```
+
 ## Key Features
 
 - **Hybrid Cognition**: Combines symbolic logic with semantic vectors
@@ -92,6 +235,8 @@ npx ts-node src/benchmark.ts
 - **Goal-Agentic Flow**: All cognition driven by goals
 - **Trust-Aware Inference**: Knowledge weighted by credibility
 - **Self-Reflective Operation**: System audits its own performance
+- **Multi-Interface Access**: CLI, Web, WebSocket, and REST APIs
+- **Enhanced Usability**: Improved error handling, status monitoring, and user feedback
 
 ## Implementation Status
 

@@ -144,18 +144,40 @@ export class WebSocketInterface {
       }
       
       // Validate message format
-      if (!message.id || !message.type) {
-        this.sendError(ws, 'INVALID_MESSAGE', 'Message must have id and type fields');
+      if (!message.id) {
+        this.sendError(ws, 'INVALID_MESSAGE', 'Message must have an id field');
+        return;
+      }
+      
+      if (!message.type) {
+        this.sendError(ws, 'INVALID_MESSAGE', 'Message must have a type field');
         return;
       }
 
-      if (message.type !== 'request') {
-        this.sendError(ws, 'INVALID_MESSAGE_TYPE', 'Only request messages are supported');
-        return;
-      }
+      if (message.type === 'request') {
+        if (!message.target) {
+          this.sendError(ws, 'MISSING_FIELDS', 'Request must have a target field');
+          return;
+        }
 
-      if (!message.target || !message.method) {
-        this.sendError(ws, 'MISSING_FIELDS', 'Request must have target and method fields');
+        if (!message.method) {
+          this.sendError(ws, 'MISSING_FIELDS', 'Request must have a method field');
+          return;
+        }
+        
+        // Validate target
+        if (!Object.keys(this.componentMethods).includes(message.target)) {
+          this.sendError(ws, 'INVALID_TARGET', `Unknown target: ${message.target}. Available targets: ${Object.keys(this.componentMethods).join(', ')}`);
+          return;
+        }
+        
+        // Validate method for the target
+        if (!this.componentMethods[message.target as keyof ComponentMethods].includes(message.method)) {
+          this.sendError(ws, 'INVALID_METHOD', `Unknown method: ${message.method} for target: ${message.target}. Available methods: ${this.componentMethods[message.target as keyof ComponentMethods].join(', ')}`);
+          return;
+        }
+      } else if (message.type !== 'response' && message.type !== 'event' && message.type !== 'error') {
+        this.sendError(ws, 'INVALID_MESSAGE_TYPE', `Invalid message type: ${message.type}. Supported types: request, response, event, error`);
         return;
       }
 
@@ -265,6 +287,19 @@ export class WebSocketInterface {
           throw new Error('Missing required field: input');
         }
         
+        // Validate input
+        if (typeof payload.input !== 'string') {
+          throw new Error('Input must be a string');
+        }
+        
+        if (payload.input.length < 3) {
+          throw new Error('Input too short. Please provide at least 3 characters.');
+        }
+        
+        if (payload.input.length > 10000) {
+          throw new Error('Input too long. Please limit input to 10,000 characters.');
+        }
+        
         try {
           const cognitiveItems = await this.perception.processInput(payload.input);
           
@@ -275,7 +310,11 @@ export class WebSocketInterface {
             console.log(`Processed item: ${item.type} - ${item.label || item.id}`);
           });
           
-          return { cognitiveItems };
+          return { 
+            cognitiveItems,
+            message: `Processed input and extracted ${cognitiveItems.length} cognitive item(s)`,
+            timestamp: new Date().toISOString()
+          };
         } catch (error) {
           console.error('Error in perception processing:', error);
           throw new Error(`Perception processing failed: ${error instanceof Error ? error.message : 'Unknown error'}`);

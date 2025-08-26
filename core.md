@@ -481,7 +481,97 @@ interface Executor {
 
 ---
 
-## **7. Metacognition & Self-Regulation**
+## **7. WebSocket Interface**
+
+**Role**: Provides a metaprogrammatic interface for external access to the cognitive system's components.
+
+**Architecture**: The WebSocket interface exposes the system's components through a request-response pattern with event broadcasting capabilities. This allows for flexible and adaptable integration with web-based user interfaces and other external systems.
+
+**Key Features**:
+
+- **Component-based Access**: Direct access to core components (core, perception, agenda, worldModel, actionSubsystem)
+- **Request-Response Pattern**: Standardized communication protocol for predictable interactions
+- **Event Broadcasting**: Real-time notifications of system events to all connected clients
+- **Metaprogrammatic Design**: Exposes the system's internal capabilities for dynamic usage patterns
+
+**Interface**:
+
+```ts
+interface WebSocketInterface {
+    // Core methods
+    start(): Promise<void>;
+    stop(): void;
+    getSystemStatus(): SystemStatus;
+    addInitialBelief(content: any, truth: TruthValue, attention: AttentionValue, meta?: Record<string, any>): void;
+    addInitialGoal(content: any, attention: AttentionValue, meta?: Record<string, any>): void;
+    addSchema(content: any, meta?: Record<string, any>): void;
+    
+    // Perception methods
+    processInput(input: string): Promise<CognitiveItem[]>;
+    
+    // Agenda methods
+    getAgendaSize(): number;
+    
+    // WorldModel methods
+    getWorldModelStatistics(): WorldModelStatistics;
+    
+    // ActionSubsystem methods
+    getActionSubsystemStatistics(): ActionSubsystemStatistics;
+}
+```
+
+**Message Structure**:
+
+All communication follows a consistent JSON message structure:
+
+```json
+{
+  "id": "unique-message-id",
+  "type": "request|response|event|error",
+  "target": "component-name",
+  "method": "method-name",
+  "payload": { /* method-specific data */ },
+  "error": { /* error information */ }
+}
+```
+
+**Usage Example**:
+
+```javascript
+// Connect to the WebSocket server
+const ws = new WebSocket('ws://localhost:8080');
+
+// Process input through the perception subsystem
+ws.send(JSON.stringify({
+  id: 'msg-1',
+  type: 'request',
+  target: 'perception',
+  method: 'processInput',
+  payload: {
+    input: 'My cat seems sick after eating chocolate. What should I do?'
+  }
+}));
+
+// Handle responses
+ws.onmessage = function(event) {
+  const message = JSON.parse(event.data);
+  if (message.type === 'response') {
+    console.log('Received response:', message.payload);
+  }
+};
+```
+
+**Benefits**:
+
+- **Real-time Interaction**: Enables immediate feedback and dynamic user interfaces
+- **Flexible Integration**: Can be used with any WebSocket-capable client
+- **Standardized Protocol**: Consistent interface makes it easy to build various client applications
+- **Scalable**: Supports multiple concurrent clients
+- **Extensible**: New components and methods can be easily added
+
+---
+
+## **8. Metacognition & Self-Regulation**
 
 The system audits itself via:
 
