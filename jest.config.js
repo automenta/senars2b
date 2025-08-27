@@ -13,7 +13,7 @@ module.exports = {
     '^@/(.*)$': '<rootDir>/src/$1'
   },
   transformIgnorePatterns: [
-    "/node_modules/(?!(@xenova/transformers|langchain|@langchain/community)/)"
+    "/node_modules/(?!(@xenova/transformers|langchain|@langchain/community))"
   ],
   testMatch: ['**/test/unit/**/*.test.ts'],
   moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json', 'node'],

@@ -1,4 +1,4 @@
-import { HierarchicalGoalTreeManager } from '../../dist/goalTreeManager';
+import { HierarchicalGoalTreeManager } from '../src/core/goalTreeManager';
 import { createGoalItem } from './testUtils';
 
 describe('HierarchicalGoalTreeManager', () => {

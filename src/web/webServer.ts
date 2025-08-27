@@ -12,6 +12,9 @@ const restApiInterface = new RestApiInterface(wsInterface, 3000);
 const app = restApiInterface.getApp();
 const port = process.env.PORT || 3000;
 
+// Serve node_modules for charting libraries
+app.use('/node_modules', express.static(path.join(__dirname, '../../node_modules')));
+
 // Serve static files from the src directory
 app.use(express.static(path.join(__dirname)));
 

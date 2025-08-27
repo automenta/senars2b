@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Senars3 - Next-Gen Agentic Reasoning System</title>
+    <script src="/node_modules/chart.js/dist/chart.umd.js"></script>
+    <script src="/node_modules/chartjs-adapter-date-fns/dist/chartjs-adapter-date-fns.bundle.js"></script>
     <style>
         :root {
             --primary: #6366f1;
@@ -921,6 +923,15 @@
                     <div>Version: <span id="system-version">3.0.0-nal</span></div>
                 </div>
             </div>
+            <div class="card" style="margin-top: 30px;">
+                <div class="card-header">
+                    <h3 class="card-title">📊 Global Consciousness</h3>
+                </div>
+                <p>Distribution of confidence across all beliefs in the World Model.</p>
+                <div class="chart-container" style="height: 300px; margin-top: 20px;">
+                    <canvas id="confidence-distribution-chart"></canvas>
+                </div>
+            </div>
         </div>
         
         <div class="tab-content" id="metaprogramming-tab">
@@ -1263,6 +1274,7 @@
     </div>
     
     <script src="components/Component.js" defer></script>
+    <script src="components/UncertaintyDonut.js" defer></script>
     <script src="components/StatusBar.js" defer></script>
     <script src="components/TabManager.js" defer></script>
     <script src="components/CognitiveItem.js" defer></script>

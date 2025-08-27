@@ -1,4 +1,4 @@
-import { PriorityAgenda } from '../../dist/agenda';
+import { PriorityAgenda } from '../src/core/agenda';
 import { createBeliefItem, createGoalItem } from './testUtils';
 
 describe('PriorityAgenda', () => {

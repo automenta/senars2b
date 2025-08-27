@@ -1,4 +1,4 @@
-import { SimpleBeliefRevisionEngine } from '../../dist/beliefRevisionEngine';
+import { SimpleBeliefRevisionEngine } from '../src/core/beliefRevisionEngine';
 import { createTruthValue } from './testUtils';
 
 describe('SimpleBeliefRevisionEngine', () => {

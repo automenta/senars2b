@@ -70,7 +70,8 @@ export class WebSocketInterface {
       worldModel: [
         'getStatistics',
         'getItemHistory',
-        'getInsightsForBelief'
+        'getInsightsForBelief',
+        'getConfidenceDistribution'
       ],
       actionSubsystem: [
         'getStatistics',
@@ -430,6 +431,10 @@ export class WebSocketInterface {
         }
         const insights = worldModel.query_by_meta('analysisOf', payload.beliefId);
         return { insights };
+
+      case 'getConfidenceDistribution':
+        const distribution = worldModel.getConfidenceDistribution();
+        return { distribution };
 
       default:
         throw new Error(`Unknown worldModel method: ${method}`);

@@ -19,9 +19,11 @@ class Senars3WebApp {
         this.cacheDOMElements();
         this.statusBar = new StatusBar(this.statusBarElement);
         this.tabManager = new TabManager(this.tabsElement, this);
+        this.confidenceDistributionChart = null;
     }
 
     cacheDOMElements() {
+        this.confidenceChartCanvas = document.getElementById('confidence-distribution-chart');
         this.notificationContainer = document.getElementById('notification-container');
         this.statusBarElement = document.querySelector('.status-bar');
         this.tabsElement = document.querySelector('.tabs');
@@ -210,6 +212,9 @@ class Senars3WebApp {
                 this.successfulGeneralizations.textContent = stats.learning.successfulGeneralizations || 0;
             }
         }
+        if (message.payload && message.payload.distribution) {
+            this.updateConfidenceDistributionChart(message.payload.distribution);
+        }
         if (message.payload) {
             this.addToCliOutput(`Response: ${JSON.stringify(message.payload, null, 2)}`);
             if (this.commandResult) {
@@ -274,6 +279,77 @@ class Senars3WebApp {
         this.sendWebSocketMessage('worldModel', 'getStatistics', {});
     }
 
+    requestConfidenceDistribution() {
+        this.sendWebSocketMessage('worldModel', 'getConfidenceDistribution', {});
+    }
+
+    updateConfidenceDistributionChart(distribution) {
+        if (!this.confidenceChartCanvas) return;
+
+        const data = {
+            labels: distribution.bins,
+            datasets: [{
+                label: 'Belief Count',
+                data: distribution.counts,
+                backgroundColor: 'rgba(16, 185, 129, 0.6)',
+                borderColor: 'rgba(16, 185, 129, 1)',
+                borderWidth: 1
+            }]
+        };
+
+        if (this.confidenceDistributionChart) {
+            this.confidenceDistributionChart.data = data;
+            this.confidenceDistributionChart.update();
+        } else {
+            const options = {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    title: {
+                        display: false // The card already has a title
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: 'Number of Beliefs',
+                            color: 'white'
+                        },
+                        ticks: {
+                            color: 'white'
+                        },
+                        grid: {
+                            color: 'rgba(255, 255, 255, 0.1)'
+                        }
+                    },
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'Confidence Bins',
+                            color: 'white'
+                        },
+                        ticks: {
+                            color: 'white'
+                        },
+                        grid: {
+                            color: 'rgba(255, 255, 255, 0.1)'
+                        }
+                    }
+                }
+            };
+            this.confidenceDistributionChart = new Chart(this.confidenceChartCanvas.getContext('2d'), {
+                type: 'bar',
+                data: data,
+                options: options
+            });
+        }
+    }
+
     startPeriodicUpdates() {
         setInterval(() => {
             const uptime = Math.floor((Date.now() - this.startTime) / 1000);
@@ -285,6 +361,7 @@ class Senars3WebApp {
         setInterval(() => {
             if (this.ws && this.ws.readyState === WebSocket.OPEN) {
                 this.requestSystemStatus();
+                this.requestConfidenceDistribution();
             }
         }, 5000);
     }

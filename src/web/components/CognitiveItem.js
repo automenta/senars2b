@@ -83,8 +83,13 @@ class CognitiveItem extends Component {
         metaEl.className = 'item-meta';
 
         if (this.item.truth) {
-            metaEl.appendChild(this.createVisualization('Frequency', this.item.truth.frequency));
-            metaEl.appendChild(this.createVisualization('Confidence', this.item.truth.confidence));
+            const donutContainer = document.createElement('div');
+            donutContainer.style.marginRight = '15px';
+            new UncertaintyDonut(donutContainer, {
+                frequency: this.item.truth.frequency,
+                confidence: this.item.truth.confidence
+            });
+            metaEl.appendChild(donutContainer);
         }
         if (this.item.attention) {
             metaEl.appendChild(this.createVisualization('Priority', this.item.attention.priority));
@@ -226,86 +231,83 @@ class CognitiveItem extends Component {
     renderHistoryChart(history) {
         this.historyContainer.innerHTML = ''; // Clear spinner
 
-        const width = 400;
-        const height = 200;
-        const padding = 40;
+        const canvas = document.createElement('canvas');
+        this.historyContainer.appendChild(canvas);
 
-        const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-        svg.setAttribute('width', '100%');
-        svg.setAttribute('viewBox', `0 0 ${width} ${height}`);
-        svg.style.backgroundColor = 'rgba(255, 255, 255, 0.05)';
-        svg.style.borderRadius = '8px';
+        const labels = history.map(h => new Date(h.stamp.timestamp));
+        const frequencyData = history.map(h => h.truth.frequency);
+        const confidenceData = history.map(h => h.truth.confidence);
 
-        // --- Data preparation ---
-        const timestamps = history.map(h => h.stamp.timestamp);
-        const minTime = Math.min(...timestamps);
-        const maxTime = Math.max(...timestamps);
-        const timeRange = maxTime - minTime || 1; // Avoid division by zero
-
-        const xScale = (t) => padding + ((t - minTime) / timeRange) * (width - padding * 2);
-        const yScale = (v) => (height - padding) - v * (height - padding * 2);
-
-        // --- Axes ---
-        const createLine = (x1, y1, x2, y2, color) => {
-            const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-            line.setAttribute('x1', x1);
-            line.setAttribute('y1', y1);
-            line.setAttribute('x2', x2);
-            line.setAttribute('y2', y2);
-            line.style.stroke = color;
-            line.style.strokeWidth = '1';
-            return line;
+        const data = {
+            labels: labels,
+            datasets: [
+                {
+                    label: 'Frequency',
+                    data: frequencyData,
+                    borderColor: 'var(--success)',
+                    backgroundColor: 'rgba(16, 185, 129, 0.2)',
+                    fill: true,
+                    tension: 0.4, // For smooth curves
+                },
+                {
+                    label: 'Confidence',
+                    data: confidenceData,
+                    borderColor: 'var(--primary)',
+                    backgroundColor: 'rgba(99, 102, 241, 0.2)',
+                    fill: true,
+                    tension: 0.4,
+                }
+            ]
         };
-        svg.appendChild(createLine(padding, padding, padding, height - padding, '#888')); // Y-axis
-        svg.appendChild(createLine(padding, height - padding, width - padding, height - padding, '#888')); // X-axis
 
-        // --- Axis Labels ---
-        const createText = (x, y, text, fill = '#ccc', fontSize = '10px', anchor = 'middle') => {
-            const txt = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-            txt.setAttribute('x', x);
-            txt.setAttribute('y', y);
-            txt.style.fill = fill;
-            txt.style.fontSize = fontSize;
-            txt.style.textAnchor = anchor;
-            txt.textContent = text;
-            return txt;
+        const options = {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'top',
+                    labels: {
+                        color: 'white'
+                    }
+                },
+                tooltip: {
+                    mode: 'index',
+                    intersect: false,
+                }
+            },
+            scales: {
+                x: {
+                    type: 'time',
+                    time: {
+                        unit: 'second',
+                        displayFormats: {
+                            second: 'h:mm:ss a'
+                        }
+                    },
+                    ticks: {
+                        color: 'white'
+                    },
+                    grid: {
+                        color: 'rgba(255, 255, 255, 0.1)'
+                    }
+                },
+                y: {
+                    min: 0,
+                    max: 1,
+                    ticks: {
+                        color: 'white'
+                    },
+                    grid: {
+                        color: 'rgba(255, 255, 255, 0.1)'
+                    }
+                }
+            }
         };
-        svg.appendChild(createText(width / 2, height - 5, 'Time', '#888'));
-        svg.appendChild(createText(10, height / 2, 'Value', '#888', '10px', 'start')).setAttribute('transform', `rotate(-90 15 ${height/2})`);
-        svg.appendChild(createText(padding, height - padding + 15, new Date(minTime).toLocaleTimeString(), '#888'));
-        svg.appendChild(createText(width - padding, height - padding + 15, new Date(maxTime).toLocaleTimeString(), '#888'));
-        svg.appendChild(createText(padding - 5, padding, '1.0', '#888', '10px', 'end'));
-        svg.appendChild(createText(padding - 5, height - padding, '0.0', '#888', '10px', 'end'));
 
-        // --- Polylines ---
-        const createPolyline = (data, yField, color) => {
-            const points = data.map(h => `${xScale(h.stamp.timestamp)},${yScale(h.truth[yField])}`).join(' ');
-            const polyline = document.createElementNS('http://www.w3.org/2000/svg', 'polyline');
-            polyline.setAttribute('points', points);
-            polyline.style.stroke = color;
-            polyline.style.strokeWidth = '2';
-            polyline.style.fill = 'none';
-            return polyline;
-        };
-        svg.appendChild(createPolyline(history, 'frequency', 'var(--success)'));
-        svg.appendChild(createPolyline(history, 'confidence', 'var(--primary)'));
-
-        // --- Legend ---
-        const createLegendItem = (x, y, color, text) => {
-            const group = document.createElementNS('http://www.w3.org/2000/svg', 'g');
-            const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
-            rect.setAttribute('x', x);
-            rect.setAttribute('y', y);
-            rect.setAttribute('width', 10);
-            rect.setAttribute('height', 10);
-            rect.style.fill = color;
-            group.appendChild(rect);
-            group.appendChild(createText(x + 15, y + 9, text, '#eee', '12px', 'start'));
-            return group;
-        };
-        svg.appendChild(createLegendItem(padding + 10, 10, 'var(--success)', 'Frequency'));
-        svg.appendChild(createLegendItem(padding + 110, 10, 'var(--primary)', 'Confidence'));
-
-        this.historyContainer.appendChild(svg);
+        new Chart(canvas.getContext('2d'), {
+            type: 'line',
+            data: data,
+            options: options
+        });
     }
 }

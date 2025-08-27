@@ -344,6 +344,30 @@ export class PersistentWorldModel implements WorldModel {
         return historyItems.sort((a, b) => b.stamp.timestamp - a.stamp.timestamp);
     }
 
+    getConfidenceDistribution(): { bins: string[], counts: number[] } {
+        const beliefs = Array.from(this.items.values()).filter(
+            item => item.type === 'BELIEF' && item.truth
+        );
+
+        const binCount = 10;
+        const bins = Array.from({ length: binCount }, (_, i) => {
+            const lower = (i / binCount).toFixed(1);
+            const upper = ((i + 1) / binCount).toFixed(1);
+            return `${lower}-${upper}`;
+        });
+        const counts = Array(binCount).fill(0);
+
+        for (const belief of beliefs) {
+            if (belief.truth) {
+                const confidence = belief.truth.confidence;
+                const binIndex = Math.min(Math.floor(confidence * binCount), binCount - 1);
+                counts[binIndex]++;
+            }
+        }
+
+        return { bins, counts };
+    }
+
     // Get statistics about the world model
     getStatistics(): {
         atomCount: number;

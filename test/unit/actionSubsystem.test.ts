@@ -1,4 +1,4 @@
-import { ActionSubsystem } from '../../dist/actionSubsystem';
+import { ActionSubsystem } from '../../src/actions/actionSubsystem';
 import { createGoalItem } from './testUtils';
 
 describe('ActionSubsystem', () => {

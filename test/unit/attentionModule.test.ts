@@ -1,4 +1,4 @@
-import { DynamicAttentionModule } from '../../dist/attentionModule';
+import { DynamicAttentionModule } from '../src/core/attentionModule';
 import { createBeliefItem, createMockSchema, createAttentionValue } from './testUtils';
 
 describe('DynamicAttentionModule', () => {
