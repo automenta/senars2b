@@ -1,7 +1,7 @@
 import {DynamicAttentionModule} from '@/core/attentionModule';
-import {AttentionValue, CognitiveItem, SemanticAtom, TruthValue} from '../interfaces/types';
-import {CognitiveSchema, WorldModel} from '../core/worldModel';
-import {createCognitiveItem, createSemanticAtom, createTruthValue, createAttentionValue, createMockSchema} from './testUtils';
+import {AttentionValue, CognitiveItem, SemanticAtom, TruthValue} from '@/interfaces/types';
+import {CognitiveSchema, WorldModel} from '@/core/worldModel';
+import {createCognitiveItem, createSemanticAtom, createTruthValue, createAttentionValue, createMockSchema, createBeliefItem} from './testUtils';
 
 describe('DynamicAttentionModule', () => {
     let attentionModule: DynamicAttentionModule;

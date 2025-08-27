@@ -1,6 +1,7 @@
-import {AttentionValue, CognitiveItem, SemanticAtom, TruthValue} from '../interfaces/types';
-import {CognitiveSchema, WorldModel} from '../core/worldModel';
-import {createCognitiveItem, createSemanticAtom, createTruthValue, createAttentionValue, createMockSchema} from './testUtils';
+import {AttentionValue, CognitiveItem, SemanticAtom, TruthValue} from '@/interfaces/types';
+import {CognitiveSchema, WorldModel} from '@/core/worldModel';
+import {DecentralizedCognitiveCore} from '@/core/cognitiveCore';
+import {createCognitiveItem, createSemanticAtom, createTruthValue, createAttentionValue, createMockSchema, createCognitiveMetadata} from './testUtils';
 
 describe('Educational Domain Tests', () => {
     let core: DecentralizedCognitiveCore;

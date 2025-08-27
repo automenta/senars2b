@@ -1,6 +1,7 @@
-import {AttentionValue, CognitiveItem, SemanticAtom, TruthValue} from '../interfaces/types';
-import {CognitiveSchema, WorldModel} from '../core/worldModel';
-import {createCognitiveItem, createSemanticAtom, createTruthValue, createAttentionValue, createMockSchema} from './testUtils';
+import {AttentionValue, CognitiveItem, SemanticAtom, TruthValue} from '@/interfaces/types';
+import {CognitiveSchema, WorldModel} from '@/core/worldModel';
+import {ActionSubsystem} from '@/actions/actionSubsystem';
+import {createCognitiveItem, createSemanticAtom, createTruthValue, createAttentionValue, createMockSchema, createGoalItem} from './testUtils';
 
 describe('ActionSubsystem', () => {
     let actionSubsystem: ActionSubsystem;

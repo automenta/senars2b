@@ -62,6 +62,7 @@ describe('HybridResonanceModule', () => {
                 id: uuidv4(),
                 atom_id: uuidv4(),
                 type: 'BELIEF',
+                label: 'Test Item',
                 truth: {frequency: 0.8, confidence: 0.9},
                 attention: {priority: 0.5, durability: 0.7},
                 stamp: {timestamp: Date.now(), parent_ids: [], schema_id: uuidv4()}

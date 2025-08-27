@@ -1,6 +1,11 @@
 import {v4 as uuidv4} from 'uuid';
-import {AttentionValue, CognitiveItem, SemanticAtom, TruthValue} from '../interfaces/types';
-import {CognitiveSchema, WorldModel} from '../core/worldModel';
+import {
+    AttentionValue,
+    CognitiveItem,
+    SemanticAtom,
+    TruthValue
+} from '@/interfaces/types';
+import {CognitiveSchema, WorldModel} from '@/core/worldModel';
 
 /**
  * Creates a basic CognitiveItem with default values

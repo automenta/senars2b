@@ -1,6 +1,7 @@
-import {AttentionValue, CognitiveItem, SemanticAtom, TruthValue} from '../interfaces/types';
-import {CognitiveSchema, WorldModel} from '../core/worldModel';
-import {createCognitiveItem, createSemanticAtom, createTruthValue, createAttentionValue, createMockSchema} from './testUtils';
+import {AttentionValue, CognitiveItem, SemanticAtom, TruthValue} from '@/interfaces/types';
+import {CognitiveSchema, WorldModel} from '@/core/worldModel';
+import {HierarchicalGoalTreeManager} from '@/core/goalTreeManager';
+import {createCognitiveItem, createSemanticAtom, createTruthValue, createAttentionValue, createMockSchema, createGoalItem} from './testUtils';
 
 describe('HierarchicalGoalTreeManager', () => {
     let goalTreeManager: HierarchicalGoalTreeManager;
