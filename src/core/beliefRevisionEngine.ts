@@ -37,11 +37,13 @@ export class SimpleBeliefRevisionEngine implements BeliefRevisionEngine {
         // There is a conflict, apply conflict resolution strategy
         // Strategy: Keep the belief with higher confidence, but lower the confidence of the result
         const higherConfidenceItem = existingItem.truth.confidence > newItem.truth.confidence ? existingItem : newItem;
+        // TypeScript assertion to ensure truth exists
+        const truth = higherConfidenceItem.truth!;
         return {
             ...higherConfidenceItem,
             truth: {
-                frequency: higherConfidenceItem.truth.frequency,
-                confidence: Math.max(0.1, higherConfidenceItem.truth.confidence * 0.8) // Lower confidence
+                frequency: truth.frequency,
+                confidence: Math.max(0.1, truth.confidence * 0.8) // Lower confidence
             }
         };
     }
