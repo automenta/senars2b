@@ -26,9 +26,6 @@ export class UnifiedInterface {
    * Start both interfaces
    */
   public start(): void {
-    // Start the WebSocket server
-    console.log(`WebSocket interface started on port ${this.wsPort}`);
-    
     // Start the REST API server
     this.restInterface.start();
     

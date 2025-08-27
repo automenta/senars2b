@@ -115,8 +115,6 @@ export class DynamicAttentionModule implements AttentionModule {
         const decayThreshold = 5 * 60 * 1000; // 5 minutes
         let decayedCount = 0;
         
-        console.log("Running attention decay cycle");
-        
         // Get all items from the world model (simplified approach)
         // In a real implementation, we would have a more efficient way to iterate
         try {
@@ -163,8 +161,6 @@ export class DynamicAttentionModule implements AttentionModule {
         } catch (error) {
             console.warn("Error during attention decay cycle:", error);
         }
-        
-        console.log(`Decayed attention for ${decayedCount} items`);
     }
     
     private recordAccess(itemId: UUID, timestamp: number): void {

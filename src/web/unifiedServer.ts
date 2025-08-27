@@ -1,13 +1,6 @@
 import { UnifiedInterface } from './unifiedInterface';
 
-async function main() {
-    // Create unified interface on ports 8080 (WebSocket) and 3000 (REST)
-    const unifiedInterface = new UnifiedInterface(8080, 3000, 4);
-    
-    // Start both interfaces
-    unifiedInterface.start();
-    
-    // Handle graceful shutdown
+const setupShutdownHandler = (unifiedInterface: UnifiedInterface) => {
     const shutdown = () => {
         console.log('\
 Received shutdown signal. Shutting down gracefully...');
@@ -17,6 +10,17 @@ Received shutdown signal. Shutting down gracefully...');
     
     process.on('SIGINT', shutdown);
     process.on('SIGTERM', shutdown);
+};
+
+async function main() {
+    // Create unified interface on ports 8080 (WebSocket) and 3000 (REST)
+    const unifiedInterface = new UnifiedInterface(8080, 3000, 4);
+    
+    // Start both interfaces
+    unifiedInterface.start();
+    
+    // Handle graceful shutdown
+    setupShutdownHandler(unifiedInterface);
     
     console.log('Senars3 Cognitive System Unified Server started');
 }

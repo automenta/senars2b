@@ -142,7 +142,7 @@ export class RestApiInterface {
         const { component } = req.params;
         // In a full implementation, we would call the appropriate component method
         // For now, we'll return mock data
-        const mockStats = {
+        const mockStats: Record<string, any> = {
           attention: {
             moduleName: 'AttentionModule',
             parameters: {
@@ -177,11 +177,8 @@ export class RestApiInterface {
           }
         };
         
-        if (mockStats[component as keyof typeof mockStats]) {
-          res.json({ statistics: mockStats[component as keyof typeof mockStats] });
-        } else {
-          res.status(404).json({ error: 'Component not found' });
-        }
+        const stats = mockStats[component];
+        stats ? res.json({ statistics: stats }) : res.status(404).json({ error: 'Component not found' });
       } catch (error) {
         res.status(500).json({ 
           error: 'Failed to get component statistics',
@@ -215,7 +212,7 @@ export class RestApiInterface {
         
         // In a full implementation, we would call the appropriate component method
         // For now, we'll return mock responses
-        const responses = {
+        const responses: Record<string, any> = {
           attention: { 
             success: true, 
             message: 'Attention parameters updated',
@@ -228,11 +225,8 @@ export class RestApiInterface {
           }
         };
         
-        if (responses[component as keyof typeof responses]) {
-          res.json(responses[component as keyof typeof responses]);
-        } else {
-          res.status(404).json({ error: 'Component not found or action not supported' });
-        }
+        const response = responses[component];
+        response ? res.json(response) : res.status(404).json({ error: 'Component not found or action not supported' });
       } catch (error) {
         res.status(500).json({ 
           error: 'Failed to control component',
@@ -314,11 +308,8 @@ export class RestApiInterface {
         };
         
         const componentMethods = mockResponses[component];
-        if (componentMethods && componentMethods[method]) {
-          res.json(componentMethods[method]);
-        } else {
-          res.status(404).json({ error: `Method ${method} not found for component ${component}` });
-        }
+        const response = componentMethods?.[method];
+        response ? res.json(response) : res.status(404).json({ error: `Method ${method} not found for component ${component}` });
       } catch (error) {
         res.status(500).json({ 
           error: 'Failed to execute component method',

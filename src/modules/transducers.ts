@@ -4,17 +4,13 @@ import { v4 as uuidv4 } from 'uuid';
 
 export class TextTransducer implements Transducer {
     async process(data: any): Promise<CognitiveItem[]> {
-        // Process text data into CognitiveItems
-        const items: CognitiveItem[] = [];
-        
         if (typeof data === 'string') {
             // Simple text processing - in a real implementation, this would use NLP
-            const sentences = data.split(/[.!?]+/).filter(s => s.trim().length > 0);
-            
-            for (const sentence of sentences) {
-                const trimmed = sentence.trim();
-                if (trimmed.length > 0) {
-                    // Create a belief for each sentence
+            return data
+                .split(/[.!?]+/)
+                .filter(s => s.trim().length > 0)
+                .map(sentence => {
+                    const trimmed = sentence.trim();
                     const truth: TruthValue = {
                         frequency: 1.0, // Assume user input is factual
                         confidence: 0.8 // But not completely certain
@@ -31,11 +27,11 @@ export class TextTransducer implements Transducer {
                         attention
                     );
                     item.label = trimmed;
-                    
-                    items.push(item);
-                }
-            }
-        } else if (typeof data === 'object' && data !== null) {
+                    return item;
+                });
+        } 
+        
+        if (typeof data === 'object' && data !== null) {
             // Process structured data
             const truth: TruthValue = {
                 frequency: 1.0,
@@ -54,62 +50,49 @@ export class TextTransducer implements Transducer {
             );
             item.label = JSON.stringify(data);
             
-            items.push(item);
+            return [item];
         }
         
-        return items;
+        return [];
     }
 }
 
 export class SensorStreamTransducer implements Transducer {
     async process(data: any): Promise<CognitiveItem[]> {
+        if (!Array.isArray(data)) return [];
+        
         // Process sensor/event stream data
-        const items: CognitiveItem[] = [];
-        
-        // Detect events in the data stream
-        if (Array.isArray(data)) {
-            for (const event of data) {
-                if (this.isSignificantEvent(event)) {
-                    const truth: TruthValue = {
-                        frequency: 1.0,
-                        confidence: 0.95
-                    };
-                    
-                    const attention: AttentionValue = {
-                        priority: 0.8, // High priority for events
-                        durability: 0.6
-                    };
-                    
-                    const item = CognitiveItemFactory.createBelief(
-                        'event-atom-' + uuidv4(),
-                        truth,
-                        attention
-                    );
-                    item.label = `Event: ${JSON.stringify(event)}`;
-                    
-                    items.push(item);
-                }
-            }
-        }
-        
-        return items;
+        return data
+            .filter(event => this.isSignificantEvent(event))
+            .map(event => {
+                const truth: TruthValue = {
+                    frequency: 1.0,
+                    confidence: 0.95
+                };
+                
+                const attention: AttentionValue = {
+                    priority: 0.8, // High priority for events
+                    durability: 0.6
+                };
+                
+                const item = CognitiveItemFactory.createBelief(
+                    'event-atom-' + uuidv4(),
+                    truth,
+                    attention
+                );
+                item.label = `Event: ${JSON.stringify(event)}`;
+                return item;
+            });
     }
     
     private isSignificantEvent(event: any): boolean {
         // Simple significance detection
         // In a real implementation, this would be more sophisticated
-        if (typeof event === 'object' && event !== null) {
-            // Check for threshold violations or anomalies
-            for (const key in event) {
-                if (typeof event[key] === 'number') {
-                    // Simple threshold check
-                    if (Math.abs(event[key]) > 100) {
-                        return true;
-                    }
-                }
-            }
-        }
+        if (typeof event !== 'object' || event === null) return false;
         
-        return false;
+        // Check for threshold violations or anomalies
+        return Object.values(event).some(value => 
+            typeof value === 'number' && Math.abs(value) > 100
+        );
     }
 }

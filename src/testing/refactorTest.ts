@@ -40,11 +40,11 @@ async function testCoreInitialization(): Promise<void> {
     console.log("\n1. Testing Core System Initialization...");
     
     // Test standard initialization
-    const core = new DecentralizedCognitiveCore(2, false);
+    const core = new DecentralizedCognitiveCore(2);
     console.log("Standard core initialized successfully");
     
-    // Test enhanced initialization
-    const enhancedCore = new DecentralizedCognitiveCore(2, true);
+    // Test enhanced initialization (now the same as standard)
+    const enhancedCore = new DecentralizedCognitiveCore(2);
     console.log("Enhanced core initialized successfully");
 }
 

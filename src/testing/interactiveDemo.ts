@@ -1,7 +1,6 @@
 import { DecentralizedCognitiveCore } from '../core/cognitiveCore';
 import { PerceptionSubsystem } from '../modules/perceptionSubsystem';
 import { TruthValue, AttentionValue } from '../interfaces/types';
-import { EnhancedAnalogyHypothesisSchema, EnhancedCausalInferenceSchema, GoalDecompositionSchema } from '../modules/advancedSchemas';
 
 async function runInteractiveDemo() {
     console.log("===========================================");
@@ -10,15 +9,13 @@ async function runInteractiveDemo() {
     console.log("This demo will walk you through a scenario where a pet owner is concerned about their cat's health.");
     console.log("");
 
-    // Create cognitive core with enhanced components
-    const core = new DecentralizedCognitiveCore(4, true); // Using enhanced components
+    // Create cognitive core
+    const core = new DecentralizedCognitiveCore(4);
     const perception = new PerceptionSubsystem();
 
     // Add schemas
     console.log("Adding cognitive schemas...");
-    core.addSchema(EnhancedAnalogyHypothesisSchema.content, EnhancedAnalogyHypothesisSchema.meta);
-    core.addSchema(EnhancedCausalInferenceSchema.content, EnhancedCausalInferenceSchema.meta);
-    core.addSchema(GoalDecompositionSchema.content, GoalDecompositionSchema.meta);
+    // No schemas added in this demo
 
     // Add initial knowledge base
     console.log("Populating knowledge base...");

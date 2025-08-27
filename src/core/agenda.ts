@@ -130,9 +130,8 @@ export class PriorityAgenda implements Agenda {
         const popRate = timeElapsed > 0 ? this.popCount / (timeElapsed / 1000) : 0; // pops per second
         
         // Calculate average wait time (simplified)
-        const averageWaitTime = this.items.length > 0 ? 
-            this.items.reduce((sum, item) => sum + (now - item.stamp.timestamp), 0) / this.items.length : 
-            0;
+        const totalWaitTime = this.items.reduce((sum, item) => sum + (now - item.stamp.timestamp), 0);
+        const averageWaitTime = this.items.length > 0 ? totalWaitTime / this.items.length : 0;
             
         return {
             size: this.items.length,

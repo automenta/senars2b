@@ -1,6 +1,5 @@
 import { DecentralizedCognitiveCore } from '../core/cognitiveCore';
 import { TruthValue, AttentionValue } from '../interfaces/types';
-import { EnhancedAnalogyHypothesisSchema, EnhancedCausalInferenceSchema, GoalDecompositionSchema } from '../modules/advancedSchemas';
 
 async function runBenchmark() {
     console.log("Starting benchmark test...");
@@ -10,9 +9,6 @@ async function runBenchmark() {
     
     // Add enhanced schemas
     console.log("Adding schemas...");
-    core.addSchema(EnhancedAnalogyHypothesisSchema.content, EnhancedAnalogyHypothesisSchema.meta);
-    core.addSchema(EnhancedCausalInferenceSchema.content, EnhancedCausalInferenceSchema.meta);
-    core.addSchema(GoalDecompositionSchema.content, GoalDecompositionSchema.meta);
     
     // Add a large number of initial beliefs and goals for benchmarking
     console.log("Adding initial beliefs and goals...");

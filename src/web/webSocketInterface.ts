@@ -168,8 +168,7 @@ export class WebSocketInterface {
         availableComponents: Object.keys(this.componentMethods),
         componentMethods: this.componentMethods,
         systemInfo: {
-          workerCount: (this.core as any).workerCount,
-          enhancedComponents: (this.core as any).useEnhancedComponents
+          workerCount: (this.core as any).workerCount
         },
         serverStats: this.getServerStats()
       }
@@ -415,84 +414,76 @@ export class WebSocketInterface {
   }
 
   private async handleActionSubsystemRequest(method: string, payload?: any): Promise<any> {
+    const core = this.core as any;
+    const actionSubsystem = core.actionSubsystem;
+    
     switch (method) {
       case 'getStatistics':
-        // Access the action subsystem through the core
-        const core = this.core as any;
-        if (core.actionSubsystem && typeof core.actionSubsystem.getStatistics === 'function') {
-          return { statistics: core.actionSubsystem.getStatistics() };
+        if (actionSubsystem?.getStatistics) {
+          return { statistics: actionSubsystem.getStatistics() };
         }
-        // Fallback to placeholder
         return { statistics: {} };
+        
       case 'executeGoal':
         if (!payload?.goal) {
           throw new Error('Missing required field: goal');
         }
-        // Access the action subsystem through the core
-        const core2 = this.core as any;
-        if (core2.actionSubsystem && typeof core2.actionSubsystem.executeGoal === 'function') {
-          const result = await core2.actionSubsystem.executeGoal(payload.goal);
+        if (actionSubsystem?.executeGoal) {
+          const result = await actionSubsystem.executeGoal(payload.goal);
           return { success: true, result };
         }
-        // Fallback
         return { success: true, result: null, message: 'Action executed (simulated)' };
+        
       default:
         throw new Error(`Unknown actionSubsystem method: ${method}`);
     }
   }
   
   private async handleAttentionRequest(method: string, payload?: any): Promise<any> {
-    switch (method) {
-      case 'getStatistics':
-        // Return attention module statistics
-        return { 
-          statistics: {
-            moduleName: 'AttentionModule',
-            parameters: {
-              priorityWeight: 0.7,
-              durabilityWeight: 0.3
-            }
+    const responses = {
+      getStatistics: { 
+        statistics: {
+          moduleName: 'AttentionModule',
+          parameters: {
+            priorityWeight: 0.7,
+            durabilityWeight: 0.3
           }
-        };
-      case 'setParameters':
-        // Set attention module parameters
-        return { 
-          success: true, 
-          message: 'Attention parameters updated',
-          parameters: payload
-        };
-      case 'calculate_derived':
-        // Calculate derived attention values
-        return { 
-          success: true, 
-          message: 'Derived attention calculated',
-          result: {
-            priority: 0.5,
-            durability: 0.4
-          }
-        };
-      case 'update_on_access':
-        // Update attention based on access
-        return { 
-          success: true, 
-          message: 'Attention updated on access',
-          items: payload?.items || []
-        };
-      case 'run_decay_cycle':
-        // Run attention decay cycle
-        return { 
-          success: true, 
-          message: 'Attention decay cycle completed'
-        };
-      default:
-        throw new Error(`Unknown attention method: ${method}`);
+        }
+      },
+      setParameters: { 
+        success: true, 
+        message: 'Attention parameters updated',
+        parameters: payload
+      },
+      calculate_derived: { 
+        success: true, 
+        message: 'Derived attention calculated',
+        result: {
+          priority: 0.5,
+          durability: 0.4
+        }
+      },
+      update_on_access: { 
+        success: true, 
+        message: 'Attention updated on access',
+        items: payload?.items || []
+      },
+      run_decay_cycle: { 
+        success: true, 
+        message: 'Attention decay cycle completed'
+      }
+    };
+    
+    if (method in responses) {
+      return responses[method as keyof typeof responses];
     }
+    
+    throw new Error(`Unknown attention method: ${method}`);
   }
   
   private async handleResonanceRequest(method: string, payload?: any): Promise<any> {
     switch (method) {
       case 'getStatistics':
-        // Return resonance engine statistics
         return { 
           statistics: {
             moduleName: 'ResonanceEngine',
@@ -501,7 +492,6 @@ export class WebSocketInterface {
           }
         };
       case 'find_context':
-        // Find context items
         if (!payload?.item) {
           throw new Error('Missing required field: item');
         }
@@ -518,7 +508,6 @@ export class WebSocketInterface {
   private async handleSchemaRequest(method: string, payload?: any): Promise<any> {
     switch (method) {
       case 'getStatistics':
-        // Return schema matcher statistics
         return { 
           statistics: {
             moduleName: 'SchemaMatcher',
@@ -527,21 +516,18 @@ export class WebSocketInterface {
           }
         };
       case 'addSchema':
-        // Add a new schema
         return { 
           success: true, 
           message: 'Schema added successfully',
           schema: payload
         };
       case 'removeSchema':
-        // Remove a schema
         return { 
           success: true, 
           message: 'Schema removed successfully',
           schemaId: payload?.id
         };
       case 'find_applicable':
-        // Find applicable schemas
         if (!payload?.itemA || !payload?.itemB) {
           throw new Error('Missing required fields: itemA, itemB');
         }
@@ -551,7 +537,6 @@ export class WebSocketInterface {
           schemas: []
         };
       case 'apply':
-        // Apply a schema
         if (!payload?.schema || !payload?.itemA || !payload?.itemB) {
           throw new Error('Missing required fields: schema, itemA, itemB');
         }
@@ -561,8 +546,6 @@ export class WebSocketInterface {
           result: []
         };
       case 'triggerLearning':
-        // Trigger schema learning
-        // In a full implementation, this would call the schema learning module
         return { 
           success: true, 
           message: 'Schema learning process initiated'
@@ -575,7 +558,6 @@ export class WebSocketInterface {
   private async handleBeliefRequest(method: string, payload?: any): Promise<any> {
     switch (method) {
       case 'getStatistics':
-        // Return belief revision engine statistics
         return { 
           statistics: {
             moduleName: 'BeliefRevisionEngine',
@@ -584,14 +566,12 @@ export class WebSocketInterface {
           }
         };
       case 'addBelief':
-        // Add a new belief
         return { 
           success: true, 
           message: 'Belief added successfully',
           belief: payload
         };
       case 'reviseBelief':
-        // Revise an existing belief
         return { 
           success: true, 
           message: 'Belief revised successfully',
@@ -606,7 +586,6 @@ export class WebSocketInterface {
   private async handleGoalRequest(method: string, payload?: any): Promise<any> {
     switch (method) {
       case 'getStatistics':
-        // Return goal tree manager statistics
         return { 
           statistics: {
             moduleName: 'GoalTreeManager',
@@ -615,14 +594,12 @@ export class WebSocketInterface {
           }
         };
       case 'addGoal':
-        // Add a new goal
         return { 
           success: true, 
           message: 'Goal added successfully',
           goal: payload
         };
       case 'updateGoal':
-        // Update an existing goal
         return { 
           success: true, 
           message: 'Goal updated successfully',
@@ -630,7 +607,6 @@ export class WebSocketInterface {
           newAttentionValue: payload?.newAttentionValue
         };
       case 'decompose':
-        // Decompose a complex goal
         if (!payload?.goal) {
           throw new Error('Missing required field: goal');
         }
@@ -640,7 +616,6 @@ export class WebSocketInterface {
           subgoals: []
         };
       case 'mark_achieved':
-        // Mark a goal as achieved
         if (!payload?.goalId) {
           throw new Error('Missing required field: goalId');
         }
@@ -657,7 +632,6 @@ export class WebSocketInterface {
   private async handleReflectionRequest(method: string, payload?: any): Promise<any> {
     switch (method) {
       case 'getStatistics':
-        // Return reflection loop statistics
         return { 
           statistics: {
             moduleName: 'ReflectionLoop',
@@ -666,21 +640,18 @@ export class WebSocketInterface {
           }
         };
       case 'setEnabled':
-        // Enable or disable reflection
         return { 
           success: true, 
           message: `Reflection ${payload?.enabled ? 'enabled' : 'disabled'}`,
           enabled: payload?.enabled
         };
       case 'setParameters':
-        // Set reflection parameters
         return { 
           success: true, 
           message: 'Reflection parameters updated',
           parameters: payload
         };
       case 'recordSchemaUsage':
-        // Record schema usage for reflection
         if (!payload?.schemaId) {
           throw new Error('Missing required field: schemaId');
         }

@@ -18,11 +18,11 @@ export class PerceptionSubsystem {
     }
 
     async processInput(data: any): Promise<CognitiveItem[]> {
-        const allItems: CognitiveItem[] = [];
         const inputType = this.determineInputType(data);
         const startTime = Date.now();
         
         // Try each transducer
+        const allItems = [];
         for (const transducer of this.transducers) {
             try {
                 const items = await transducer.process(data);
@@ -39,10 +39,8 @@ export class PerceptionSubsystem {
             itemCount: allItems.length
         });
         
-        // Keep only recent history
-        if (this.processingHistory.length > 100) {
-            this.processingHistory = this.processingHistory.slice(-100);
-        }
+        // Keep only recent history (limit to 100 records)
+        this.processingHistory = this.processingHistory.slice(-100);
         
         return allItems;
     }
@@ -102,9 +100,9 @@ export class PerceptionSubsystem {
         
         // Calculate recent processing rate (last 10 records)
         const recentRecords = this.processingHistory.slice(-10);
-        const timeSpan = Date.now() - recentRecords[0]?.timestamp || 1;
+        const timeSpan = Date.now() - (recentRecords[0]?.timestamp || Date.now());
         const recentItems = recentRecords.reduce((sum, record) => sum + record.itemCount, 0);
-        const processingRate = recentItems / (timeSpan / 1000); // items per second
+        const processingRate = timeSpan > 0 ? recentItems / (timeSpan / 1000) : 0; // items per second
         
         return {
             totalProcessed: this.processingHistory.length,
@@ -136,11 +134,18 @@ export class PerceptionSubsystem {
     
     private classifyCommand(command: string): string {
         const cmd = command.toLowerCase();
-        if (cmd.includes('search') || cmd.includes('find') || cmd.includes('look')) return 'search';
-        if (cmd.includes('diagnose') || cmd.includes('analyze') || cmd.includes('check')) return 'diagnostic';
-        if (cmd.includes('create') || cmd.includes('make') || cmd.includes('generate')) return 'creation';
-        if (cmd.includes('delete') || cmd.includes('remove') || cmd.includes('cancel')) return 'deletion';
-        if (cmd.includes('update') || cmd.includes('change') || cmd.includes('modify')) return 'modification';
+        const commandTypes: [string[], string][] = [
+            [['search', 'find', 'look'], 'search'],
+            [['diagnose', 'analyze', 'check'], 'diagnostic'],
+            [['create', 'make', 'generate'], 'creation'],
+            [['delete', 'remove', 'cancel'], 'deletion'],
+            [['update', 'change', 'modify'], 'modification']
+        ];
+        
+        for (const [keywords, type] of commandTypes) {
+            if (keywords.some(keyword => cmd.includes(keyword))) return type;
+        }
+        
         return 'general';
     }
 }

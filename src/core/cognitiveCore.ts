@@ -1,9 +1,7 @@
 import { PriorityAgenda } from './agenda';
 import { PersistentWorldModel } from './worldModel';
-import { EnhancedWorldModel } from './enhancedWorldModel';
 import { SimpleBeliefRevisionEngine } from './beliefRevisionEngine';
 import { DynamicAttentionModule } from './attentionModule';
-import { EnhancedAttentionModule } from './enhancedAttentionModule';
 import { HybridResonanceModule } from './resonanceModule';
 import { EfficientSchemaMatcher } from './schemaMatcher';
 import { HierarchicalGoalTreeManager } from './goalTreeManager';
@@ -46,19 +44,15 @@ export class DecentralizedCognitiveCore {
     private isRunning: boolean = false;
     private reflectionInterval: NodeJS.Timeout | null = null;
     private workerStatistics: Map<number, { itemsProcessed: number; errors: number }> = new Map();
-    private useEnhancedComponents: boolean;
 
     /**
      * Create a new cognitive core
      * @param workerCount Number of worker threads to use for processing
-     * @param useEnhancedComponents Whether to use enhanced versions of components
      */
-    constructor(workerCount: number = 4, useEnhancedComponents: boolean = false) {
-        this.useEnhancedComponents = useEnhancedComponents;
-        
+    constructor(workerCount: number = 4) {
         this.agenda = new PriorityAgenda();
         
-        // Initialize components based on enhancement flag
+        // Initialize components
         this.initializeComponents();
         
         this.workerCount = workerCount;
@@ -71,14 +65,9 @@ export class DecentralizedCognitiveCore {
      * Initialize all cognitive components
      */
     private initializeComponents(): void {
-        // Optionally use enhanced components
-        if (this.useEnhancedComponents) {
-            this.worldModel = new EnhancedWorldModel();
-            this.attentionModule = new EnhancedAttentionModule();
-        } else {
-            this.worldModel = new PersistentWorldModel();
-            this.attentionModule = new DynamicAttentionModule();
-        }
+        // Use standard components only
+        this.worldModel = new PersistentWorldModel();
+        this.attentionModule = new DynamicAttentionModule();
         
         this.beliefRevisionEngine = new SimpleBeliefRevisionEngine();
         this.resonanceModule = new HybridResonanceModule();
@@ -140,8 +129,7 @@ export class DecentralizedCognitiveCore {
                 await this.processItem(itemA, workerId);
                 
                 // Run attention decay cycle periodically
-                itemCounter++;
-                if (itemCounter % decayCycleInterval === 0) {
+                if (++itemCounter % decayCycleInterval === 0) {
                     this.attentionModule.run_decay_cycle(this.worldModel, this.agenda);
                 }
             } catch (error) {
@@ -321,15 +309,9 @@ export class DecentralizedCognitiveCore {
      * @returns True if the goal is an action goal, false otherwise
      */
     private isActionGoal(goal: CognitiveItem): boolean {
-        // Determine if a goal is an action goal based on its content
-        const label = goal.label || '';
-        return label.toLowerCase().includes('search') || 
-               label.toLowerCase().includes('find') || 
-               label.toLowerCase().includes('lookup') ||
-               label.toLowerCase().includes('diagnose') ||
-               label.toLowerCase().includes('diagnostic') ||
-               label.toLowerCase().includes('execute') ||
-               label.toLowerCase().includes('run');
+        const actionKeywords = ['search', 'find', 'lookup', 'diagnose', 'diagnostic', 'execute', 'run'];
+        const label = (goal.label || '').toLowerCase();
+        return actionKeywords.some(keyword => label.includes(keyword));
     }
 
     /**
@@ -338,14 +320,8 @@ export class DecentralizedCognitiveCore {
      * @returns True if the goal is achieved, false otherwise
      */
     private isGoalAchieved(goal: CognitiveItem): boolean {
-        // Check if a goal is achieved (simplified implementation)
-        // In a real implementation, this would check if the goal's conditions are met
-        // For now, we'll use a simple heuristic based on goal content
-        const label = goal.label || '';
-        if (label.includes('?')) {
-            // Query goals are achieved when they get answers
-            return false;
-        }
+        // Query goals are achieved when they get answers
+        if ((goal.label || '').includes('?')) return false;
         
         // For other goals, use a probability-based approach
         return Math.random() > 0.8; // 20% chance of being achieved

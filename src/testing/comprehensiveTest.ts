@@ -1,6 +1,5 @@
 import { DecentralizedCognitiveCore } from '../core/cognitiveCore';
 import { TruthValue, AttentionValue } from '../interfaces/types';
-import { EnhancedAnalogyHypothesisSchema, EnhancedCausalInferenceSchema, GoalDecompositionSchema } from '../modules/advancedSchemas';
 import { PerceptionSubsystem } from '../modules/perceptionSubsystem';
 import { CognitiveItemFactory } from '../modules/cognitiveItemFactory';
 
@@ -11,11 +10,9 @@ async function runComprehensiveTest() {
     const core = new DecentralizedCognitiveCore(2);
     const perception = new PerceptionSubsystem();
     
-    // Add enhanced schemas
+    // Add schemas
     console.log("Adding schemas...");
-    core.addSchema(EnhancedAnalogyHypothesisSchema.content, EnhancedAnalogyHypothesisSchema.meta);
-    core.addSchema(EnhancedCausalInferenceSchema.content, EnhancedCausalInferenceSchema.meta);
-    core.addSchema(GoalDecompositionSchema.content, GoalDecompositionSchema.meta);
+    // No schemas added in this test
     
     // Add some initial beliefs with different trust scores
     console.log("Adding initial beliefs...");

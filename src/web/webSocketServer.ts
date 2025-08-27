@@ -1,10 +1,6 @@
 import { WebSocketInterface } from './webSocketInterface';
 
-async function main() {
-    // Create WebSocket interface on port 8080
-    const wsInterface = new WebSocketInterface(8080, 4);
-    
-    // Handle graceful shutdown
+const setupShutdownHandler = (wsInterface: WebSocketInterface) => {
     const shutdown = () => {
         console.log('\nReceived shutdown signal. Shutting down gracefully...');
         wsInterface.close();
@@ -13,6 +9,14 @@ async function main() {
     
     process.on('SIGINT', shutdown);
     process.on('SIGTERM', shutdown);
+};
+
+async function main() {
+    // Create WebSocket interface on port 8080
+    const wsInterface = new WebSocketInterface(8080, 4);
+    
+    // Handle graceful shutdown
+    setupShutdownHandler(wsInterface);
     
     console.log('Senars3 Cognitive System WebSocket Server started');
     console.log('Listening on ws://localhost:8080');
