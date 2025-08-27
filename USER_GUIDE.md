@@ -2,6 +2,8 @@
 
 This guide provides comprehensive instructions for using the Senars3 cognitive system through its unified interface that works across both CLI and Web environments.
 
+> **Note**: This guide focuses on practical usage. For technical details about the Non-Axiomatic Logic principles, please refer to [core.md](core.md). For system features and setup instructions, see [README.md](README.md).
+
 ## System Overview
 
 The Senars3 cognitive system is a next-generation agentic reasoning system that uses non-axiomatic logic principles to fuse symbolic reasoning with Language Model technology. It processes natural language input through:
@@ -14,7 +16,7 @@ The Senars3 cognitive system is a next-generation agentic reasoning system that 
 
 ## Available Interfaces
 
-The system now provides a **unified interface** that works seamlessly across both CLI and Web environments:
+The system provides a **unified interface** that works seamlessly across both CLI and Web environments:
 
 1. **Unified Command-Line Interface (CLI)** - Interactive text-based interface that connects to the WebSocket backend
 2. **Unified Web Interface** - Browser-based graphical interface with real-time feedback and metaprogramming capabilities
