@@ -157,20 +157,20 @@ export class HierarchicalGoalTreeManager implements GoalTreeManager {
                     return sibling && sibling.goal_status === "achieved";
                 });
                 
-                if (allAchieved) {
-                    this.mark_achieved(parentId);
-                } else {
-                    // If any sibling failed, mark parent as failed
-                    const anyFailed = siblings.some(siblingId => {
-                        const sibling = this.goals.get(siblingId);
-                        return sibling && sibling.goal_status === "failed";
-                    });
-                    
-                    if (anyFailed) {
-                        this.mark_failed(parentId);
-                    }
-                }
+                allAchieved ? this.mark_achieved(parentId) : this.handleFailedParent(siblings, parentId);
             }
+        }
+    }
+    
+    private handleFailedParent(siblings: UUID[], parentId: UUID): void {
+        // If any sibling failed, mark parent as failed
+        const anyFailed = siblings.some(siblingId => {
+            const sibling = this.goals.get(siblingId);
+            return sibling && sibling.goal_status === "failed";
+        });
+        
+        if (anyFailed) {
+            this.mark_failed(parentId);
         }
     }
     
@@ -207,10 +207,9 @@ export class HierarchicalGoalTreeManager implements GoalTreeManager {
         // Determine how many subgoals to create based on content complexity
         const wordCount = content.split(/\s+/).length;
         
-        if (wordCount < 5) return 1;
-        if (wordCount < 15) return 2;
-        if (wordCount < 30) return 3;
-        return 4; // Maximum of 4 subgoals
+        return wordCount < 5 ? 1 : 
+               wordCount < 15 ? 2 : 
+               wordCount < 30 ? 3 : 4; // Maximum of 4 subgoals
     }
     
     private generateSubgoalLabel(parentContent: string, index: number, total: number): string {

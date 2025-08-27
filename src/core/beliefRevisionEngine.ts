@@ -28,31 +28,21 @@ export class SimpleBeliefRevisionEngine implements BeliefRevisionEngine {
         // Check if there's actually a conflict
         if (!this.detect_conflict(existingItem.truth, newItem.truth)) {
             // No conflict, merge normally
-            const mergedTruth = this.merge(existingItem.truth, newItem.truth);
             return {
                 ...existingItem,
-                truth: mergedTruth
+                truth: this.merge(existingItem.truth, newItem.truth)
             };
         }
         
         // There is a conflict, apply conflict resolution strategy
         // Strategy: Keep the belief with higher confidence, but lower the confidence of the result
-        if (existingItem.truth.confidence > newItem.truth.confidence) {
-            return {
-                ...existingItem,
-                truth: {
-                    frequency: existingItem.truth.frequency,
-                    confidence: Math.max(0.1, existingItem.truth.confidence * 0.8) // Lower confidence
-                }
-            };
-        } else {
-            return {
-                ...newItem,
-                truth: {
-                    frequency: newItem.truth.frequency,
-                    confidence: Math.max(0.1, newItem.truth.confidence * 0.8) // Lower confidence
-                }
-            };
-        }
+        const higherConfidenceItem = existingItem.truth.confidence > newItem.truth.confidence ? existingItem : newItem;
+        return {
+            ...higherConfidenceItem,
+            truth: {
+                frequency: higherConfidenceItem.truth.frequency,
+                confidence: Math.max(0.1, higherConfidenceItem.truth.confidence * 0.8) // Lower confidence
+            }
+        };
     }
 }

@@ -74,7 +74,7 @@ export class EfficientSchemaMatcher implements SchemaMatcher {
         
         // Add nodes for common pattern components
         const typeNode = new ReteNode('type', (item: CognitiveItem) => 
-            item.type === 'BELIEF' || item.type === 'GOAL' || item.type === 'QUERY');
+            ['BELIEF', 'GOAL', 'QUERY'].includes(item.type));
         root.addChild(typeNode);
         
         const contentNode = new ReteNode('content', (item: CognitiveItem, atom: any) => 
@@ -84,8 +84,7 @@ export class EfficientSchemaMatcher implements SchemaMatcher {
         // Add schema-specific nodes
         for (const [schemaId, schemaAtom] of this.schemaAtoms.entries()) {
             if (schemaAtom.content && typeof schemaAtom.content === 'object' && 'name' in schemaAtom.content) {
-                const name = schemaAtom.content.name;
-                const schemaNode = new ReteNode(`schema-${name}`, () => true);
+                const schemaNode = new ReteNode(`schema-${schemaAtom.content.name}`, () => true);
                 schemaNode.addSchema(schemaId);
                 root.addChild(schemaNode);
             }

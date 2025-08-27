@@ -6,51 +6,32 @@ export class DynamicAttentionModule implements AttentionModule {
     
     calculate_initial(item: CognitiveItem): AttentionValue {
         // Calculate initial attention based on item properties
-        let priority = 0.5;
-        let durability = 0.5;
+        const baseValues = { 
+            'GOAL': { priority: 0.8, durability: 0.7 },
+            'BELIEF': { priority: 0.6, durability: 0.8 },
+            'QUERY': { priority: 0.7, durability: 0.6 }
+        }[item.type] || { priority: 0.5, durability: 0.5 };
         
-        // Adjust based on item type
-        switch (item.type) {
-            case 'GOAL':
-                priority = 0.8;
-                durability = 0.7;
-                break;
-            case 'BELIEF':
-                priority = 0.6;
-                durability = 0.8;
-                break;
-            case 'QUERY':
-                priority = 0.7;
-                durability = 0.6;
-                break;
-        }
+        let { priority, durability } = baseValues;
         
         // Adjust based on truth values for beliefs
         if (item.type === 'BELIEF' && item.truth) {
-            priority *= (0.5 + item.truth.confidence * 0.5);
-            durability *= (0.5 + item.truth.confidence * 0.5);
+            const confidenceFactor = 0.5 + item.truth.confidence * 0.5;
+            priority *= confidenceFactor;
+            durability *= confidenceFactor;
         }
         
         // Adjust based on goal status for goals
         if (item.type === 'GOAL' && item.goal_status) {
-            switch (item.goal_status) {
-                case 'active':
-                    priority *= 1.0;
-                    durability *= 1.0;
-                    break;
-                case 'achieved':
-                    priority *= 0.3; // Lower priority for achieved goals
-                    durability *= 0.8;
-                    break;
-                case 'failed':
-                    priority *= 0.2; // Even lower priority for failed goals
-                    durability *= 0.5;
-                    break;
-                case 'blocked':
-                    priority *= 0.5; // Medium priority for blocked goals
-                    durability *= 0.7;
-                    break;
-            }
+            const statusFactors = {
+                'active': { priority: 1.0, durability: 1.0 },
+                'achieved': { priority: 0.3, durability: 0.8 },
+                'failed': { priority: 0.2, durability: 0.5 },
+                'blocked': { priority: 0.5, durability: 0.7 }
+            }[item.goal_status] || { priority: 1.0, durability: 1.0 };
+            
+            priority *= statusFactors.priority;
+            durability *= statusFactors.durability;
         }
         
         return {
@@ -113,7 +94,6 @@ export class DynamicAttentionModule implements AttentionModule {
         // Decay attention values over time based on inactivity
         const now = Date.now();
         const decayThreshold = 5 * 60 * 1000; // 5 minutes
-        let decayedCount = 0;
         
         // Get all items from the world model (simplified approach)
         // In a real implementation, we would have a more efficient way to iterate
@@ -147,8 +127,6 @@ export class DynamicAttentionModule implements AttentionModule {
                             // Ensure values don't go below minimum thresholds
                             item.attention.priority = Math.max(0.01, item.attention.priority);
                             item.attention.durability = Math.max(0.01, item.attention.durability);
-                            
-                            decayedCount++;
                             
                             // Update item in agenda/world model if needed
                             if ((agenda as any).updateAttention) {
