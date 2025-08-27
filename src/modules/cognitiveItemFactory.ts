@@ -1,5 +1,5 @@
+import {AttentionValue, CognitiveItem, DerivationStamp, SemanticAtom, TruthValue} from '../interfaces/types';
 import {v4 as uuidv4} from 'uuid';
-import {AttentionValue, CognitiveItem, DerivationStamp, TruthValue, UUID} from '../interfaces/types';
 
 /**
  * CognitiveItemFactory - Factory for creating cognitive items with consistent structure
@@ -21,9 +21,14 @@ export class CognitiveItemFactory {
             id: uuidv4(),
             atom_id: atomId,
             type: 'BELIEF',
+            label: 'New Belief', // Default label
             truth,
             attention,
-            stamp: this.createStamp(parentId ? [parentId] : [])
+            stamp: {
+                timestamp: Date.now(),
+                parent_ids: [],
+                schema_id: 'cognitive-item-factory'
+            }
         };
     }
 
@@ -60,8 +65,13 @@ export class CognitiveItemFactory {
             id: uuidv4(),
             atom_id: atomId,
             type: 'GOAL',
+            label: 'New Goal', // Default label
             attention,
-            stamp: this.createStamp(parentId ? [parentId] : []),
+            stamp: {
+                timestamp: Date.now(),
+                parent_ids: parentId ? [parentId] : [],
+                schema_id: 'cognitive-item-factory'
+            },
             goal_status: 'active'
         };
     }
@@ -78,6 +88,7 @@ export class CognitiveItemFactory {
             id: uuidv4(),
             atom_id: atomId,
             type: 'QUERY',
+            label: 'New Query', // Default label
             attention,
             stamp: this.createStamp(parentId ? [parentId] : [])
         };
@@ -97,16 +108,18 @@ export class CognitiveItemFactory {
     static createDerivedItem(
         atomId: string,
         type: 'BELIEF' | 'GOAL' | 'QUERY',
-        parentIds: UUID[],
-        schemaId: UUID,
+        parentIds: string[],
+        schemaId: string,
         attention: AttentionValue,
         truth?: TruthValue,
-        goalParentId?: UUID
+        goalParentId?: string,
+        label: string = 'Derived Item' // Default label
     ): CognitiveItem {
         const item: CognitiveItem = {
             id: uuidv4(),
             atom_id: atomId,
             type,
+            label,
             attention,
             stamp: this.createStamp(parentIds, schemaId)
         };

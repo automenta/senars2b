@@ -1,12 +1,22 @@
-import {CognitiveItem, CognitiveSchema, SemanticAtom, UUID, WorldModel} from '../interfaces/types';
+import {
+    CognitiveItem,
+    SemanticAtom
+} from '../interfaces/types';
+import {CognitiveSchema, WorldModel} from './worldModel';
+import {BeliefRevisionEngine} from './beliefRevisionEngine';
 
 // Simple in-memory implementation of WorldModel for testing
 export class InMemoryWorldModel implements WorldModel {
-    private atoms: Map<UUID, SemanticAtom> = new Map();
-    private items: Map<UUID, CognitiveItem> = new Map();
-    private schemas: Map<UUID, CognitiveSchema> = new Map();
+    private atoms: Map<string, SemanticAtom> = new Map();
+    private items: Map<string, CognitiveItem> = new Map();
+    private schemas: Map<string, CognitiveSchema> = new Map();
+    private semanticIndex: Map<string, number[]> = new Map(); // atom_id -> embedding
+    private symbolicIndex: Map<string, string> = new Map(); // atom_id -> content string
+    private temporalIndex: Map<number, string[]> = new Map(); // timestamp -> item_ids
+    private attentionIndex: Map<string, number> = new Map(); // item_id -> durability
+    private metaIndex: Map<string, Map<any, Set<string>>> = new Map(); // metaKey -> metaValue -> itemIds
 
-    add_atom(atom: SemanticAtom): UUID {
+    add_atom(atom: SemanticAtom): string {
         this.atoms.set(atom.id, atom);
         return atom.id;
     }
@@ -15,11 +25,11 @@ export class InMemoryWorldModel implements WorldModel {
         this.items.set(item.id, item);
     }
 
-    get_atom(id: UUID): SemanticAtom | null {
+    get_atom(id: string): SemanticAtom | null {
         return this.atoms.get(id) || null;
     }
 
-    get_item(id: UUID): CognitiveItem | null {
+    get_item(id: string): CognitiveItem | null {
         return this.items.get(id) || null;
     }
 
@@ -95,7 +105,7 @@ export class InMemoryWorldModel implements WorldModel {
         };
     }
 
-    getItemHistory(itemId: UUID): CognitiveItem[] {
+    getItemHistory(itemId: string): CognitiveItem[] {
         // Simplified implementation: filter items based on a meta field
         return Array.from(this.items.values()).filter(item =>
             item.meta && item.meta.historicalRecordFor === itemId

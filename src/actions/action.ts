@@ -1,4 +1,5 @@
-import {CognitiveItem, Executor} from '../interfaces/types';
+import {CognitiveItem, SemanticAtom, TruthValue} from '../interfaces/types';
+import {Executor} from './actionSubsystem';
 import {CognitiveItemFactory} from '../modules/cognitiveItemFactory';
 
 export class WebSearchExecutor implements Executor {

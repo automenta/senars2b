@@ -20,6 +20,8 @@ describe('PersistentWorldModel', () => {
             id: HistoryRecordingSchema.atom_id,
             content: {name: 'HistoryRecordingSchema', apply: HistoryRecordingSchema.apply},
             embedding: [],
+            creationTime: Date.now(), // Added
+            lastAccessTime: Date.now(), // Added
             meta: {
                 type: "CognitiveSchema",
                 source: "system",

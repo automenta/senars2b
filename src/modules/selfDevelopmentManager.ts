@@ -324,10 +324,10 @@ export class SelfDevelopmentManager {
     ): CognitiveItem {
         return {
             id: id,
-            atom_id: id,
+            atom_id: id, // Assign atom_id
             type,
             label,
-            attention,
+            attention: attention, // Assign attention
             stamp: {
                 timestamp: Date.now(),
                 parent_ids: [],

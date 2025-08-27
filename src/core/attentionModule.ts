@@ -1,16 +1,29 @@
 import {
-    Agenda,
-    AttentionModule,
-    AttentionValue,
-    CognitiveItem,
+    Agenda
+} from './agenda';
+import {
     CognitiveSchema,
-    UUID,
     WorldModel
+} from './worldModel';
+import {
+    AttentionValue,
+    CognitiveItem
 } from '../interfaces/types';
 
+export interface AttentionModule {
+    calculate_initial(item: CognitiveItem): AttentionValue;
+    calculate_derived(
+        parents: CognitiveItem[],
+        schema: CognitiveSchema,
+        source_trust?: number
+    ): AttentionValue;
+    update_on_access(items: CognitiveItem[]): void;
+    run_decay_cycle(world_model: WorldModel, agenda: Agenda): void;
+}
+
 export class DynamicAttentionModule implements AttentionModule {
-    private accessHistory: Map<UUID, { timestamp: number; count: number }[]> = new Map();
-    private decayFactors: Map<UUID, number> = new Map(); // item_id -> decay_factor
+    private accessHistory: Map<string, { timestamp: number; count: number }[]> = new Map();
+    private decayFactors: Map<string, number> = new Map(); // item_id -> decay_factor
 
     calculate_initial(item: CognitiveItem): AttentionValue {
         // Calculate initial attention based on item properties
@@ -150,7 +163,7 @@ export class DynamicAttentionModule implements AttentionModule {
         }
     }
 
-    private recordAccess(itemId: UUID, timestamp: number): void {
+    private recordAccess(itemId: string, timestamp: number): void {
         // Record an access event for an item
         if (!this.accessHistory.has(itemId)) {
             this.accessHistory.set(itemId, []);
@@ -165,7 +178,7 @@ export class DynamicAttentionModule implements AttentionModule {
         }
     }
 
-    private getRecentAccessCount(itemId: UUID, now: number): number {
+    private getRecentAccessCount(itemId: string, now: number): number {
         // Count accesses in the last 10 minutes
         const tenMinutesAgo = now - (10 * 60 * 1000);
 
@@ -173,7 +186,7 @@ export class DynamicAttentionModule implements AttentionModule {
         return history.filter(record => record.timestamp > tenMinutesAgo).length;
     }
 
-    private calculateInhibitionFactor(schemaId: UUID): number {
+    private calculateInhibitionFactor(schemaId: string): number {
         // Calculate inhibition factor to prevent runaway reasoning
         // Based on how frequently this schema has been used recently
         const recentUsage = this.getRecentSchemaUsage(schemaId);
@@ -181,7 +194,7 @@ export class DynamicAttentionModule implements AttentionModule {
         return Math.exp(-recentUsage / 10); // 10 usages = ~37% inhibition
     }
 
-    private getRecentSchemaUsage(schemaId: UUID): number {
+    private getRecentSchemaUsage(schemaId: string): number {
         // Count how many times a schema has been used recently
         // In a real implementation, we'd track schema usage separately
         // For now, we'll use a placeholder that returns a small random value

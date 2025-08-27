@@ -1,4 +1,9 @@
-import {CognitiveItem, ResonanceModule, UUID, WorldModel} from '../interfaces/types';
+import {CognitiveItem} from '../interfaces/types';
+import {WorldModel} from './worldModel';
+
+export interface ResonanceModule {
+    find_context(item: CognitiveItem, world_model: WorldModel, k: number): CognitiveItem[];
+}
 
 export class HybridResonanceModule implements ResonanceModule {
     find_context(item: CognitiveItem, world_model: WorldModel, k: number): CognitiveItem[] {
@@ -152,8 +157,8 @@ export class HybridResonanceModule implements ResonanceModule {
         return 0.1; // Base relevance
     }
 
-    private getGoalAncestors(item: CognitiveItem): UUID[] {
-        const ancestors: UUID[] = [];
+    private getGoalAncestors(item: CognitiveItem): string[] {
+        const ancestors: string[] = [];
         let currentId = item.goal_parent_id;
 
         // Limit traversal to prevent infinite loops

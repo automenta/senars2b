@@ -1,29 +1,22 @@
 import {PriorityAgenda} from './agenda';
-import {PersistentWorldModel} from './worldModel';
-import {SimpleBeliefRevisionEngine} from './beliefRevisionEngine';
-import {DynamicAttentionModule} from './attentionModule';
-import {HybridResonanceModule} from './resonanceModule';
-import {EfficientSchemaMatcher} from './schemaMatcher';
-import {HierarchicalGoalTreeManager} from './goalTreeManager';
+import {PersistentWorldModel, CognitiveSchema, WorldModel} from './worldModel';
+import {SimpleBeliefRevisionEngine, BeliefRevisionEngine} from './beliefRevisionEngine';
+import {DynamicAttentionModule, AttentionModule} from './attentionModule';
+import {HybridResonanceModule, ResonanceModule} from './resonanceModule';
+import {EfficientSchemaMatcher, SchemaMatcher} from './schemaMatcher';
+import {HierarchicalGoalTreeManager, GoalTreeManager} from './goalTreeManager';
 import {CognitiveItemFactory} from '../modules/cognitiveItemFactory';
 import {ReflectionLoop} from './reflectionLoop';
 import {ActionSubsystem} from '../actions/actionSubsystem';
 import {SchemaLearningModule} from '../modules/schemaLearningModule';
 import {HistoryAnalysisSchema, HistoryRecordingSchema} from '../modules/systemSchemas';
 import {
-    Agenda,
-    AttentionModule,
     AttentionValue,
-    BeliefRevisionEngine,
     CognitiveItem,
-    CognitiveSchema,
-    GoalTreeManager,
-    ResonanceModule,
-    SchemaMatcher,
     SemanticAtom,
-    TruthValue,
-    WorldModel
+    TruthValue
 } from '../interfaces/types';
+import {Agenda} from './agenda';
 import {v4 as uuidv4} from 'uuid';
 import {embeddingService} from '../services/embeddingService';
 
@@ -109,6 +102,8 @@ export class DecentralizedCognitiveCore {
             id: uuidv4(),
             content: content,
             embedding: await this.generateEmbedding(content),
+            creationTime: Date.now(), // Added
+            lastAccessTime: Date.now(), // Added
             meta: {
                 type: "Fact",
                 source: "user_input",
@@ -134,6 +129,8 @@ export class DecentralizedCognitiveCore {
             id: uuidv4(),
             content: content,
             embedding: await this.generateEmbedding(content),
+            creationTime: Date.now(), // Added
+            lastAccessTime: Date.now(), // Added
             meta: {
                 type: "Fact",
                 source: "user_input",
@@ -158,6 +155,8 @@ export class DecentralizedCognitiveCore {
             id: uuidv4(),
             content: content,
             embedding: await this.generateEmbedding(content),
+            creationTime: Date.now(), // Added
+            lastAccessTime: Date.now(), // Added
             meta: {
                 type: "CognitiveSchema",
                 source: "system",
@@ -254,6 +253,8 @@ export class DecentralizedCognitiveCore {
             id: HistoryRecordingSchema.atom_id,
             content: {name: 'HistoryRecordingSchema', apply: HistoryRecordingSchema.apply},
             embedding: [], // System schema, no embedding needed
+            creationTime: Date.now(), // Added
+            lastAccessTime: Date.now(), // Added
             meta: {
                 type: "CognitiveSchema",
                 source: "system",
@@ -269,6 +270,8 @@ export class DecentralizedCognitiveCore {
             id: HistoryAnalysisSchema.atom_id,
             content: {name: 'HistoryAnalysisSchema', apply: HistoryAnalysisSchema.apply},
             embedding: [],
+            creationTime: Date.now(), // Added
+            lastAccessTime: Date.now(), // Added
             meta: {
                 type: "CognitiveSchema",
                 source: "system",
@@ -563,7 +566,7 @@ export class DecentralizedCognitiveCore {
         console.log("Worker Statistics:");
         for (const [workerId, stats] of this.workerStatistics.entries()) {
             console.log(`  Worker ${workerId}: ${stats.itemsProcessed} items processed, ${stats.errors} errors`);
-        }
+        };
     }
 
     /**

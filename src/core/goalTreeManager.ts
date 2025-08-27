@@ -1,11 +1,22 @@
-import {AttentionValue, CognitiveItem, GoalTreeManager, UUID} from '../interfaces/types';
+import {AttentionValue, CognitiveItem} from '../interfaces/types';
 import {CognitiveItemFactory} from '../modules/cognitiveItemFactory';
 
+export interface GoalTreeManager {
+    decompose(goal: CognitiveItem): CognitiveItem[];
+    mark_achieved(goal_id: string): void;
+    mark_failed(goal_id: string): void;
+    get_ancestors(goal_id: string): string[];
+    addDependency(goalId: string, dependencyId: string): void;
+    getDependencies(goalId: string): string[];
+    registerGoal(goal: CognitiveItem): void;
+    getGoal(goalId: string): CognitiveItem | null;
+}
+
 export class HierarchicalGoalTreeManager implements GoalTreeManager {
-    private goalHierarchy: Map<UUID, UUID[]> = new Map(); // goal_id -> [child_ids]
-    private goalParents: Map<UUID, UUID> = new Map(); // child_id -> parent_id
-    private goals: Map<UUID, CognitiveItem> = new Map();
-    private goalDependencies: Map<UUID, UUID[]> = new Map(); // goal_id -> [dependency_ids]
+    private goalHierarchy: Map<string, string[]> = new Map(); // goal_id -> [child_ids]
+    private goalParents: Map<string, string> = new Map(); // child_id -> parent_id
+    private goals: Map<string, CognitiveItem> = new Map();
+    private goalDependencies: Map<string, string[]> = new Map(); // goal_id -> [dependency_ids]
 
     decompose(goal: CognitiveItem): CognitiveItem[] {
         // Decompose a goal into subgoals based on content analysis
@@ -41,7 +52,7 @@ export class HierarchicalGoalTreeManager implements GoalTreeManager {
         return subgoals;
     }
 
-    mark_achieved(goal_id: UUID): void {
+    mark_achieved(goal_id: string): void {
         // Mark a goal as achieved
         const goal = this.goals.get(goal_id);
         if (goal) {
@@ -56,7 +67,7 @@ export class HierarchicalGoalTreeManager implements GoalTreeManager {
         }
     }
 
-    mark_failed(goal_id: UUID): void {
+    mark_failed(goal_id: string): void {
         // Mark a goal as failed
         const goal = this.goals.get(goal_id);
         if (goal) {
@@ -74,9 +85,9 @@ export class HierarchicalGoalTreeManager implements GoalTreeManager {
         }
     }
 
-    get_ancestors(goal_id: UUID): UUID[] {
+    get_ancestors(goal_id: string): string[] {
         // Return the ancestors of a goal
-        const ancestors: UUID[] = [];
+        const ancestors: string[] = [];
         let currentId = this.goalParents.get(goal_id);
 
         // Limit traversal to prevent infinite loops
@@ -93,7 +104,7 @@ export class HierarchicalGoalTreeManager implements GoalTreeManager {
     }
 
     // Add dependency relationship between goals
-    addDependency(goalId: UUID, dependencyId: UUID): void {
+    addDependency(goalId: string, dependencyId: string): void {
         if (!this.goalDependencies.has(goalId)) {
             this.goalDependencies.set(goalId, []);
         }
@@ -105,7 +116,7 @@ export class HierarchicalGoalTreeManager implements GoalTreeManager {
     }
 
     // Get dependencies for a goal
-    getDependencies(goalId: UUID): UUID[] {
+    getDependencies(goalId: string): string[] {
         return this.goalDependencies.get(goalId) || [];
     }
 
@@ -115,11 +126,11 @@ export class HierarchicalGoalTreeManager implements GoalTreeManager {
     }
 
     // Get goal by ID
-    getGoal(goalId: UUID): CognitiveItem | null {
+    getGoal(goalId: string): CognitiveItem | null {
         return this.goals.get(goalId) || null;
     }
 
-    private addGoalToHierarchy(parentId: UUID, childId: UUID): void {
+    private addGoalToHierarchy(parentId: string, childId: string): void {
         // Add a child goal to a parent in the hierarchy
         if (!this.goalHierarchy.has(parentId)) {
             this.goalHierarchy.set(parentId, []);
@@ -133,7 +144,7 @@ export class HierarchicalGoalTreeManager implements GoalTreeManager {
         this.goalParents.set(childId, parentId);
     }
 
-    private checkParentAchievement(childId: UUID): void {
+    private checkParentAchievement(childId: string): void {
         // Check if all subgoals of a parent are achieved
         const parentId = this.goalParents.get(childId);
         if (!parentId) return;
@@ -162,7 +173,7 @@ export class HierarchicalGoalTreeManager implements GoalTreeManager {
         }
     }
 
-    private handleFailedParent(siblings: UUID[], parentId: UUID): void {
+    private handleFailedParent(siblings: string[], parentId: string): void {
         // If any sibling failed, mark parent as failed
         const anyFailed = siblings.some(siblingId => {
             const sibling = this.goals.get(siblingId);
@@ -174,7 +185,7 @@ export class HierarchicalGoalTreeManager implements GoalTreeManager {
         }
     }
 
-    private updateDependentGoals(goalId: UUID, status: "achieved" | "failed"): void {
+    private updateDependentGoals(goalId: string, status: "achieved" | "failed"): void {
         // Update goals that depend on this goal
         // In a real implementation, we would have a reverse dependency map
         // For now, we'll iterate through all dependencies

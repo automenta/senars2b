@@ -1,4 +1,14 @@
-import {Agenda, AttentionValue, CognitiveItem, UUID} from '../interfaces/types';
+import {AttentionValue, CognitiveItem} from '../interfaces/types';
+
+export interface Agenda {
+    push(item: CognitiveItem): void;
+    pop(): Promise<CognitiveItem>;
+    peek(): CognitiveItem | null;
+    size(): number;
+    updateAttention(id: string, newVal: AttentionValue): void;
+    remove(id: string): boolean;
+    get(id: string): CognitiveItem | null;
+}
 
 /**
  * PriorityAgenda - A priority-based agenda implementation for cognitive items
@@ -6,7 +16,7 @@ import {Agenda, AttentionValue, CognitiveItem, UUID} from '../interfaces/types';
  */
 export class PriorityAgenda implements Agenda {
     private items: CognitiveItem[] = [];
-    private itemMap: Map<UUID, CognitiveItem> = new Map(); // For O(1) lookups
+    private itemMap: Map<string, CognitiveItem> = new Map(); // For O(1) lookups
     private waitingQueue: (() => void)[] = [];
     private lastPopTime: number = 0;
     private popCount: number = 0;
@@ -83,7 +93,7 @@ export class PriorityAgenda implements Agenda {
      * @param id The ID of the item to update
      * @param newVal The new attention value
      */
-    updateAttention(id: UUID, newVal: AttentionValue): void {
+    updateAttention(id: string, newVal: AttentionValue): void {
         const index = this.items.findIndex(item => item.id === id);
         if (index !== -1) {
             this.items[index].attention = newVal;
@@ -96,7 +106,7 @@ export class PriorityAgenda implements Agenda {
      * @param id The ID of the item to remove
      * @returns True if the item was removed, false otherwise
      */
-    remove(id: UUID): boolean {
+    remove(id: string): boolean {
         const initialLength = this.items.length;
         this.items = this.items.filter(item => item.id !== id);
         const removed = this.items.length !== initialLength;
@@ -111,7 +121,7 @@ export class PriorityAgenda implements Agenda {
      * @param id The ID of the item to retrieve
      * @returns The cognitive item or null if not found
      */
-    get(id: UUID): CognitiveItem | null {
+    get(id: string): CognitiveItem | null {
         return this.itemMap.get(id) || null;
     }
 

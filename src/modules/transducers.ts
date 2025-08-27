@@ -1,6 +1,10 @@
-import {AttentionValue, CognitiveItem, Transducer, TruthValue} from '../interfaces/types';
+import {AttentionValue, CognitiveItem, TruthValue} from '../interfaces/types';
 import {CognitiveItemFactory} from './cognitiveItemFactory';
 import {v4 as uuidv4} from 'uuid';
+
+export interface Transducer {
+    process(data: any): CognitiveItem[] | Promise<CognitiveItem[]>;
+}
 
 export class TextTransducer implements Transducer {
     async process(data: any): Promise<CognitiveItem[]> {

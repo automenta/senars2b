@@ -1,33 +1,56 @@
 import {
-    BeliefRevisionEngine,
     CognitiveItem,
-    CognitiveSchema,
-    SemanticAtom,
-    UUID,
-    WorldModel
+    SemanticAtom
 } from '../interfaces/types';
 import {v4 as uuidv4} from 'uuid';
-import {SimpleBeliefRevisionEngine} from './beliefRevisionEngine';
+import {BeliefRevisionEngine, SimpleBeliefRevisionEngine} from './beliefRevisionEngine';
 import {CognitiveItemFactory} from '../modules/cognitiveItemFactory';
 
+export type CognitiveSchema = {
+    atom_id: string;
+    apply: (a: CognitiveItem, b: CognitiveItem, worldModel: WorldModel) => CognitiveItem[];
+};
+
+export interface WorldModel {
+    add_atom(atom: SemanticAtom): string;
+    add_item(item: CognitiveItem): void;
+    get_atom(id: string): SemanticAtom | null;
+    get_item(id: string): CognitiveItem | null;
+    query_by_semantic(embedding: number[], k: number): CognitiveItem[];
+    query_by_symbolic(pattern: any, k?: number): CognitiveItem[];
+    query_by_structure(pattern: any, k?: number): CognitiveItem[];
+    query_by_meta(key: string, value: any): CognitiveItem[];
+    query_atoms_by_meta(key: string, value: any): SemanticAtom[];
+    revise_belief(new_item: CognitiveItem): [CognitiveItem | null, CognitiveItem | null];
+    register_schema_atom(atom: SemanticAtom): CognitiveSchema;
+    getStatistics(): {
+        atomCount: number;
+        itemCount: number;
+        schemaCount: number;
+        averageItemDurability: number;
+    };
+    getItemHistory(itemId: string): CognitiveItem[];
+    getConfidenceDistribution(): { bins: string[], counts: number[] };
+}
+
 export class PersistentWorldModel implements WorldModel {
-    private atoms: Map<UUID, SemanticAtom> = new Map();
-    private items: Map<UUID, CognitiveItem> = new Map();
-    private schemas: Map<UUID, CognitiveSchema> = new Map();
+    private atoms: Map<string, SemanticAtom> = new Map();
+    private items: Map<string, CognitiveItem> = new Map();
+    private schemas: Map<string, CognitiveSchema> = new Map();
     private beliefRevisionEngine: BeliefRevisionEngine;
 
     // Multi-index structures
     private semanticIndex: Map<string, number[]> = new Map(); // atom_id -> embedding
     private symbolicIndex: Map<string, string> = new Map(); // atom_id -> content string
-    private temporalIndex: Map<number, UUID[]> = new Map(); // timestamp -> item_ids
+    private temporalIndex: Map<number, string[]> = new Map(); // timestamp -> item_ids
     private attentionIndex: Map<string, number> = new Map(); // item_id -> durability
-    private metaIndex: Map<string, Map<any, Set<UUID>>> = new Map(); // metaKey -> metaValue -> itemIds
+    private metaIndex: Map<string, Map<any, Set<string>>> = new Map(); // metaKey -> metaValue -> itemIds
 
     constructor() {
         this.beliefRevisionEngine = new SimpleBeliefRevisionEngine();
     }
 
-    add_atom(atom: SemanticAtom): UUID {
+    add_atom(atom: SemanticAtom): string {
         this.atoms.set(atom.id, atom);
 
         // Update indexes
@@ -68,11 +91,11 @@ export class PersistentWorldModel implements WorldModel {
         }
     }
 
-    get_atom(id: UUID): SemanticAtom | null {
+    get_atom(id: string): SemanticAtom | null {
         return this.atoms.get(id) || null;
     }
 
-    get_item(id: UUID): CognitiveItem | null {
+    get_item(id: string): CognitiveItem | null {
         return this.items.get(id) || null;
     }
 
@@ -345,7 +368,7 @@ export class PersistentWorldModel implements WorldModel {
         return results;
     }
 
-    getItemHistory(itemId: UUID): CognitiveItem[] {
+    getItemHistory(itemId: string): CognitiveItem[] {
         const historyItems = this.query_by_meta('historicalRecordFor', itemId);
         // Sort by timestamp descending to get the most recent history first
         return historyItems.sort((a, b) => b.stamp.timestamp - a.stamp.timestamp);

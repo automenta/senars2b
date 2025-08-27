@@ -1,5 +1,6 @@
 import {SchemaLearningModule} from '@/modules/schemaLearningModule';
-import {CognitiveItem, SemanticAtom, WorldModel} from '@/interfaces/types';
+import {CognitiveItem, SemanticAtom} from '@/interfaces/types';
+import {WorldModel} from '@/core/worldModel';
 
 // Mock WorldModel for testing
 class MockWorldModel implements WorldModel {
@@ -76,6 +77,7 @@ describe('SchemaLearningModule', () => {
                     id: 'item-1',
                     atom_id: 'atom-1',
                     type: 'BELIEF',
+                    label: 'Test Belief 1',
                     attention: {priority: 0.5, durability: 0.5},
                     stamp: {timestamp: Date.now(), parent_ids: [], schema_id: 'schema-1'}
                 },
@@ -83,6 +85,7 @@ describe('SchemaLearningModule', () => {
                     id: 'item-2',
                     atom_id: 'atom-2',
                     type: 'BELIEF',
+                    label: 'Test Belief 2',
                     attention: {priority: 0.5, durability: 0.5},
                     stamp: {timestamp: Date.now(), parent_ids: [], schema_id: 'schema-1'}
                 }
@@ -144,6 +147,7 @@ describe('SchemaLearningModule', () => {
                     id: 'item-1',
                     atom_id: 'atom-1',
                     type: 'BELIEF',
+                    label: 'Test Belief 1',
                     attention: {priority: 0.5, durability: 0.5},
                     stamp: {timestamp: Date.now(), parent_ids: [], schema_id: 'schema-1'}
                 }
@@ -170,6 +174,7 @@ describe('SchemaLearningModule', () => {
                     id: 'item-1',
                     atom_id: 'atom-1',
                     type: 'BELIEF',
+                    label: 'Test Belief 1',
                     attention: {priority: 0.5, durability: 0.5},
                     stamp: {timestamp: Date.now(), parent_ids: [], schema_id: 'schema-1'}
                 }

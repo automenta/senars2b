@@ -1,6 +1,11 @@
-import {CognitiveItem, Executor} from '../interfaces/types';
+import {CognitiveItem} from '../interfaces/types';
 import {DiagnosticExecutor, KnowledgeBaseQueryExecutor, PlanningExecutor, WebSearchExecutor} from './action';
 import {CognitiveItemFactory} from '../modules/cognitiveItemFactory';
+
+export interface Executor {
+    can_execute(goal: CognitiveItem): boolean;
+    execute(goal: CognitiveItem): Promise<CognitiveItem>;
+}
 
 export class ActionSubsystem {
     private executors: Executor[] = [];

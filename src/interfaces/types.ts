@@ -1,154 +1,39 @@
-export type UUID = string;
+export interface SemanticAtom {
+    id: string;                // Unique identifier
+    content: any;              // Natural language content or object (changed from string)
+    embedding: number[];       // Semantic vector representation
+    creationTime: number;      // Timestamp of creation (added)
+    lastAccessTime: number;    // Timestamp of last access (added)
+    meta: Record<string, any>; // Metadata (added)
+}
 
-export type SemanticAtom = {
-    id: UUID;
-    content: any;
-    embedding: number[];
-    meta: {
-        type: "Fact" | "CognitiveSchema" | "Observation" | "Rule" | "ActionVerb";
-        source: string;
-        timestamp: string;
-        author?: string;
-        trust_score: number;
-        domain?: string;
-        license?: string;
-        [key: string]: any;
-    };
-};
+export interface TruthValue {
+    frequency: number;         // Evidence frequency (0.0 to 1.0)
+    confidence: number;        // Evidence amount (0.0 to 1.0)
+}
 
-export type TruthValue = {
-    frequency: number;
-    confidence: number;
-};
+export interface AttentionValue {
+    priority: number;          // Current importance (0.0 to 1.0)
+    durability: number;        // Persistence of importance (0.0 to 1.0)
+}
 
-export type AttentionValue = {
-    priority: number;
-    durability: number;
-};
-
-export type DerivationStamp = {
+export interface DerivationStamp { // Added
     timestamp: number;
-    parent_ids: UUID[];
-    schema_id: UUID;
+    parent_ids: string[];
+    schema_id: string;
     module?: string;
-};
+}
 
-export type CognitiveItem = {
-    id: UUID;
-    atom_id: UUID;
-    type: 'BELIEF' | 'GOAL' | 'QUERY' | 'EVENT';
-    truth?: TruthValue;
-    attention: AttentionValue;
-    stamp: DerivationStamp;
-    goal_parent_id?: UUID;
+export interface CognitiveItem {
+    id: string;                // Unique identifier
+    atom_id: string;           // Reference to SemanticAtom (added)
+    type: 'BELIEF' | 'GOAL' | 'QUERY' | 'EVENT'; // Item category
+    label: string;             // Natural language representation (made required)
+    truth?: TruthValue;        // Truth value for beliefs
+    attention: AttentionValue; // Attention value for goals (made non-optional)
+    meta?: Record<string, any>; // Metadata (domain, source, etc.)
+    goal_parent_id?: string;   // Parent goal ID (added)
     goal_status?: "active" | "blocked" | "achieved" | "failed";
-    label?: string;
-    meta?: Record<string, any>;
-    payload?: Record<string, any>;
-};
-
-export type CognitiveSchema = {
-    atom_id: UUID;
-    apply: (a: CognitiveItem, b: CognitiveItem, worldModel: WorldModel) => CognitiveItem[];
-};
-
-export interface Agenda {
-    push(item: CognitiveItem): void;
-
-    pop(): Promise<CognitiveItem>;
-
-    peek(): CognitiveItem | null;
-
-    size(): number;
-
-    updateAttention(id: UUID, newVal: AttentionValue): void;
-
-    remove(id: UUID): boolean;
-
-    get(id: UUID): CognitiveItem | null;
-}
-
-export interface WorldModel {
-    add_atom(atom: SemanticAtom): UUID;
-
-    add_item(item: CognitiveItem): void;
-
-    get_atom(id: UUID): SemanticAtom | null;
-
-    get_item(id: UUID): CognitiveItem | null;
-
-    query_by_semantic(embedding: number[], k: number): CognitiveItem[];
-
-    query_by_symbolic(pattern: any, k?: number): CognitiveItem[];
-
-    query_by_structure(pattern: any, k?: number): CognitiveItem[];
-
-    query_by_meta(key: string, value: any): CognitiveItem[];
-
-    query_atoms_by_meta(key: string, value: any): SemanticAtom[];
-
-    revise_belief(new_item: CognitiveItem): [CognitiveItem | null, CognitiveItem | null];
-
-    register_schema_atom(atom: SemanticAtom): CognitiveSchema;
-
-    getStatistics(): {
-        atomCount: number;
-        itemCount: number;
-        schemaCount: number;
-        averageItemDurability: number;
-    };
-
-    getItemHistory(itemId: UUID): CognitiveItem[];
-
-    getConfidenceDistribution(): { bins: string[], counts: number[] };
-}
-
-export interface BeliefRevisionEngine {
-    merge(existing: TruthValue, newTv: TruthValue): TruthValue;
-
-    detect_conflict(a: TruthValue, b: TruthValue): boolean;
-}
-
-export interface AttentionModule {
-    calculate_initial(item: CognitiveItem): AttentionValue;
-
-    calculate_derived(
-        parents: CognitiveItem[],
-        schema: CognitiveSchema,
-        source_trust?: number
-    ): AttentionValue;
-
-    update_on_access(items: CognitiveItem[]): void;
-
-    run_decay_cycle(world_model: WorldModel, agenda: Agenda): void;
-}
-
-export interface ResonanceModule {
-    find_context(item: CognitiveItem, world_model: WorldModel, k: number): CognitiveItem[];
-}
-
-export interface SchemaMatcher {
-    register_schema(schema: SemanticAtom, world_model: WorldModel): CognitiveSchema;
-
-    find_applicable(a: CognitiveItem, b: CognitiveItem, world_model: WorldModel): CognitiveSchema[];
-}
-
-export interface GoalTreeManager {
-    decompose(goal: CognitiveItem): CognitiveItem[];
-
-    mark_achieved(goal_id: UUID): void;
-
-    mark_failed(goal_id: UUID): void;
-
-    get_ancestors(goal_id: UUID): UUID[];
-}
-
-export interface Transducer {
-    process(data: any): CognitiveItem[] | Promise<CognitiveItem[]>;
-}
-
-export interface Executor {
-    can_execute(goal: CognitiveItem): boolean;
-
-    execute(goal: CognitiveItem): Promise<CognitiveItem>;
+    stamp: DerivationStamp;    // Derivation stamp (added)
+    payload?: Record<string, any>; // Payload for events/actions (added)
 }

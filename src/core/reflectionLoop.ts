@@ -1,4 +1,5 @@
-import {Agenda, WorldModel} from '../interfaces/types';
+import {Agenda} from './agenda';
+import {WorldModel} from './worldModel';
 import {CognitiveItemFactory} from '../modules/cognitiveItemFactory';
 
 export class ReflectionLoop {

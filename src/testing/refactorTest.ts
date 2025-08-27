@@ -69,6 +69,7 @@ async function testComponentIntegration(): Promise<void> {
         id: uuidv4(),
         atom_id: uuidv4(),
         type: 'BELIEF',
+        label: 'Refactor Test Belief',
         truth: {frequency: 0.8, confidence: 0.9},
         attention: {priority: 0.9, durability: 0.7},
         stamp: {timestamp: Date.now(), parent_ids: [], schema_id: uuidv4()}
@@ -82,6 +83,8 @@ async function testComponentIntegration(): Promise<void> {
         id: uuidv4(),
         content: "Test atom for integration",
         embedding: Array(768).fill(0.5),
+        creationTime: Date.now(), // Added
+        lastAccessTime: Date.now(), // Added
         meta: {
             type: "Fact",
             source: "integration_test",
@@ -114,20 +117,20 @@ async function testSchemaLearningModule(): Promise<void> {
         id: uuidv4(),
         atom_id: uuidv4(),
         type: 'BELIEF',
+        label: "Medical diagnosis related to cardiac issues",
         truth: {frequency: 0.8, confidence: 0.9},
         attention: {priority: 0.9, durability: 0.7},
-        stamp: {timestamp: Date.now(), parent_ids: [], schema_id: uuidv4()},
-        label: "Medical diagnosis related to cardiac issues"
+        stamp: {timestamp: Date.now(), parent_ids: [], schema_id: uuidv4()}
     };
 
     const item2: CognitiveItem = {
         id: uuidv4(),
         atom_id: uuidv4(),
         type: 'BELIEF',
+        label: "Patient symptoms include chest pain",
         truth: {frequency: 0.7, confidence: 0.8},
         attention: {priority: 0.8, durability: 0.6},
-        stamp: {timestamp: Date.now(), parent_ids: [], schema_id: uuidv4()},
-        label: "Patient symptoms include chest pain"
+        stamp: {timestamp: Date.now(), parent_ids: [], schema_id: uuidv4()}
     };
 
     // Record schema usage

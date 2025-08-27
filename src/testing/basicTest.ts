@@ -46,6 +46,7 @@ async function testAgenda(): Promise<void> {
         id: uuidv4(),
         atom_id: uuidv4(),
         type: 'BELIEF',
+        label: 'Test Belief 1',
         truth: {frequency: 0.8, confidence: 0.9},
         attention: {priority: 0.9, durability: 0.7},
         stamp: {timestamp: Date.now(), parent_ids: [], schema_id: uuidv4()}
@@ -55,6 +56,7 @@ async function testAgenda(): Promise<void> {
         id: uuidv4(),
         atom_id: uuidv4(),
         type: 'GOAL',
+        label: 'Test Goal 1',
         attention: {priority: 0.7, durability: 0.8},
         stamp: {timestamp: Date.now(), parent_ids: [], schema_id: uuidv4()},
         goal_status: 'active'
@@ -78,6 +80,8 @@ async function testWorldModel(): Promise<void> {
         id: uuidv4(),
         content: "Chocolate is toxic to pets",
         embedding: Array(768).fill(0.5),
+        creationTime: Date.now(), // Added
+        lastAccessTime: Date.now(), // Added
         meta: {
             type: "Fact",
             source: "veterinary_database",
@@ -124,6 +128,7 @@ async function testAttentionModule(): Promise<void> {
         id: uuidv4(),
         atom_id: uuidv4(),
         type: 'BELIEF',
+        label: 'Test Belief for Attention',
         truth: {frequency: 0.8, confidence: 0.9},
         attention: {priority: 0.9, durability: 0.7},
         stamp: {timestamp: Date.now(), parent_ids: [], schema_id: uuidv4()}
@@ -152,6 +157,8 @@ async function testSchemaMatcher(): Promise<void> {
             }
         },
         embedding: Array(768).fill(0.3),
+        creationTime: Date.now(), // Added
+        lastAccessTime: Date.now(), // Added
         meta: {
             type: "CognitiveSchema",
             source: "test",

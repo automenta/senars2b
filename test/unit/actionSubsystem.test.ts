@@ -1,5 +1,6 @@
-import {ActionSubsystem} from '@/actions/actionSubsystem';
-import {createGoalItem} from './testUtils';
+import {AttentionValue, CognitiveItem, SemanticAtom, TruthValue} from '../interfaces/types';
+import {CognitiveSchema, WorldModel} from '../core/worldModel';
+import {createCognitiveItem, createSemanticAtom, createTruthValue, createAttentionValue, createMockSchema} from './testUtils';
 
 describe('ActionSubsystem', () => {
     let actionSubsystem: ActionSubsystem;

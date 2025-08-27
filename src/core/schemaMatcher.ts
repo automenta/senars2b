@@ -1,11 +1,17 @@
-import {CognitiveItem, CognitiveSchema, SchemaMatcher, SemanticAtom, UUID, WorldModel} from '../interfaces/types';
+import {CognitiveItem, SemanticAtom} from '../interfaces/types';
+import {CognitiveSchema, WorldModel} from './worldModel';
+
+export interface SchemaMatcher {
+    register_schema(schema: SemanticAtom, world_model: WorldModel): CognitiveSchema;
+    find_applicable(a: CognitiveItem, b: CognitiveItem, world_model: WorldModel): CognitiveSchema[];
+}
 
 // A simple Rete-like network implementation for pattern matching
 class ReteNode {
     id: string;
     condition: (item: CognitiveItem, atom: any) => boolean;
     children: ReteNode[] = [];
-    schemas: Set<UUID> = new Set();
+    schemas: Set<string> = new Set();
 
     constructor(id: string, condition: (item: CognitiveItem, atom: any) => boolean) {
         this.id = id;
@@ -16,16 +22,16 @@ class ReteNode {
         this.children.push(node);
     }
 
-    addSchema(schemaId: UUID): void {
+    addSchema(schemaId: string): void {
         this.schemas.add(schemaId);
     }
 }
 
 export class EfficientSchemaMatcher implements SchemaMatcher {
-    private schemaIndex: Map<UUID, CognitiveSchema> = new Map();
-    private schemaAtoms: Map<UUID, SemanticAtom> = new Map();
+    private schemaIndex: Map<string, CognitiveSchema> = new Map();
+    private schemaAtoms: Map<string, SemanticAtom> = new Map();
     private reteNetwork: ReteNode | null = null;
-    private patternIndex: Map<string, Set<UUID>> = new Map(); // pattern component -> schema_ids
+    private patternIndex: Map<string, Set<string>> = new Map(); // pattern component -> schema_ids
 
     register_schema(schema: SemanticAtom, world_model: WorldModel): CognitiveSchema {
         const cognitiveSchema = world_model.register_schema_atom(schema);
@@ -93,10 +99,10 @@ export class EfficientSchemaMatcher implements SchemaMatcher {
         this.reteNetwork = root;
     }
 
-    private matchReteNetwork(a: CognitiveItem, b: CognitiveItem, world_model: WorldModel): Set<UUID> {
+    private matchReteNetwork(a: CognitiveItem, b: CognitiveItem, world_model: WorldModel): Set<string> {
         if (!this.reteNetwork) return new Set();
 
-        const applicableSchemas = new Set<UUID>();
+        const applicableSchemas = new Set<string>();
 
         // Get atoms for both items
         const atomA = world_model.get_atom(a.atom_id);

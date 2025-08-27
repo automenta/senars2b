@@ -66,6 +66,8 @@ export class SelfRepresentationModule {
                 capabilities: component.capabilities
             },
             embedding: this.generateEmbedding(component.description),
+            creationTime: Date.now(), // Added
+            lastAccessTime: Date.now(), // Added
             meta: {
                 type: "Fact",
                 source: "self_model",
@@ -100,8 +102,9 @@ export class SelfRepresentationModule {
             // Update the semantic atom with new metrics
             const atom = this.componentKnowledge.get(componentId);
             if (atom) {
+                // Ensure atom.content is an object before spreading
                 atom.content = {
-                    ...atom.content,
+                    ...(typeof atom.content === 'object' && atom.content !== null ? atom.content : {}),
                     metrics: metrics
                 };
             }

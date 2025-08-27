@@ -1,4 +1,5 @@
-import {CognitiveItem, CognitiveSchema, SemanticAtom, WorldModel} from '../interfaces/types';
+import {CognitiveItem, SemanticAtom} from '../interfaces/types';
+import {CognitiveSchema, WorldModel} from '../core/worldModel';
 import {v4 as uuidv4} from 'uuid';
 
 // Define the structure for schema usage records
@@ -178,6 +179,8 @@ export class SchemaLearningModule {
                 id: uuidv4(),
                 content: `Generalized schema based on pattern: ${JSON.stringify(pattern)}`,
                 embedding: this.generateEmbedding(pattern),
+                creationTime: Date.now(), // Added
+                lastAccessTime: Date.now(), // Added
                 meta: {
                     type: "CognitiveSchema",
                     source: "schema_learning",

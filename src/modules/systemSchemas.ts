@@ -1,4 +1,5 @@
-import {CognitiveItem, CognitiveSchema, TruthValue, WorldModel} from '../interfaces/types';
+import {CognitiveItem, TruthValue} from '../interfaces/types';
+import {CognitiveSchema, WorldModel} from '../core/worldModel';
 import {CognitiveItemFactory} from './cognitiveItemFactory';
 import {v4 as uuidv4} from 'uuid';
 
@@ -40,6 +41,8 @@ export const HistoryRecordingSchema: CognitiveSchema = {
             id: uuidv4(),
             content: historyAtomContent,
             embedding: [], // Historical records may not need semantic embeddings
+            creationTime: Date.now(), // Added
+            lastAccessTime: Date.now(), // Added
             meta: {
                 type: 'Observation' as const,
                 source: 'system_history_module',
@@ -102,6 +105,8 @@ export const HistoryAnalysisSchema: CognitiveSchema = {
                 id: uuidv4(),
                 content: {insightType, label, analyzedBelief: belief.id},
                 embedding: [],
+                creationTime: Date.now(), // Added
+                lastAccessTime: Date.now(), // Added
                 meta: {
                     type: 'Observation' as const,
                     source: 'system_history_analyzer',

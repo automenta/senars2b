@@ -1,5 +1,7 @@
 import {DecentralizedCognitiveCore} from '@/core/cognitiveCore';
-import {createAttentionValue, createCognitiveMetadata, createTruthValue} from './testUtils';
+import {AttentionValue, CognitiveItem, SemanticAtom, TruthValue} from '../interfaces/types';
+import {CognitiveSchema, WorldModel} from '../core/worldModel';
+import {createCognitiveItem, createSemanticAtom, createTruthValue, createAttentionValue, createMockSchema} from './testUtils';
 import {embeddingService} from '@/services/embeddingService';
 
 jest.mock('@/services/embeddingService');

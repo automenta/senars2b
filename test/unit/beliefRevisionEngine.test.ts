@@ -1,5 +1,6 @@
-import {SimpleBeliefRevisionEngine} from '@/core/beliefRevisionEngine';
-import {createTruthValue} from './testUtils';
+import {AttentionValue, CognitiveItem, SemanticAtom, TruthValue} from '../interfaces/types';
+import {CognitiveSchema, WorldModel} from '../core/worldModel';
+import {createCognitiveItem, createSemanticAtom, createTruthValue, createAttentionValue, createMockSchema} from './testUtils';
 
 describe('SimpleBeliefRevisionEngine', () => {
     let revisionEngine: SimpleBeliefRevisionEngine;

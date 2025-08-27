@@ -1,5 +1,6 @@
+import {CognitiveItem, SemanticAtom} from '@/interfaces/types';
 import {DecentralizedCognitiveCore} from '@/core/cognitiveCore';
-import {CognitiveItem, SemanticAtom, WorldModel} from '@/interfaces/types';
+import {WorldModel} from '@/core/worldModel';
 import {createAttentionValue, createTruthValue} from './testUtils';
 import {v4 as uuidv4} from 'uuid';
 import {embeddingService} from '@/services/embeddingService';
@@ -92,6 +93,8 @@ describe('DecentralizedCognitiveCore', () => {
                 id: uuidv4(),
                 content: goalContent,
                 embedding: Array(10).fill(0).map(() => Math.random()),
+                creationTime: Date.now(), // Added
+                lastAccessTime: Date.now(), // Added
                 meta: {type: "Fact", source: "test", timestamp: new Date().toISOString(), trust_score: 1.0}
             };
             worldModel.add_atom(goalAtom);
@@ -109,6 +112,8 @@ describe('DecentralizedCognitiveCore', () => {
                 id: uuidv4(),
                 content: beliefContent,
                 embedding: Array(10).fill(0).map(() => Math.random()),
+                creationTime: Date.now(), // Added
+                lastAccessTime: Date.now(), // Added
                 meta: {type: "Fact", source: "test", timestamp: new Date().toISOString(), trust_score: 1.0}
             };
             worldModel.add_atom(beliefAtom);
@@ -154,6 +159,8 @@ describe('DecentralizedCognitiveCore', () => {
                 id: uuidv4(),
                 content: 'perform analysis',
                 embedding: [],
+                creationTime: Date.now(), // Added
+                lastAccessTime: Date.now(), // Added
                 meta: {type: 'ActionVerb', source: 'system', timestamp: new Date().toISOString(), trust_score: 1.0}
             };
             worldModel.add_atom(actionVerbAtom);

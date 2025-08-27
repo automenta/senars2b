@@ -1,4 +1,10 @@
-import {BeliefRevisionEngine, CognitiveItem, TruthValue} from '../interfaces/types';
+import {CognitiveItem, TruthValue} from '../interfaces/types';
+
+export interface BeliefRevisionEngine {
+    merge(existing: TruthValue, newTv: TruthValue): TruthValue;
+    detect_conflict(a: TruthValue, b: TruthValue): boolean;
+    resolve_conflict(existingItem: CognitiveItem, newItem: CognitiveItem): CognitiveItem;
+}
 
 export class SimpleBeliefRevisionEngine implements BeliefRevisionEngine {
     merge(existing: TruthValue, newTv: TruthValue): TruthValue {

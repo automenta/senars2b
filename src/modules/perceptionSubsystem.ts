@@ -1,5 +1,5 @@
-import {AttentionValue, CognitiveItem, Transducer, TruthValue} from '../interfaces/types';
-import {SensorStreamTransducer, TextTransducer} from './perception';
+import {AttentionValue, CognitiveItem, SemanticAtom, TruthValue} from '../interfaces/types';
+import {Transducer, TextTransducer, SensorStreamTransducer} from './transducers';
 import {CognitiveItemFactory} from './cognitiveItemFactory';
 import {v4 as uuidv4} from 'uuid';
 

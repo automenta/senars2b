@@ -1,5 +1,6 @@
 import {v4 as uuidv4} from 'uuid';
-import {AttentionValue, CognitiveItem, CognitiveSchema, SemanticAtom, TruthValue} from '@/interfaces/types';
+import {AttentionValue, CognitiveItem, SemanticAtom, TruthValue} from '../interfaces/types';
+import {CognitiveSchema, WorldModel} from '../core/worldModel';
 
 /**
  * Creates a basic CognitiveItem with default values
@@ -11,6 +12,7 @@ export function createCognitiveItem(overrides: Partial<CognitiveItem> = {}): Cog
         id: uuidv4(),
         atom_id: uuidv4(),
         type: 'BELIEF',
+        label: 'Test Item', // Added default label
         attention: {priority: 0.5, durability: 0.7},
         stamp: {timestamp: Date.now(), parent_ids: [], schema_id: uuidv4()},
         ...overrides
@@ -93,6 +95,8 @@ export function createSemanticAtom(overrides: Partial<SemanticAtom> = {}): Seman
         id: uuidv4(),
         content: 'Test content',
         embedding: Array(768).fill(0.5),
+        creationTime: Date.now(), // Added
+        lastAccessTime: Date.now(), // Added
         meta: {
             type: 'Fact',
             source: 'test',
