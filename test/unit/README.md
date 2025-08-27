@@ -81,6 +81,18 @@ const atom = createSemanticAtom({
 });
 ```
 
+### `createCognitiveMetadata(overrides: Partial<CognitiveMetadata> = {})`
+
+Creates basic CognitiveMetadata with default values.
+
+```typescript
+const metadata = createCognitiveMetadata({
+  domain: 'medical',
+  source: 'medical_journal',
+  trust_score: 0.95
+});
+```
+
 ## Usage
 
 Import the utilities in your test files:
@@ -93,7 +105,8 @@ import {
   createAttentionValue,
   createTruthValue,
   createMockSchema,
-  createSemanticAtom
+  createSemanticAtom,
+  createCognitiveMetadata
 } from './testUtils';
 ```
 
@@ -107,7 +120,7 @@ import {
 ## Example Test Structure
 
 ```typescript
-import { createBeliefItem, createGoalItem } from './testUtils';
+import { createBeliefItem, createGoalItem, createCognitiveMetadata } from './testUtils';
 
 describe('CognitiveCore', () => {
   it('should process beliefs with high confidence', () => {
@@ -121,6 +134,18 @@ describe('CognitiveCore', () => {
   it('should prioritize goals with high durability', () => {
     const goal = createGoalItem({
       attention: { priority: 0.5, durability: 0.9 }
+    });
+    
+    // Test implementation
+  });
+});
+
+describe('DomainSpecificTests', () => {
+  it('should handle domain-specific knowledge', () => {
+    const metadata = createCognitiveMetadata({
+      domain: 'medicine',
+      source: 'medical_journal',
+      trust_score: 0.95
     });
     
     // Test implementation
