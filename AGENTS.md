@@ -3,20 +3,20 @@
 ## Core Principles
 
 - **Elegance**
-  - Abstract and modularize complex functionality
-  - Use concise syntax (ternary operators, switch statements, etc.)
-  - Consolidate related functionality
-  - Eliminate code duplication (DRY principle)
+    - Abstract and modularize complex functionality
+    - Use concise syntax (ternary operators, switch statements, etc.)
+    - Consolidate related functionality
+    - Eliminate code duplication (DRY principle)
 
 - **Self-Documentation**
-  - Rely on meaningful identifiers rather than comments
-  - Write code that clearly expresses its intent
-  - Structure code to minimize the need for explanatory comments
+    - Rely on meaningful identifiers rather than comments
+    - Write code that clearly expresses its intent
+    - Structure code to minimize the need for explanatory comments
 
 - **Professional Quality**
-  - Maintain production-grade code quality
-  - Prioritize correctness and performance over educational explanations
-  - Follow established patterns and conventions
+    - Maintain production-grade code quality
+    - Prioritize correctness and performance over educational explanations
+    - Follow established patterns and conventions
 
 ## Implementation Standards
 

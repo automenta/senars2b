@@ -2,7 +2,9 @@
 
 This directory contains utility functions to help reduce code duplication in unit tests and improve maintainability.
 
-These utilities are designed to create consistent, predictable test data with minimal boilerplate code. All functions accept an optional `overrides` parameter that allows you to customize specific properties while maintaining default values for others.
+These utilities are designed to create consistent, predictable test data with minimal boilerplate code. All functions
+accept an optional `overrides` parameter that allows you to customize specific properties while maintaining default
+values for others.
 
 ## Available Utilities
 
@@ -112,7 +114,8 @@ import {
 
 ## Best Practices
 
-1. **Use specific creators when possible**: Use `createBeliefItem()` instead of `createCognitiveItem({type: 'BELIEF'})` for better readability
+1. **Use specific creators when possible**: Use `createBeliefItem()` instead of `createCognitiveItem({type: 'BELIEF'})`
+   for better readability
 2. **Override only what you need**: Rely on default values for properties that aren't relevant to your test
 3. **Combine utilities**: Use multiple utilities together to create complex test scenarios
 4. **Consistent test data**: Using these utilities ensures consistent test data across your test suite

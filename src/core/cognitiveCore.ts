@@ -1,38 +1,38 @@
-import { PriorityAgenda } from './agenda';
-import { PersistentWorldModel } from './worldModel';
-import { SimpleBeliefRevisionEngine } from './beliefRevisionEngine';
-import { DynamicAttentionModule } from './attentionModule';
-import { HybridResonanceModule } from './resonanceModule';
-import { EfficientSchemaMatcher } from './schemaMatcher';
-import { HierarchicalGoalTreeManager } from './goalTreeManager';
-import { CognitiveItemFactory } from '../modules/cognitiveItemFactory';
-import { ReflectionLoop } from './reflectionLoop';
-import { ActionSubsystem } from '../actions/actionSubsystem';
-import { SchemaLearningModule } from '../modules/schemaLearningModule';
-import { HistoryRecordingSchema, HistoryAnalysisSchema } from '../modules/systemSchemas';
-import { 
-  Agenda, 
-  WorldModel, 
-  BeliefRevisionEngine, 
-  AttentionModule, 
-  ResonanceModule, 
-  SchemaMatcher, 
-  GoalTreeManager, 
-  CognitiveItem, 
-  TruthValue, 
-  AttentionValue, 
-  SemanticAtom,
-  CognitiveSchema
+import {PriorityAgenda} from './agenda';
+import {PersistentWorldModel} from './worldModel';
+import {SimpleBeliefRevisionEngine} from './beliefRevisionEngine';
+import {DynamicAttentionModule} from './attentionModule';
+import {HybridResonanceModule} from './resonanceModule';
+import {EfficientSchemaMatcher} from './schemaMatcher';
+import {HierarchicalGoalTreeManager} from './goalTreeManager';
+import {CognitiveItemFactory} from '../modules/cognitiveItemFactory';
+import {ReflectionLoop} from './reflectionLoop';
+import {ActionSubsystem} from '../actions/actionSubsystem';
+import {SchemaLearningModule} from '../modules/schemaLearningModule';
+import {HistoryAnalysisSchema, HistoryRecordingSchema} from '../modules/systemSchemas';
+import {
+    Agenda,
+    AttentionModule,
+    AttentionValue,
+    BeliefRevisionEngine,
+    CognitiveItem,
+    CognitiveSchema,
+    GoalTreeManager,
+    ResonanceModule,
+    SchemaMatcher,
+    SemanticAtom,
+    TruthValue,
+    WorldModel
 } from '../interfaces/types';
-import { v4 as uuidv4 } from 'uuid';
-import { embeddingService } from '../services/embeddingService';
+import {v4 as uuidv4} from 'uuid';
+import {embeddingService} from '../services/embeddingService';
 
 /**
  * DecentralizedCognitiveCore - The main cognitive processing engine
  * Implements a hybrid symbolic and semantic reasoning system with attention dynamics
  */
 export class DecentralizedCognitiveCore {
-    private agenda: Agenda;
+    private readonly agenda: Agenda;
     private worldModel!: WorldModel;
     private beliefRevisionEngine!: BeliefRevisionEngine;
     private attentionModule!: AttentionModule;
@@ -42,10 +42,14 @@ export class DecentralizedCognitiveCore {
     private reflectionLoop!: ReflectionLoop;
     private actionSubsystem!: ActionSubsystem;
     private schemaLearningModule!: SchemaLearningModule;
-    private workerCount: number;
+    private readonly workerCount: number;
     private isRunning: boolean = false;
     private reflectionInterval: NodeJS.Timeout | null = null;
-    private workerStatistics: Map<number, { itemsProcessed: number; errors: number; totalProcessingTime: number }> = new Map();
+    private workerStatistics: Map<number, {
+        itemsProcessed: number;
+        errors: number;
+        totalProcessingTime: number
+    }> = new Map();
     private eventHandler?: (event: CognitiveItem) => void;
     private startTime: number = 0;
 
@@ -55,77 +59,14 @@ export class DecentralizedCognitiveCore {
      */
     constructor(workerCount: number = 4) {
         this.agenda = new PriorityAgenda();
-        
+
         // Initialize components
         this.initializeComponents();
-        
+
         this.workerCount = workerCount;
-        
+
         // Initialize worker statistics
         this.initializeWorkerStatistics();
-    }
-
-    /**
-     * Initialize all cognitive components
-     */
-    private initializeComponents(): void {
-        // Use standard components only
-        this.worldModel = new PersistentWorldModel();
-        this.attentionModule = new DynamicAttentionModule();
-        
-        this.beliefRevisionEngine = new SimpleBeliefRevisionEngine();
-        this.resonanceModule = new HybridResonanceModule();
-        this.schemaMatcher = new EfficientSchemaMatcher();
-        this.goalTreeManager = new HierarchicalGoalTreeManager();
-        this.reflectionLoop = new ReflectionLoop(this.worldModel, this.agenda);
-        this.actionSubsystem = new ActionSubsystem();
-        this.schemaLearningModule = new SchemaLearningModule(this.worldModel);
-
-        this.registerSystemSchemas();
-    }
-
-    /**
-     * Register built-in system schemas
-     */
-    private registerSystemSchemas(): void {
-        const historySchemaAtom: SemanticAtom = {
-            id: HistoryRecordingSchema.atom_id,
-            content: { name: 'HistoryRecordingSchema', apply: HistoryRecordingSchema.apply },
-            embedding: [], // System schema, no embedding needed
-            meta: {
-                type: "CognitiveSchema",
-                source: "system",
-                timestamp: new Date().toISOString(),
-                trust_score: 1.0,
-                domain: "system_internals"
-            }
-        };
-        this.worldModel.add_atom(historySchemaAtom);
-        this.schemaMatcher.register_schema(historySchemaAtom, this.worldModel);
-
-        const analysisSchemaAtom: SemanticAtom = {
-            id: HistoryAnalysisSchema.atom_id,
-            content: { name: 'HistoryAnalysisSchema', apply: HistoryAnalysisSchema.apply },
-            embedding: [],
-            meta: {
-                type: "CognitiveSchema",
-                source: "system",
-                timestamp: new Date().toISOString(),
-                trust_score: 1.0,
-                domain: "system_internals"
-            }
-        };
-        this.worldModel.add_atom(analysisSchemaAtom);
-        this.schemaMatcher.register_schema(analysisSchemaAtom, this.worldModel);
-    }
-
-    /**
-     * Initialize worker statistics tracking
-     */
-    private initializeWorkerStatistics(): void {
-        for (let i = 0; i < this.workerCount; i++) {
-            this.workerStatistics.set(i, { itemsProcessed: 0, errors: 0, totalProcessingTime: 0 });
-        }
     }
 
     /**
@@ -135,10 +76,10 @@ export class DecentralizedCognitiveCore {
         this.isRunning = true;
         this.startTime = Date.now();
         console.log(`Starting cognitive core with ${this.workerCount} workers`);
-        
+
         // Start reflection loop
         this.reflectionInterval = this.reflectionLoop.start();
-        
+
         // Start worker pool
         const workers = Array(this.workerCount).fill(null).map((_, i) => this.createWorker(i));
         await Promise.all(workers);
@@ -157,6 +98,199 @@ export class DecentralizedCognitiveCore {
     }
 
     /**
+     * Add an initial belief to the cognitive system
+     * @param content The content of the belief
+     * @param truth The truth value of the belief
+     * @param attention The attention value of the belief
+     * @param meta Optional metadata for the belief
+     */
+    public async addInitialBelief(content: any, truth: TruthValue, attention: AttentionValue, meta?: Record<string, any>): Promise<void> {
+        const atom: SemanticAtom = {
+            id: uuidv4(),
+            content: content,
+            embedding: await this.generateEmbedding(content),
+            meta: {
+                type: "Fact",
+                source: "user_input",
+                timestamp: new Date().toISOString(),
+                trust_score: truth.confidence,
+                ...meta
+            }
+        };
+
+        this.worldModel.add_atom(atom);
+        const belief = CognitiveItemFactory.createBelief(atom.id, truth, attention);
+        this.agenda.push(belief);
+    }
+
+    /**
+     * Add an initial goal to the cognitive system
+     * @param content The content of the goal
+     * @param attention The attention value of the goal
+     * @param meta Optional metadata for the goal
+     */
+    public async addInitialGoal(content: any, attention: AttentionValue, meta?: Record<string, any>): Promise<void> {
+        const atom: SemanticAtom = {
+            id: uuidv4(),
+            content: content,
+            embedding: await this.generateEmbedding(content),
+            meta: {
+                type: "Fact",
+                source: "user_input",
+                timestamp: new Date().toISOString(),
+                trust_score: attention.priority,
+                ...meta
+            }
+        };
+
+        this.worldModel.add_atom(atom);
+        const goal = CognitiveItemFactory.createGoal(atom.id, attention);
+        this.agenda.push(goal);
+    }
+
+    /**
+     * Add a schema to the cognitive system
+     * @param content The content of the schema
+     * @param meta Optional metadata for the schema
+     */
+    public async addSchema(content: any, meta?: Record<string, any>): Promise<void> {
+        const atom: SemanticAtom = {
+            id: uuidv4(),
+            content: content,
+            embedding: await this.generateEmbedding(content),
+            meta: {
+                type: "CognitiveSchema",
+                source: "system",
+                timestamp: new Date().toISOString(),
+                trust_score: 0.9,
+                ...meta
+            }
+        };
+
+        this.worldModel.add_atom(atom);
+        this.schemaMatcher.register_schema(atom, this.worldModel);
+    }
+
+    /**
+     * Get the current system status
+     * @returns Object containing system status information
+     */
+    public getSystemStatus(): {
+        agendaSize: number;
+        worldModelStats: any;
+        workerStats: any;
+        performance: {
+            uptime: string;
+            totalItemsProcessed: number;
+            itemsProcessedPerSecond: number;
+            averageItemProcessingTime: number;
+        }
+    } {
+        const totalItems = Array.from(this.workerStatistics.values()).reduce((acc, stats) => acc + stats.itemsProcessed, 0);
+        const totalTime = Array.from(this.workerStatistics.values()).reduce((acc, stats) => acc + stats.totalProcessingTime, 0);
+        const averageItemProcessingTime = totalItems > 0 ? totalTime / totalItems : 0;
+
+        const uptimeSeconds = this.startTime > 0 ? (Date.now() - this.startTime) / 1000 : 0;
+        const itemsProcessedPerSecond = uptimeSeconds > 0 ? totalItems / uptimeSeconds : 0;
+
+        const hours = Math.floor(uptimeSeconds / 3600);
+        const minutes = Math.floor((uptimeSeconds % 3600) / 60);
+        const seconds = Math.floor(uptimeSeconds % 60);
+        const uptimeStr = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+
+        return {
+            agendaSize: this.agenda.size(),
+            worldModelStats: (this.worldModel as PersistentWorldModel).getStatistics(),
+            workerStats: Object.fromEntries(this.workerStatistics),
+            performance: {
+                uptime: uptimeStr,
+                totalItemsProcessed: totalItems,
+                itemsProcessedPerSecond: parseFloat(itemsProcessedPerSecond.toFixed(2)),
+                averageItemProcessingTime: parseFloat(averageItemProcessingTime.toFixed(2))
+            }
+        };
+    }
+
+    /**
+     * Get the world model instance
+     * @returns The world model component
+     */
+    public getWorldModel(): WorldModel {
+        return this.worldModel;
+    }
+
+    /**
+     * Set a handler for internally generated events
+     * @param handler The function to call when an event is generated
+     */
+    public setEventHandler(handler: (event: CognitiveItem) => void): void {
+        this.eventHandler = handler;
+    }
+
+    /**
+     * Initialize all cognitive components
+     */
+    private initializeComponents(): void {
+        // Use standard components only
+        this.worldModel = new PersistentWorldModel();
+        this.attentionModule = new DynamicAttentionModule();
+
+        this.beliefRevisionEngine = new SimpleBeliefRevisionEngine();
+        this.resonanceModule = new HybridResonanceModule();
+        this.schemaMatcher = new EfficientSchemaMatcher();
+        this.goalTreeManager = new HierarchicalGoalTreeManager();
+        this.reflectionLoop = new ReflectionLoop(this.worldModel, this.agenda);
+        this.actionSubsystem = new ActionSubsystem();
+        this.schemaLearningModule = new SchemaLearningModule(this.worldModel);
+
+        this.registerSystemSchemas();
+    }
+
+    /**
+     * Register built-in system schemas
+     */
+    private registerSystemSchemas(): void {
+        const historySchemaAtom: SemanticAtom = {
+            id: HistoryRecordingSchema.atom_id,
+            content: {name: 'HistoryRecordingSchema', apply: HistoryRecordingSchema.apply},
+            embedding: [], // System schema, no embedding needed
+            meta: {
+                type: "CognitiveSchema",
+                source: "system",
+                timestamp: new Date().toISOString(),
+                trust_score: 1.0,
+                domain: "system_internals"
+            }
+        };
+        this.worldModel.add_atom(historySchemaAtom);
+        this.schemaMatcher.register_schema(historySchemaAtom, this.worldModel);
+
+        const analysisSchemaAtom: SemanticAtom = {
+            id: HistoryAnalysisSchema.atom_id,
+            content: {name: 'HistoryAnalysisSchema', apply: HistoryAnalysisSchema.apply},
+            embedding: [],
+            meta: {
+                type: "CognitiveSchema",
+                source: "system",
+                timestamp: new Date().toISOString(),
+                trust_score: 1.0,
+                domain: "system_internals"
+            }
+        };
+        this.worldModel.add_atom(analysisSchemaAtom);
+        this.schemaMatcher.register_schema(analysisSchemaAtom, this.worldModel);
+    }
+
+    /**
+     * Initialize worker statistics tracking
+     */
+    private initializeWorkerStatistics(): void {
+        for (let i = 0; i < this.workerCount; i++) {
+            this.workerStatistics.set(i, {itemsProcessed: 0, errors: 0, totalProcessingTime: 0});
+        }
+    }
+
+    /**
      * Create a worker thread for processing cognitive items
      * @param workerId The ID of the worker to create
      */
@@ -164,19 +298,23 @@ export class DecentralizedCognitiveCore {
         console.log(`Worker ${workerId} started`);
         let itemCounter = 0;
         const decayCycleInterval = 100; // Run decay cycle every 100 items
-        
+
         while (this.isRunning) {
             try {
                 const itemA = await this.agenda.pop();
                 await this.processItem(itemA, workerId);
-                
+
                 // Run attention decay cycle periodically
                 if (++itemCounter % decayCycleInterval === 0) {
                     this.attentionModule.run_decay_cycle(this.worldModel, this.agenda);
                 }
             } catch (error) {
                 console.error(`Worker ${workerId} encountered an error:`, error);
-                const stats = this.workerStatistics.get(workerId) || { itemsProcessed: 0, errors: 0, totalProcessingTime: 0 };
+                const stats = this.workerStatistics.get(workerId) || {
+                    itemsProcessed: 0,
+                    errors: 0,
+                    totalProcessingTime: 0
+                };
                 stats.errors++;
                 this.workerStatistics.set(workerId, stats);
             }
@@ -191,7 +329,7 @@ export class DecentralizedCognitiveCore {
      */
     private async processItem(itemA: CognitiveItem, workerId: number): Promise<void> {
         const startTime = Date.now();
-        
+
         try {
             // Update worker statistics
             this.updateWorkerStatistics(workerId);
@@ -225,7 +363,7 @@ export class DecentralizedCognitiveCore {
      * @param workerId The ID of the worker to update statistics for
      */
     private updateWorkerStatistics(workerId: number): void {
-        const stats = this.workerStatistics.get(workerId) || { itemsProcessed: 0, errors: 0, totalProcessingTime: 0 };
+        const stats = this.workerStatistics.get(workerId) || {itemsProcessed: 0, errors: 0, totalProcessingTime: 0};
         stats.itemsProcessed++;
         this.workerStatistics.set(workerId, stats);
     }
@@ -254,32 +392,32 @@ export class DecentralizedCognitiveCore {
         try {
             // Record schema usage for reflection
             this.reflectionLoop.recordSchemaUsage(schema.atom_id);
-            
+
             // Apply schema to generate new items
             const derived = schema.apply(itemA, itemB, this.worldModel);
-            
+
             for (const newItem of derived) {
                 // Calculate attention for derived items
                 const schemaAtom = this.worldModel.get_atom(schema.atom_id);
                 const sourceTrust = schemaAtom?.meta.trust_score || 0.5;
-                
+
                 newItem.attention = this.attentionModule.calculate_derived(
                     [itemA, itemB],
                     schema,
                     sourceTrust
                 );
-                
+
                 // Create derivation stamp
                 newItem.stamp = {
                     timestamp: Date.now(),
                     parent_ids: [itemA.id, itemB.id],
                     schema_id: schema.atom_id
                 };
-                
+
                 // Add derived item to agenda
                 this.agenda.push(newItem);
             }
-            
+
             // Record successful schema usage for learning
             this.schemaLearningModule.recordSchemaUsage(schema.atom_id, true, [itemA, itemB]);
         } catch (error) {
@@ -418,136 +556,6 @@ export class DecentralizedCognitiveCore {
         return false;
     }
 
-    /**
-     * Add an initial belief to the cognitive system
-     * @param content The content of the belief
-     * @param truth The truth value of the belief
-     * @param attention The attention value of the belief
-     * @param meta Optional metadata for the belief
-     */
-    public async addInitialBelief(content: any, truth: TruthValue, attention: AttentionValue, meta?: Record<string, any>): Promise<void> {
-        const atom: SemanticAtom = {
-            id: uuidv4(),
-            content: content,
-            embedding: await this.generateEmbedding(content),
-            meta: {
-                type: "Fact",
-                source: "user_input",
-                timestamp: new Date().toISOString(),
-                trust_score: truth.confidence,
-                ...meta
-            }
-        };
-        
-        this.worldModel.add_atom(atom);
-        const belief = CognitiveItemFactory.createBelief(atom.id, truth, attention);
-        this.agenda.push(belief);
-    }
-
-    /**
-     * Add an initial goal to the cognitive system
-     * @param content The content of the goal
-     * @param attention The attention value of the goal
-     * @param meta Optional metadata for the goal
-     */
-    public async addInitialGoal(content: any, attention: AttentionValue, meta?: Record<string, any>): Promise<void> {
-        const atom: SemanticAtom = {
-            id: uuidv4(),
-            content: content,
-            embedding: await this.generateEmbedding(content),
-            meta: {
-                type: "Fact",
-                source: "user_input",
-                timestamp: new Date().toISOString(),
-                trust_score: attention.priority,
-                ...meta
-            }
-        };
-        
-        this.worldModel.add_atom(atom);
-        const goal = CognitiveItemFactory.createGoal(atom.id, attention);
-        this.agenda.push(goal);
-    }
-
-    /**
-     * Add a schema to the cognitive system
-     * @param content The content of the schema
-     * @param meta Optional metadata for the schema
-     */
-    public async addSchema(content: any, meta?: Record<string, any>): Promise<void> {
-        const atom: SemanticAtom = {
-            id: uuidv4(),
-            content: content,
-            embedding: await this.generateEmbedding(content),
-            meta: {
-                type: "CognitiveSchema",
-                source: "system",
-                timestamp: new Date().toISOString(),
-                trust_score: 0.9,
-                ...meta
-            }
-        };
-        
-        this.worldModel.add_atom(atom);
-        this.schemaMatcher.register_schema(atom, this.worldModel);
-    }
-    
-    /**
-     * Get the current system status
-     * @returns Object containing system status information
-     */
-    public getSystemStatus(): {
-        agendaSize: number;
-        worldModelStats: any;
-        workerStats: any;
-        performance: {
-            uptime: string;
-            totalItemsProcessed: number;
-            itemsProcessedPerSecond: number;
-            averageItemProcessingTime: number;
-        }
-    } {
-        const totalItems = Array.from(this.workerStatistics.values()).reduce((acc, stats) => acc + stats.itemsProcessed, 0);
-        const totalTime = Array.from(this.workerStatistics.values()).reduce((acc, stats) => acc + stats.totalProcessingTime, 0);
-        const averageItemProcessingTime = totalItems > 0 ? totalTime / totalItems : 0;
-
-        const uptimeSeconds = this.startTime > 0 ? (Date.now() - this.startTime) / 1000 : 0;
-        const itemsProcessedPerSecond = uptimeSeconds > 0 ? totalItems / uptimeSeconds : 0;
-
-        const hours = Math.floor(uptimeSeconds / 3600);
-        const minutes = Math.floor((uptimeSeconds % 3600) / 60);
-        const seconds = Math.floor(uptimeSeconds % 60);
-        const uptimeStr = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-
-        return {
-            agendaSize: this.agenda.size(),
-            worldModelStats: (this.worldModel as PersistentWorldModel).getStatistics(),
-            workerStats: Object.fromEntries(this.workerStatistics),
-            performance: {
-                uptime: uptimeStr,
-                totalItemsProcessed: totalItems,
-                itemsProcessedPerSecond: parseFloat(itemsProcessedPerSecond.toFixed(2)),
-                averageItemProcessingTime: parseFloat(averageItemProcessingTime.toFixed(2))
-            }
-        };
-    }
-
-    /**
-     * Get the world model instance
-     * @returns The world model component
-     */
-    public getWorldModel(): WorldModel {
-        return this.worldModel;
-    }
-
-    /**
-     * Set a handler for internally generated events
-     * @param handler The function to call when an event is generated
-     */
-    public setEventHandler(handler: (event: CognitiveItem) => void): void {
-        this.eventHandler = handler;
-    }
-    
     /**
      * Print worker statistics to the console
      */

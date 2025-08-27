@@ -1,4 +1,4 @@
-import { HuggingFaceTransformersEmbeddings } from "@langchain/community/embeddings/hf_transformers";
+import {HuggingFaceTransformersEmbeddings} from "@langchain/community/embeddings/hf_transformers";
 
 class EmbeddingService {
     private static instance: EmbeddingService;

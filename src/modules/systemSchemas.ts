@@ -1,6 +1,6 @@
-import { CognitiveSchema, CognitiveItem, WorldModel, TruthValue } from '../interfaces/types';
-import { CognitiveItemFactory } from './cognitiveItemFactory';
-import { v4 as uuidv4 } from 'uuid';
+import {CognitiveItem, CognitiveSchema, TruthValue, WorldModel} from '../interfaces/types';
+import {CognitiveItemFactory} from './cognitiveItemFactory';
+import {v4 as uuidv4} from 'uuid';
 
 /**
  * A system-level schema to record the history of belief changes.
@@ -14,14 +14,14 @@ export const HistoryRecordingSchema: CognitiveSchema = {
         // This schema is unary, it only operates on a single event item.
         // We check both itemA and itemB to see if one is the event.
         const eventItem = itemA.type === 'EVENT' && itemA.label === 'BeliefUpdated' ? itemA :
-                          itemB.type === 'EVENT' && itemB.label === 'BeliefUpdated' ? itemB :
-                          null;
+            itemB.type === 'EVENT' && itemB.label === 'BeliefUpdated' ? itemB :
+                null;
 
         if (!eventItem || !eventItem.payload) {
             return []; // Not applicable
         }
 
-        const { itemId, oldTruth, newTruth } = eventItem.payload;
+        const {itemId, oldTruth, newTruth} = eventItem.payload;
 
         if (!itemId || !oldTruth || !newTruth) {
             console.warn('HistoryRecordingSchema: Invalid payload for BeliefUpdated event.', eventItem.payload);
@@ -55,7 +55,7 @@ export const HistoryRecordingSchema: CognitiveSchema = {
         const historicalBelief = CognitiveItemFactory.createBelief(
             historyAtom.id,
             oldTruth as TruthValue,
-            { priority: 0.1, durability: 0.9 } // Historical facts are not urgent but should persist
+            {priority: 0.1, durability: 0.9} // Historical facts are not urgent but should persist
         );
 
         historicalBelief.label = `History: Truth of ${itemId} at ${eventItem.stamp.timestamp}`;
@@ -80,8 +80,8 @@ export const HistoryAnalysisSchema: CognitiveSchema = {
         // This schema is designed to be unary, operating on a single belief item.
         // It triggers on any belief that is not itself a historical record or a meta-belief.
         const belief = (itemA.type === 'BELIEF' && !itemA.meta?.isHistory && !itemA.meta?.analysisOf) ? itemA :
-                       (itemB.type === 'BELIEF' && !itemB.meta?.isHistory && !itemB.meta?.analysisOf) ? itemB :
-                       null;
+            (itemB.type === 'BELIEF' && !itemB.meta?.isHistory && !itemB.meta?.analysisOf) ? itemB :
+                null;
 
         if (!belief) {
             return []; // Not applicable
@@ -100,7 +100,7 @@ export const HistoryAnalysisSchema: CognitiveSchema = {
         const createMetaBelief = (insightType: string, label: string): CognitiveItem => {
             const metaAtom = {
                 id: uuidv4(),
-                content: { insightType, label, analyzedBelief: belief.id },
+                content: {insightType, label, analyzedBelief: belief.id},
                 embedding: [],
                 meta: {
                     type: 'Observation' as const,
@@ -114,8 +114,8 @@ export const HistoryAnalysisSchema: CognitiveSchema = {
 
             const metaBelief = CognitiveItemFactory.createBelief(
                 metaAtom.id,
-                { frequency: 1.0, confidence: 0.9 }, // Meta-beliefs are asserted with high confidence
-                { priority: 0.3, durability: 0.8 }
+                {frequency: 1.0, confidence: 0.9}, // Meta-beliefs are asserted with high confidence
+                {priority: 0.3, durability: 0.8}
             );
             metaBelief.label = label;
             metaBelief.meta = {
@@ -139,12 +139,12 @@ export const HistoryAnalysisSchema: CognitiveSchema = {
         const analyzeTrend = (hist: CognitiveItem[]): CognitiveItem | null => {
             const TREND_THRESHOLD = 0.05; // Required average confidence change per step
             // History is newest-to-oldest, so reverse it first to get a proper time series.
-            const points = hist.slice().reverse().map((h, i) => ({ x: i, y: h.truth!.confidence }));
+            const points = hist.slice().reverse().map((h, i) => ({x: i, y: h.truth!.confidence}));
 
             // Simple linear regression slope calculation
             let sumX = 0, sumY = 0, sumXY = 0, sumXX = 0;
             const n = points.length;
-            for(const p of points) {
+            for (const p of points) {
                 sumX += p.x;
                 sumY += p.y;
                 sumXY += p.x * p.y;
@@ -166,7 +166,7 @@ export const HistoryAnalysisSchema: CognitiveSchema = {
             let crossings = 0;
             for (let i = 1; i < hist.length; i++) {
                 const prevFreq = hist[i].truth!.frequency;
-                const currFreq = hist[i-1].truth!.frequency;
+                const currFreq = hist[i - 1].truth!.frequency;
                 if ((prevFreq < 0.5 && currFreq >= 0.5) || (prevFreq > 0.5 && currFreq <= 0.5)) {
                     crossings++;
                 }

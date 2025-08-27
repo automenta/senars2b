@@ -1,4 +1,4 @@
-import { WorldModel, SemanticAtom, CognitiveItem, TruthValue, CognitiveSchema, UUID } from '../interfaces/types';
+import {CognitiveItem, CognitiveSchema, SemanticAtom, UUID, WorldModel} from '../interfaces/types';
 
 // Simple in-memory implementation of WorldModel for testing
 export class InMemoryWorldModel implements WorldModel {

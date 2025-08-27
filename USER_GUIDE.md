@@ -1,12 +1,15 @@
 # Senars3 Cognitive System - User Guide
 
-This guide provides comprehensive instructions for using the Senars3 cognitive system through its unified interface that works across both CLI and Web environments.
+This guide provides comprehensive instructions for using the Senars3 cognitive system through its unified interface that
+works across both CLI and Web environments.
 
-> **Note**: This guide focuses on practical usage. For technical details about the Non-Axiomatic Logic principles, please refer to [core.md](core.md). For system features and setup instructions, see [README.md](README.md).
+> **Note**: This guide focuses on practical usage. For technical details about the Non-Axiomatic Logic principles,
+> please refer to [core.md](core.md). For system features and setup instructions, see [README.md](README.md).
 
 ## System Overview
 
-The Senars3 cognitive system is a next-generation agentic reasoning system that uses non-axiomatic logic principles to fuse symbolic reasoning with Language Model technology. It processes natural language input through:
+The Senars3 cognitive system is a next-generation agentic reasoning system that uses non-axiomatic logic principles to
+fuse symbolic reasoning with Language Model technology. It processes natural language input through:
 
 1. **Perceiving** - Converting text into cognitive items (beliefs, goals, queries) with uncertainty values
 2. **Contextualizing** - Finding relevant knowledge in its memory using resonance mechanisms
@@ -19,7 +22,8 @@ The Senars3 cognitive system is a next-generation agentic reasoning system that 
 The system provides a **unified interface** that works seamlessly across both CLI and Web environments:
 
 1. **Unified Command-Line Interface (CLI)** - Interactive text-based interface that connects to the WebSocket backend
-2. **Unified Web Interface** - Browser-based graphical interface with real-time feedback and metaprogramming capabilities
+2. **Unified Web Interface** - Browser-based graphical interface with real-time feedback and metaprogramming
+   capabilities
 3. **WebSocket API** - Programmatic interface for custom applications
 4. **REST API** - HTTP-based interface for programmatic access
 
@@ -63,6 +67,7 @@ The unified CLI allows direct access to system components:
 - `worldModel.<method> <json>` - Call world model methods
 
 Examples:
+
 ```bash
 # Process input
 process My cat seems sick after eating chocolate. What should I do considering uncertainty?
@@ -79,7 +84,8 @@ worldModel.getStatistics {}
 
 ### Providing Input
 
-You can enter natural language statements or questions for the system to process through its non-axiomatic logic framework. Examples:
+You can enter natural language statements or questions for the system to process through its non-axiomatic logic
+framework. Examples:
 
 - Uncertain Statements: "Chocolate is likely toxic to dogs"
 - Probabilistic Questions: "What is the probability my cat is sick after eating chocolate?"
@@ -87,7 +93,8 @@ You can enter natural language statements or questions for the system to process
 - Exploratory Goals: "Diagnose why my plant is wilting considering multiple possible causes"
 - Adaptive Requests: "Create a health plan for my pet that adjusts based on ongoing symptoms"
 
-The system will process your input and add the extracted cognitive items to its agenda for further processing through its non-axiomatic reasoning engine.
+The system will process your input and add the extracted cognitive items to its agenda for further processing through
+its non-axiomatic reasoning engine.
 
 ## Unified Web Interface
 
@@ -99,7 +106,8 @@ To start the unified web interface:
 npm run start:web
 ```
 
-This will start both an HTTP server (for serving the web interface) and a WebSocket server (for communication with the cognitive system).
+This will start both an HTTP server (for serving the web interface) and a WebSocket server (for communication with the
+cognitive system).
 
 ### Accessing the Web Interface
 
@@ -138,7 +146,8 @@ The unified web interface provides several tabs for different functionalities:
 
 ## WebSocket API
 
-The WebSocket API provides programmatic access to the cognitive system's capabilities. It uses a request-response pattern with JSON messages.
+The WebSocket API provides programmatic access to the cognitive system's capabilities. It uses a request-response
+pattern with JSON messages.
 
 ### Connecting to the WebSocket Server
 
@@ -169,6 +178,7 @@ All messages follow this structure:
 #### Core Component
 
 Methods:
+
 - `start` - Start the cognitive core
 - `stop` - Stop the cognitive core
 - `getSystemStatus` - Get system status information
@@ -178,6 +188,7 @@ Methods:
 - `addCognitiveItem` - Add a cognitive item to the system
 
 Example:
+
 ```javascript
 // Start the cognitive core
 ws.send(JSON.stringify({
@@ -206,9 +217,11 @@ ws.send(JSON.stringify({
 #### Perception Component
 
 Methods:
+
 - `processInput` - Process natural language input into cognitive items
 
 Example:
+
 ```javascript
 // Process natural language input with uncertainty consideration
 ws.send(JSON.stringify({
@@ -225,10 +238,12 @@ ws.send(JSON.stringify({
 #### Agenda Component
 
 Methods:
+
 - `size` - Get the current size of the agenda
 - `peek` - Peek at the top item in the agenda
 
 Example:
+
 ```javascript
 // Get agenda size
 ws.send(JSON.stringify({
@@ -243,9 +258,11 @@ ws.send(JSON.stringify({
 #### World Model Component
 
 Methods:
+
 - `getStatistics` - Get world model statistics
 
 Example:
+
 ```javascript
 // Get world model statistics
 ws.send(JSON.stringify({
@@ -292,6 +309,7 @@ The system also sends events and errors:
 ```
 
 Example response handling:
+
 ```javascript
 ws.onmessage = function(event) {
   const message = JSON.parse(event.data);
@@ -345,25 +363,33 @@ curl -X POST http://localhost:3000/api/process \
 The system can process different types of input through its non-axiomatic logic framework:
 
 1. **Uncertain Statements** - Information with implicit uncertainty like "Chocolate is likely toxic to dogs"
-2. **Probabilistic Questions** - Queries that require uncertainty-aware answers like "What is the probability my cat is sick after eating chocolate?"
-3. **Conditional Commands** - Action requests with uncertainty considerations like "If my plant is wilting due to overwatering, reduce watering frequency"
-4. **Exploratory Goals** - Complex objectives with uncertainty evaluation like "Diagnose why my plant is wilting considering multiple possible causes"
-5. **Adaptive Requests** - Multi-part requests that adapt based on uncertainty like "Create a health plan for my pet that adjusts based on ongoing symptoms"
+2. **Probabilistic Questions** - Queries that require uncertainty-aware answers like "What is the probability my cat is
+   sick after eating chocolate?"
+3. **Conditional Commands** - Action requests with uncertainty considerations like "If my plant is wilting due to
+   overwatering, reduce watering frequency"
+4. **Exploratory Goals** - Complex objectives with uncertainty evaluation like "Diagnose why my plant is wilting
+   considering multiple possible causes"
+5. **Adaptive Requests** - Multi-part requests that adapt based on uncertainty like "Create a health plan for my pet
+   that adjusts based on ongoing symptoms"
 
 ### Input Validation
 
 The system validates all inputs:
+
 - Minimum length: 3 characters
 - Maximum length: 10,000 characters
 - Must be a string
 
 ### Best Practices for Non-Axiomatic Logic Processing
 
-1. **Express Uncertainty Explicitly** - Include phrases like "likely", "possibly", "with high probability" to help the system understand uncertainty levels
+1. **Express Uncertainty Explicitly** - Include phrases like "likely", "possibly", "with high probability" to help the
+   system understand uncertainty levels
 2. **Use Conditional Language** - Frame requests with "if-then" constructs to express conditional relationships
 3. **Specify Confidence Requirements** - Indicate when you need high-confidence answers vs. exploratory responses
-4. **Break Down Complex Requests** - For very complex tasks, consider breaking them down into simpler sub-tasks with explicit uncertainty handling
-5. **Monitor System Status** - Use the status and stats commands to monitor system performance and uncertainty processing
+4. **Break Down Complex Requests** - For very complex tasks, consider breaking them down into simpler sub-tasks with
+   explicit uncertainty handling
+5. **Monitor System Status** - Use the status and stats commands to monitor system performance and uncertainty
+   processing
 6. **Be Specific and Clear** - Use clear, unambiguous language while acknowledging inherent uncertainties
 7. **Check Input Length** - Ensure inputs are between 3-10,000 characters
 
@@ -371,11 +397,14 @@ The system validates all inputs:
 
 The system categorizes output through its non-axiomatic framework:
 
-1. **Beliefs** - Factual information the system has learned or inferred with associated truth values (frequency and confidence)
-2. **Goals** - Tasks or objectives the system needs to accomplish with associated attention values (priority and durability)
+1. **Beliefs** - Factual information the system has learned or inferred with associated truth values (frequency and
+   confidence)
+2. **Goals** - Tasks or objectives the system needs to accomplish with associated attention values (priority and
+   durability)
 3. **Queries** - Questions that require answers or exploration with associated interest values
 
-Each cognitive item includes metadata about its truth value and attention value, which help determine its reliability and importance in the non-axiomatic framework.
+Each cognitive item includes metadata about its truth value and attention value, which help determine its reliability
+and importance in the non-axiomatic framework.
 
 ## Metaprogramming and Self-Modification
 
@@ -386,38 +415,40 @@ The unified interface enables direct interaction with the system's self-represen
 3. **Schema Evolution** - Add or modify cognitive patterns that guide reasoning
 4. **Reflection Control** - Configure how the system monitors and adapts itself
 
-Through the metaprogramming interface in both CLI and Web UI, users can directly modify system behavior and observe how the system adapts its reasoning processes.
+Through the metaprogramming interface in both CLI and Web UI, users can directly modify system behavior and observe how
+the system adapts its reasoning processes.
 
 ## Troubleshooting
 
 ### Common Issues
 
 1. **Connection problems with WebSocket interface**
-   - Ensure the WebSocket server is running (`npm run start:ws` or `npm run start:web`)
-   - Check that the port (8080 by default) is not blocked by a firewall
-   - Verify the WebSocket URL is correct
-   - Check the web interface for connection status indicators
+    - Ensure the WebSocket server is running (`npm run start:ws` or `npm run start:web`)
+    - Check that the port (8080 by default) is not blocked by a firewall
+    - Verify the WebSocket URL is correct
+    - Check the web interface for connection status indicators
 
 2. **No results from input processing**
-   - Try rephrasing your input to be more explicit about uncertainty
-   - Make sure your input contains clear statements, questions, or commands with uncertainty considerations
-   - Check that the system is properly started
-   - Use the `help` command in CLI or check the Help tab in the web interface
+    - Try rephrasing your input to be more explicit about uncertainty
+    - Make sure your input contains clear statements, questions, or commands with uncertainty considerations
+    - Check that the system is properly started
+    - Use the `help` command in CLI or check the Help tab in the web interface
 
 3. **Performance issues**
-   - Monitor agenda size with the status command
-   - Consider reducing the number of concurrent workers if system is overloaded
-   - Check system status tab in web interface for real-time statistics
+    - Monitor agenda size with the status command
+    - Consider reducing the number of concurrent workers if system is overloaded
+    - Check system status tab in web interface for real-time statistics
 
 4. **Web interface not loading**
-   - Ensure the server is running with `npm run start:web`
-   - Check that port 3000 is not blocked
-   - Try refreshing the page
-   - Check the browser's developer console for errors
+    - Ensure the server is running with `npm run start:web`
+    - Check that port 3000 is not blocked
+    - Try refreshing the page
+    - Check the browser's developer console for errors
 
 ### Getting Help
 
 For additional help, refer to:
+
 - This user guide
 - The system's README.md file
 - The core.md specification document

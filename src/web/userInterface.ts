@@ -1,6 +1,5 @@
-import { DecentralizedCognitiveCore } from '../core/cognitiveCore';
-import { PerceptionSubsystem } from '../modules/perceptionSubsystem';
-import { v4 as uuidv4 } from 'uuid';
+import {DecentralizedCognitiveCore} from '../core/cognitiveCore';
+import {PerceptionSubsystem} from '../modules/perceptionSubsystem';
 import * as readline from 'readline';
 
 export class UserInterface {
@@ -8,7 +7,7 @@ export class UserInterface {
     private perception: PerceptionSubsystem;
     private rl: readline.Interface;
     private isRunning: boolean = false;
-    private startTime: number;
+    private readonly startTime: number;
     private commandHistory: string[] = [];
     private historyIndex: number = 0;
 
@@ -51,14 +50,14 @@ export class UserInterface {
 
         // Setup keypress event for command history navigation
         let inputBuffer = '';
-        
+
         this.rl.question("> ", async (input) => {
             if (!this.isRunning) return;
 
             // Add to command history (if not empty and not a duplicate of last command)
-            if (input.trim() && 
-                (this.commandHistory.length === 0 || 
-                 this.commandHistory[this.commandHistory.length - 1] !== input.trim())) {
+            if (input.trim() &&
+                (this.commandHistory.length === 0 ||
+                    this.commandHistory[this.commandHistory.length - 1] !== input.trim())) {
                 this.commandHistory.push(input.trim());
             }
             this.historyIndex = this.commandHistory.length;
@@ -77,13 +76,13 @@ export class UserInterface {
         process.stdin.on('keypress', (str, key) => {
             // Only handle when we're waiting for input
             if (!this.isRunning) return;
-            
+
             // Handle Ctrl+C to exit
             if (key && key.ctrl && key.name === 'c') {
                 this.stop();
                 return;
             }
-            
+
             // Handle up/down arrows for command history
             if (key && key.name === 'up') {
                 if (this.commandHistory.length > 0) {
@@ -208,7 +207,7 @@ export class UserInterface {
         const minutes = Math.floor((uptime % 3600) / 60);
         const seconds = uptime % 60;
         const uptimeStr = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-        
+
         console.log("System Status:");
         console.log(`  Uptime: ${uptimeStr}`);
         console.log(`  Agenda size: ${status.agendaSize}`);
@@ -237,26 +236,26 @@ export class UserInterface {
             console.log("");
             return;
         }
-        
+
         if (input.length < 3) {
             console.log("Input too short. Please enter at least 3 characters.");
             console.log("Type 'examples' to see input examples.");
             console.log("");
             return;
         }
-        
+
         if (input.length > 10000) {
             console.log("Input too long. Please limit input to 10,000 characters.");
             console.log("");
             return;
         }
-        
+
         console.log(`Processing: "${input}"`);
-        
+
         try {
             // Process the input through the perception subsystem
             const cognitiveItems = await this.perception.processInput(input);
-            
+
             if (cognitiveItems.length === 0) {
                 console.log("No cognitive items were extracted from your input.");
                 console.log("Try rephrasing or providing more specific information.");
@@ -264,7 +263,7 @@ export class UserInterface {
                 console.log("");
                 return;
             }
-            
+
             console.log(`Extracted ${cognitiveItems.length} cognitive item(s):`);
             cognitiveItems.forEach((item, index) => {
                 console.log(`  ${index + 1}. ${item.type}: ${item.label || 'No label'}`);
@@ -277,7 +276,7 @@ export class UserInterface {
                 // Meta information is stored in the associated SemanticAtom, not directly in CognitiveItem
                 // We would need to access the WorldModel to get this information
             });
-            
+
             // Add items to the agenda
             cognitiveItems.forEach(item => {
                 // Add to agenda for processing
@@ -285,14 +284,14 @@ export class UserInterface {
                 // based on their type or content
                 console.log(`Added to agenda: ${item.type} - ${item.label || item.id}`);
             });
-            
+
             console.log("");
             console.log("The system is now processing your input.");
             console.log("Results will appear as they are generated.");
             console.log("(Note: In this demo, results are not automatically displayed in the CLI)");
             console.log("For full interactive experience with real-time results, use the web interface at http://localhost:3000");
             console.log("");
-            
+
         } catch (error) {
             console.error("Error processing input:", error);
             console.log("Please try again or rephrase your input.");

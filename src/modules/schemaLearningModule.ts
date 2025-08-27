@@ -1,5 +1,5 @@
-import { CognitiveItem, CognitiveSchema, WorldModel, SemanticAtom } from '../interfaces/types';
-import { v4 as uuidv4 } from 'uuid';
+import {CognitiveItem, CognitiveSchema, SemanticAtom, WorldModel} from '../interfaces/types';
+import {v4 as uuidv4} from 'uuid';
 
 // Define the structure for schema usage records
 interface SchemaUsageRecord {
@@ -18,7 +18,7 @@ interface SchemaPattern {
 
 /**
  * SchemaLearningModule - Automatically generates new schemas based on successful reasoning patterns
- * 
+ *
  * This module implements a key aspect of Non-Axiomatic Logic: the ability to learn and evolve
  * reasoning patterns through experience. It monitors successful schema applications and
  * generalizes them into new schemas.
@@ -26,8 +26,8 @@ interface SchemaPattern {
 export class SchemaLearningModule {
     private worldModel: WorldModel;
     private schemaUsageHistory: Map<string, SchemaUsageRecord>;
-    private learningThreshold: number; // Minimum success rate to create new schema
-    private minApplications: number;   // Minimum applications before considering learning
+    private readonly learningThreshold: number; // Minimum success rate to create new schema
+    private readonly minApplications: number;   // Minimum applications before considering learning
 
     /**
      * Create a new schema learning module
@@ -72,13 +72,13 @@ export class SchemaLearningModule {
      */
     learnNewSchemas(): string[] {
         const newSchemaIds: string[] = [];
-        
+
         // Look for patterns that have been successfully applied multiple times
         for (const [schemaId, record] of this.schemaUsageHistory.entries()) {
             // Check if we have enough applications and a high enough success rate
-            if (record.applications >= this.minApplications && 
+            if (record.applications >= this.minApplications &&
                 (record.successes / record.applications) >= this.learningThreshold) {
-                
+
                 // Try to generalize this pattern into a new schema
                 const newSchema = this.generalizePattern(schemaId, record.pattern);
                 if (newSchema) {
@@ -86,15 +86,40 @@ export class SchemaLearningModule {
                     const atomId = this.worldModel.add_atom(newSchema.atom);
                     this.worldModel.register_schema_atom(newSchema.atom);
                     newSchemaIds.push(atomId);
-                    
+
                     // Reset the usage history for this pattern to avoid infinite learning
                     record.applications = 0;
                     record.successes = 0;
                 }
             }
         }
-        
+
         return newSchemaIds;
+    }
+
+    /**
+     * Get statistics about the schema learning process
+     * @returns Learning statistics
+     */
+    getStatistics(): any {
+        return {
+            trackedSchemas: this.schemaUsageHistory.size,
+            totalApplications: Array.from(this.schemaUsageHistory.values())
+                .reduce((sum, record) => sum + record.applications, 0),
+            successfulGeneralizations: Array.from(this.schemaUsageHistory.values())
+                .filter(record => record.applications >= this.minApplications &&
+                    (record.successes / record.applications) >= this.learningThreshold)
+                .length,
+            learningThreshold: this.learningThreshold,
+            minApplications: this.minApplications
+        };
+    }
+
+    /**
+     * Clear the schema usage history
+     */
+    clearHistory(): void {
+        this.schemaUsageHistory.clear();
     }
 
     /**
@@ -146,7 +171,7 @@ export class SchemaLearningModule {
      * @param pattern The pattern to generalize
      * @returns A new schema or null if generalization fails
      */
-    private generalizePattern(originalSchemaId: string, pattern: SchemaPattern): {atom: SemanticAtom} | null {
+    private generalizePattern(originalSchemaId: string, pattern: SchemaPattern): { atom: SemanticAtom } | null {
         try {
             // Create a semantic atom for this schema
             const atom: SemanticAtom = {
@@ -163,7 +188,7 @@ export class SchemaLearningModule {
                 }
             };
 
-            return { atom };
+            return {atom};
         } catch (error) {
             console.error('Error generalizing pattern:', error);
             return null;
@@ -180,12 +205,12 @@ export class SchemaLearningModule {
     private applyGeneralizedSchema(a: CognitiveItem, b: CognitiveItem, pattern: SchemaPattern): CognitiveItem[] {
         // This is a simplified implementation
         // A real implementation would contain more sophisticated logic
-        
+
         const derivedItems: CognitiveItem[] = [];
-        
+
         // Create a new belief that combines information from both items
         const combinedContent = `Combination of "${a.label}" and "${b.label}" based on learned pattern`;
-        
+
         const newItem: CognitiveItem = {
             id: uuidv4(),
             atom_id: uuidv4(),
@@ -205,7 +230,7 @@ export class SchemaLearningModule {
             },
             label: combinedContent
         };
-        
+
         derivedItems.push(newItem);
         return derivedItems;
     }
@@ -219,30 +244,5 @@ export class SchemaLearningModule {
         // In a real implementation, this would use a neural network
         // For now, we'll generate a placeholder embedding
         return Array(768).fill(0).map(() => Math.random());
-    }
-
-    /**
-     * Get statistics about the schema learning process
-     * @returns Learning statistics
-     */
-    getStatistics(): any {
-        return {
-            trackedSchemas: this.schemaUsageHistory.size,
-            totalApplications: Array.from(this.schemaUsageHistory.values())
-                .reduce((sum, record) => sum + record.applications, 0),
-            successfulGeneralizations: Array.from(this.schemaUsageHistory.values())
-                .filter(record => record.applications >= this.minApplications && 
-                                (record.successes / record.applications) >= this.learningThreshold)
-                .length,
-            learningThreshold: this.learningThreshold,
-            minApplications: this.minApplications
-        };
-    }
-
-    /**
-     * Clear the schema usage history
-     */
-    clearHistory(): void {
-        this.schemaUsageHistory.clear();
     }
 }

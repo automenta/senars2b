@@ -1,1 +1,1 @@
-export { TextTransducer, SensorStreamTransducer } from './transducers';
+export {TextTransducer, SensorStreamTransducer} from './transducers';

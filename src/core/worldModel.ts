@@ -1,14 +1,21 @@
-import { WorldModel, SemanticAtom, CognitiveItem, TruthValue, CognitiveSchema, BeliefRevisionEngine, UUID } from '../interfaces/types';
-import { v4 as uuidv4 } from 'uuid';
-import { SimpleBeliefRevisionEngine } from './beliefRevisionEngine';
-import { CognitiveItemFactory } from '../modules/cognitiveItemFactory';
+import {
+    BeliefRevisionEngine,
+    CognitiveItem,
+    CognitiveSchema,
+    SemanticAtom,
+    UUID,
+    WorldModel
+} from '../interfaces/types';
+import {v4 as uuidv4} from 'uuid';
+import {SimpleBeliefRevisionEngine} from './beliefRevisionEngine';
+import {CognitiveItemFactory} from '../modules/cognitiveItemFactory';
 
 export class PersistentWorldModel implements WorldModel {
     private atoms: Map<UUID, SemanticAtom> = new Map();
     private items: Map<UUID, CognitiveItem> = new Map();
     private schemas: Map<UUID, CognitiveSchema> = new Map();
     private beliefRevisionEngine: BeliefRevisionEngine;
-    
+
     // Multi-index structures
     private semanticIndex: Map<string, number[]> = new Map(); // atom_id -> embedding
     private symbolicIndex: Map<string, string> = new Map(); // atom_id -> content string
@@ -22,23 +29,23 @@ export class PersistentWorldModel implements WorldModel {
 
     add_atom(atom: SemanticAtom): UUID {
         this.atoms.set(atom.id, atom);
-        
+
         // Update indexes
         this.semanticIndex.set(atom.id, atom.embedding);
         this.symbolicIndex.set(
-            atom.id, 
+            atom.id,
             typeof atom.content === 'string' ? atom.content : JSON.stringify(atom.content)
         );
-        
+
         return atom.id;
     }
 
     add_item(item: CognitiveItem): void {
         this.items.set(item.id, item);
-        
+
         // Update indexes
         this.attentionIndex.set(item.id, item.attention.durability);
-        
+
         // Update temporal index
         const timestamp = Math.floor(item.stamp.timestamp / 1000); // Group by second
         if (!this.temporalIndex.has(timestamp)) {
@@ -73,15 +80,15 @@ export class PersistentWorldModel implements WorldModel {
         // More sophisticated semantic matching implementation using the index
         const similarities = Array.from(this.semanticIndex.entries()).map(([atomId, atomEmbedding]) => {
             const similarity = this.calculateCosineSimilarity(embedding, atomEmbedding);
-            return { atomId, similarity };
+            return {atomId, similarity};
         });
-        
+
         // Sort by similarity (descending) and get top k atom IDs
         const topAtoms = similarities
             .sort((a, b) => b.similarity - a.similarity)
             .slice(0, k)
             .map(x => x.atomId);
-            
+
         // Get corresponding items
         return topAtoms
             .map(atomId => {
@@ -94,19 +101,19 @@ export class PersistentWorldModel implements WorldModel {
     query_by_symbolic(pattern: any, k: number = 10): CognitiveItem[] {
         // Pattern matching implementation using the index
         const patternStr = typeof pattern === 'string' ? pattern : JSON.stringify(pattern).toLowerCase();
-        
+
         // Score atoms based on symbolic match
         const scoredAtoms = Array.from(this.symbolicIndex.entries()).map(([atomId, content]) => {
             const score = this.calculateStringOverlap(patternStr, content.toLowerCase());
-            return { atomId, score };
+            return {atomId, score};
         });
-        
+
         // Sort by score (descending) and get top k atom IDs
         const topAtoms = scoredAtoms
             .sort((a, b) => b.score - a.score)
             .slice(0, k)
             .map(x => x.atomId);
-            
+
         // Get corresponding items
         return topAtoms
             .map(atomId => {
@@ -119,17 +126,17 @@ export class PersistentWorldModel implements WorldModel {
     query_by_structure(pattern: any, k: number = 10): CognitiveItem[] {
         // Structural pattern matching
         const items = Array.from(this.items.values());
-        
+
         // Score items based on structural match
         const scoredItems = items.map(item => {
             const atom = this.get_atom(item.atom_id);
-            if (!atom) return { item, score: 0 };
-            
+            if (!atom) return {item, score: 0};
+
             // Calculate structural similarity
             const score = this.calculateStructuralSimilarity(atom.content, pattern);
-            return { item, score };
+            return {item, score};
         });
-        
+
         // Sort by score (descending) and return top k
         return scoredItems
             .sort((a, b) => b.score - a.score)
@@ -139,12 +146,12 @@ export class PersistentWorldModel implements WorldModel {
 
     revise_belief(new_item: CognitiveItem): [CognitiveItem | null, CognitiveItem | null] {
         if (!new_item.truth) return [null, null];
-        
+
         const existing = this.items.get(new_item.id);
         let event: CognitiveItem | null = null;
 
         if (existing && existing.truth) {
-            const oldTruth = { ...existing.truth };
+            const oldTruth = {...existing.truth};
             let revisedItem: CognitiveItem;
 
             // Check for conflict
@@ -154,15 +161,15 @@ export class PersistentWorldModel implements WorldModel {
             } else {
                 // Merge the beliefs
                 const mergedTruth = this.beliefRevisionEngine.merge(existing.truth, new_item.truth);
-                revisedItem = { ...existing, truth: mergedTruth };
+                revisedItem = {...existing, truth: mergedTruth};
             }
 
             // Update the item in the world model
             this.items.set(revisedItem.id, revisedItem);
-            
+
             // Update index
             this.attentionIndex.set(revisedItem.id, revisedItem.attention.durability);
-            
+
             // Create the BeliefUpdated event
             event = CognitiveItemFactory.createEvent(
                 'BeliefUpdated',
@@ -171,12 +178,12 @@ export class PersistentWorldModel implements WorldModel {
                     oldTruth: oldTruth,
                     newTruth: revisedItem.truth
                 },
-                { priority: 0.8, durability: 0.5 } // System-level event attention
+                {priority: 0.8, durability: 0.5} // System-level event attention
             );
 
             return [revisedItem, event];
         }
-        
+
         // Add new belief if it doesn't exist
         this.add_item(new_item);
         return [new_item, null];
@@ -196,10 +203,10 @@ export class PersistentWorldModel implements WorldModel {
                         return [];
                     }
                 }
-                
+
                 // Fallback to default schema application based on schema type
                 const schemaName = atom.content?.name || '';
-                
+
                 if (schemaName === 'EnhancedAnalogyHypothesis') {
                     // Create a query based on analogy
                     const newItem = {
@@ -265,11 +272,11 @@ export class PersistentWorldModel implements WorldModel {
         this.schemas.set(atom.id, schema);
         return schema;
     }
-    
+
     // Additional query methods for the multi-index structure
     query_by_temporal(startTime: number, endTime: number): CognitiveItem[] {
         const items: CognitiveItem[] = [];
-        
+
         // Iterate through the time range
         for (let ts = startTime; ts <= endTime; ts++) {
             const itemIds = this.temporalIndex.get(ts) || [];
@@ -280,27 +287,27 @@ export class PersistentWorldModel implements WorldModel {
                 }
             }
         }
-        
+
         return items;
     }
-    
+
     query_by_attention(minDurability: number): CognitiveItem[] {
         return Array.from(this.items.values()).filter(
             item => item.attention.durability >= minDurability
         );
     }
-    
+
     // Compaction method for memory management
     compact(): void {
         // Remove items with very low durability that are old
         const now = Date.now();
         const oneDayAgo = now - (24 * 60 * 60 * 1000);
-        
+
         for (const [id, item] of this.items.entries()) {
             if (item.attention.durability < 0.1 && item.stamp.timestamp < oneDayAgo) {
                 this.items.delete(id);
                 this.attentionIndex.delete(id);
-                
+
                 // Remove from temporal index
                 const timestamp = Math.floor(item.stamp.timestamp / 1000);
                 const itemsAtTime = this.temporalIndex.get(timestamp);
@@ -315,7 +322,7 @@ export class PersistentWorldModel implements WorldModel {
             }
         }
     }
-    
+
     query_by_meta(key: string, value: any): CognitiveItem[] {
         const valueMap = this.metaIndex.get(key);
         if (!valueMap) return [];
@@ -350,7 +357,7 @@ export class PersistentWorldModel implements WorldModel {
         );
 
         const binCount = 10;
-        const bins = Array.from({ length: binCount }, (_, i) => {
+        const bins = Array.from({length: binCount}, (_, i) => {
             const lower = (i / binCount).toFixed(1);
             const upper = ((i + 1) / binCount).toFixed(1);
             return `${lower}-${upper}`;
@@ -365,7 +372,7 @@ export class PersistentWorldModel implements WorldModel {
             }
         }
 
-        return { bins, counts };
+        return {bins, counts};
     }
 
     // Get statistics about the world model
@@ -376,10 +383,10 @@ export class PersistentWorldModel implements WorldModel {
         averageItemDurability: number;
     } {
         const durabilities = Array.from(this.items.values()).map(item => item.attention.durability);
-        const avgDurability = durabilities.length > 0 
-            ? durabilities.reduce((a, b) => a + b, 0) / durabilities.length 
+        const avgDurability = durabilities.length > 0
+            ? durabilities.reduce((a, b) => a + b, 0) / durabilities.length
             : 0;
-            
+
         return {
             atomCount: this.atoms.size,
             itemCount: this.items.size,
@@ -390,22 +397,22 @@ export class PersistentWorldModel implements WorldModel {
 
     private calculateCosineSimilarity(a: number[], b: number[]): number {
         if (a.length !== b.length || a.length === 0) return 0;
-        
+
         let dotProduct = 0;
         let magnitudeA = 0;
         let magnitudeB = 0;
-        
+
         for (let i = 0; i < a.length; i++) {
             dotProduct += a[i] * b[i];
             magnitudeA += a[i] * a[i];
             magnitudeB += b[i] * b[i];
         }
-        
+
         magnitudeA = Math.sqrt(magnitudeA);
         magnitudeB = Math.sqrt(magnitudeB);
-        
+
         if (magnitudeA === 0 || magnitudeB === 0) return 0;
-        
+
         return dotProduct / (magnitudeA * magnitudeB);
     }
 
@@ -413,10 +420,10 @@ export class PersistentWorldModel implements WorldModel {
         // Simple string overlap calculation using Jaccard similarity
         const patternWords = new Set(pattern.toLowerCase().split(/\W+/).filter(w => w.length > 0));
         const contentWords = new Set(content.toLowerCase().split(/\W+/).filter(w => w.length > 0));
-        
+
         const intersection = new Set([...patternWords].filter(x => contentWords.has(x)));
         const union = new Set([...patternWords, ...contentWords]);
-        
+
         return union.size > 0 ? intersection.size / union.size : 0;
     }
 
@@ -425,21 +432,21 @@ export class PersistentWorldModel implements WorldModel {
         if (typeof pattern !== 'object' || pattern === null) {
             return typeof obj === typeof pattern ? 1 : 0;
         }
-        
+
         if (typeof obj !== 'object' || obj === null) {
             return 0;
         }
-        
+
         // Count matching keys
         const patternKeys = Object.keys(pattern);
         const objKeys = Object.keys(obj);
         const commonKeys = patternKeys.filter(key => objKeys.includes(key));
-        
+
         if (patternKeys.length === 0) return objKeys.length === 0 ? 1 : 0;
-        
+
         // Calculate key matching score
         const keyMatchScore = commonKeys.length / Math.max(patternKeys.length, objKeys.length);
-        
+
         // Calculate value matching score for common keys
         let valueMatchScore = 0;
         if (commonKeys.length > 0) {
@@ -447,7 +454,7 @@ export class PersistentWorldModel implements WorldModel {
                 return score + this.calculateStructuralSimilarity(obj[key], pattern[key]);
             }, 0) / commonKeys.length;
         }
-        
+
         // Weighted combination
         return 0.3 * keyMatchScore + 0.7 * valueMatchScore;
     }

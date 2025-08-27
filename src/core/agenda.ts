@@ -1,5 +1,4 @@
-import { v4 as uuidv4 } from 'uuid';
-import { Agenda, CognitiveItem, AttentionValue, UUID } from '../interfaces/types';
+import {Agenda, AttentionValue, CognitiveItem, UUID} from '../interfaces/types';
 
 /**
  * PriorityAgenda - A priority-based agenda implementation for cognitive items
@@ -28,11 +27,11 @@ export class PriorityAgenda implements Agenda {
             }
             return;
         }
-        
+
         this.items.push(item);
         this.itemMap.set(item.id, item);
         this.sortItemsByPriority();
-        
+
         // Resolve any waiting pop promises
         if (this.waitingQueue.length > 0) {
             const resolver = this.waitingQueue.shift();
@@ -51,7 +50,7 @@ export class PriorityAgenda implements Agenda {
             this.trackPopStatistics();
             return item;
         }
-        
+
         // Return a promise that resolves when an item is added
         return new Promise<CognitiveItem>(resolve => {
             this.waitingQueue.push(() => {
@@ -106,7 +105,7 @@ export class PriorityAgenda implements Agenda {
         }
         return removed;
     }
-    
+
     /**
      * Get an item by ID without removing it from the agenda
      * @param id The ID of the item to retrieve
@@ -115,38 +114,38 @@ export class PriorityAgenda implements Agenda {
     get(id: UUID): CognitiveItem | null {
         return this.itemMap.get(id) || null;
     }
-    
+
     /**
      * Get statistics about agenda usage
      * @returns Object containing size, pop rate, and average wait time
      */
-    getStatistics(): { 
-        size: number; 
-        popRate: number; 
+    getStatistics(): {
+        size: number;
+        popRate: number;
         averageWaitTime: number;
     } {
         const now = Date.now();
         const timeElapsed = now - this.lastPopTime;
         const popRate = timeElapsed > 0 ? this.popCount / (timeElapsed / 1000) : 0; // pops per second
-        
+
         // Calculate average wait time (simplified)
         const totalWaitTime = this.items.reduce((sum, item) => sum + (now - item.stamp.timestamp), 0);
         const averageWaitTime = this.items.length > 0 ? totalWaitTime / this.items.length : 0;
-            
+
         return {
             size: this.items.length,
             popRate,
             averageWaitTime
         };
     }
-    
+
     /**
      * Sort items by priority in descending order (highest first)
      */
     private sortItemsByPriority(): void {
         this.items.sort((a, b) => b.attention.priority - a.attention.priority);
     }
-    
+
     /**
      * Track statistics for pop operations
      */

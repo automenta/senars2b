@@ -1,5 +1,5 @@
 class UncertaintyDonut extends Component {
-    constructor(element, { frequency, confidence, thresholds = {} }) {
+    constructor(element, {frequency, confidence, thresholds = {}}) {
         super(element);
         this.frequency = frequency;
         this.confidence = confidence;

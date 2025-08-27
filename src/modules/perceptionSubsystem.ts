@@ -1,7 +1,7 @@
-import { Transducer, CognitiveItem, TruthValue, AttentionValue } from '../interfaces/types';
-import { TextTransducer, SensorStreamTransducer } from './perception';
-import { CognitiveItemFactory } from './cognitiveItemFactory';
-import { v4 as uuidv4 } from 'uuid';
+import {AttentionValue, CognitiveItem, Transducer, TruthValue} from '../interfaces/types';
+import {SensorStreamTransducer, TextTransducer} from './perception';
+import {CognitiveItemFactory} from './cognitiveItemFactory';
+import {v4 as uuidv4} from 'uuid';
 
 export class PerceptionSubsystem {
     private transducers: Transducer[] = [];
@@ -20,7 +20,7 @@ export class PerceptionSubsystem {
     async processInput(data: any): Promise<CognitiveItem[]> {
         const inputType = this.determineInputType(data);
         const startTime = Date.now();
-        
+
         // Try each transducer
         const allItems = [];
         for (const transducer of this.transducers) {
@@ -31,60 +31,60 @@ export class PerceptionSubsystem {
                 console.error("Transducer failed:", error);
             }
         }
-        
+
         // Record processing statistics
         this.processingHistory.push({
             timestamp: startTime,
             inputType,
             itemCount: allItems.length
         });
-        
+
         // Keep only recent history (limit to 100 records)
         this.processingHistory = this.processingHistory.slice(-100);
-        
+
         return allItems;
     }
-    
+
     // Process structured observations
     processObservation(observation: any, source: string = "perception"): CognitiveItem[] {
         const items: CognitiveItem[] = [];
-        const truth: TruthValue = { frequency: 1.0, confidence: 0.9 };
-        const attention: AttentionValue = { priority: 0.7, durability: 0.6 };
-        
+        const truth: TruthValue = {frequency: 1.0, confidence: 0.9};
+        const attention: AttentionValue = {priority: 0.7, durability: 0.6};
+
         const item = CognitiveItemFactory.createBelief(
             `observation-${uuidv4()}`,
             truth,
             attention
         );
         item.label = typeof observation === 'string' ? observation : JSON.stringify(observation);
-        
+
         // Add metadata
         (item as any).source = source;
         (item as any).observationType = this.determineObservationType(observation);
-        
+
         items.push(item);
         return items;
     }
-    
+
     // Process user commands
     processCommand(command: string): CognitiveItem[] {
         const items: CognitiveItem[] = [];
-        const attention: AttentionValue = { priority: 0.9, durability: 0.7 };
-        
+        const attention: AttentionValue = {priority: 0.9, durability: 0.7};
+
         const item = CognitiveItemFactory.createGoal(
             `command-${uuidv4()}`,
             attention
         );
         item.label = command;
-        
+
         // Add metadata
         (item as any).source = "user_command";
         (item as any).commandType = this.classifyCommand(command);
-        
+
         items.push(item);
         return items;
     }
-    
+
     // Get processing statistics
     getStatistics(): {
         totalProcessed: number;
@@ -92,25 +92,25 @@ export class PerceptionSubsystem {
         recentProcessingRate: number; // items per second
     } {
         if (this.processingHistory.length === 0) {
-            return { totalProcessed: 0, averageItemsPerInput: 0, recentProcessingRate: 0 };
+            return {totalProcessed: 0, averageItemsPerInput: 0, recentProcessingRate: 0};
         }
-        
+
         const totalItems = this.processingHistory.reduce((sum, record) => sum + record.itemCount, 0);
         const averageItems = totalItems / this.processingHistory.length;
-        
+
         // Calculate recent processing rate (last 10 records)
         const recentRecords = this.processingHistory.slice(-10);
         const timeSpan = Date.now() - (recentRecords[0]?.timestamp || Date.now());
         const recentItems = recentRecords.reduce((sum, record) => sum + record.itemCount, 0);
         const processingRate = timeSpan > 0 ? recentItems / (timeSpan / 1000) : 0; // items per second
-        
+
         return {
             totalProcessed: this.processingHistory.length,
             averageItemsPerInput: averageItems,
             recentProcessingRate: processingRate
         };
     }
-    
+
     private determineInputType(data: any): string {
         if (typeof data === 'string') return 'text';
         if (Array.isArray(data)) return 'array';
@@ -119,7 +119,7 @@ export class PerceptionSubsystem {
         if (typeof data === 'boolean') return 'boolean';
         return 'unknown';
     }
-    
+
     private determineObservationType(observation: any): string {
         if (typeof observation === 'string') return 'textual';
         if (typeof observation === 'number') return 'numerical';
@@ -131,7 +131,7 @@ export class PerceptionSubsystem {
         }
         return 'unknown';
     }
-    
+
     private classifyCommand(command: string): string {
         const cmd = command.toLowerCase();
         const commandTypes: [string[], string][] = [
@@ -141,11 +141,11 @@ export class PerceptionSubsystem {
             [['delete', 'remove', 'cancel'], 'deletion'],
             [['update', 'change', 'modify'], 'modification']
         ];
-        
+
         for (const [keywords, type] of commandTypes) {
             if (keywords.some(keyword => cmd.includes(keyword))) return type;
         }
-        
+
         return 'general';
     }
 }

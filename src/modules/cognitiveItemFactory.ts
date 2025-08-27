@@ -1,9 +1,9 @@
-import { v4 as uuidv4 } from 'uuid';
-import { CognitiveItem, AttentionValue, TruthValue, DerivationStamp, UUID } from '../interfaces/types';
+import {v4 as uuidv4} from 'uuid';
+import {AttentionValue, CognitiveItem, DerivationStamp, TruthValue, UUID} from '../interfaces/types';
 
 /**
  * CognitiveItemFactory - Factory for creating cognitive items with consistent structure
- * 
+ *
  * This factory ensures that all cognitive items are created with proper UUIDs,
  * timestamps, and consistent structure according to the cognitive architecture.
  */
@@ -95,7 +95,7 @@ export class CognitiveItemFactory {
      * @returns A new derived cognitive item
      */
     static createDerivedItem(
-        atomId: string, 
+        atomId: string,
         type: 'BELIEF' | 'GOAL' | 'QUERY',
         parentIds: UUID[],
         schemaId: UUID,
@@ -110,18 +110,18 @@ export class CognitiveItemFactory {
             attention,
             stamp: this.createStamp(parentIds, schemaId)
         };
-        
+
         if (truth && type === 'BELIEF') {
             item.truth = truth;
         }
-        
+
         if (type === 'GOAL') {
             item.goal_status = 'active';
             if (goalParentId) {
                 item.goal_parent_id = goalParentId;
             }
         }
-        
+
         return item;
     }
 

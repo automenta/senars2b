@@ -2,28 +2,27 @@
 
 /**
  * Senars3 Cognitive System - Advanced Demo
- * 
+ *
  * This script demonstrates the advanced capabilities of the Senars3 cognitive system
  * with a complex, multi-domain scenario.
  */
 
-import { UserInterface } from '../web/userInterface';
-import { DecentralizedCognitiveCore } from '../core/cognitiveCore';
-import { PerceptionSubsystem } from '../modules/perceptionSubsystem';
+import {DecentralizedCognitiveCore} from '../core/cognitiveCore';
+import {PerceptionSubsystem} from '../modules/perceptionSubsystem';
 
 async function runAdvancedDemo() {
     console.log("===========================================");
     console.log("  Senars3 Cognitive System - Advanced Demo");
     console.log("===========================================");
     console.log("");
-    
+
     // Create a simplified version for demonstration
     const core = new DecentralizedCognitiveCore(2);
     const perception = new PerceptionSubsystem();
-    
+
     console.log("Initializing cognitive core...");
     await core.start();
-    
+
     // Complex scenario: Environmental impact assessment for a new industrial project
     console.log("\n--- Complex Environmental Scenario ---");
     const complexScenario = `
@@ -35,18 +34,18 @@ async function runAdvancedDemo() {
     Consider regulatory compliance, sustainable alternatives, and stakeholder concerns. 
     Provide recommendations for a balanced approach that addresses all these factors.
     `;
-    
+
     console.log(`Processing complex scenario:\n${complexScenario}`);
-    
+
     try {
         const cognitiveItems = await perception.processInput(complexScenario);
         console.log(`\nExtracted ${cognitiveItems.length} cognitive item(s):`);
-        
+
         // Group items by type for better presentation
         const beliefs = cognitiveItems.filter(item => item.type === 'BELIEF');
         const goals = cognitiveItems.filter(item => item.type === 'GOAL');
         const queries = cognitiveItems.filter(item => item.type === 'QUERY');
-        
+
         if (beliefs.length > 0) {
             console.log("\nBeliefs identified:");
             beliefs.forEach((item, index) => {
@@ -56,35 +55,35 @@ async function runAdvancedDemo() {
                 }
             });
         }
-        
+
         if (goals.length > 0) {
             console.log("\nGoals identified:");
             goals.forEach((item, index) => {
                 console.log(`  ${index + 1}. ${item.label || 'No label'}`);
             });
         }
-        
+
         if (queries.length > 0) {
             console.log("\nQueries identified:");
             queries.forEach((item, index) => {
                 console.log(`  ${index + 1}. ${item.label || 'No label'}`);
             });
         }
-        
+
     } catch (error) {
         console.error("Error processing input:", error);
     }
-    
+
     // Show system status
     console.log("\n--- System Status ---");
     const status = core.getSystemStatus();
     console.log(`Agenda size: ${status.agendaSize}`);
     console.log(`World Model - Atoms: ${status.worldModelStats.atomCount}, Items: ${status.worldModelStats.itemCount}`);
-    
+
     // Stop the core
     console.log("\nStopping cognitive core...");
     core.stop();
-    
+
     console.log("\nAdvanced demo completed!");
     console.log("\nThis demonstrates the system's ability to process complex, multi-domain scenarios");
     console.log("and extract multiple types of cognitive items from natural language input.");

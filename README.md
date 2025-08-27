@@ -1,36 +1,37 @@
 # Senars3 Cognitive System
 
-A next-generation agentic reasoning system that uses Non-Axiomatic Logic (NAL) principles to implement the ultimate fusion of symbolic reasoning and Language Model technology.
+A next-generation agentic reasoning system that uses Non-Axiomatic Logic (NAL) principles to implement the ultimate
+fusion of symbolic reasoning and Language Model technology.
 
 ## Table of Contents
 
 - [Overview](#overview)
 - [Non-Axiomatic Logic Principles](#non-axiomatic-logic-principles)
-  - [1. Experience-Grounded Reasoning](#1-experience-grounded-reasoning)
-  - [2. Uncertainty Management](#2-uncertainty-management)
-  - [3. Goal-Directed Cognition](#3-goal-directed-cognition)
-  - [4. Self-Reflective Operation](#4-self-reflective-operation)
+    - [1. Experience-Grounded Reasoning](#1-experience-grounded-reasoning)
+    - [2. Uncertainty Management](#2-uncertainty-management)
+    - [3. Goal-Directed Cognition](#3-goal-directed-cognition)
+    - [4. Self-Reflective Operation](#4-self-reflective-operation)
 - [Core Data Model](#core-data-model)
-  - [SemanticAtom](#semanticiatom)
-  - [CognitiveItem](#cognitiveitem)
+    - [SemanticAtom](#semanticiatom)
+    - [CognitiveItem](#cognitiveitem)
 - [Cognitive Architecture](#cognitive-architecture)
-  - [1. Agenda System](#1-agenda-system)
-  - [2. World Model](#2-world-model)
-  - [3. Cognitive Core](#3-cognitive-core)
-  - [4. Pluggable Cognitive Modules](#4-pluggable-cognitive-modules)
-  - [5. I/O Subsystems](#5-io-subsystems)
+    - [1. Agenda System](#1-agenda-system)
+    - [2. World Model](#2-world-model)
+    - [3. Cognitive Core](#3-cognitive-core)
+    - [4. Pluggable Cognitive Modules](#4-pluggable-cognitive-modules)
+    - [5. I/O Subsystems](#5-io-subsystems)
 - [Features](#features)
 - [Reasoning Processes](#reasoning-processes)
-  - [1. Perception and Input Processing](#1-perception-and-input-processing)
-  - [2. Agenda Management](#2-agenda-management)
-  - [3. Inference and Knowledge Generation](#3-inference-and-knowledge-generation)
-  - [4. Learning and Adaptation](#4-learning-and-adaptation)
+    - [1. Perception and Input Processing](#1-perception-and-input-processing)
+    - [2. Agenda Management](#2-agenda-management)
+    - [3. Inference and Knowledge Generation](#3-inference-and-knowledge-generation)
+    - [4. Learning and Adaptation](#4-learning-and-adaptation)
 - [System Architecture](#system-architecture)
-  - [Core Components](#core-components)
-  - [Modular Design](#modular-design)
-  - [Cognitive Processes](#cognitive-processes)
-  - [Data Model](#data-model)
-  - [Interface Design](#interface-design)
+    - [Core Components](#core-components)
+    - [Modular Design](#modular-design)
+    - [Cognitive Processes](#cognitive-processes)
+    - [Data Model](#data-model)
+    - [Interface Design](#interface-design)
 - [Input Processing](#input-processing)
 - [Self-Development Capabilities](#self-development-capabilities)
 - [Metaprogramming and Self-Modification](#metaprogramming-and-self-modification)
@@ -46,9 +47,13 @@ A next-generation agentic reasoning system that uses Non-Axiomatic Logic (NAL) p
 
 ## Overview
 
-The Senars3 cognitive system implements a next-generation agentic reasoning framework based on Non-Axiomatic Logic (NAL) principles. This approach fundamentally differs from traditional symbolic AI systems by replacing fixed axioms with experience-grounded reasoning, enabling the system to handle uncertainty, learn from incomplete information, and adapt its knowledge base through interaction with its environment.
+The Senars3 cognitive system implements a next-generation agentic reasoning framework based on Non-Axiomatic Logic (NAL)
+principles. This approach fundamentally differs from traditional symbolic AI systems by replacing fixed axioms with
+experience-grounded reasoning, enabling the system to handle uncertainty, learn from incomplete information, and adapt
+its knowledge base through interaction with its environment.
 
-The system combines symbolic reasoning with Language Model technology to create a system capable of learning, adaptation, and self-improvement through interaction with its environment. It features:
+The system combines symbolic reasoning with Language Model technology to create a system capable of learning,
+adaptation, and self-improvement through interaction with its environment. It features:
 
 - Experience-grounded reasoning instead of fixed axioms
 - Explicit uncertainty management through truth values (frequency and confidence)
@@ -66,15 +71,18 @@ Senars3 is designed as a cognitive system that processes information through mul
 4. **Learning Mechanisms**: Evolves its knowledge base through experience
 5. **Output Generation**: Produces responses that account for uncertainty and confidence
 
-The system operates through continuous cycles of perception, reasoning, and learning, with each component contributing to the overall cognitive process.
+The system operates through continuous cycles of perception, reasoning, and learning, with each component contributing
+to the overall cognitive process.
 
 ## Non-Axiomatic Logic Principles
 
-Senars3 is built on four foundational principles of Non-Axiomatic Logic that enable adaptive, uncertainty-aware reasoning:
+Senars3 is built on four foundational principles of Non-Axiomatic Logic that enable adaptive, uncertainty-aware
+reasoning:
 
 ### 1. Experience-Grounded Reasoning
 
-Unlike classical logic systems that rely on fixed axioms, NAL grounds all reasoning in experience. Every conclusion is derived from observations and interactions rather than predetermined rules. This allows the system to:
+Unlike classical logic systems that rely on fixed axioms, NAL grounds all reasoning in experience. Every conclusion is
+derived from observations and interactions rather than predetermined rules. This allows the system to:
 
 - **Adapt to new domains** without reprogramming
 - **Handle incomplete or contradictory information** gracefully
@@ -89,6 +97,7 @@ All knowledge in the system carries explicit uncertainty measures through truth 
 - **Confidence (c)**: The amount of evidence available (0.0 to 1.0)
 
 These values allow the system to:
+
 - **Distinguish** between well-supported beliefs and tentative hypotheses
 - **Make decisions** based on available evidence even when incomplete
 - **Update beliefs** as new evidence becomes available
@@ -96,12 +105,14 @@ These values allow the system to:
 
 ### 3. Goal-Directed Cognition
 
-All cognitive processes are driven by goals, which are represented as special types of cognitive items with attention values:
+All cognitive processes are driven by goals, which are represented as special types of cognitive items with attention
+values:
 
 - **Priority (p)**: The current importance of pursuing the goal (0.0 to 1.0)
 - **Durability (d)**: How long the goal remains important (0.0 to 1.0)
 
 This enables the system to:
+
 - **Focus computational resources** on high-priority tasks
 - **Balance immediate needs** with long-term objectives
 - **Adapt goal priorities** based on changing circumstances
@@ -126,15 +137,16 @@ The fundamental unit of knowledge representation that combines natural language 
 
 ```typescript
 interface SemanticAtom {
-  id: string;                // Unique identifier
-  content: string;           // Natural language content
-  embedding: number[];       // Semantic vector representation
-  creationTime: number;      // Timestamp of creation
-  lastAccessTime: number;    // Timestamp of last access
+    id: string;                // Unique identifier
+    content: string;           // Natural language content
+    embedding: number[];       // Semantic vector representation
+    creationTime: number;      // Timestamp of creation
+    lastAccessTime: number;    // Timestamp of last access
 }
 ```
 
-Each SemanticAtom represents a piece of knowledge with both symbolic (content) and sub-symbolic (embedding) representations, enabling the system to leverage both logical reasoning and semantic similarity.
+Each SemanticAtom represents a piece of knowledge with both symbolic (content) and sub-symbolic (embedding)
+representations, enabling the system to leverage both logical reasoning and semantic similarity.
 
 ### CognitiveItem
 
@@ -142,30 +154,32 @@ Contextualized thoughts with associated values that drive the cognitive processe
 
 ```typescript
 interface CognitiveItem {
-  id: string;                // Unique identifier
-  type: 'BELIEF' | 'GOAL' | 'QUERY'; // Item category
-  label: string;             // Natural language representation
-  truth?: TruthValue;        // Truth value for beliefs
-  attention?: AttentionValue; // Attention value for goals
-  meta?: Record<string, any>; // Metadata (domain, source, etc.)
+    id: string;                // Unique identifier
+    type: 'BELIEF' | 'GOAL' | 'QUERY'; // Item category
+    label: string;             // Natural language representation
+    truth?: TruthValue;        // Truth value for beliefs
+    attention?: AttentionValue; // Attention value for goals
+    meta?: Record<string, any>; // Metadata (domain, source, etc.)
 }
 
 interface TruthValue {
-  frequency: number;         // Evidence frequency (0.0 to 1.0)
-  confidence: number;        // Evidence amount (0.0 to 1.0)
+    frequency: number;         // Evidence frequency (0.0 to 1.0)
+    confidence: number;        // Evidence amount (0.0 to 1.0)
 }
 
 interface AttentionValue {
-  priority: number;          // Current importance (0.0 to 1.0)
-  durability: number;        // Persistence of importance (0.0 to 1.0)
+    priority: number;          // Current importance (0.0 to 1.0)
+    durability: number;        // Persistence of importance (0.0 to 1.0)
 }
 ```
 
-CognitiveItems represent the active elements in the system's reasoning process, each with specific types and values that determine how they are processed.
+CognitiveItems represent the active elements in the system's reasoning process, each with specific types and values that
+determine how they are processed.
 
 ## Cognitive Architecture
 
-The system follows a modular architecture designed for self-reflection and adaptive reasoning, with each component serving a specific role in the cognitive process:
+The system follows a modular architecture designed for self-reflection and adaptive reasoning, with each component
+serving a specific role in the cognitive process:
 
 ### 1. Agenda System
 
@@ -175,7 +189,9 @@ The central cognitive queue that prioritizes processing tasks:
 - **Dynamic Reordering**: Priorities are continuously updated based on system state
 - **Resource Allocation**: Computational resources are allocated to high-priority items
 
-The Agenda serves as the system's executive function, determining which cognitive tasks to process next based on their importance and urgency. This architecture is particularly beneficial for:
+The Agenda serves as the system's executive function, determining which cognitive tasks to process next based on their
+importance and urgency. This architecture is particularly beneficial for:
+
 - Real-time decision-making systems that must balance multiple competing priorities
 - Resource-constrained environments where computational efficiency is critical
 - Complex planning scenarios with interdependent tasks
@@ -188,7 +204,9 @@ The persistent knowledge base with multi-indexed storage:
 - **Structural Indexing**: Relationship-based retrieval using logical connections
 - **Temporal Indexing**: Time-based retrieval for episodic memory
 
-The World Model maintains all knowledge and beliefs of the system, organized for efficient retrieval through multiple access patterns. This multi-indexed approach enables:
+The World Model maintains all knowledge and beliefs of the system, organized for efficient retrieval through multiple
+access patterns. This multi-indexed approach enables:
+
 - Rapid retrieval of relevant information for diverse query types
 - Cross-domain reasoning by connecting concepts through multiple pathways
 - Context-sensitive information retrieval based on temporal or relational proximity
@@ -201,7 +219,9 @@ Worker pool for executing cognitive cycles with parallel processing capabilities
 - **Scalable Architecture**: Dynamically adjusts to workload demands
 - **Verifiable Provenance**: Every derived item traces back to its source
 
-The Cognitive Core executes the actual reasoning processes, applying various cognitive schemas to generate new knowledge. This design supports:
+The Cognitive Core executes the actual reasoning processes, applying various cognitive schemas to generate new
+knowledge. This design supports:
+
 - High-throughput reasoning for large-scale knowledge processing
 - Complex inference chains that may take variable amounts of time
 - Auditable reasoning processes for critical applications
@@ -217,7 +237,9 @@ Specialized components that handle specific cognitive functions:
 - **GoalTreeManager**: Manages complex goal hierarchies and decomposition
 - **ReflectionLoop**: Enables self-monitoring and adaptation
 
-These modules can be extended or replaced to customize the system's reasoning capabilities for specific domains, making it adaptable to:
+These modules can be extended or replaced to customize the system's reasoning capabilities for specific domains, making
+it adaptable to:
+
 - Scientific reasoning with domain-specific inference patterns
 - Legal reasoning with precedent-based argumentation schemas
 - Medical diagnosis with symptom-to-condition mapping modules
@@ -230,40 +252,49 @@ Interface components for environmental interaction:
 - **PerceptionSubsystem**: Converts natural language input into cognitive items
 - **ActionSubsystem**: Executes actions and outputs responses
 
-The I/O Subsystems provide the interface between the cognitive system and its environment, handling both input processing and output generation. This modular I/O design allows for:
+The I/O Subsystems provide the interface between the cognitive system and its environment, handling both input
+processing and output generation. This modular I/O design allows for:
+
 - Integration with diverse data sources and formats
 - Customized output generation for different user interfaces
 - Seamless interaction with external systems and databases
 
 ## Features
 
-Senars3 provides a comprehensive set of capabilities that enable advanced reasoning in uncertain environments while focusing on enhanced applicability, utility, enjoyability, and potential ubiquity:
+Senars3 provides a comprehensive set of capabilities that enable advanced reasoning in uncertain environments while
+focusing on enhanced applicability, utility, enjoyability, and potential ubiquity:
 
 ### Core Reasoning Capabilities
+
 - **Non-Axiomatic Logic Principles**: Reasoning with uncertainty management and experience-grounded conclusions
 - **Hybrid Cognition**: Combines symbolic logic with semantic vectors for richer representation
 - **Trust-Aware Inference**: Knowledge weighted by credibility measures for more reliable conclusions
 
 ### Architectural Advantages
+
 - **Concurrency-Native**: Built on asynchronous, parallel processing for efficient execution
 - **Modular Abstraction**: Swappable modules with strict interfaces for easy customization
 - **Verifiable Provenance**: Every derived item traces back to its source for transparency and debugging
 
 ### Cognitive Functions
+
 - **Goal-Agentic Flow**: All cognition driven by goals for purposeful reasoning
 - **Self-Reflective Operation**: System audits its own performance for continuous improvement
 - **Schema Learning**: Automatic evolution of reasoning patterns through experience for adaptive intelligence
 
 ### User Experience
+
 - **Unified Interface Access**: Single interface for CLI and Web through WebSocket backend for consistent interaction
 - **Enhanced Usability**: Improved error handling, status monitoring, and user feedback for better experience
 - **Personalization Support**: Adapts to individual user preferences and interaction patterns
 
 ### Self-Modification
+
 - **Metaprogramming Capabilities**: System can represent and modify itself for autonomous improvement
 - **Self-Development**: System can analyze its own performance and generate enhancements for evolution
 
 ### Application Versatility
+
 - **Decision Support**: Evaluate options under uncertainty for better decision-making
 - **Adaptive Planning**: Create plans that adjust to changing conditions and new information
 - **Creative Problem-Solving**: Explore solution spaces with uncertainty-aware exploration
@@ -272,6 +303,7 @@ Senars3 provides a comprehensive set of capabilities that enable advanced reason
 - **Knowledge Management**: Organize and evolve knowledge bases through experience
 
 ### Ubiquity Enablers
+
 - **Cross-Platform Compatibility**: Operate consistently across different environments and devices
 - **Resource Efficiency**: Optimize performance for both high-end and constrained systems
 - **Integration Flexibility**: Connect seamlessly with existing tools and workflows
@@ -290,7 +322,9 @@ When the system receives input, it transforms raw information into actionable co
 4. **Value Assignment**: Assign initial truth and attention values
 5. **Context Integration**: Connect to existing knowledge in the world model
 
-This process converts external stimuli into the internal representations the system can reason about. This capability is essential for:
+This process converts external stimuli into the internal representations the system can reason about. This capability is
+essential for:
+
 - Natural language interfaces that make the system accessible to non-technical users
 - Integration with diverse data sources including documents, databases, and sensor feeds
 - Real-time processing of streaming information in dynamic environments
@@ -304,7 +338,9 @@ The system continuously manages its cognitive tasks through dynamic prioritizati
 3. **Dynamic Reordering**: Reassess priorities as system state changes
 4. **Task Execution**: Process selected items through appropriate modules
 
-This ensures the most important cognitive tasks are addressed first, adapting to changing circumstances. This process is particularly valuable for:
+This ensures the most important cognitive tasks are addressed first, adapting to changing circumstances. This process is
+particularly valuable for:
+
 - Multi-objective optimization problems where trade-offs must be evaluated
 - Emergency response scenarios where priorities shift rapidly
 - Complex project management with interdependent tasks and deadlines
@@ -319,7 +355,9 @@ When applying reasoning schemas, the system generates new knowledge through stru
 4. **Uncertainty Calculation**: Compute truth values for conclusions
 5. **Attention Assignment**: Assign attention values to new items
 
-This process enables the system to derive new insights from existing knowledge while tracking their reliability. Applications include:
+This process enables the system to derive new insights from existing knowledge while tracking their reliability.
+Applications include:
+
 - Scientific hypothesis generation and testing
 - Legal argumentation and case law analysis
 - Diagnostic reasoning in medicine and engineering
@@ -334,7 +372,9 @@ The system continuously improves through experience by reflecting on its perform
 3. **Knowledge Refinement**: Update beliefs based on new evidence
 4. **Strategy Evolution**: Adapt reasoning strategies based on effectiveness
 
-This meta-cognitive process allows the system to become more effective over time through self-improvement. This capability enables:
+This meta-cognitive process allows the system to become more effective over time through self-improvement. This
+capability enables:
+
 - Personalized tutoring systems that adapt to individual learning patterns
 - Autonomous systems that improve performance in dynamic environments
 - Research assistants that develop expertise in specific domains
@@ -359,16 +399,16 @@ The system is built around several core components that work together to enable 
 The system's modular design allows for flexible configuration and extension:
 
 - **Pluggable Cognitive Modules**: Specialized components that handle specific cognitive functions
-  - Attention Module: Manages cognitive focus and resource allocation
-  - Resonance Module: Identifies and strengthens coherent knowledge structures
-  - Schema Matcher: Applies reasoning patterns to generate new knowledge
-  - Belief Revision Engine: Maintains knowledge consistency and updates beliefs
-  - Goal Tree Manager: Manages complex goal hierarchies and decomposition
-  - Reflection Loop: Enables self-monitoring and adaptation
+    - Attention Module: Manages cognitive focus and resource allocation
+    - Resonance Module: Identifies and strengthens coherent knowledge structures
+    - Schema Matcher: Applies reasoning patterns to generate new knowledge
+    - Belief Revision Engine: Maintains knowledge consistency and updates beliefs
+    - Goal Tree Manager: Manages complex goal hierarchies and decomposition
+    - Reflection Loop: Enables self-monitoring and adaptation
 
 - **I/O Subsystems**: Interface components for environmental interaction
-  - Perception Subsystem: Converts inputs into cognitive items
-  - Action Subsystem: Executes actions and generates outputs
+    - Perception Subsystem: Converts inputs into cognitive items
+    - Action Subsystem: Executes actions and generates outputs
 
 ### Cognitive Processes
 
@@ -399,32 +439,34 @@ Senars3 is designed to support multiple interaction paradigms:
 The system is designed to handle various types of input through its non-axiomatic logic framework:
 
 1. **Uncertain Statements**: Information with implicit uncertainty
-   - Example: "Based on my experience, meditation likely reduces stress levels"
-   - Use case: Adding probabilistic knowledge to the system's world model
+    - Example: "Based on my experience, meditation likely reduces stress levels"
+    - Use case: Adding probabilistic knowledge to the system's world model
 
 2. **Probabilistic Questions**: Queries that require uncertainty-aware answers
-   - Example: "What is the probability that this investment will yield positive returns?"
-   - Use case: Decision support systems that need to evaluate risk
+    - Example: "What is the probability that this investment will yield positive returns?"
+    - Use case: Decision support systems that need to evaluate risk
 
 3. **Conditional Commands**: Action requests with uncertainty considerations
-   - Example: "If the weather is good tomorrow, then plan a picnic"
-   - Use case: Planning systems that adapt to changing conditions
+    - Example: "If the weather is good tomorrow, then plan a picnic"
+    - Use case: Planning systems that adapt to changing conditions
 
 4. **Exploratory Goals**: Complex objectives with uncertainty evaluation
-   - Example: "Find possible solutions to reduce energy consumption in my home"
-   - Use case: Creative problem-solving and innovation support
+    - Example: "Find possible solutions to reduce energy consumption in my home"
+    - Use case: Creative problem-solving and innovation support
 
 5. **Adaptive Requests**: Multi-part requests that adapt based on uncertainty
-   - Example: "Suggest a meal plan for the week, adjusting based on my dietary preferences and budget constraints"
-   - Use case: Personalized recommendation systems
+    - Example: "Suggest a meal plan for the week, adjusting based on my dietary preferences and budget constraints"
+    - Use case: Personalized recommendation systems
 
 Best practices for effective input design:
+
 - Express uncertainty explicitly using terms like "likely" or "possibly"
 - Use conditional language with "if-then" constructs
 - Specify confidence requirements when needed
 - Break down complex requests into simpler sub-tasks
 
-The system's ability to process these diverse input types makes it suitable for a wide range of applications, from decision support and planning to creative problem-solving and personalized recommendations.
+The system's ability to process these diverse input types makes it suitable for a wide range of applications, from
+decision support and planning to creative problem-solving and personalized recommendations.
 
 ## Self-Development Capabilities
 
@@ -440,137 +482,169 @@ One of the key features of Senars3 is its ability to analyze its own performance
 The system's self-representational nature enables powerful metaprogramming capabilities:
 
 ### Self-Inspection
+
 - Component Status: Examine internal state of all modules
 - Performance Metrics: Access detailed performance statistics
 - Knowledge Structure: Analyze current knowledge organization
 
 Self-inspection capabilities are particularly valuable for:
+
 - Debugging complex reasoning failures
 - Performance optimization in specialized applications
 - Understanding system behavior in research contexts
 
 ### Self-Modification
+
 - Parameter Adjustment: Modify system parameters that affect reasoning
 - Schema Evolution: Add or modify reasoning patterns
 - Attention Control: Configure focus and resource allocation strategies
 
 Self-modification enables the system to:
+
 - Adapt to domain-specific requirements without reprogramming
 - Optimize performance for particular types of problems
 - Evolve new capabilities based on usage patterns
 
 ### Self-Development
+
 - Capability Expansion: Add new reasoning capabilities through experience
 - Architecture Evolution: Adapt cognitive architecture based on effectiveness
 - Interface Enhancement: Improve interaction mechanisms through use
 
 Self-development capabilities make the system suitable for:
+
 - Lifelong learning assistants that grow with their users
 - Autonomous research systems that develop new methodologies
 - Adaptive tools that evolve with changing organizational needs
 
 ## Design Benefits
 
-The Senars3 system provides several key advantages that make it suitable for complex reasoning tasks in uncertain environments while enhancing applicability, utility, enjoyability, and potential ubiquity:
+The Senars3 system provides several key advantages that make it suitable for complex reasoning tasks in uncertain
+environments while enhancing applicability, utility, enjoyability, and potential ubiquity:
 
 ### Robustness
+
 - Graceful Degradation: Continue functioning with incomplete knowledge
 - Uncertainty Awareness: Explicitly handle unknowns and ambiguities
 - Adaptive Behavior: Adjust strategies based on environmental changes
 
-These features make the system particularly valuable for real-world applications where information is often incomplete or contradictory, such as:
+These features make the system particularly valuable for real-world applications where information is often incomplete
+or contradictory, such as:
+
 - Medical diagnosis with uncertain symptoms
 - Financial forecasting with volatile markets
 - Emergency response planning with evolving situations
 
 ### Flexibility
+
 - Domain Independence: Apply same reasoning principles across domains
 - Dynamic Adaptation: Modify behavior based on task requirements
 - Incremental Learning: Continuously improve through experience
 
 This flexibility enables the system to be applied across diverse fields including:
+
 - Scientific research and hypothesis generation
 - Business strategy development
 - Educational tutoring systems
 - Creative arts and design
 
 ### Transparency
+
 - Explicit Uncertainty: Clear indication of knowledge reliability
 - Traceable Reasoning: Every conclusion linked to its evidence
 - Inspectable Internals: Direct access to cognitive processes
 
-Transparency is crucial for high-stakes applications where understanding the reasoning process is as important as the conclusions, such as:
+Transparency is crucial for high-stakes applications where understanding the reasoning process is as important as the
+conclusions, such as:
+
 - Legal reasoning and case law analysis
 - Regulatory compliance checking
 - Audit trails in financial systems
 
 ### Scalability
+
 - Parallel Processing: Distribute cognitive tasks across workers
 - Resource Management: Efficiently allocate computational resources
 - Modular Architecture: Independent components can be enhanced separately
 
 The scalable design allows the system to handle:
+
 - Large-scale data analysis and pattern recognition
 - Complex multi-objective optimization problems
 - Real-time decision making in dynamic environments
 
 ### Ubiquity Support
+
 - Cross-Platform Compatibility: Operate consistently across different environments
 - Resource Efficiency: Function effectively on both high-end and constrained devices
 - Integration Simplicity: Seamlessly connect with existing tools and workflows
 
-These ubiquity-enabling features make the system accessible to a broader user base and facilitate widespread adoption across diverse environments and use cases.
+These ubiquity-enabling features make the system accessible to a broader user base and facilitate widespread adoption
+across diverse environments and use cases.
 
 ## Future Development Directions
 
-The Senars3 system is designed for continuous evolution, with several enhancement paths identified for future development that align with our goals of enhanced applicability, utility, enjoyability, and potential ubiquity:
+The Senars3 system is designed for continuous evolution, with several enhancement paths identified for future
+development that align with our goals of enhanced applicability, utility, enjoyability, and potential ubiquity:
 
 ### Advanced Uncertainty Models
+
 - Higher-Order Uncertainty: Reason about uncertainty in uncertainty values
 - Temporal Uncertainty: Model how confidence changes over time
 - Contextual Uncertainty: Adjust uncertainty based on situational factors
 
 These enhancements will enable more sophisticated applications such as:
+
 - Predictive maintenance systems that adapt confidence based on equipment history
 - Personalized medicine platforms that model uncertainty in treatment outcomes
 - Autonomous systems that adjust risk tolerance based on environmental conditions
 
 ### Enhanced Metaprogramming
+
 - Self-Programming: Generate new reasoning schemas automatically
 - Architecture Evolution: Dynamically modify cognitive architecture
 - Interface Synthesis: Create custom interfaces for specific tasks
 
 This will allow the system to:
+
 - Automatically optimize its reasoning strategies for specific domains (utility)
 - Generate specialized interfaces for industry-specific applications (applicability)
 - Evolve new cognitive capabilities based on usage patterns (enjoyability)
 
 ### Multi-Agent Integration
+
 - Collaborative Reasoning: Coordinate with other cognitive systems
 - Knowledge Sharing: Exchange knowledge with complementary systems
 - Collective Intelligence: Leverage group reasoning capabilities
 
 Multi-agent collaboration will expand applications to:
+
 - Distributed scientific research networks
 - Collaborative business strategy development
 - Coordinated emergency response systems
 - Collective problem-solving in complex engineering domains
 
 ### User Experience Advancement
+
 - Conversational Flow Optimization: Improve natural dialogue patterns for more enjoyable interactions
 - Personalized Interface Adaptation: Dynamically adjust UI elements based on user preferences
 - Emotional Intelligence Integration: Incorporate empathy and emotional awareness into responses
 
 ### Ecosystem Expansion
+
 - Third-Party Integration Framework: Simplify incorporation into existing software ecosystems
 - Cross-Platform Compatibility: Ensure seamless operation across devices and environments
 - Community-Driven Module Development: Enable external contributors to create specialized modules
 
 ## System Capabilities and Applications
 
-This Non-Axiomatic Logic foundation positions Senars3 as a next-generation agentic reasoning system capable of genuine learning, adaptation, and self-improvement through interaction with complex, uncertain environments. By combining the rigor of symbolic reasoning with the flexibility of Language Model technology, Senars3 represents a significant step forward in artificial cognitive systems.
+This Non-Axiomatic Logic foundation positions Senars3 as a next-generation agentic reasoning system capable of genuine
+learning, adaptation, and self-improvement through interaction with complex, uncertain environments. By combining the
+rigor of symbolic reasoning with the flexibility of Language Model technology, Senars3 represents a significant step
+forward in artificial cognitive systems.
 
-The modular architecture, uncertainty-aware reasoning, and self-modification capabilities make it a powerful platform for exploring advanced AI concepts and developing intelligent applications across diverse domains:
+The modular architecture, uncertainty-aware reasoning, and self-modification capabilities make it a powerful platform
+for exploring advanced AI concepts and developing intelligent applications across diverse domains:
 
 - **Scientific Research**: Hypothesis generation, experimental design, and knowledge synthesis
 - **Business Intelligence**: Strategic planning, risk assessment, and market analysis
@@ -580,20 +654,27 @@ The modular architecture, uncertainty-aware reasoning, and self-modification cap
 - **Finance**: Investment analysis, fraud detection, and regulatory compliance
 - **Creative Arts**: Concept generation, composition assistance, and design exploration
 
-With its focus on enhanced applicability, utility, enjoyability, and potential ubiquity, Senars3 is designed to become more than just a reasoning engine—it aims to be an intelligent companion that adapts to individual needs while maintaining the rigorous logical foundation that makes it unique.
+With its focus on enhanced applicability, utility, enjoyability, and potential ubiquity, Senars3 is designed to become
+more than just a reasoning engine—it aims to be an intelligent companion that adapts to individual needs while
+maintaining the rigorous logical foundation that makes it unique.
 
-Whether you're a researcher exploring the frontiers of artificial intelligence, a developer building intelligent applications, or an end-user seeking advanced decision support, Senars3 provides a flexible and powerful foundation for tackling complex problems in uncertain environments. Its emphasis on user experience and broad accessibility positions it to become a ubiquitous tool that enhances human reasoning and decision-making across all aspects of life and work.
+Whether you're a researcher exploring the frontiers of artificial intelligence, a developer building intelligent
+applications, or an end-user seeking advanced decision support, Senars3 provides a flexible and powerful foundation for
+tackling complex problems in uncertain environments. Its emphasis on user experience and broad accessibility positions
+it to become a ubiquitous tool that enhances human reasoning and decision-making across all aspects of life and work.
 
 ## Design Principles for Enhanced Applicability
 
 To maximize the system's applicability across diverse domains, future development should focus on:
 
 ### Universal Design Patterns
+
 - **Domain-Agnostic Core**: Maintain a core reasoning engine that operates independently of specific domains
 - **Plug-and-Play Modules**: Develop standardized interfaces for domain-specific modules
 - **Adaptive Ontologies**: Create flexible knowledge structures that can evolve with new domains
 
 ### Broad Integration Capabilities
+
 - **Multi-Protocol Support**: Extend beyond WebSocket/REST to include MQTT, gRPC, and other communication protocols
 - **Data Format Versatility**: Process structured data (JSON, XML), unstructured text, and multimedia inputs
 - **Platform Independence**: Ensure compatibility across cloud, edge, and embedded environments
@@ -603,11 +684,13 @@ To maximize the system's applicability across diverse domains, future developmen
 To increase the practical utility of the system, development should prioritize:
 
 ### User-Centric Features
+
 - **Personalization Engines**: Implement user profiling to tailor responses and interactions
 - **Context Awareness**: Enhance environmental sensing and context-sensitive responses
 - **Proactive Assistance**: Develop anticipatory reasoning capabilities that predict user needs
 
 ### Performance Optimization
+
 - **Resource-Efficient Processing**: Optimize algorithms for minimal computational overhead
 - **Real-Time Responsiveness**: Reduce latency for time-critical applications
 - **Scalable Architecture**: Ensure consistent performance under varying workloads
@@ -617,11 +700,13 @@ To increase the practical utility of the system, development should prioritize:
 To make the system more enjoyable to use, focus on:
 
 ### Intuitive Interaction Design
+
 - **Natural Language Mastery**: Improve conversational flow and contextual understanding
 - **Visual Feedback Systems**: Implement rich visualizations of reasoning processes
 - **Gamification Elements**: Introduce progress tracking and achievement systems for learning applications
 
 ### Emotional Intelligence
+
 - **Tone Adaptation**: Adjust communication style based on user preferences and context
 - **Empathetic Responses**: Incorporate emotional awareness in interactions
 - **Personality Customization**: Allow users to define system personality traits
@@ -631,11 +716,13 @@ To make the system more enjoyable to use, focus on:
 To achieve widespread adoption and integration, consider:
 
 ### Ecosystem Development
+
 - **Developer Toolkits**: Create comprehensive SDKs and APIs for third-party integration
 - **Community Building**: Establish forums, documentation, and educational resources
 - **Open Standards Compliance**: Adhere to industry standards for interoperability
 
 ### Accessibility and Inclusion
+
 - **Multi-Language Support**: Expand natural language processing to global languages
 - **Assistive Technology Integration**: Ensure compatibility with screen readers and other aids
 - **Low-Resource Deployments**: Optimize for constrained environments and devices
@@ -645,29 +732,38 @@ To achieve widespread adoption and integration, consider:
 To guide the evolution toward an ideal design, prioritize these enhancement areas:
 
 ### Immediate Goals (Next Release)
+
 - Enhanced uncertainty visualization in web interface
 - Improved schema learning algorithms for faster adaptation
 - Expanded domain-specific module library
 
 ### Medium-Term Objectives (6-12 months)
+
 - Multi-agent collaboration framework
 - Advanced context modeling capabilities
 - Personalization engine with user preference learning
 
 ### Long-Term Vision (1-3 years)
+
 - Autonomous architecture evolution
 - Cross-modal reasoning (text, image, audio integration)
 - Collective intelligence emergence through networked systems
 
 ## Conclusion
 
-The Senars3 cognitive system represents a unique opportunity to create a truly versatile reasoning platform that transcends traditional AI limitations. By focusing on enhanced applicability, utility, enjoyability, and potential ubiquity, we can develop a system that not only solves complex problems but also becomes an indispensable tool for users across all walks of life.
+The Senars3 cognitive system represents a unique opportunity to create a truly versatile reasoning platform that
+transcends traditional AI limitations. By focusing on enhanced applicability, utility, enjoyability, and potential
+ubiquity, we can develop a system that not only solves complex problems but also becomes an indispensable tool for users
+across all walks of life.
 
-The principles outlined above provide a roadmap for evolving Senars3 from a powerful reasoning engine into an intelligent companion that adapts to individual needs while maintaining the rigorous logical foundation that makes it unique.
+The principles outlined above provide a roadmap for evolving Senars3 from a powerful reasoning engine into an
+intelligent companion that adapts to individual needs while maintaining the rigorous logical foundation that makes it
+unique.
 
 ## Additional Documentation
 
 For detailed information about specific components and implementation details, please refer to:
+
 - User Guide (`USER_GUIDE.md`)
 - Test Utilities documentation (`test/unit/README.md`)
 - Architecture Decision Records (`docs/adr/`)

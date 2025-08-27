@@ -29,9 +29,9 @@ class CognitiveItem extends Component {
         filler.className = 'progress-bar-filler';
         filler.style.width = `${percentage}%`;
         const progressColor = label === 'Frequency' ? 'var(--success)' :
-                              label === 'Confidence' ? 'var(--primary)' :
-                              label === 'Priority' ? 'var(--danger)' :
-                              'var(--warning)';
+            label === 'Confidence' ? 'var(--primary)' :
+                label === 'Priority' ? 'var(--danger)' :
+                    'var(--warning)';
         filler.style.backgroundColor = progressColor;
 
         progressBar.appendChild(filler);
@@ -49,9 +49,9 @@ class CognitiveItem extends Component {
         const iconButton = document.createElement('button');
         iconButton.className = 'item-icon-button';
         const typeIcon = this.item.type === 'BELIEF' ? '🧠' :
-                         this.item.type === 'GOAL' ? '🎯' :
-                         this.item.type === 'QUERY' ? '❓' :
-                         this.item.type === 'EVENT' ? '⚡' : '❓';
+            this.item.type === 'GOAL' ? '🎯' :
+                this.item.type === 'QUERY' ? '❓' :
+                    this.item.type === 'EVENT' ? '⚡' : '❓';
         iconButton.textContent = typeIcon;
         iconButton.title = 'Show History';
 
@@ -153,7 +153,7 @@ class CognitiveItem extends Component {
         this.insightsContainer.innerHTML = '<div class="spinner"></div>';
         try {
             const messageId = `insights-${this.item.id}-${Date.now()}`;
-            this.app.sendWebSocketMessage('worldModel', 'getInsightsForBelief', { beliefId: this.item.id }, messageId);
+            this.app.sendWebSocketMessage('worldModel', 'getInsightsForBelief', {beliefId: this.item.id}, messageId);
 
             const response = await this.app.waitForResponse(messageId, 5000);
 
@@ -208,7 +208,7 @@ class CognitiveItem extends Component {
         try {
             // This is a custom implementation of a request that expects a response
             const messageId = `history-${this.item.id}-${Date.now()}`;
-            this.app.sendWebSocketMessage('worldModel', 'getItemHistory', { itemId: this.item.id }, messageId);
+            this.app.sendWebSocketMessage('worldModel', 'getItemHistory', {itemId: this.item.id}, messageId);
 
             const response = await this.app.waitForResponse(messageId, 5000); // 5s timeout
 
