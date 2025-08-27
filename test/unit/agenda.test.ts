@@ -1,4 +1,5 @@
-import { PriorityAgenda } from '../src/core/agenda';
+import { PriorityAgenda } from '../../src/core/agenda';
+import { CognitiveItemFactory } from '../../src/modules/cognitiveItemFactory';
 import { createBeliefItem, createGoalItem } from './testUtils';
 
 describe('PriorityAgenda', () => {

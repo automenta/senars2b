@@ -45,6 +45,18 @@ class MockWorldModel implements WorldModel {
   register_schema_atom(atom: SemanticAtom): any {
     return { atom_id: atom.id };
   }
+
+  getStatistics() {
+    return { atomCount: 0, itemCount: 0, schemaCount: 0, averageItemDurability: 0 };
+  }
+
+  getItemHistory(itemId: string) {
+    return [];
+  }
+
+  getConfidenceDistribution() {
+    return { bins: [], counts: [] };
+  }
 }
 
 describe('SchemaLearningModule', () => {

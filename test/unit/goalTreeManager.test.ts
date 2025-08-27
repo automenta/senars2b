@@ -1,4 +1,5 @@
-import { HierarchicalGoalTreeManager } from '../src/core/goalTreeManager';
+import { HierarchicalGoalTreeManager } from '../../src/core/goalTreeManager';
+import { CognitiveItem } from '../../src/interfaces/types';
 import { createGoalItem } from './testUtils';
 
 describe('HierarchicalGoalTreeManager', () => {

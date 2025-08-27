@@ -74,6 +74,14 @@ export interface WorldModel {
     query_atoms_by_meta(key: string, value: any): SemanticAtom[];
     revise_belief(new_item: CognitiveItem): [CognitiveItem | null, CognitiveItem | null];
     register_schema_atom(atom: SemanticAtom): CognitiveSchema;
+    getStatistics(): {
+        atomCount: number;
+        itemCount: number;
+        schemaCount: number;
+        averageItemDurability: number;
+    };
+    getItemHistory(itemId: UUID): CognitiveItem[];
+    getConfidenceDistribution(): { bins: string[], counts: number[] };
 }
 
 export interface BeliefRevisionEngine {

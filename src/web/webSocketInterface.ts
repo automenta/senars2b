@@ -117,6 +117,16 @@ export class WebSocketInterface {
 
     this.setupWebSocketServer();
     console.log(`WebSocket server started on port ${port}`);
+
+    // Set up the event handler
+    this.core.setEventHandler(this.onCoreEvent.bind(this));
+  }
+
+  private onCoreEvent(event: CognitiveItem): void {
+    if (event.label === 'BeliefUpdated') {
+      this.broadcastEvent('beliefRevised', event.payload);
+    }
+    // We can handle other event types here in the future
   }
 
   private setupWebSocketServer(): void {
@@ -309,38 +319,32 @@ export class WebSocketInterface {
         return this.core.getSystemStatus();
       case 'addInitialBelief':
         if (!payload?.content || !payload?.truth || !payload?.attention) {
-          throw new Error('Missing required fields: content, truth, attention');
+            throw new Error('Missing required fields: content, truth, attention');
         }
-        this.core.addInitialBelief(
-          payload.content,
-          payload.truth as TruthValue,
-          payload.attention as AttentionValue,
-          payload.meta
+        await this.core.addInitialBelief(
+            payload.content,
+            payload.truth as TruthValue,
+            payload.attention as AttentionValue,
+            payload.meta
         );
+        this.broadcastEvent('itemAddedToAgenda', { type: 'BELIEF', content: payload.content });
         return { success: true };
       case 'addInitialGoal':
         if (!payload?.content || !payload?.attention) {
-          throw new Error('Missing required fields: content, attention');
+            throw new Error('Missing required fields: content, attention');
         }
-        this.core.addInitialGoal(
-          payload.content,
-          payload.attention as AttentionValue,
-          payload.meta
+        await this.core.addInitialGoal(
+            payload.content,
+            payload.attention as AttentionValue,
+            payload.meta
         );
+        this.broadcastEvent('itemAddedToAgenda', { type: 'GOAL', content: payload.content });
         return { success: true };
       case 'addSchema':
         if (!payload?.content) {
           throw new Error('Missing required field: content');
         }
         this.core.addSchema(payload.content, payload.meta);
-        return { success: true };
-      case 'addCognitiveItem':
-        if (!payload?.item) {
-          throw new Error('Missing required field: item');
-        }
-        // In a full implementation, we would add the item to the core's agenda
-        // For now, we'll just log that we received the request
-        console.log('Received request to add cognitive item:', payload.item);
         return { success: true };
       default:
         throw new Error(`Unknown core method: ${method}`);
@@ -371,12 +375,19 @@ export class WebSocketInterface {
           const cognitiveItems = await this.perception.processInput(payload.input);
           
           // Add items to the core's agenda
-          cognitiveItems.forEach(item => {
-            // In a real implementation, we would properly add items to the core's agenda
-            // For now, we'll just broadcast that we've processed the items
-            console.log(`Processed item: ${item.type} - ${item.label || item.id}`);
-          });
+          for (const item of cognitiveItems) {
+            if (item.type === 'BELIEF' && item.truth && item.attention) {
+              await this.core.addInitialBelief(item.label, item.truth, item.attention, item.meta);
+            } else if (item.type === 'GOAL' && item.attention) {
+              await this.core.addInitialGoal(item.label, item.attention, item.meta);
+            }
+          }
           
+          this.broadcastEvent('inputProcessed', {
+            input: payload.input,
+            cognitiveItems
+          });
+
           return { 
             cognitiveItems,
             message: `Processed input and extracted ${cognitiveItems.length} cognitive item(s)`,
@@ -406,10 +417,7 @@ export class WebSocketInterface {
   }
 
   private async handleWorldModelRequest(method: string, payload?: any): Promise<any> {
-    // The worldModel is a private member of DecentralizedCognitiveCore.
-    // We cast to `any` to access it, assuming we know the internal structure.
-    // A better solution would be to expose a public getter on the core.
-    const worldModel = (this.core as any).worldModel;
+    const worldModel = this.core.getWorldModel();
     if (!worldModel) {
         throw new Error('WorldModel is not available in the core.');
     }

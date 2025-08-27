@@ -1,4 +1,5 @@
-import { SimpleBeliefRevisionEngine } from '../src/core/beliefRevisionEngine';
+import { SimpleBeliefRevisionEngine } from '../../src/core/beliefRevisionEngine';
+import { TruthValue } from '../../src/interfaces/types';
 import { createTruthValue } from './testUtils';
 
 describe('SimpleBeliefRevisionEngine', () => {

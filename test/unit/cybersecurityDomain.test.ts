@@ -1,4 +1,4 @@
-import { DecentralizedCognitiveCore } from '../src/core/cognitiveCore';
+import { DecentralizedCognitiveCore } from '../../src/core/cognitiveCore';
 import { createTruthValue, createAttentionValue, createCognitiveMetadata } from './testUtils';
 
 describe('Cybersecurity Domain Tests', () => {

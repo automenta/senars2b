@@ -45,7 +45,9 @@ export class DecentralizedCognitiveCore {
     private workerCount: number;
     private isRunning: boolean = false;
     private reflectionInterval: NodeJS.Timeout | null = null;
-    private workerStatistics: Map<number, { itemsProcessed: number; errors: number }> = new Map();
+    private workerStatistics: Map<number, { itemsProcessed: number; errors: number; totalProcessingTime: number }> = new Map();
+    private eventHandler?: (event: CognitiveItem) => void;
+    private startTime: number = 0;
 
     /**
      * Create a new cognitive core
@@ -122,7 +124,7 @@ export class DecentralizedCognitiveCore {
      */
     private initializeWorkerStatistics(): void {
         for (let i = 0; i < this.workerCount; i++) {
-            this.workerStatistics.set(i, { itemsProcessed: 0, errors: 0 });
+            this.workerStatistics.set(i, { itemsProcessed: 0, errors: 0, totalProcessingTime: 0 });
         }
     }
 
@@ -131,6 +133,7 @@ export class DecentralizedCognitiveCore {
      */
     async start(): Promise<void> {
         this.isRunning = true;
+        this.startTime = Date.now();
         console.log(`Starting cognitive core with ${this.workerCount} workers`);
         
         // Start reflection loop
@@ -173,7 +176,7 @@ export class DecentralizedCognitiveCore {
                 }
             } catch (error) {
                 console.error(`Worker ${workerId} encountered an error:`, error);
-                const stats = this.workerStatistics.get(workerId) || { itemsProcessed: 0, errors: 0 };
+                const stats = this.workerStatistics.get(workerId) || { itemsProcessed: 0, errors: 0, totalProcessingTime: 0 };
                 stats.errors++;
                 this.workerStatistics.set(workerId, stats);
             }
@@ -187,10 +190,12 @@ export class DecentralizedCognitiveCore {
      * @param workerId The ID of the worker processing the item
      */
     private async processItem(itemA: CognitiveItem, workerId: number): Promise<void> {
-        // Update worker statistics
-        this.updateWorkerStatistics(workerId);
+        const startTime = Date.now();
         
         try {
+            // Update worker statistics
+            this.updateWorkerStatistics(workerId);
+
             // Contextualize: Find relevant context via hybrid retrieval
             const contextItems = this.resonanceModule.find_context(itemA, this.worldModel, 10);
 
@@ -208,6 +213,10 @@ export class DecentralizedCognitiveCore {
         } catch (error) {
             console.error("Worker failed processing item", itemA.id, error);
             throw error;
+        } finally {
+            const duration = Date.now() - startTime;
+            const stats = this.workerStatistics.get(workerId)!;
+            stats.totalProcessingTime += duration;
         }
     }
 
@@ -216,7 +225,7 @@ export class DecentralizedCognitiveCore {
      * @param workerId The ID of the worker to update statistics for
      */
     private updateWorkerStatistics(workerId: number): void {
-        const stats = this.workerStatistics.get(workerId) || { itemsProcessed: 0, errors: 0 };
+        const stats = this.workerStatistics.get(workerId) || { itemsProcessed: 0, errors: 0, totalProcessingTime: 0 };
         stats.itemsProcessed++;
         this.workerStatistics.set(workerId, stats);
     }
@@ -295,6 +304,9 @@ export class DecentralizedCognitiveCore {
             }
             if (event) {
                 this.agenda.push(event);
+                if (this.eventHandler) {
+                    this.eventHandler(event);
+                }
             }
         }
     }
@@ -487,13 +499,53 @@ export class DecentralizedCognitiveCore {
     public getSystemStatus(): {
         agendaSize: number;
         worldModelStats: any;
-        workerStats: Map<number, { itemsProcessed: number; errors: number }>;
+        workerStats: any;
+        performance: {
+            uptime: string;
+            totalItemsProcessed: number;
+            itemsProcessedPerSecond: number;
+            averageItemProcessingTime: number;
+        }
     } {
+        const totalItems = Array.from(this.workerStatistics.values()).reduce((acc, stats) => acc + stats.itemsProcessed, 0);
+        const totalTime = Array.from(this.workerStatistics.values()).reduce((acc, stats) => acc + stats.totalProcessingTime, 0);
+        const averageItemProcessingTime = totalItems > 0 ? totalTime / totalItems : 0;
+
+        const uptimeSeconds = this.startTime > 0 ? (Date.now() - this.startTime) / 1000 : 0;
+        const itemsProcessedPerSecond = uptimeSeconds > 0 ? totalItems / uptimeSeconds : 0;
+
+        const hours = Math.floor(uptimeSeconds / 3600);
+        const minutes = Math.floor((uptimeSeconds % 3600) / 60);
+        const seconds = Math.floor(uptimeSeconds % 60);
+        const uptimeStr = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+
         return {
             agendaSize: this.agenda.size(),
             worldModelStats: (this.worldModel as PersistentWorldModel).getStatistics(),
-            workerStats: new Map(this.workerStatistics)
+            workerStats: Object.fromEntries(this.workerStatistics),
+            performance: {
+                uptime: uptimeStr,
+                totalItemsProcessed: totalItems,
+                itemsProcessedPerSecond: parseFloat(itemsProcessedPerSecond.toFixed(2)),
+                averageItemProcessingTime: parseFloat(averageItemProcessingTime.toFixed(2))
+            }
         };
+    }
+
+    /**
+     * Get the world model instance
+     * @returns The world model component
+     */
+    public getWorldModel(): WorldModel {
+        return this.worldModel;
+    }
+
+    /**
+     * Set a handler for internally generated events
+     * @param handler The function to call when an event is generated
+     */
+    public setEventHandler(handler: (event: CognitiveItem) => void): void {
+        this.eventHandler = handler;
     }
     
     /**
