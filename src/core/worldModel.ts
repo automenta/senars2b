@@ -1,6 +1,7 @@
 import { WorldModel, SemanticAtom, CognitiveItem, TruthValue, CognitiveSchema, BeliefRevisionEngine, UUID } from '../interfaces/types';
 import { v4 as uuidv4 } from 'uuid';
 import { SimpleBeliefRevisionEngine } from './beliefRevisionEngine';
+import { CognitiveItemFactory } from '../modules/cognitiveItemFactory';
 
 export class PersistentWorldModel implements WorldModel {
     private atoms: Map<UUID, SemanticAtom> = new Map();
@@ -13,6 +14,7 @@ export class PersistentWorldModel implements WorldModel {
     private symbolicIndex: Map<string, string> = new Map(); // atom_id -> content string
     private temporalIndex: Map<number, UUID[]> = new Map(); // timestamp -> item_ids
     private attentionIndex: Map<string, number> = new Map(); // item_id -> durability
+    private metaIndex: Map<string, Map<any, Set<UUID>>> = new Map(); // metaKey -> metaValue -> itemIds
 
     constructor() {
         this.beliefRevisionEngine = new SimpleBeliefRevisionEngine();
@@ -43,6 +45,20 @@ export class PersistentWorldModel implements WorldModel {
             this.temporalIndex.set(timestamp, []);
         }
         this.temporalIndex.get(timestamp)!.push(item.id);
+
+        // Update meta index
+        if (item.meta) {
+            for (const [key, value] of Object.entries(item.meta)) {
+                if (!this.metaIndex.has(key)) {
+                    this.metaIndex.set(key, new Map());
+                }
+                const valueMap = this.metaIndex.get(key)!;
+                if (!valueMap.has(value)) {
+                    valueMap.set(value, new Set());
+                }
+                valueMap.get(value)!.add(item.id);
+            }
+        }
     }
 
     get_atom(id: UUID): SemanticAtom | null {
@@ -121,42 +137,49 @@ export class PersistentWorldModel implements WorldModel {
             .map(x => x.item);
     }
 
-    revise_belief(new_item: CognitiveItem): CognitiveItem | null {
-        if (!new_item.truth) return null;
+    revise_belief(new_item: CognitiveItem): [CognitiveItem | null, CognitiveItem | null] {
+        if (!new_item.truth) return [null, null];
         
         const existing = this.items.get(new_item.id);
+        let event: CognitiveItem | null = null;
+
         if (existing && existing.truth) {
+            const oldTruth = { ...existing.truth };
+            let revisedItem: CognitiveItem;
+
             // Check for conflict
             if (this.beliefRevisionEngine.detect_conflict(existing.truth, new_item.truth)) {
-                // Resolve conflict
                 console.warn(`Conflict detected between beliefs for item ${new_item.id}`);
-                const resolved = (this.beliefRevisionEngine as any).resolve_conflict ? 
-                    (this.beliefRevisionEngine as any).resolve_conflict(existing, new_item) : 
-                    existing; // Fallback to existing if resolve_conflict not implemented
-                
-                // Update the existing item
-                existing.truth = resolved.truth || existing.truth;
-                this.items.set(existing.id, existing);
-                
-                // Update index
-                this.attentionIndex.set(existing.id, existing.attention.durability);
-                
-                return existing;
+                revisedItem = (this.beliefRevisionEngine as any).resolve_conflict(existing, new_item);
+            } else {
+                // Merge the beliefs
+                const mergedTruth = this.beliefRevisionEngine.merge(existing.truth, new_item.truth);
+                revisedItem = { ...existing, truth: mergedTruth };
             }
-            
-            // Merge the beliefs
-            const mergedTruth = this.beliefRevisionEngine.merge(existing.truth, new_item.truth);
-            existing.truth = mergedTruth;
+
+            // Update the item in the world model
+            this.items.set(revisedItem.id, revisedItem);
             
             // Update index
-            this.attentionIndex.set(existing.id, existing.attention.durability);
+            this.attentionIndex.set(revisedItem.id, revisedItem.attention.durability);
             
-            return existing;
+            // Create the BeliefUpdated event
+            event = CognitiveItemFactory.createEvent(
+                'BeliefUpdated',
+                {
+                    itemId: revisedItem.id,
+                    oldTruth: oldTruth,
+                    newTruth: revisedItem.truth
+                },
+                { priority: 0.8, durability: 0.5 } // System-level event attention
+            );
+
+            return [revisedItem, event];
         }
         
         // Add new belief if it doesn't exist
         this.add_item(new_item);
-        return new_item;
+        return [new_item, null];
     }
 
     register_schema_atom(atom: SemanticAtom): CognitiveSchema {
@@ -293,6 +316,24 @@ export class PersistentWorldModel implements WorldModel {
         }
     }
     
+    query_by_meta(key: string, value: any): CognitiveItem[] {
+        const valueMap = this.metaIndex.get(key);
+        if (!valueMap) return [];
+
+        const itemIds = valueMap.get(value);
+        if (!itemIds) return [];
+
+        return Array.from(itemIds)
+            .map(id => this.items.get(id))
+            .filter((item): item is CognitiveItem => item !== undefined);
+    }
+
+    getItemHistory(itemId: UUID): CognitiveItem[] {
+        const historyItems = this.query_by_meta('historicalRecordFor', itemId);
+        // Sort by timestamp descending to get the most recent history first
+        return historyItems.sort((a, b) => b.stamp.timestamp - a.stamp.timestamp);
+    }
+
     // Get statistics about the world model
     getStatistics(): {
         atomCount: number;

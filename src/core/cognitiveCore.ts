@@ -9,6 +9,7 @@ import { CognitiveItemFactory } from '../modules/cognitiveItemFactory';
 import { ReflectionLoop } from './reflectionLoop';
 import { ActionSubsystem } from '../actions/actionSubsystem';
 import { SchemaLearningModule } from '../modules/schemaLearningModule';
+import { HistoryRecordingSchema } from '../modules/systemSchemas';
 import { 
   Agenda, 
   WorldModel, 
@@ -76,6 +77,28 @@ export class DecentralizedCognitiveCore {
         this.reflectionLoop = new ReflectionLoop(this.worldModel, this.agenda);
         this.actionSubsystem = new ActionSubsystem();
         this.schemaLearningModule = new SchemaLearningModule(this.worldModel);
+
+        this.registerSystemSchemas();
+    }
+
+    /**
+     * Register built-in system schemas
+     */
+    private registerSystemSchemas(): void {
+        const historySchemaAtom: SemanticAtom = {
+            id: HistoryRecordingSchema.atom_id,
+            content: { name: 'HistoryRecordingSchema', apply: HistoryRecordingSchema.apply },
+            embedding: [], // System schema, no embedding needed
+            meta: {
+                type: "CognitiveSchema",
+                source: "system",
+                timestamp: new Date().toISOString(),
+                trust_score: 1.0,
+                domain: "system_internals"
+            }
+        };
+        this.worldModel.add_atom(historySchemaAtom);
+        this.schemaMatcher.register_schema(historySchemaAtom, this.worldModel);
     }
 
     /**
@@ -247,9 +270,15 @@ export class DecentralizedCognitiveCore {
      */
     private memorizeBelief(itemA: CognitiveItem): void {
         if (itemA.type === "BELIEF") {
-            const revised = this.worldModel.revise_belief(itemA);
+            const [revised, event] = this.worldModel.revise_belief(itemA);
             if (revised) {
+                // The revised item is already in the world model, but we might want to
+                // push it to the agenda to trigger further reasoning with the new truth value.
+                // The original code did this, so we'll keep it.
                 this.agenda.push(revised);
+            }
+            if (event) {
+                this.agenda.push(event);
             }
         }
     }

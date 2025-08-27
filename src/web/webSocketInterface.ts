@@ -68,7 +68,8 @@ export class WebSocketInterface {
         'peek'
       ],
       worldModel: [
-        'getStatistics'
+        'getStatistics',
+        'getItemHistory'
       ],
       actionSubsystem: [
         'getStatistics',
@@ -403,11 +404,25 @@ export class WebSocketInterface {
   }
 
   private async handleWorldModelRequest(method: string, payload?: any): Promise<any> {
+    // The worldModel is a private member of DecentralizedCognitiveCore.
+    // We cast to `any` to access it, assuming we know the internal structure.
+    // A better solution would be to expose a public getter on the core.
+    const worldModel = (this.core as any).worldModel;
+    if (!worldModel) {
+        throw new Error('WorldModel is not available in the core.');
+    }
+
     switch (method) {
       case 'getStatistics':
-        // Access the world model statistics through the core
-        const status = this.core.getSystemStatus();
-        return { statistics: status.worldModelStats };
+        return { statistics: worldModel.getStatistics() };
+
+      case 'getItemHistory':
+        if (!payload?.itemId) {
+            throw new Error("Missing required field: 'itemId'");
+        }
+        const history = worldModel.getItemHistory(payload.itemId);
+        return { history };
+
       default:
         throw new Error(`Unknown worldModel method: ${method}`);
     }

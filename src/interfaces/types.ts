@@ -36,13 +36,15 @@ export type DerivationStamp = {
 export type CognitiveItem = {
     id: UUID;
     atom_id: UUID;
-    type: 'BELIEF' | 'GOAL' | 'QUERY';
+    type: 'BELIEF' | 'GOAL' | 'QUERY' | 'EVENT';
     truth?: TruthValue;
     attention: AttentionValue;
     stamp: DerivationStamp;
     goal_parent_id?: UUID;
     goal_status?: "active" | "blocked" | "achieved" | "failed";
     label?: string;
+    meta?: Record<string, any>;
+    payload?: Record<string, any>;
 };
 
 export type CognitiveSchema = {
@@ -68,7 +70,8 @@ export interface WorldModel {
     query_by_semantic(embedding: number[], k: number): CognitiveItem[];
     query_by_symbolic(pattern: any, k?: number): CognitiveItem[];
     query_by_structure(pattern: any, k?: number): CognitiveItem[];
-    revise_belief(new_item: CognitiveItem): CognitiveItem | null;
+    query_by_meta(key: string, value: any): CognitiveItem[];
+    revise_belief(new_item: CognitiveItem): [CognitiveItem | null, CognitiveItem | null];
     register_schema_atom(atom: SemanticAtom): CognitiveSchema;
 }
 

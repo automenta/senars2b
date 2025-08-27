@@ -1,14 +1,35 @@
-import { PersistentWorldModel } from '../../dist/worldModel';
-import { SimpleBeliefRevisionEngine } from '../../dist/beliefRevisionEngine';
+import { PersistentWorldModel } from '../../src/core/worldModel';
+import { SimpleBeliefRevisionEngine } from '../../src/core/beliefRevisionEngine';
+import { HistoryRecordingSchema } from '../../src/modules/systemSchemas';
+import { EfficientSchemaMatcher } from '../../src/core/schemaMatcher';
+import { SemanticAtom } from '../../src/interfaces/types';
 import { createSemanticAtom, createBeliefItem } from './testUtils';
 
 describe('PersistentWorldModel', () => {
   let worldModel: PersistentWorldModel;
   let revisionEngine: SimpleBeliefRevisionEngine;
+  let schemaMatcher: EfficientSchemaMatcher;
 
   beforeEach(() => {
     worldModel = new PersistentWorldModel();
     revisionEngine = new SimpleBeliefRevisionEngine();
+    schemaMatcher = new EfficientSchemaMatcher();
+
+    // Register the history schema for testing
+    const historySchemaAtom: SemanticAtom = {
+        id: HistoryRecordingSchema.atom_id,
+        content: { name: 'HistoryRecordingSchema', apply: HistoryRecordingSchema.apply },
+        embedding: [],
+        meta: {
+            type: "CognitiveSchema",
+            source: "system",
+            timestamp: new Date().toISOString(),
+            trust_score: 1.0,
+            domain: "system_internals"
+        }
+    };
+    worldModel.add_atom(historySchemaAtom);
+    schemaMatcher.register_schema(historySchemaAtom, worldModel);
   });
 
   describe('add_atom and get_atom', () => {
@@ -65,13 +86,92 @@ describe('PersistentWorldModel', () => {
   });
 
   describe('revise_belief', () => {
-    it('should revise a belief using the belief revision engine', () => {
+    it('should add a new belief and not generate an event', () => {
       const item = createBeliefItem();
 
-      const revisedItem = worldModel.revise_belief(item);
+      const [revisedItem, event] = worldModel.revise_belief(item);
       
-      // Could return null or a revised item depending on implementation
-      expect(revisedItem === null || typeof revisedItem === 'object').toBe(true);
+      expect(revisedItem).toEqual(item);
+      expect(event).toBeNull();
+      expect(worldModel.get_item(item.id)).toEqual(item);
+    });
+
+    it('should revise an existing belief and generate a BeliefUpdated event', () => {
+        const originalItem = createBeliefItem({ id: 'belief-1' });
+        worldModel.add_item(originalItem);
+
+        const newItem = createBeliefItem({
+            id: 'belief-1',
+            truth: { frequency: 0.5, confidence: 0.7 }
+        });
+
+        const [revisedItem, event] = worldModel.revise_belief(newItem);
+
+        expect(revisedItem).toBeDefined();
+        expect(revisedItem!.id).toBe('belief-1');
+        expect(revisedItem!.truth!.frequency).not.toBe(0.8); // Should have been merged
+
+        expect(event).toBeDefined();
+        expect(event!.type).toBe('EVENT');
+        expect(event!.label).toBe('BeliefUpdated');
+        expect(event!.payload!.itemId).toBe('belief-1');
+        expect(event!.payload!.oldTruth.frequency).toBe(0.8);
+        expect(event!.payload!.newTruth.confidence).toBe(revisedItem!.truth!.confidence);
+    });
+  });
+
+  describe('History Tracking', () => {
+    it('should create a historical belief item after a belief is revised', () => {
+        const originalItem = createBeliefItem({ id: 'belief-2' });
+        worldModel.add_item(originalItem);
+
+        const newItem = createBeliefItem({
+            id: 'belief-2',
+            truth: { frequency: 0.1, confidence: 0.6 }
+        });
+
+        const [, event] = worldModel.revise_belief(newItem);
+
+        expect(event).toBeDefined();
+
+        // Simulate the cognitive core processing the event
+        const historicalBeliefs = HistoryRecordingSchema.apply(event!, {} as any, worldModel);
+        expect(historicalBeliefs).toHaveLength(1);
+
+        const historicalBelief = historicalBeliefs[0];
+        worldModel.add_item(historicalBelief);
+
+        expect(historicalBelief.type).toBe('BELIEF');
+        expect(historicalBelief.meta!.historicalRecordFor).toBe('belief-2');
+        expect(historicalBelief.truth).toEqual(originalItem.truth);
+
+        // Now, test the API layer for retrieving history
+        const history = worldModel.getItemHistory('belief-2');
+        expect(history).toHaveLength(1);
+        expect(history[0].id).toBe(historicalBelief.id);
+    });
+
+    it('should retrieve multiple historical records for an item', () => {
+        const itemId = 'belief-3';
+        const item1 = createBeliefItem({ id: itemId, truth: { frequency: 0.1, confidence: 0.2 }});
+        worldModel.add_item(item1);
+
+        // First revision
+        const item2 = createBeliefItem({ id: itemId, truth: { frequency: 0.3, confidence: 0.4 }});
+        const [, event1] = worldModel.revise_belief(item2);
+        const [hist1] = HistoryRecordingSchema.apply(event1!, {} as any, worldModel);
+        worldModel.add_item(hist1);
+
+        // Second revision
+        const item3 = createBeliefItem({ id: itemId, truth: { frequency: 0.5, confidence: 0.6 }});
+        const [, event2] = worldModel.revise_belief(item3);
+        const [hist2] = HistoryRecordingSchema.apply(event2!, {} as any, worldModel);
+        worldModel.add_item(hist2);
+
+        const history = worldModel.getItemHistory(itemId);
+        expect(history).toHaveLength(2);
+        // Check if sorted correctly (most recent first)
+        expect(history[0].stamp.timestamp).toBeGreaterThan(history[1].stamp.timestamp);
     });
   });
 });

@@ -28,6 +28,27 @@ export class CognitiveItemFactory {
     }
 
     /**
+     * Create an event cognitive item
+     * @param label A label for the event, e.g., 'BeliefUpdated'
+     * @param payload The data associated with the event
+     * @param attention The attention value for the event
+     * @returns A new event cognitive item
+     */
+    static createEvent(label: string, payload: Record<string, any>, attention: AttentionValue): CognitiveItem {
+        // Events might not have a semantic atom, so we use a placeholder UUID for atom_id
+        const atomId = uuidv4();
+        return {
+            id: uuidv4(),
+            atom_id: atomId,
+            type: 'EVENT',
+            label: label,
+            payload: payload,
+            attention: attention,
+            stamp: this.createStamp([])
+        };
+    }
+
+    /**
      * Create a goal cognitive item
      * @param atomId The ID of the semantic atom this goal is based on
      * @param attention The attention value of the goal

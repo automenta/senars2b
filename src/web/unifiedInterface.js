@@ -2,6 +2,7 @@ class Senars3WebApp {
     constructor() {
         this.ws = null;
         this.messageId = 1;
+        this.pendingRequests = new Map();
         this.processedInputs = 0;
         this.reconnectAttempts = 0;
         this.maxReconnectAttempts = 5;
@@ -189,6 +190,14 @@ class Senars3WebApp {
     }
 
     handleResponse(message) {
+        // Check if this response corresponds to a pending request
+        if (this.pendingRequests.has(message.id)) {
+            const resolver = this.pendingRequests.get(message.id);
+            resolver(message);
+            this.pendingRequests.delete(message.id);
+            return; // Don't process as a generic response
+        }
+
         if (message.payload && message.payload.statistics) {
             const stats = message.payload.statistics;
             this.agendaCountEl.textContent = stats.agendaSize || 0;
@@ -228,10 +237,11 @@ class Senars3WebApp {
         this.demoCards.forEach(card => card.style.pointerEvents = 'auto');
     }
 
-    sendWebSocketMessage(target, method, payload) {
+    sendWebSocketMessage(target, method, payload, customId = null) {
         if (this.ws && this.ws.readyState === WebSocket.OPEN) {
+            const messageId = customId || `msg-${this.messageId++}`;
             const message = {
-                id: 'msg-' + this.messageId++,
+                id: messageId,
                 type: 'request',
                 target: target,
                 method: method,
@@ -244,6 +254,20 @@ class Senars3WebApp {
             this.showNotification('Not connected to server. Please wait for reconnection or refresh the page.', 'error');
             return false;
         }
+    }
+
+    waitForResponse(messageId, timeout = 5000) {
+        return new Promise((resolve, reject) => {
+            const timer = setTimeout(() => {
+                this.pendingRequests.delete(messageId);
+                reject(new Error(`Request timed out after ${timeout}ms`));
+            }, timeout);
+
+            this.pendingRequests.set(messageId, (response) => {
+                clearTimeout(timer);
+                resolve(response);
+            });
+        });
     }
 
     requestSystemStatus() {
@@ -310,7 +334,7 @@ class Senars3WebApp {
         this.demoOutput.appendChild(inputHeader);
 
         results.forEach(item => {
-            const cognitiveItemComponent = new CognitiveItem(item);
+            const cognitiveItemComponent = new CognitiveItem(item, this);
             this.demoOutput.appendChild(cognitiveItemComponent.element);
         });
 
