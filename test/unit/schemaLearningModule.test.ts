@@ -31,8 +31,12 @@ class MockWorldModel implements WorldModel {
     return [];
   }
 
-  revise_belief(new_item: CognitiveItem): CognitiveItem | null {
-    return null;
+  query_by_meta(key: string, value: any): CognitiveItem[] {
+    return [];
+  }
+
+  revise_belief(new_item: CognitiveItem): [CognitiveItem | null, CognitiveItem | null] {
+    return [new_item, null];
   }
 
   register_schema_atom(atom: SemanticAtom): any {

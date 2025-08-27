@@ -41,15 +41,22 @@ export class InMemoryWorldModel implements WorldModel {
         return items.slice(0, Math.min(k || 10, items.length));
     }
 
-    revise_belief(new_item: CognitiveItem): CognitiveItem | null {
+    query_by_meta(key: string, value: any): CognitiveItem[] {
+        // Simplified implementation - in a real system, this would use an index
+        return Array.from(this.items.values()).filter(item => {
+            return item.meta && item.meta[key] === value;
+        });
+    }
+
+    revise_belief(new_item: CognitiveItem): [CognitiveItem | null, CognitiveItem | null] {
         // Simplified implementation - in a real system, this would use the belief revision engine
         const existing = this.items.get(new_item.id);
         if (existing) {
             this.items.set(new_item.id, new_item);
-            return new_item;
+            return [new_item, null];
         }
         this.items.set(new_item.id, new_item);
-        return new_item;
+        return [new_item, null];
     }
 
     register_schema_atom(atom: SemanticAtom): CognitiveSchema {

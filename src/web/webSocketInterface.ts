@@ -69,7 +69,8 @@ export class WebSocketInterface {
       ],
       worldModel: [
         'getStatistics',
-        'getItemHistory'
+        'getItemHistory',
+        'getInsightsForBelief'
       ],
       actionSubsystem: [
         'getStatistics',
@@ -422,6 +423,13 @@ export class WebSocketInterface {
         }
         const history = worldModel.getItemHistory(payload.itemId);
         return { history };
+
+      case 'getInsightsForBelief':
+        if (!payload?.beliefId) {
+            throw new Error("Missing required field: 'beliefId'");
+        }
+        const insights = worldModel.query_by_meta('analysisOf', payload.beliefId);
+        return { insights };
 
       default:
         throw new Error(`Unknown worldModel method: ${method}`);

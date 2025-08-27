@@ -527,7 +527,9 @@ class Senars3WebApp {
     }
 }
 
-window.addEventListener('load', () => {
-    const app = new Senars3WebApp();
-    app.init();
-});
+if (typeof window !== 'undefined') {
+    window.addEventListener('load', () => {
+        const app = new Senars3WebApp();
+        app.init();
+    });
+}

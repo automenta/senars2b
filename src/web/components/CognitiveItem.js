@@ -7,6 +7,7 @@ class CognitiveItem extends Component {
         this.app = app; // Reference to the main web app for API calls
         this.element.className = `output-item ${this.item.type.toLowerCase()}`;
         this.isHistoryVisible = false;
+        this.isInsightsVisible = false;
 
         this.render();
         this.setupEventListeners();
@@ -52,16 +53,26 @@ class CognitiveItem extends Component {
                          this.item.type === 'QUERY' ? '❓' :
                          this.item.type === 'EVENT' ? '⚡' : '❓';
         iconButton.textContent = typeIcon;
+        iconButton.title = 'Show History';
+
+        const insightsButton = document.createElement('button');
+        insightsButton.className = 'item-icon-button';
+        insightsButton.textContent = '💡';
+        insightsButton.title = 'Show Insights';
 
         if (this.item.type !== 'BELIEF') {
             iconButton.disabled = true;
             iconButton.style.cursor = 'default';
+            insightsButton.disabled = true;
+            insightsButton.style.cursor = 'default';
         }
-        this.historyButton = iconButton; // Save a reference for later
+        this.historyButton = iconButton;
+        this.insightsButton = insightsButton;
 
         const typeEl = document.createElement('div');
         typeEl.className = 'item-type';
         typeEl.appendChild(iconButton);
+        typeEl.appendChild(insightsButton);
         typeEl.append(` ${this.item.type}`);
 
         const contentEl = document.createElement('div');
@@ -106,12 +117,75 @@ class CognitiveItem extends Component {
         this.historyContainer.className = 'history-container';
         this.historyContainer.style.display = 'none'; // Initially hidden
         this.element.appendChild(this.historyContainer);
+
+        // Placeholder for insights
+        this.insightsContainer = document.createElement('div');
+        this.insightsContainer.className = 'insights-container';
+        this.insightsContainer.style.display = 'none'; // Initially hidden
+        this.element.appendChild(this.insightsContainer);
     }
 
     setupEventListeners() {
         if (this.historyButton && !this.historyButton.disabled) {
             this.historyButton.addEventListener('click', () => this.toggleHistory());
         }
+        if (this.insightsButton && !this.insightsButton.disabled) {
+            this.insightsButton.addEventListener('click', () => this.toggleInsights());
+        }
+    }
+
+    toggleInsights() {
+        this.isInsightsVisible = !this.isInsightsVisible;
+        if (this.isInsightsVisible) {
+            this.insightsContainer.style.display = 'block';
+            this.loadInsights();
+        } else {
+            this.insightsContainer.style.display = 'none';
+        }
+    }
+
+    async loadInsights() {
+        this.insightsContainer.innerHTML = '<div class="spinner"></div>';
+        try {
+            const messageId = `insights-${this.item.id}-${Date.now()}`;
+            this.app.sendWebSocketMessage('worldModel', 'getInsightsForBelief', { beliefId: this.item.id }, messageId);
+
+            const response = await this.app.waitForResponse(messageId, 5000);
+
+            if (response.error) {
+                throw new Error(response.error.message);
+            }
+
+            const insights = response.payload.insights;
+            if (insights && insights.length > 0) {
+                this.renderInsights(insights);
+            } else {
+                this.insightsContainer.innerHTML = '<p>No insights found for this item.</p>';
+            }
+        } catch (error) {
+            this.insightsContainer.innerHTML = `<p class="error">Error loading insights: ${error.message}</p>`;
+            console.error('Failed to load insights:', error);
+        }
+    }
+
+    renderInsights(insights) {
+        this.insightsContainer.innerHTML = ''; // Clear spinner or old content
+
+        const title = document.createElement('h4');
+        title.textContent = 'Meta-Insights';
+        title.style.marginTop = '10px';
+        title.style.marginBottom = '5px';
+        this.insightsContainer.appendChild(title);
+
+        const list = document.createElement('ul');
+        list.className = 'insights-list';
+        insights.forEach(insight => {
+            const listItem = document.createElement('li');
+            listItem.textContent = insight.label;
+            list.appendChild(listItem);
+        });
+
+        this.insightsContainer.appendChild(list);
     }
 
     toggleHistory() {

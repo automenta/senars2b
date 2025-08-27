@@ -9,7 +9,8 @@ export class DynamicAttentionModule implements AttentionModule {
         const baseValues = { 
             'GOAL': { priority: 0.8, durability: 0.7 },
             'BELIEF': { priority: 0.6, durability: 0.8 },
-            'QUERY': { priority: 0.7, durability: 0.6 }
+            'QUERY': { priority: 0.7, durability: 0.6 },
+            'EVENT': { priority: 0.5, durability: 0.5 }
         }[item.type] || { priority: 0.5, durability: 0.5 };
         
         let { priority, durability } = baseValues;

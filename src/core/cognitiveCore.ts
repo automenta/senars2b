@@ -9,7 +9,7 @@ import { CognitiveItemFactory } from '../modules/cognitiveItemFactory';
 import { ReflectionLoop } from './reflectionLoop';
 import { ActionSubsystem } from '../actions/actionSubsystem';
 import { SchemaLearningModule } from '../modules/schemaLearningModule';
-import { HistoryRecordingSchema } from '../modules/systemSchemas';
+import { HistoryRecordingSchema, HistoryAnalysisSchema } from '../modules/systemSchemas';
 import { 
   Agenda, 
   WorldModel, 
@@ -99,6 +99,21 @@ export class DecentralizedCognitiveCore {
         };
         this.worldModel.add_atom(historySchemaAtom);
         this.schemaMatcher.register_schema(historySchemaAtom, this.worldModel);
+
+        const analysisSchemaAtom: SemanticAtom = {
+            id: HistoryAnalysisSchema.atom_id,
+            content: { name: 'HistoryAnalysisSchema', apply: HistoryAnalysisSchema.apply },
+            embedding: [],
+            meta: {
+                type: "CognitiveSchema",
+                source: "system",
+                timestamp: new Date().toISOString(),
+                trust_score: 1.0,
+                domain: "system_internals"
+            }
+        };
+        this.worldModel.add_atom(analysisSchemaAtom);
+        this.schemaMatcher.register_schema(analysisSchemaAtom, this.worldModel);
     }
 
     /**

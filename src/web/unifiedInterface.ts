@@ -5,7 +5,7 @@ import { RestApiInterface } from './restApiInterface';
  * Unified Interface that combines both WebSocket and REST API interfaces
  * This provides a single entry point for all client interactions
  */
-export class UnifiedInterface {
+export default class UnifiedInterface {
   private wsInterface: WebSocketInterface;
   private restInterface: RestApiInterface;
   private wsPort: number;

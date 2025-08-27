@@ -1,4 +1,4 @@
-import { UnifiedInterface } from './unifiedInterface';
+import UnifiedInterface from './unifiedInterface';
 
 const setupShutdownHandler = (unifiedInterface: UnifiedInterface) => {
     const shutdown = () => {
