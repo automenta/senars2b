@@ -27,7 +27,7 @@ describe('ImplementationModule', () => {
             expect(change.filePath).toBe('src/testComponent.ts');
             expect(change.changeType).toBe('modify');
             expect(change.description).toBe('Fix a bug in testComponent');
-            expect(change.newContent).toContain('// TODO: Implement');
+            expect(change.newContent).toContain('* TODO: Implement');
         });
     });
 

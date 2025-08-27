@@ -70,4 +70,59 @@ export class InMemoryWorldModel implements WorldModel {
         this.schemas.set(atom.id, schema);
         return schema;
     }
+
+    query_atoms_by_meta(key: string, value: any): SemanticAtom[] {
+        const results: SemanticAtom[] = [];
+        for (const atom of this.atoms.values()) {
+            if (atom.meta && atom.meta[key] === value) {
+                results.push(atom);
+            }
+        }
+        return results;
+    }
+
+    getStatistics(): { atomCount: number; itemCount: number; schemaCount: number; averageItemDurability: number; } {
+        const durabilities = Array.from(this.items.values()).map(item => item.attention.durability);
+        const avgDurability = durabilities.length > 0
+            ? durabilities.reduce((a, b) => a + b, 0) / durabilities.length
+            : 0;
+
+        return {
+            atomCount: this.atoms.size,
+            itemCount: this.items.size,
+            schemaCount: this.schemas.size,
+            averageItemDurability: avgDurability
+        };
+    }
+
+    getItemHistory(itemId: UUID): CognitiveItem[] {
+        // Simplified implementation: filter items based on a meta field
+        return Array.from(this.items.values()).filter(item =>
+            item.meta && item.meta.historicalRecordFor === itemId
+        ).sort((a, b) => b.stamp.timestamp - a.stamp.timestamp);
+    }
+
+    getConfidenceDistribution(): { bins: string[]; counts: number[]; } {
+        const beliefs = Array.from(this.items.values()).filter(
+            item => item.type === 'BELIEF' && item.truth
+        );
+
+        const binCount = 10;
+        const bins = Array.from({length: binCount}, (_, i) => {
+            const lower = (i / binCount).toFixed(1);
+            const upper = ((i + 1) / binCount).toFixed(1);
+            return `${lower}-${upper}`;
+        });
+        const counts = Array(binCount).fill(0);
+
+        for (const belief of beliefs) {
+            if (belief.truth) {
+                const confidence = belief.truth.confidence;
+                const binIndex = Math.min(Math.floor(confidence * binCount), binCount - 1);
+                counts[binIndex]++;
+            }
+        }
+
+        return {bins, counts};
+    }
 }
