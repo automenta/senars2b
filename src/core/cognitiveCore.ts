@@ -25,6 +25,7 @@ import {
   CognitiveSchema
 } from '../interfaces/types';
 import { v4 as uuidv4 } from 'uuid';
+import { embeddingService } from '../services/embeddingService';
 
 /**
  * DecentralizedCognitiveCore - The main cognitive processing engine
@@ -353,22 +354,56 @@ export class DecentralizedCognitiveCore {
      * @returns True if the goal is an action goal, false otherwise
      */
     private isActionGoal(goal: CognitiveItem): boolean {
-        const actionKeywords = ['search', 'find', 'lookup', 'diagnose', 'diagnostic', 'execute', 'run'];
-        const label = (goal.label || '').toLowerCase();
-        return actionKeywords.some(keyword => label.includes(keyword));
+        const goalLabel = (goal.label || '').toLowerCase();
+        if (!goalLabel) {
+            return false;
+        }
+
+        const actionVerbs = this.worldModel.query_atoms_by_meta('type', 'ActionVerb');
+
+        if (actionVerbs.length > 0) {
+            // New dynamic mechanism
+            return actionVerbs.some(verbAtom => {
+                const verb = (verbAtom.content as string).toLowerCase();
+                return goalLabel.includes(verb);
+            });
+        } else {
+            // Fallback to old hardcoded list if no action verbs are registered
+            const actionKeywords = ['search', 'find', 'lookup', 'diagnose', 'diagnostic', 'execute', 'run'];
+            return actionKeywords.some(keyword => goalLabel.includes(keyword));
+        }
     }
 
     /**
-     * Check if a goal is achieved (simplified implementation)
+     * Check if a goal is achieved by querying the world model for relevant beliefs.
      * @param goal The goal to check
-     * @returns True if the goal is achieved, false otherwise
+     * @returns True if the goal is considered achieved, false otherwise
      */
     private isGoalAchieved(goal: CognitiveItem): boolean {
-        // Query goals are achieved when they get answers
-        if ((goal.label || '').includes('?')) return false;
-        
-        // For other goals, use a probability-based approach
-        return Math.random() > 0.8; // 20% chance of being achieved
+        // For non-query goals, we'll keep the probabilistic check for now.
+        if (!goal.label || !goal.label.includes('?')) {
+            return Math.random() > 0.8;
+        }
+
+        // For query goals, find relevant context using the resonance module.
+        const contextItems = this.resonanceModule.find_context(goal, this.worldModel, 5);
+
+        // A query goal is achieved if we find a relevant belief with high confidence that is not a question itself.
+        for (const item of contextItems) {
+            if (
+                item.type === 'BELIEF' &&
+                item.label &&
+                !item.label.includes('?') &&
+                item.id !== goal.id &&
+                (item.truth?.confidence ?? 0) > 0.6
+            ) {
+                // A relevant, confident belief that is a statement has been found.
+                return true;
+            }
+        }
+
+        // No satisfactory belief was found.
+        return false;
     }
 
     /**
@@ -378,11 +413,11 @@ export class DecentralizedCognitiveCore {
      * @param attention The attention value of the belief
      * @param meta Optional metadata for the belief
      */
-    public addInitialBelief(content: any, truth: TruthValue, attention: AttentionValue, meta?: Record<string, any>): void {
+    public async addInitialBelief(content: any, truth: TruthValue, attention: AttentionValue, meta?: Record<string, any>): Promise<void> {
         const atom: SemanticAtom = {
             id: uuidv4(),
             content: content,
-            embedding: this.generateEmbedding(content),
+            embedding: await this.generateEmbedding(content),
             meta: {
                 type: "Fact",
                 source: "user_input",
@@ -403,11 +438,11 @@ export class DecentralizedCognitiveCore {
      * @param attention The attention value of the goal
      * @param meta Optional metadata for the goal
      */
-    public addInitialGoal(content: any, attention: AttentionValue, meta?: Record<string, any>): void {
+    public async addInitialGoal(content: any, attention: AttentionValue, meta?: Record<string, any>): Promise<void> {
         const atom: SemanticAtom = {
             id: uuidv4(),
             content: content,
-            embedding: this.generateEmbedding(content),
+            embedding: await this.generateEmbedding(content),
             meta: {
                 type: "Fact",
                 source: "user_input",
@@ -427,11 +462,11 @@ export class DecentralizedCognitiveCore {
      * @param content The content of the schema
      * @param meta Optional metadata for the schema
      */
-    public addSchema(content: any, meta?: Record<string, any>): void {
+    public async addSchema(content: any, meta?: Record<string, any>): Promise<void> {
         const atom: SemanticAtom = {
             id: uuidv4(),
             content: content,
-            embedding: this.generateEmbedding(content),
+            embedding: await this.generateEmbedding(content),
             meta: {
                 type: "CognitiveSchema",
                 source: "system",
@@ -476,9 +511,9 @@ export class DecentralizedCognitiveCore {
      * @param content The content to generate an embedding for
      * @returns A placeholder embedding array
      */
-    private generateEmbedding(content: any): number[] {
-        // Generate placeholder embeddings
+    private async generateEmbedding(content: any): Promise<number[]> {
+        const text = typeof content === 'string' ? content : JSON.stringify(content);
         // In a real implementation, this would use a neural network
-        return Array(768).fill(0).map(() => Math.random());
+        return embeddingService.generateEmbedding(text);
     }
 }

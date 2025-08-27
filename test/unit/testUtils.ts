@@ -5,7 +5,7 @@ import {
   TruthValue,
   CognitiveSchema,
   SemanticAtom
-} from '../../dist/types';
+} from '@/interfaces/types';
 
 /**
  * Creates a basic CognitiveItem with default values

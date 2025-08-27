@@ -1,8 +1,11 @@
-import { SchemaLearningModule } from '../../src/modules/schemaLearningModule';
-import { WorldModel, CognitiveItem, SemanticAtom } from '../../src/interfaces/types';
+import { SchemaLearningModule } from '@/modules/schemaLearningModule';
+import { WorldModel, CognitiveItem, SemanticAtom } from '@/interfaces/types';
 
 // Mock WorldModel for testing
 class MockWorldModel implements WorldModel {
+  query_atoms_by_meta(key: string, value: any): SemanticAtom[] {
+    return [];
+  }
   add_atom(atom: SemanticAtom): string {
     return atom.id;
   }

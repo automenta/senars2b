@@ -1,10 +1,15 @@
-import { PerceptionSubsystem } from '../../dist/perceptionSubsystem';
+import { PerceptionSubsystem } from '@/modules/perceptionSubsystem';
+import { embeddingService } from '@/services/embeddingService';
+
+jest.mock('@/services/embeddingService');
 
 describe('PerceptionSubsystem', () => {
   let perception: PerceptionSubsystem;
+  const mockEmbeddingService = embeddingService as jest.Mocked<typeof embeddingService>;
 
   beforeEach(() => {
     perception = new PerceptionSubsystem();
+    mockEmbeddingService.generateEmbedding.mockResolvedValue(Array(384).fill(0.5));
   });
 
   describe('processInput', () => {

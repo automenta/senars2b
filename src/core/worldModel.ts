@@ -328,6 +328,16 @@ export class PersistentWorldModel implements WorldModel {
             .filter((item): item is CognitiveItem => item !== undefined);
     }
 
+    query_atoms_by_meta(key: string, value: any): SemanticAtom[] {
+        const results: SemanticAtom[] = [];
+        for (const atom of this.atoms.values()) {
+            if (atom.meta && atom.meta[key] === value) {
+                results.push(atom);
+            }
+        }
+        return results;
+    }
+
     getItemHistory(itemId: UUID): CognitiveItem[] {
         const historyItems = this.query_by_meta('historicalRecordFor', itemId);
         // Sort by timestamp descending to get the most recent history first

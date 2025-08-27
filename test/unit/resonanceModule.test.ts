@@ -1,7 +1,7 @@
-import { HybridResonanceModule } from '../../dist/resonanceModule';
-import { PersistentWorldModel } from '../../dist/worldModel';
+import { HybridResonanceModule } from '@/core/resonanceModule';
+import { PersistentWorldModel } from '@/core/worldModel';
 import { v4 as uuidv4 } from 'uuid';
-import { CognitiveItem } from '../../dist/types';
+import { CognitiveItem } from '@/interfaces/types';
 
 describe('HybridResonanceModule', () => {
   let resonanceModule: HybridResonanceModule;

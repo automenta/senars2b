@@ -5,7 +5,7 @@ export type SemanticAtom = {
     content: any;
     embedding: number[];
     meta: {
-        type: "Fact" | "CognitiveSchema" | "Observation" | "Rule";
+        type: "Fact" | "CognitiveSchema" | "Observation" | "Rule" | "ActionVerb";
         source: string;
         timestamp: string;
         author?: string;
@@ -71,6 +71,7 @@ export interface WorldModel {
     query_by_symbolic(pattern: any, k?: number): CognitiveItem[];
     query_by_structure(pattern: any, k?: number): CognitiveItem[];
     query_by_meta(key: string, value: any): CognitiveItem[];
+    query_atoms_by_meta(key: string, value: any): SemanticAtom[];
     revise_belief(new_item: CognitiveItem): [CognitiveItem | null, CognitiveItem | null];
     register_schema_atom(atom: SemanticAtom): CognitiveSchema;
 }

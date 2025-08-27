@@ -1,8 +1,8 @@
-import { PersistentWorldModel } from '../../src/core/worldModel';
-import { SimpleBeliefRevisionEngine } from '../../src/core/beliefRevisionEngine';
-import { HistoryRecordingSchema } from '../../src/modules/systemSchemas';
-import { EfficientSchemaMatcher } from '../../src/core/schemaMatcher';
-import { SemanticAtom } from '../../src/interfaces/types';
+import { PersistentWorldModel } from '@/core/worldModel';
+import { SimpleBeliefRevisionEngine } from '@/core/beliefRevisionEngine';
+import { HistoryRecordingSchema } from '@/modules/systemSchemas';
+import { EfficientSchemaMatcher } from '@/core/schemaMatcher';
+import { SemanticAtom } from '@/interfaces/types';
 import { createSemanticAtom, createBeliefItem } from './testUtils';
 
 describe('PersistentWorldModel', () => {
@@ -151,7 +151,7 @@ describe('PersistentWorldModel', () => {
         expect(history[0].id).toBe(historicalBelief.id);
     });
 
-    it('should retrieve multiple historical records for an item', () => {
+    it('should retrieve multiple historical records for an item', async () => {
         const itemId = 'belief-3';
         const item1 = createBeliefItem({ id: itemId, truth: { frequency: 0.1, confidence: 0.2 }});
         worldModel.add_item(item1);
@@ -161,6 +161,9 @@ describe('PersistentWorldModel', () => {
         const [, event1] = worldModel.revise_belief(item2);
         const [hist1] = HistoryRecordingSchema.apply(event1!, {} as any, worldModel);
         worldModel.add_item(hist1);
+
+        // Introduce a small delay to ensure a different timestamp
+        await new Promise(resolve => setTimeout(resolve, 5));
 
         // Second revision
         const item3 = createBeliefItem({ id: itemId, truth: { frequency: 0.5, confidence: 0.6 }});

@@ -1,5 +1,5 @@
-import { EfficientSchemaMatcher } from '../../dist/schemaMatcher';
-import { PersistentWorldModel } from '../../dist/worldModel';
+import { EfficientSchemaMatcher } from '@/core/schemaMatcher';
+import { PersistentWorldModel } from '@/core/worldModel';
 import { createSemanticAtom, createBeliefItem } from './testUtils';
 
 describe('EfficientSchemaMatcher', () => {

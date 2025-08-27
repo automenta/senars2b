@@ -1,4 +1,4 @@
-import { UnifiedInterface } from '../web/unifiedInterface';
+import UnifiedInterface from '../web/unifiedInterface';
 
 async function runUnifiedTest() {
   console.log('=== Senars3 Cognitive System Unified Interface Test ===\n');
