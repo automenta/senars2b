@@ -1,7 +1,6 @@
 import { PersistentWorldModel } from '../../dist/worldModel';
 import { SimpleBeliefRevisionEngine } from '../../dist/beliefRevisionEngine';
-import { v4 as uuidv4 } from 'uuid';
-import { SemanticAtom, CognitiveItem } from '../../dist/types';
+import { createSemanticAtom, createBeliefItem } from './testUtils';
 
 describe('PersistentWorldModel', () => {
   let worldModel: PersistentWorldModel;
@@ -14,17 +13,7 @@ describe('PersistentWorldModel', () => {
 
   describe('add_atom and get_atom', () => {
     it('should add and retrieve a semantic atom', () => {
-      const atom: SemanticAtom = {
-        id: uuidv4(),
-        content: "Test content",
-        embedding: Array(768).fill(0.5),
-        meta: {
-          type: "Fact",
-          source: "test",
-          timestamp: new Date().toISOString(),
-          trust_score: 0.8
-        }
-      };
+      const atom = createSemanticAtom();
 
       const atomId = worldModel.add_atom(atom);
       expect(atomId).toBe(atom.id);
@@ -34,21 +23,14 @@ describe('PersistentWorldModel', () => {
     });
 
     it('should return null for a non-existent atom', () => {
-      const retrievedAtom = worldModel.get_atom(uuidv4());
+      const retrievedAtom = worldModel.get_atom(createSemanticAtom().id);
       expect(retrievedAtom).toBeNull();
     });
   });
 
   describe('add_item and get_item', () => {
     it('should add and retrieve a cognitive item', () => {
-      const item: CognitiveItem = {
-        id: uuidv4(),
-        atom_id: uuidv4(),
-        type: 'BELIEF',
-        truth: { frequency: 0.8, confidence: 0.9 },
-        attention: { priority: 0.5, durability: 0.7 },
-        stamp: { timestamp: Date.now(), parent_ids: [], schema_id: uuidv4() }
-      };
+      const item = createBeliefItem();
 
       worldModel.add_item(item);
 
@@ -57,7 +39,7 @@ describe('PersistentWorldModel', () => {
     });
 
     it('should return null for a non-existent item', () => {
-      const retrievedItem = worldModel.get_item(uuidv4());
+      const retrievedItem = worldModel.get_item(createBeliefItem().id);
       expect(retrievedItem).toBeNull();
     });
   });
@@ -84,14 +66,7 @@ describe('PersistentWorldModel', () => {
 
   describe('revise_belief', () => {
     it('should revise a belief using the belief revision engine', () => {
-      const item: CognitiveItem = {
-        id: uuidv4(),
-        atom_id: uuidv4(),
-        type: 'BELIEF',
-        truth: { frequency: 0.8, confidence: 0.9 },
-        attention: { priority: 0.5, durability: 0.7 },
-        stamp: { timestamp: Date.now(), parent_ids: [], schema_id: uuidv4() }
-      };
+      const item = createBeliefItem();
 
       const revisedItem = worldModel.revise_belief(item);
       

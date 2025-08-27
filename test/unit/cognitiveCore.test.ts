@@ -1,4 +1,5 @@
 import { DecentralizedCognitiveCore } from '../../dist/cognitiveCore';
+import { createTruthValue, createAttentionValue } from './testUtils';
 
 describe('DecentralizedCognitiveCore', () => {
   let core: DecentralizedCognitiveCore;
@@ -44,8 +45,8 @@ describe('DecentralizedCognitiveCore', () => {
       expect(() => {
         core.addInitialBelief(
           "Test belief content",
-          { frequency: 0.8, confidence: 0.9 },
-          { priority: 0.5, durability: 0.7 },
+          createTruthValue(),
+          createAttentionValue(),
           { domain: "test", source: "test_source" }
         );
       }).not.toThrow();
@@ -58,7 +59,7 @@ describe('DecentralizedCognitiveCore', () => {
       expect(() => {
         core.addInitialGoal(
           "Test goal content",
-          { priority: 0.9, durability: 0.8 },
+          createAttentionValue({ priority: 0.9, durability: 0.8 }),
           { domain: "test", source: "test_source" }
         );
       }).not.toThrow();

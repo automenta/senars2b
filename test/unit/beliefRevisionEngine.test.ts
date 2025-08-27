@@ -1,5 +1,5 @@
 import { SimpleBeliefRevisionEngine } from '../../dist/beliefRevisionEngine';
-import { TruthValue } from '../../dist/types';
+import { createTruthValue } from './testUtils';
 
 describe('SimpleBeliefRevisionEngine', () => {
   let revisionEngine: SimpleBeliefRevisionEngine;
@@ -10,8 +10,8 @@ describe('SimpleBeliefRevisionEngine', () => {
 
   describe('merge', () => {
     it('should merge two truth values using weighted average', () => {
-      const existing: TruthValue = { frequency: 0.8, confidence: 0.9 };
-      const newer: TruthValue = { frequency: 0.6, confidence: 0.7 };
+      const existing = createTruthValue({ frequency: 0.8, confidence: 0.9 });
+      const newer = createTruthValue({ frequency: 0.6, confidence: 0.7 });
 
       const result = revisionEngine.merge(existing, newer);
       
@@ -23,8 +23,8 @@ describe('SimpleBeliefRevisionEngine', () => {
     });
 
     it('should cap confidence at 0.99', () => {
-      const existing: TruthValue = { frequency: 0.8, confidence: 0.95 };
-      const newer: TruthValue = { frequency: 0.7, confidence: 0.95 };
+      const existing = createTruthValue({ frequency: 0.8, confidence: 0.95 });
+      const newer = createTruthValue({ frequency: 0.7, confidence: 0.95 });
 
       const result = revisionEngine.merge(existing, newer);
       
@@ -36,32 +36,32 @@ describe('SimpleBeliefRevisionEngine', () => {
 
   describe('detect_conflict', () => {
     it('should detect conflict when frequency difference > 0.5 and both confidences > 0.7', () => {
-      const truth1: TruthValue = { frequency: 0.9, confidence: 0.8 };
-      const truth2: TruthValue = { frequency: 0.2, confidence: 0.85 };
+      const truth1 = createTruthValue({ frequency: 0.9, confidence: 0.8 });
+      const truth2 = createTruthValue({ frequency: 0.2, confidence: 0.85 });
 
       const hasConflict = revisionEngine.detect_conflict(truth1, truth2);
       expect(hasConflict).toBe(true);
     });
 
     it('should not detect conflict when frequency difference <= 0.5', () => {
-      const truth1: TruthValue = { frequency: 0.6, confidence: 0.8 };
-      const truth2: TruthValue = { frequency: 0.3, confidence: 0.85 };
+      const truth1 = createTruthValue({ frequency: 0.6, confidence: 0.8 });
+      const truth2 = createTruthValue({ frequency: 0.3, confidence: 0.85 });
 
       const hasConflict = revisionEngine.detect_conflict(truth1, truth2);
       expect(hasConflict).toBe(false);
     });
 
     it('should not detect conflict when both confidences <= 0.7', () => {
-      const truth1: TruthValue = { frequency: 0.9, confidence: 0.6 };
-      const truth2: TruthValue = { frequency: 0.2, confidence: 0.65 };
+      const truth1 = createTruthValue({ frequency: 0.9, confidence: 0.6 });
+      const truth2 = createTruthValue({ frequency: 0.2, confidence: 0.65 });
 
       const hasConflict = revisionEngine.detect_conflict(truth1, truth2);
       expect(hasConflict).toBe(false);
     });
 
     it('should not detect conflict when only one confidence > 0.7', () => {
-      const truth1: TruthValue = { frequency: 0.9, confidence: 0.8 };
-      const truth2: TruthValue = { frequency: 0.2, confidence: 0.6 };
+      const truth1 = createTruthValue({ frequency: 0.9, confidence: 0.8 });
+      const truth2 = createTruthValue({ frequency: 0.2, confidence: 0.6 });
 
       const hasConflict = revisionEngine.detect_conflict(truth1, truth2);
       expect(hasConflict).toBe(false);

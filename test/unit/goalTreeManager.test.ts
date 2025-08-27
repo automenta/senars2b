@@ -1,6 +1,5 @@
 import { HierarchicalGoalTreeManager } from '../../dist/goalTreeManager';
-import { v4 as uuidv4 } from 'uuid';
-import { CognitiveItem } from '../../dist/types';
+import { createGoalItem } from './testUtils';
 
 describe('HierarchicalGoalTreeManager', () => {
   let goalTreeManager: HierarchicalGoalTreeManager;
@@ -11,14 +10,9 @@ describe('HierarchicalGoalTreeManager', () => {
 
   describe('decompose', () => {
     it('should decompose a goal into subgoals', () => {
-      const goal: CognitiveItem = {
-        id: uuidv4(),
-        atom_id: uuidv4(),
-        type: 'GOAL',
-        attention: { priority: 0.9, durability: 0.8 },
-        stamp: { timestamp: Date.now(), parent_ids: [], schema_id: uuidv4() },
-        goal_status: 'active'
-      };
+      const goal = createGoalItem({
+        attention: { priority: 0.9, durability: 0.8 }
+      });
 
       const subgoals = goalTreeManager.decompose(goal);
       
@@ -29,7 +23,7 @@ describe('HierarchicalGoalTreeManager', () => {
 
   describe('mark_achieved', () => {
     it('should mark a goal as achieved', () => {
-      const goalId = uuidv4();
+      const goalId = createGoalItem().id;
       
       // This should not throw an error
       expect(() => {
@@ -40,7 +34,7 @@ describe('HierarchicalGoalTreeManager', () => {
 
   describe('mark_failed', () => {
     it('should mark a goal as failed', () => {
-      const goalId = uuidv4();
+      const goalId = createGoalItem().id;
       
       // This should not throw an error
       expect(() => {
@@ -51,7 +45,7 @@ describe('HierarchicalGoalTreeManager', () => {
 
   describe('get_ancestors', () => {
     it('should return ancestor goal IDs', () => {
-      const goalId = uuidv4();
+      const goalId = createGoalItem().id;
       const ancestors = goalTreeManager.get_ancestors(goalId);
       
       // Should return an array (could be empty depending on implementation)

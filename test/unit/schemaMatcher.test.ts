@@ -1,7 +1,6 @@
 import { EfficientSchemaMatcher } from '../../dist/schemaMatcher';
 import { PersistentWorldModel } from '../../dist/worldModel';
-import { v4 as uuidv4 } from 'uuid';
-import { CognitiveItem, SemanticAtom, CognitiveSchema } from '../../dist/types';
+import { createSemanticAtom, createBeliefItem } from './testUtils';
 
 describe('EfficientSchemaMatcher', () => {
   let schemaMatcher: EfficientSchemaMatcher;
@@ -14,8 +13,7 @@ describe('EfficientSchemaMatcher', () => {
 
   describe('register_schema', () => {
     it('should register a schema atom and return a cognitive schema', () => {
-      const schemaAtom: SemanticAtom = {
-        id: uuidv4(),
+      const schemaAtom = createSemanticAtom({
         content: {
           name: "TestSchema",
           pattern: {
@@ -23,14 +21,13 @@ describe('EfficientSchemaMatcher', () => {
             conclusion: "(?B is related to ?A)"
           }
         },
-        embedding: Array(768).fill(0.5),
         meta: {
           type: "CognitiveSchema",
           source: "test",
           timestamp: new Date().toISOString(),
           trust_score: 0.8
         }
-      };
+      });
 
       const schema = schemaMatcher.register_schema(schemaAtom, worldModel);
       
@@ -42,23 +39,14 @@ describe('EfficientSchemaMatcher', () => {
   describe('find_applicable', () => {
     it('should find applicable schemas for two cognitive items', () => {
       // Create two test items
-      const itemA: CognitiveItem = {
-        id: uuidv4(),
-        atom_id: uuidv4(),
-        type: 'BELIEF',
-        truth: { frequency: 0.8, confidence: 0.9 },
-        attention: { priority: 0.5, durability: 0.7 },
-        stamp: { timestamp: Date.now(), parent_ids: [], schema_id: uuidv4() }
-      };
+      const itemA = createBeliefItem({
+        attention: { priority: 0.5, durability: 0.7 }
+      });
 
-      const itemB: CognitiveItem = {
-        id: uuidv4(),
-        atom_id: uuidv4(),
-        type: 'BELIEF',
+      const itemB = createBeliefItem({
         truth: { frequency: 0.7, confidence: 0.8 },
-        attention: { priority: 0.6, durability: 0.5 },
-        stamp: { timestamp: Date.now(), parent_ids: [], schema_id: uuidv4() }
-      };
+        attention: { priority: 0.6, durability: 0.5 }
+      });
 
       // Find applicable schemas
       const schemas = schemaMatcher.find_applicable(itemA, itemB, worldModel);

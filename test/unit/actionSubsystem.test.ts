@@ -1,6 +1,5 @@
 import { ActionSubsystem } from '../../dist/actionSubsystem';
-import { v4 as uuidv4 } from 'uuid';
-import { CognitiveItem } from '../../dist/types';
+import { createGoalItem } from './testUtils';
 
 describe('ActionSubsystem', () => {
   let actionSubsystem: ActionSubsystem;
@@ -11,15 +10,10 @@ describe('ActionSubsystem', () => {
 
   describe('executeGoal', () => {
     it('should execute a goal and return a result', async () => {
-      const goal: CognitiveItem = {
-        id: uuidv4(),
-        atom_id: uuidv4(),
-        type: 'GOAL',
+      const goal = createGoalItem({
         attention: { priority: 0.9, durability: 0.8 },
-        stamp: { timestamp: Date.now(), parent_ids: [], schema_id: uuidv4() },
-        goal_status: 'active',
         label: "Web search for pet safety information"
-      };
+      });
 
       // Note: We're not actually executing the action in tests, 
       // just checking that the method exists and returns a promise

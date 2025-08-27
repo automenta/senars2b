@@ -1,6 +1,5 @@
 import { DynamicAttentionModule } from '../../dist/attentionModule';
-import { v4 as uuidv4 } from 'uuid';
-import { CognitiveItem, AttentionValue, CognitiveSchema } from '../../dist/types';
+import { createBeliefItem, createMockSchema, createAttentionValue } from './testUtils';
 
 describe('DynamicAttentionModule', () => {
   let attentionModule: DynamicAttentionModule;
@@ -11,14 +10,7 @@ describe('DynamicAttentionModule', () => {
 
   describe('calculate_initial', () => {
     it('should calculate initial attention for a cognitive item', () => {
-      const item: CognitiveItem = {
-        id: uuidv4(),
-        atom_id: uuidv4(),
-        type: 'BELIEF',
-        truth: { frequency: 0.8, confidence: 0.9 },
-        attention: { priority: 0.5, durability: 0.7 },
-        stamp: { timestamp: Date.now(), parent_ids: [], schema_id: uuidv4() }
-      };
+      const item = createBeliefItem();
 
       const attention = attentionModule.calculate_initial(item);
       
@@ -32,29 +24,16 @@ describe('DynamicAttentionModule', () => {
 
   describe('calculate_derived', () => {
     it('should calculate derived attention based on parents and schema', () => {
-      const parent1: CognitiveItem = {
-        id: uuidv4(),
-        atom_id: uuidv4(),
-        type: 'BELIEF',
-        truth: { frequency: 0.8, confidence: 0.9 },
-        attention: { priority: 0.7, durability: 0.6 },
-        stamp: { timestamp: Date.now(), parent_ids: [], schema_id: uuidv4() }
-      };
+      const parent1 = createBeliefItem({
+        attention: createAttentionValue({ priority: 0.7, durability: 0.6 })
+      });
 
-      const parent2: CognitiveItem = {
-        id: uuidv4(),
-        atom_id: uuidv4(),
-        type: 'BELIEF',
-        truth: { frequency: 0.6, confidence: 0.8 },
-        attention: { priority: 0.5, durability: 0.4 },
-        stamp: { timestamp: Date.now(), parent_ids: [], schema_id: uuidv4() }
-      };
+      const parent2 = createBeliefItem({
+        attention: createAttentionValue({ priority: 0.5, durability: 0.4 })
+      });
 
       // Create a mock schema
-      const mockSchema: CognitiveSchema = {
-        atom_id: uuidv4(),
-        apply: jest.fn()
-      };
+      const mockSchema = createMockSchema();
 
       const derivedAttention = attentionModule.calculate_derived(
         [parent1, parent2],
@@ -72,14 +51,7 @@ describe('DynamicAttentionModule', () => {
 
   describe('update_on_access', () => {
     it('should update attention values when items are accessed', () => {
-      const item: CognitiveItem = {
-        id: uuidv4(),
-        atom_id: uuidv4(),
-        type: 'BELIEF',
-        truth: { frequency: 0.8, confidence: 0.9 },
-        attention: { priority: 0.5, durability: 0.7 },
-        stamp: { timestamp: Date.now(), parent_ids: [], schema_id: uuidv4() }
-      };
+      const item = createBeliefItem();
 
       // Store initial values
       const initialPriority = item.attention.priority;

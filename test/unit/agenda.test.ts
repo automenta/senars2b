@@ -1,6 +1,5 @@
 import { PriorityAgenda } from '../../dist/agenda';
-import { v4 as uuidv4 } from 'uuid';
-import { CognitiveItem } from '../../dist/types';
+import { createBeliefItem, createGoalItem } from './testUtils';
 
 describe('PriorityAgenda', () => {
   let agenda: PriorityAgenda;
@@ -11,14 +10,7 @@ describe('PriorityAgenda', () => {
 
   describe('push and size', () => {
     it('should add items and update size correctly', () => {
-      const item: CognitiveItem = {
-        id: uuidv4(),
-        atom_id: uuidv4(),
-        type: 'BELIEF',
-        truth: { frequency: 0.8, confidence: 0.9 },
-        attention: { priority: 0.5, durability: 0.7 },
-        stamp: { timestamp: Date.now(), parent_ids: [], schema_id: uuidv4() }
-      };
+      const item = createBeliefItem();
 
       expect(agenda.size()).toBe(0);
       agenda.push(item);
@@ -28,23 +20,13 @@ describe('PriorityAgenda', () => {
 
   describe('pop and peek', () => {
     it('should return items in priority order', async () => {
-      const item1: CognitiveItem = {
-        id: uuidv4(),
-        atom_id: uuidv4(),
-        type: 'BELIEF',
-        truth: { frequency: 0.8, confidence: 0.9 },
-        attention: { priority: 0.3, durability: 0.7 },
-        stamp: { timestamp: Date.now(), parent_ids: [], schema_id: uuidv4() }
-      };
+      const item1 = createBeliefItem({
+        attention: { priority: 0.3, durability: 0.7 }
+      });
 
-      const item2: CognitiveItem = {
-        id: uuidv4(),
-        atom_id: uuidv4(),
-        type: 'GOAL',
-        attention: { priority: 0.9, durability: 0.8 },
-        stamp: { timestamp: Date.now(), parent_ids: [], schema_id: uuidv4() },
-        goal_status: 'active'
-      };
+      const item2 = createGoalItem({
+        attention: { priority: 0.9, durability: 0.8 }
+      });
 
       agenda.push(item1);
       agenda.push(item2);
@@ -60,23 +42,13 @@ describe('PriorityAgenda', () => {
     });
 
     it('should return the highest priority item when peeking', () => {
-      const item1: CognitiveItem = {
-        id: uuidv4(),
-        atom_id: uuidv4(),
-        type: 'BELIEF',
-        truth: { frequency: 0.8, confidence: 0.9 },
-        attention: { priority: 0.3, durability: 0.7 },
-        stamp: { timestamp: Date.now(), parent_ids: [], schema_id: uuidv4() }
-      };
+      const item1 = createBeliefItem({
+        attention: { priority: 0.3, durability: 0.7 }
+      });
 
-      const item2: CognitiveItem = {
-        id: uuidv4(),
-        atom_id: uuidv4(),
-        type: 'GOAL',
-        attention: { priority: 0.9, durability: 0.8 },
-        stamp: { timestamp: Date.now(), parent_ids: [], schema_id: uuidv4() },
-        goal_status: 'active'
-      };
+      const item2 = createGoalItem({
+        attention: { priority: 0.9, durability: 0.8 }
+      });
 
       agenda.push(item1);
       agenda.push(item2);
@@ -89,14 +61,7 @@ describe('PriorityAgenda', () => {
 
   describe('updateAttention', () => {
     it('should update the attention value of an item', () => {
-      const item: CognitiveItem = {
-        id: uuidv4(),
-        atom_id: uuidv4(),
-        type: 'BELIEF',
-        truth: { frequency: 0.8, confidence: 0.9 },
-        attention: { priority: 0.5, durability: 0.7 },
-        stamp: { timestamp: Date.now(), parent_ids: [], schema_id: uuidv4() }
-      };
+      const item = createBeliefItem();
 
       agenda.push(item);
       
@@ -112,14 +77,7 @@ describe('PriorityAgenda', () => {
 
   describe('remove', () => {
     it('should remove an item by ID', () => {
-      const item: CognitiveItem = {
-        id: uuidv4(),
-        atom_id: uuidv4(),
-        type: 'BELIEF',
-        truth: { frequency: 0.8, confidence: 0.9 },
-        attention: { priority: 0.5, durability: 0.7 },
-        stamp: { timestamp: Date.now(), parent_ids: [], schema_id: uuidv4() }
-      };
+      const item = createBeliefItem();
 
       agenda.push(item);
       expect(agenda.size()).toBe(1);
@@ -130,7 +88,7 @@ describe('PriorityAgenda', () => {
     });
 
     it('should return false when trying to remove a non-existent item', () => {
-      const removed = agenda.remove(uuidv4());
+      const removed = agenda.remove(createBeliefItem().id);
       expect(removed).toBe(false);
     });
   });
