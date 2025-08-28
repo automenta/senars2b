@@ -59,6 +59,10 @@ class MockWorldModel implements WorldModel {
     getConfidenceDistribution() {
         return {bins: [], counts: []};
     }
+
+    getAllItems(): CognitiveItem[] {
+        return [];
+    }
 }
 
 describe('SchemaLearningModule', () => {

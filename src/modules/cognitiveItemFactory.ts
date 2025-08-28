@@ -101,7 +101,7 @@ export class CognitiveItemFactory {
      * @param taskMetadata Optional task metadata
      * @returns A new task cognitive item
      */
-    static createTask(content: string, attention: AttentionValue, taskMetadata?: Partial<TaskMetadata>): CognitiveItem {
+    static createTask(content: string, attention: AttentionValue, taskMetadata?: Partial<TaskMetadata>, atomId?: string): CognitiveItem {
         const defaultTaskMetadata: TaskMetadata = {
             status: 'pending',
             priority_level: 'medium'
@@ -109,7 +109,7 @@ export class CognitiveItemFactory {
         
         return {
             id: uuidv4(),
-            atom_id: uuidv4(), // Tasks create their own atom
+            atom_id: atomId || uuidv4(), // Use provided atomId or create a new one
             type: 'TASK',
             label: content,
             content: content,

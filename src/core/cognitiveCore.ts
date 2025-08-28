@@ -285,6 +285,14 @@ export class DecentralizedCognitiveCore {
         agendaSize: number;
         worldModelStats: any;
         workerStats: any;
+        taskStats: {
+            pending: number;
+            in_progress: number;
+            completed: number;
+            failed: number;
+            deferred: number;
+            total: number;
+        };
         performance: {
             uptime: string;
             totalItemsProcessed: number;
@@ -316,10 +324,43 @@ export class DecentralizedCognitiveCore {
         const activeWorkers = Array.from(this.workerStatistics.values()).filter(stats => stats.itemsProcessed > 0).length;
         const systemLoad = this.workerCount > 0 ? activeWorkers / this.workerCount : 0;
 
+        const allItems = this.worldModel.getAllItems();
+        const taskStats = {
+            pending: 0,
+            in_progress: 0,
+            completed: 0,
+            failed: 0,
+            deferred: 0,
+            total: 0,
+        };
+        for (const item of allItems) {
+            if (item.type === 'TASK' && item.task_metadata) {
+                taskStats.total++;
+                switch (item.task_metadata.status) {
+                    case 'pending':
+                        taskStats.pending++;
+                        break;
+                    case 'in_progress':
+                        taskStats.in_progress++;
+                        break;
+                    case 'completed':
+                        taskStats.completed++;
+                        break;
+                    case 'failed':
+                        taskStats.failed++;
+                        break;
+                    case 'deferred':
+                        taskStats.deferred++;
+                        break;
+                }
+            }
+        }
+
         return {
             agendaSize: this.agenda.size(),
             worldModelStats: (this.worldModel as PersistentWorldModel).getStatistics(),
             workerStats: Object.fromEntries(this.workerStatistics),
+            taskStats,
             performance: {
                 uptime: uptimeStr,
                 totalItemsProcessed: totalItems,
@@ -475,6 +516,9 @@ export class DecentralizedCognitiveCore {
 
             // Reinforce: Update attention based on access
             this.attentionModule.update_on_access([itemA, ...contextItems]);
+
+            // Process tasks
+            await this.processTask(itemA);
 
             // Update goal tree and handle action goals
             await this.processGoals(itemA);
@@ -684,6 +728,119 @@ export class DecentralizedCognitiveCore {
 
         // No satisfactory belief was found.
         return false;
+    }
+
+    /**
+     * Process a task item through its lifecycle
+     * @param item The cognitive item to process as a task
+     */
+    private async processTask(item: CognitiveItem): Promise<void> {
+        if (item.type !== 'TASK') {
+            return;
+        }
+
+        if (!item.task_metadata) {
+            console.warn(`Task ${item.id} is missing task_metadata.`);
+            return;
+        }
+
+        switch (item.task_metadata.status) {
+            case 'pending':
+                item.task_metadata.status = 'in_progress';
+                item.updated_at = Date.now();
+                console.log(`Task ${item.id} (${item.label}) status changed to in_progress.`);
+                this.worldModel.revise_belief(item);
+
+                if (item.subtasks && item.subtasks.length > 0 && !item.meta?.subtask_ids) {
+                    await this.decomposeTask(item);
+                }
+                break;
+
+            case 'in_progress':
+                if (this.isTaskCompleted(item)) {
+                    item.task_metadata.status = 'completed';
+                    item.updated_at = Date.now();
+                    console.log(`Task ${item.id} (${item.label}) status changed to completed.`);
+                    this.worldModel.revise_belief(item);
+                    const event = CognitiveItemFactory.createEvent(`TaskCompleted: ${item.label}`, { taskId: item.id }, { priority: 0.8, durability: 0.5 });
+                    this.agenda.push(event);
+                }
+                break;
+        }
+    }
+
+    /**
+     * Decompose a task into subtasks and add them to the agenda
+     * @param parentTask The task to decompose
+     */
+    private async decomposeTask(parentTask: CognitiveItem): Promise<void> {
+        if (!parentTask.subtasks || parentTask.subtasks.length === 0) {
+            return;
+        }
+
+        console.log(`Decomposing task ${parentTask.id} into ${parentTask.subtasks.length} subtasks.`);
+        const createdSubtaskIds: string[] = [];
+
+        for (const subtaskLabel of parentTask.subtasks) {
+            const atom = {
+                id: uuidv4(),
+                content: subtaskLabel,
+                embedding: await this.generateEmbedding(subtaskLabel),
+                creationTime: Date.now(),
+                lastAccessTime: Date.now(),
+                meta: { source: `decomposition_of_${parentTask.id}` }
+            };
+            this.worldModel.add_atom(atom);
+
+            const subtask = CognitiveItemFactory.createTask(
+                subtaskLabel,
+                {
+                    priority: parentTask.attention.priority * 0.9,
+                    durability: parentTask.attention.durability
+                },
+                {
+                    status: 'pending',
+                    priority_level: parentTask.task_metadata!.priority_level,
+                    dependencies: [parentTask.id]
+                },
+                atom.id
+            );
+
+            createdSubtaskIds.push(subtask.id);
+            this.agenda.push(subtask);
+        }
+
+        parentTask.meta = parentTask.meta || {};
+        parentTask.meta.subtask_ids = createdSubtaskIds;
+        this.worldModel.revise_belief(parentTask);
+    }
+
+    /**
+     * Check if a task is completed.
+     * @param task The task to check
+     * @returns True if the task is considered completed.
+     */
+    private isTaskCompleted(task: CognitiveItem): boolean {
+        if (task.meta?.subtask_ids) {
+            const subtaskIds = task.meta.subtask_ids as string[];
+            for (const subtaskId of subtaskIds) {
+                const subtask = this.agenda.get(subtaskId);
+                if (subtask) {
+                    // If subtask is still in the agenda, it's not completed
+                    return false;
+                }
+                // If not in agenda, we need to check world model.
+                // This is a simplification. A proper implementation needs world model access.
+                const worldModelItem = this.worldModel.get_item(subtaskId);
+                if (worldModelItem && worldModelItem.task_metadata?.status !== 'completed') {
+                    return false;
+                }
+            }
+            return true; // All subtasks are completed
+        }
+
+        // For simple tasks without subtasks, use probabilistic completion for now
+        return Math.random() > 0.9;
     }
 
     /**

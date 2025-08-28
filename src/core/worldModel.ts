@@ -31,6 +31,7 @@ export interface WorldModel {
     };
     getItemHistory(itemId: string): CognitiveItem[];
     getConfidenceDistribution(): { bins: string[], counts: number[] };
+    getAllItems(): CognitiveItem[];
 }
 
 export class PersistentWorldModel implements WorldModel {
@@ -430,6 +431,10 @@ export class PersistentWorldModel implements WorldModel {
         }
 
         return {bins, counts};
+    }
+
+    getAllItems(): CognitiveItem[] {
+        return Array.from(this.items.values());
     }
 
     // Get statistics about the world model

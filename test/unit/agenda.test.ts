@@ -1,7 +1,7 @@
 import {AttentionValue, CognitiveItem, SemanticAtom, TruthValue} from '@/interfaces/types';
 import {CognitiveSchema, WorldModel} from '@/core/worldModel';
 import {PriorityAgenda} from '@/core/agenda';
-import {createCognitiveItem, createSemanticAtom, createTruthValue, createAttentionValue, createMockSchema, createBeliefItem, createGoalItem} from './testUtils';
+import {createCognitiveItem, createSemanticAtom, createTruthValue, createAttentionValue, createMockSchema, createBeliefItem, createGoalItem, createTaskItem} from './testUtils';
 
 describe('PriorityAgenda', () => {
     let agenda: PriorityAgenda;
@@ -92,6 +92,101 @@ describe('PriorityAgenda', () => {
         it('should return false when trying to remove a non-existent item', () => {
             const removed = agenda.remove(createBeliefItem().id);
             expect(removed).toBe(false);
+        });
+    });
+
+    describe('Task-Specific Functionality', () => {
+        it('should prioritize tasks based on combined priority', async () => {
+            const highAttentionItem = createBeliefItem({
+                attention: { priority: 0.9, durability: 0.5 }
+            });
+
+            const highPriorityTask = createTaskItem({
+                attention: { priority: 0.5, durability: 0.5 },
+                task_metadata: {
+                    status: 'pending',
+                    priority_level: 'critical',
+                }
+            });
+
+            agenda.push(highAttentionItem);
+            agenda.push(highPriorityTask);
+
+            const poppedItem = await agenda.pop();
+            expect(poppedItem.id).toBe(highPriorityTask.id);
+        });
+
+        it('should not pop a task with an unmet dependency', async () => {
+            const dependencyTask = createTaskItem();
+            const dependentTask = createTaskItem({
+                task_metadata: {
+                    status: 'pending',
+                    priority_level: 'high',
+                    dependencies: [dependencyTask.id]
+                }
+            });
+
+            agenda.push(dependencyTask);
+            agenda.push(dependentTask);
+
+            const poppedItem = await agenda.pop();
+            expect(poppedItem.id).toBe(dependencyTask.id);
+            expect(agenda.size()).toBe(1);
+        });
+
+        it('should pop a dependent task once its dependency is completed', async () => {
+            const dependencyTask = createTaskItem({ id: 'dep1' });
+            const dependentTask = createTaskItem({
+                id: 'dep2',
+                attention: { priority: 1.0, durability: 1.0 },
+                task_metadata: {
+                    status: 'pending',
+                    priority_level: 'critical',
+                    dependencies: [dependencyTask.id]
+                }
+            });
+
+            agenda.push(dependencyTask);
+            agenda.push(dependentTask);
+
+            // Pop the dependency first
+            let poppedItem = await agenda.pop();
+            expect(poppedItem.id).toBe(dependencyTask.id);
+
+            // Now, mark the dependency as completed and push it back
+            dependencyTask.task_metadata!.status = 'completed';
+            agenda.push(dependencyTask);
+
+            // Remove the completed dependency from the agenda (simulating it being processed and finished)
+            agenda.remove(dependencyTask.id);
+
+            // Now the dependent task should be poppable
+            poppedItem = await agenda.pop();
+            expect(poppedItem.id).toBe(dependentTask.id);
+        });
+
+        it('should peek the highest priority unblocked item', () => {
+            const dependencyTask = createTaskItem();
+            const dependentTask = createTaskItem({
+                attention: { priority: 1.0, durability: 1.0 },
+                task_metadata: {
+                    status: 'pending',
+                    priority_level: 'critical',
+                    dependencies: [dependencyTask.id]
+                }
+            });
+            const anotherTask = createTaskItem({
+                attention: { priority: 0.5, durability: 0.5 }
+            });
+
+            agenda.push(dependencyTask);
+            agenda.push(dependentTask);
+            agenda.push(anotherTask);
+
+            const peekedItem = agenda.peek();
+            // Should peek `dependencyTask` as it has higher default priority than `anotherTask`
+            // and `dependentTask` is blocked
+            expect(peekedItem!.id).toBe(dependencyTask.id);
         });
     });
 });

@@ -25,6 +25,31 @@ export function createCognitiveItem(overrides: Partial<CognitiveItem> = {}): Cog
 }
 
 /**
+ * Creates a CognitiveItem of type TASK
+ * @param overrides Partial CognitiveItem properties to override defaults
+ * @returns A new CognitiveItem of type TASK with default properties and any provided overrides
+ */
+import { TaskMetadata } from '@/interfaces/types';
+
+export function createTaskItem(overrides: Partial<CognitiveItem> = {}): CognitiveItem {
+    const defaultTaskMetadata: TaskMetadata = {
+        status: 'pending',
+        priority_level: 'medium',
+    };
+
+    const taskMetadata = overrides.task_metadata
+        ? { ...defaultTaskMetadata, ...overrides.task_metadata }
+        : defaultTaskMetadata;
+
+    return createCognitiveItem({
+        type: 'TASK',
+        label: 'Test task',
+        task_metadata: taskMetadata,
+        ...overrides
+    });
+}
+
+/**
  * Creates a CognitiveItem with truth values (for beliefs)
  * @param overrides Partial CognitiveItem properties to override defaults
  * @returns A new CognitiveItem of type BELIEF with default truth values and any provided overrides

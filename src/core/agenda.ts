@@ -12,7 +12,7 @@ export interface Agenda {
 
 /**
  * PriorityAgenda - A priority-based agenda implementation for cognitive items
- * Items are sorted by priority, with higher priority items processed first
+ * Items are sorted by a combined priority score, and task dependencies are handled.
  */
 export class PriorityAgenda implements Agenda {
     private items: CognitiveItem[] = [];
@@ -46,23 +46,22 @@ export class PriorityAgenda implements Agenda {
             throw new Error('Item attention priority must be a number between 0 and 1');
         }
 
-        // Check if item already exists
-        if (this.itemMap.has(item.id)) {
-            // Update existing item
+        const isNewItem = !this.itemMap.has(item.id);
+
+        // Update or add item
+        if (!isNewItem) {
             const index = this.items.findIndex(i => i.id === item.id);
             if (index !== -1) {
                 this.items[index] = item;
-                this.itemMap.set(item.id, item);
-                this.sortItemsByPriority();
             }
-            return;
+        } else {
+            this.items.push(item);
         }
-
-        this.items.push(item);
         this.itemMap.set(item.id, item);
         this.sortItemsByPriority();
 
-        // Resolve any waiting pop promises
+        // If an item was added or updated, it might unblock others.
+        // Resolve any waiting pop promises.
         if (this.waitingQueue.length > 0) {
             const resolver = this.waitingQueue.shift();
             if (resolver) resolver();
@@ -70,41 +69,48 @@ export class PriorityAgenda implements Agenda {
     }
 
     /**
-     * Remove and return the highest priority item from the agenda
-     * @returns A promise that resolves to the highest priority cognitive item
+     * Remove and return the highest priority unblocked item from the agenda
+     * @returns A promise that resolves to the highest priority unblocked cognitive item
      * @throws Error if agenda is in an invalid state
      */
     async pop(): Promise<CognitiveItem> {
-        if (this.items.length > 0) {
-            const item = this.items.shift()!;
+        const unblockedItemIndex = this.items.findIndex(item => !this.isBlocked(item));
+
+        if (unblockedItemIndex !== -1) {
+            const item = this.items.splice(unblockedItemIndex, 1)[0];
             this.itemMap.delete(item.id);
             this.trackPopStatistics();
             return item;
         }
 
-        // Return a promise that resolves when an item is added
+        // Return a promise that resolves when an item is added or a dependency is resolved
         return new Promise<CognitiveItem>((resolve, reject) => {
-            // Set a timeout to prevent indefinite waiting
             const timeout = setTimeout(() => {
-                reject(new Error('Timeout waiting for item to be added to agenda'));
+                // Remove the resolver from the queue before rejecting
+                const index = this.waitingQueue.indexOf(resolver);
+                if (index !== -1) {
+                    this.waitingQueue.splice(index, 1);
+                }
+                reject(new Error('Timeout waiting for an unblocked item to become available'));
             }, 30000); // 30 second timeout
-            
-            this.waitingQueue.push(() => {
+
+            const resolver = () => {
                 clearTimeout(timeout);
-                const item = this.items.shift()!;
-                this.itemMap.delete(item.id);
-                this.trackPopStatistics();
-                resolve(item);
-            });
+                // When resolved, re-run pop to get the unblocked item.
+                this.pop().then(resolve).catch(reject);
+            };
+
+            this.waitingQueue.push(resolver);
         });
     }
 
     /**
-     * Peek at the highest priority item without removing it
-     * @returns The highest priority cognitive item or null if agenda is empty
+     * Peek at the highest priority unblocked item without removing it
+     * @returns The highest priority unblocked cognitive item or null if agenda is empty
      */
     peek(): CognitiveItem | null {
-        return this.items.length > 0 ? this.items[0] : null;
+        const unblockedItemIndex = this.items.findIndex(item => !this.isBlocked(item));
+        return unblockedItemIndex !== -1 ? this.items[unblockedItemIndex] : null;
     }
 
     /**
@@ -125,6 +131,11 @@ export class PriorityAgenda implements Agenda {
         if (index !== -1) {
             this.items[index].attention = newVal;
             this.sortItemsByPriority();
+            // An update might unblock an item, so we check the waiting queue
+            if (this.waitingQueue.length > 0) {
+                const resolver = this.waitingQueue.shift();
+                if (resolver) resolver();
+            }
         }
     }
 
@@ -139,6 +150,11 @@ export class PriorityAgenda implements Agenda {
         const removed = this.items.length !== initialLength;
         if (removed) {
             this.itemMap.delete(id);
+            // An item removal might unblock a dependent task, so we check the waiting queue
+            if (this.waitingQueue.length > 0) {
+                const resolver = this.waitingQueue.shift();
+                if (resolver) resolver();
+            }
         }
         return removed;
     }
@@ -181,10 +197,60 @@ export class PriorityAgenda implements Agenda {
     }
 
     /**
+     * Calculate the combined priority of a cognitive item
+     * @param item The cognitive item
+     * @returns The combined priority score
+     */
+    private getCombinedPriority(item: CognitiveItem): number {
+        const attentionPriority = item.attention.priority;
+
+        if (item.type === 'TASK' && item.task_metadata) {
+            const priorityMap = {
+                'low': 0.25,
+                'medium': 0.5,
+                'high': 0.75,
+                'critical': 1.0
+            };
+            const taskPriority = priorityMap[item.task_metadata.priority_level] || 0.5;
+
+            // Give more weight to the explicit task priority
+            return (taskPriority * 0.9) + (attentionPriority * 0.1);
+        }
+
+        return attentionPriority;
+    }
+
+    /**
      * Sort items by priority in descending order (highest first)
      */
     private sortItemsByPriority(): void {
-        this.items.sort((a, b) => b.attention.priority - a.attention.priority);
+        this.items.sort((a, b) => this.getCombinedPriority(b) - this.getCombinedPriority(a));
+    }
+
+    /**
+     * Check if a task is blocked by its dependencies.
+     * @param item The cognitive item to check.
+     * @returns True if the item is a task and one of its dependencies is not met.
+     */
+    private isBlocked(item: CognitiveItem): boolean {
+        if (item.type !== 'TASK' || !item.task_metadata?.dependencies?.length) {
+            return false; // Not a task with dependencies, so not blocked.
+        }
+
+        for (const depId of item.task_metadata.dependencies) {
+            const dependency = this.itemMap.get(depId);
+            // If the dependency is still in the agenda, it's not completed yet.
+            if (dependency) {
+                // A more robust check would be for status === 'completed', but for now,
+                // we assume if it's in the agenda, it's not done.
+                // This is a simplification until the WorldModel is the source of truth for status.
+                if (dependency.task_metadata?.status !== 'completed') {
+                    return true;
+                }
+            }
+        }
+
+        return false; // Not blocked.
     }
 
     /**
