@@ -3,7 +3,7 @@ import WebSocket = require('ws');
 import {DecentralizedCognitiveCore} from '../core/cognitiveCore';
 import {PerceptionSubsystem} from '../modules/perceptionSubsystem';
 import {AttentionValue, CognitiveItem, TruthValue} from '../interfaces/types';
-import {RealTimeTaskManager} from '../modules/taskManager';
+import {UnifiedTaskManager} from '../modules/taskManager';
 import {TaskWebSocketInterface} from '../interfaces/taskWebSocketInterface';
 import {v4 as uuidv4} from 'uuid';
 
@@ -40,7 +40,7 @@ export class WebSocketInterface {
     private wss: WebSocketServer;
     private readonly core: DecentralizedCognitiveCore;
     private readonly perception: PerceptionSubsystem;
-    private readonly taskManager: RealTimeTaskManager;
+    private readonly taskManager: UnifiedTaskManager;
     private readonly taskWebSocketInterface: TaskWebSocketInterface;
     private clients: Set<WebSocket> = new Set();
     private readonly componentMethods: ComponentMethods;
@@ -53,7 +53,7 @@ export class WebSocketInterface {
         this.perception = new PerceptionSubsystem();
         
         // Initialize task manager with access to agenda and world model
-        this.taskManager = new RealTimeTaskManager(
+        this.taskManager = new UnifiedTaskManager(
             this.core as any, // Access to agenda - in a full implementation, we'd provide a proper interface
             this.core.getWorldModel()
         );

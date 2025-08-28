@@ -1,105 +1,109 @@
-import { CognitiveItem, TaskMetadata } from '../interfaces/types';
+import { Task } from '../interfaces/task';
 
 export class TaskValidator {
-    static validateTask(task: CognitiveItem): boolean {
-        // Check if the item is a task (has task_metadata)
-        if (!task.task_metadata) {
+    static validateTask(task: Task): boolean {
+        // Validate required fields
+        if (!task.id || !task.atom_id || !task.label || !task.content) {
             return false;
         }
 
-        const metadata = task.task_metadata;
-        
         // Validate status
         const validStatuses = ['pending', 'in_progress', 'completed', 'failed', 'deferred'];
-        if (metadata.status && !validStatuses.includes(metadata.status)) {
+        if (!validStatuses.includes(task.status)) {
             return false;
         }
-        
-        // Validate priority
+
+        // Validate priority level
         const validPriorities = ['low', 'medium', 'high', 'critical'];
-        if (metadata.priority && !validPriorities.includes(metadata.priority)) {
+        if (!validPriorities.includes(task.priority_level)) {
             return false;
         }
-        
+
         // Validate dependencies (if present)
-        if (metadata.dependencies && !Array.isArray(metadata.dependencies)) {
+        if (task.dependencies && !Array.isArray(task.dependencies)) {
             return false;
         }
-        
+
         // Validate deadline (if present)
-        if (metadata.deadline && (typeof metadata.deadline !== 'number' || metadata.deadline < 0)) {
+        if (task.deadline && (typeof task.deadline !== 'number' || task.deadline < 0)) {
             return false;
         }
-        
+
         // Validate estimated_effort (if present)
-        if (metadata.estimated_effort && (typeof metadata.estimated_effort !== 'number' || metadata.estimated_effort < 0)) {
+        if (task.estimated_effort && (typeof task.estimated_effort !== 'number' || task.estimated_effort < 0)) {
             return false;
         }
-        
+
         // Validate confidence (if present)
-        if (metadata.confidence && (typeof metadata.confidence !== 'number' || metadata.confidence < 0 || metadata.confidence > 1)) {
+        if (task.confidence && (typeof task.confidence !== 'number' || task.confidence < 0 || task.confidence > 1)) {
             return false;
         }
-        
+
         // Validate tags (if present)
-        if (metadata.tags && !Array.isArray(metadata.tags)) {
+        if (task.tags && !Array.isArray(task.tags)) {
             return false;
         }
-        
+
         // Validate categories (if present)
-        if (metadata.categories && !Array.isArray(metadata.categories)) {
+        if (task.categories && !Array.isArray(task.categories)) {
             return false;
         }
-        
+
         // Validate context (if present)
-        if (metadata.context && typeof metadata.context !== 'object') {
+        if (task.context && typeof task.context !== 'object') {
             return false;
         }
-        
+
+        // Validate timestamps
+        if (typeof task.created_at !== 'number' || typeof task.updated_at !== 'number') {
+            return false;
+        }
+
         return true;
     }
-    
-    static normalizeTask(task: CognitiveItem): CognitiveItem {
-        // If it's not already a task, convert it
-        if (!task.task_metadata) {
-            task.task_metadata = {
-                status: 'pending',
-                priority: 'medium'
-            };
+
+    static normalizeTask(task: Task): Task {
+        // Ensure required fields
+        if (!task.status) {
+            task.status = 'pending';
         }
-        
-        const metadata = task.task_metadata;
-        
-        // Normalize status
-        if (!metadata.status) {
-            metadata.status = 'pending';
+
+        if (!task.priority_level) {
+            task.priority_level = 'medium';
         }
-        
-        // Normalize priority
-        if (!metadata.priority) {
-            metadata.priority = 'medium';
+
+        if (!task.subtasks) {
+            task.subtasks = [];
         }
-        
+
+        if (!task.created_at) {
+            task.created_at = Date.now();
+        }
+
+        if (!task.updated_at) {
+            task.updated_at = Date.now();
+        }
+
         // Normalize dependencies
-        if (metadata.dependencies && !Array.isArray(metadata.dependencies)) {
-            metadata.dependencies = [];
+        if (task.dependencies && !Array.isArray(task.dependencies)) {
+            task.dependencies = [];
         }
-        
+
         // Normalize tags
-        if (metadata.tags && !Array.isArray(metadata.tags)) {
-            metadata.tags = [];
+        if (task.tags && !Array.isArray(task.tags)) {
+            task.tags = [];
         }
-        
+
         // Normalize categories
-        if (metadata.categories && !Array.isArray(metadata.categories)) {
-            metadata.categories = [];
+        if (task.categories && !Array.isArray(task.categories)) {
+            task.categories = [];
         }
-        
+
         // Normalize context
-        if (metadata.context && typeof metadata.context !== 'object') {
-            metadata.context = {};
+        if (task.context && typeof task.context !== 'object') {
+            task.context = {};
         }
-        
+
         return task;
     }
 }

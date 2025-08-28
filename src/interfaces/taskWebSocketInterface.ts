@@ -1,4 +1,5 @@
-import { Task, TaskManager } from '../modules/taskManager';
+import { Task } from './task';
+import { TaskManager } from '../modules/taskManager';
 import WebSocket = require('ws');
 
 export class TaskWebSocketInterface {
