@@ -19,6 +19,8 @@ export interface TaskManager {
     getAllTasks(): CognitiveItem[];
     getTasksByStatus(status: 'pending' | 'in_progress' | 'completed' | 'failed' | 'deferred'): CognitiveItem[];
     getTasksByPriority(priority: 'low' | 'medium' | 'high' | 'critical'): CognitiveItem[];
+    getTasksByGroupId(groupId: string): CognitiveItem[];
+    assignTaskToGroup(taskId: string, groupId: string): CognitiveItem | null;
     updateTaskStatus(id: string, status: 'pending' | 'in_progress' | 'completed' | 'failed' | 'deferred'): CognitiveItem | null;
     addSubtask(parentId: string, subtask: Omit<CognitiveItem, 'id' | 'atom_id' | 'created_at' | 'updated_at' | 'subtasks' | 'stamp' | 'parent_id' | 'type'> & { 
         type?: 'TASK';
@@ -127,6 +129,27 @@ export class UnifiedTaskManager implements TaskManager {
 
     getTasksByPriority(priority: 'low' | 'medium' | 'high' | 'critical'): CognitiveItem[] {
         return this.getAllTasks().filter(task => task.task_metadata?.priority_level === priority);
+    }
+
+    getTasksByGroupId(groupId: string): CognitiveItem[] {
+        return this.getAllTasks().filter(task => task.task_metadata?.group_id === groupId);
+    }
+
+    assignTaskToGroup(taskId: string, groupId: string): CognitiveItem | null {
+        const task = this.getTask(taskId);
+        if (!task || !isTask(task)) return null;
+
+        if (task.task_metadata) {
+            task.task_metadata.group_id = groupId;
+        } else {
+            task.task_metadata = {
+                status: 'pending',
+                priority_level: 'medium',
+                group_id: groupId
+            };
+        }
+
+        return this.updateTask(taskId, { task_metadata: task.task_metadata });
     }
 
     updateTaskStatus(id: string, status: 'pending' | 'in_progress' | 'completed' | 'failed' | 'deferred'): CognitiveItem | null {

@@ -276,4 +276,58 @@ describe('UnifiedTaskManager', () => {
             expect(mockAgenda.remove).toHaveBeenCalledWith('parent1');
         });
     });
+
+    describe('Task Grouping', () => {
+        beforeEach(() => {
+            taskManager = new UnifiedTaskManager(mockAgenda, mockWorldModel);
+        });
+
+        it('should assign a task to a group', () => {
+            const task = createTaskItem({ id: 'task1' });
+            mockWorldModel.get_item.mockReturnValue(task);
+
+            // Mock updateTask to return the modified task
+            taskManager.updateTask = jest.fn().mockImplementation((id, updates) => {
+                const updated = { ...task, ...updates };
+                updated.task_metadata = { ...task.task_metadata, ...updates.task_metadata };
+                return updated;
+            });
+
+            const updatedTask = taskManager.assignTaskToGroup('task1', 'group1');
+
+            expect(taskManager.updateTask).toHaveBeenCalledWith('task1', {
+                task_metadata: expect.objectContaining({ group_id: 'group1' }),
+            });
+            expect(updatedTask?.task_metadata?.group_id).toBe('group1');
+        });
+
+        it('should return null when assigning a non-existent task to a group', () => {
+            mockWorldModel.get_item.mockReturnValue(null);
+            const result = taskManager.assignTaskToGroup('non-existent-task', 'group1');
+            expect(result).toBeNull();
+            expect(mockWorldModel.update_item).not.toHaveBeenCalled();
+        });
+
+        it('should retrieve tasks by group ID', () => {
+            const task1 = createTaskItem({ id: 'task1', task_metadata: { group_id: 'group1', status: 'pending', priority_level: 'medium' } });
+            const task2 = createTaskItem({ id: 'task2', task_metadata: { group_id: 'group2', status: 'pending', priority_level: 'medium' } });
+            const task3 = createTaskItem({ id: 'task3', task_metadata: { group_id: 'group1', status: 'pending', priority_level: 'medium' } });
+            mockWorldModel.getAllItems.mockReturnValue([task1, task2, task3]);
+
+            const group1Tasks = taskManager.getTasksByGroupId('group1');
+
+            expect(group1Tasks).toHaveLength(2);
+            expect(group1Tasks).toContain(task1);
+            expect(group1Tasks).toContain(task3);
+        });
+
+        it('should return an empty array if no tasks match the group ID', () => {
+            const task1 = createTaskItem({ id: 'task1', task_metadata: { group_id: 'group1', status: 'pending', priority_level: 'medium' } });
+            mockWorldModel.getAllItems.mockReturnValue([task1]);
+
+            const group2Tasks = taskManager.getTasksByGroupId('group2');
+
+            expect(group2Tasks).toHaveLength(0);
+        });
+    });
 });
