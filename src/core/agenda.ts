@@ -22,6 +22,23 @@ export class PriorityAgenda implements Agenda {
     private popCount: number = 0;
     private totalWaitTime: number = 0;
     private maxWaitTime: number = 0;
+    private getTaskStatus: (taskId: string) => 'pending' | 'in_progress' | 'completed' | 'failed' | 'deferred' | null;
+
+    /**
+     * Creates an instance of PriorityAgenda.
+     * @param getTaskStatus A function to resolve the status of a task by its ID.
+     * This is crucial for robust dependency checking.
+     */
+    constructor(getTaskStatus?: (taskId: string) => 'pending' | 'in_progress' | 'completed' | 'failed' | 'deferred' | null) {
+        // If no status resolver is provided, default to checking only within the agenda.
+        // This is not recommended for production use with dependent tasks.
+        this.getTaskStatus = getTaskStatus || ((taskId: string) => {
+            const task = this.itemMap.get(taskId);
+            // If task is not in the agenda, we can't know its status. Assume not completed.
+            // A more robust system would query a WorldModel.
+            return task?.task_metadata?.status || null;
+        });
+    }
 
     /**
      * Add or update an item in the agenda
@@ -79,6 +96,16 @@ export class PriorityAgenda implements Agenda {
         if (unblockedItemIndex !== -1) {
             const item = this.items.splice(unblockedItemIndex, 1)[0];
             this.itemMap.delete(item.id);
+
+            // If the popped item is a task, update its status to 'in_progress'.
+            if (item.type === 'TASK' && item.task_metadata) {
+                item.task_metadata.status = 'in_progress';
+                // Ensure updated_at is a number before updating
+                if (typeof item.updated_at === 'number') {
+                    item.updated_at = Date.now();
+                }
+            }
+
             this.trackPopStatistics();
             return item;
         }
@@ -197,7 +224,7 @@ export class PriorityAgenda implements Agenda {
     }
 
     /**
-     * Calculate the combined priority of a cognitive item
+     * Calculate the combined priority of a cognitive item, factoring in task-specific attributes.
      * @param item The cognitive item
      * @returns The combined priority score
      */
@@ -213,8 +240,21 @@ export class PriorityAgenda implements Agenda {
             };
             const taskPriority = priorityMap[item.task_metadata.priority_level] || 0.5;
 
-            // Give more weight to the explicit task priority
-            return (taskPriority * 0.9) + (attentionPriority * 0.1);
+            // Deadline factor: higher priority for tasks with closer deadlines
+            let deadlineFactor = 0;
+            if (item.task_metadata.deadline) {
+                const now = Date.now();
+                const timeLeft = item.task_metadata.deadline - now;
+                if (timeLeft < 0) {
+                    deadlineFactor = 1.0; // Overdue tasks get max factor.
+                } else if (timeLeft < 24 * 60 * 60 * 1000) { // Less than a day
+                    // Factor increases as deadline approaches.
+                    deadlineFactor = 1.0 - (timeLeft / (24 * 60 * 60 * 1000));
+                }
+            }
+
+            // Weighted average: 40% task priority, 50% deadline, 10% attention
+            return (taskPriority * 0.4) + (deadlineFactor * 0.5) + (attentionPriority * 0.1);
         }
 
         return attentionPriority;
@@ -228,25 +268,20 @@ export class PriorityAgenda implements Agenda {
     }
 
     /**
-     * Check if a task is blocked by its dependencies.
+     * Check if a task is blocked by its dependencies using the provided status resolver.
      * @param item The cognitive item to check.
-     * @returns True if the item is a task and one of its dependencies is not met.
+     * @returns True if the item is a task and any of its dependencies are not 'completed'.
      */
     private isBlocked(item: CognitiveItem): boolean {
         if (item.type !== 'TASK' || !item.task_metadata?.dependencies?.length) {
             return false; // Not a task with dependencies, so not blocked.
         }
 
+        // A task is blocked if any of its dependencies are not 'completed'.
         for (const depId of item.task_metadata.dependencies) {
-            const dependency = this.itemMap.get(depId);
-            // If the dependency is still in the agenda, it's not completed yet.
-            if (dependency) {
-                // A more robust check would be for status === 'completed', but for now,
-                // we assume if it's in the agenda, it's not done.
-                // This is a simplification until the WorldModel is the source of truth for status.
-                if (dependency.task_metadata?.status !== 'completed') {
-                    return true;
-                }
+            const dependencyStatus = this.getTaskStatus(depId);
+            if (dependencyStatus !== 'completed') {
+                return true; // Blocked if dependency is not completed or its status is unknown.
             }
         }
 

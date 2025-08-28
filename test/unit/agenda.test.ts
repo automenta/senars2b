@@ -5,9 +5,14 @@ import {createCognitiveItem, createSemanticAtom, createTruthValue, createAttenti
 
 describe('PriorityAgenda', () => {
     let agenda: PriorityAgenda;
+    let taskStatuses: Map<string, 'pending' | 'in_progress' | 'completed' | 'failed' | 'deferred'>;
+    let getTaskStatus: (taskId: string) => 'pending' | 'in_progress' | 'completed' | 'failed' | 'deferred' | null;
+
 
     beforeEach(() => {
-        agenda = new PriorityAgenda();
+        taskStatuses = new Map();
+        getTaskStatus = (taskId: string) => taskStatuses.get(taskId) || null;
+        agenda = new PriorityAgenda(getTaskStatus);
     });
 
     describe('push and size', () => {
@@ -95,98 +100,121 @@ describe('PriorityAgenda', () => {
         });
     });
 
-    describe('Task-Specific Functionality', () => {
-        it('should prioritize tasks based on combined priority', async () => {
-            const highAttentionItem = createBeliefItem({
-                attention: { priority: 0.9, durability: 0.5 }
+    describe('Enhanced Task Functionality', () => {
+
+        describe('Dependency Checking', () => {
+            it('should block a task if its dependency is not completed, then unblock it', async () => {
+                const depTask = createTaskItem({ id: 'dep1', attention: {priority: 0.9, durability: 0.5 } });
+                const mainTask = createTaskItem({ id: 'main1', attention: {priority: 0.8, durability: 0.5 }, task_metadata: { dependencies: ['dep1'], status: 'pending', priority_level: 'high' } });
+
+                taskStatuses.set('dep1', 'pending');
+                agenda.push(depTask);
+                agenda.push(mainTask);
+
+                // The dependency should be popped first as it's unblocked and has high priority
+                const popped = await agenda.pop();
+                expect(popped.id).toBe('dep1');
+
+                // After popping, we simulate that the system processed it and it's now complete.
+                taskStatuses.set('dep1', 'completed');
+
+                // Now that the dependency is complete, the main task should be the next item to be popped.
+                // Pushing a new item will resolve the waiting promise in pop() if it's waiting.
+                agenda.push(createTaskItem({id: 'dummy'}));
+
+                const nextPopped = await agenda.pop();
+                expect(nextPopped.id).toBe('main1');
             });
 
-            const highPriorityTask = createTaskItem({
-                attention: { priority: 0.5, durability: 0.5 },
-                task_metadata: {
-                    status: 'pending',
-                    priority_level: 'critical',
-                }
+            it('should not pop a blocked task', async () => {
+                const depTask = createTaskItem({ id: 'dep1' });
+                const mainTask = createTaskItem({ id: 'main1', task_metadata: { dependencies: ['dep1'], status: 'pending', priority_level: 'high' } });
+                const unblockedTask = createTaskItem({ id: 'unblocked1', attention: { priority: 0.1, durability: 0.1 } });
+
+                taskStatuses.set('dep1', 'in_progress'); // Not completed
+                agenda.push(mainTask);
+                agenda.push(unblockedTask);
+
+                const popped = await agenda.pop();
+                expect(popped.id).toBe('unblocked1');
             });
 
-            agenda.push(highAttentionItem);
-            agenda.push(highPriorityTask);
+            it('should pop a task once its dependency is completed', async () => {
+                const mainTask = createTaskItem({ id: 'main1', task_metadata: { dependencies: ['dep1'], status: 'pending', priority_level: 'high' } });
+                agenda.push(mainTask);
 
-            const poppedItem = await agenda.pop();
-            expect(poppedItem.id).toBe(highPriorityTask.id);
+                // Initially blocked
+                expect(agenda.peek()).toBeNull();
+
+                // Mark dependency as completed
+                taskStatuses.set('dep1', 'completed');
+
+                // Create a dummy item and push it to resolve the waiting pop
+                const dummy = createTaskItem({id: "dummy"});
+                agenda.push(dummy);
+
+                const popped = await agenda.pop();
+                expect(popped.id).toBe(mainTask.id);
+            });
         });
 
-        it('should not pop a task with an unmet dependency', async () => {
-            const dependencyTask = createTaskItem();
-            const dependentTask = createTaskItem({
-                task_metadata: {
-                    status: 'pending',
-                    priority_level: 'high',
-                    dependencies: [dependencyTask.id]
-                }
+        describe('Prioritization with Deadlines', () => {
+            it('should prioritize task with an imminent deadline', async () => {
+                const normalTask = createTaskItem({ id: 'normal', attention: { priority: 0.8, durability: 0.5 } });
+                const urgentTask = createTaskItem({
+                    id: 'urgent',
+                    attention: { priority: 0.5, durability: 0.5 },
+                    task_metadata: {
+                        status: 'pending',
+                        priority_level: 'medium',
+                        deadline: Date.now() + 1000 * 60 * 30 // 30 minutes from now
+                    }
+                });
+                agenda.push(normalTask);
+                agenda.push(urgentTask);
+
+                const popped = await agenda.pop();
+                expect(popped.id).toBe('urgent');
             });
 
-            agenda.push(dependencyTask);
-            agenda.push(dependentTask);
+            it('should prioritize an overdue task very highly', async () => {
+                const highPriorityTask = createTaskItem({ id: 'highPrio', task_metadata: { status: 'pending', priority_level: 'high' } });
+                const overdueTask = createTaskItem({
+                    id: 'overdue',
+                    task_metadata: {
+                        status: 'pending',
+                        priority_level: 'low',
+                        deadline: Date.now() - 1000 // 1 second ago
+                    }
+                });
+                agenda.push(highPriorityTask);
+                agenda.push(overdueTask);
 
-            const poppedItem = await agenda.pop();
-            expect(poppedItem.id).toBe(dependencyTask.id);
-            expect(agenda.size()).toBe(1);
+                const popped = await agenda.pop();
+                expect(popped.id).toBe('overdue');
+            });
         });
 
-        it('should pop a dependent task once its dependency is completed', async () => {
-            const dependencyTask = createTaskItem({ id: 'dep1' });
-            const dependentTask = createTaskItem({
-                id: 'dep2',
-                attention: { priority: 1.0, durability: 1.0 },
-                task_metadata: {
-                    status: 'pending',
-                    priority_level: 'critical',
-                    dependencies: [dependencyTask.id]
-                }
+        describe('Lifecycle Management on Pop', () => {
+            it('should change task status to in_progress on pop', async () => {
+                const task = createTaskItem({ task_metadata: { status: 'pending', priority_level: 'medium' } });
+                agenda.push(task);
+
+                const popped = await agenda.pop();
+                expect(popped.task_metadata?.status).toBe('in_progress');
             });
 
-            agenda.push(dependencyTask);
-            agenda.push(dependentTask);
+            it('should update the updated_at timestamp on pop', async () => {
+                const task = createTaskItem();
+                const originalTimestamp = task.updated_at!;
+                agenda.push(task);
 
-            // Pop the dependency first
-            let poppedItem = await agenda.pop();
-            expect(poppedItem.id).toBe(dependencyTask.id);
+                // Add a small delay to ensure Date.now() will be different
+                await new Promise(resolve => setTimeout(resolve, 5));
 
-            // Now, mark the dependency as completed and push it back
-            dependencyTask.task_metadata!.status = 'completed';
-            agenda.push(dependencyTask);
-
-            // Remove the completed dependency from the agenda (simulating it being processed and finished)
-            agenda.remove(dependencyTask.id);
-
-            // Now the dependent task should be poppable
-            poppedItem = await agenda.pop();
-            expect(poppedItem.id).toBe(dependentTask.id);
-        });
-
-        it('should peek the highest priority unblocked item', () => {
-            const dependencyTask = createTaskItem();
-            const dependentTask = createTaskItem({
-                attention: { priority: 1.0, durability: 1.0 },
-                task_metadata: {
-                    status: 'pending',
-                    priority_level: 'critical',
-                    dependencies: [dependencyTask.id]
-                }
+                const popped = await agenda.pop();
+                expect(popped.updated_at).toBeGreaterThan(originalTimestamp);
             });
-            const anotherTask = createTaskItem({
-                attention: { priority: 0.5, durability: 0.5 }
-            });
-
-            agenda.push(dependencyTask);
-            agenda.push(dependentTask);
-            agenda.push(anotherTask);
-
-            const peekedItem = agenda.peek();
-            // Should peek `dependencyTask` as it has higher default priority than `anotherTask`
-            // and `dependentTask` is blocked
-            expect(peekedItem!.id).toBe(dependencyTask.id);
         });
     });
 });

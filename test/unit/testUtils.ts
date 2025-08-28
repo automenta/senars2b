@@ -41,9 +41,13 @@ export function createTaskItem(overrides: Partial<CognitiveItem> = {}): Cognitiv
         ? { ...defaultTaskMetadata, ...overrides.task_metadata }
         : defaultTaskMetadata;
 
+    const now = Date.now();
+
     return createCognitiveItem({
         type: 'TASK',
         label: 'Test task',
+        created_at: now,
+        updated_at: now,
         task_metadata: taskMetadata,
         ...overrides
     });
