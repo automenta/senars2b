@@ -18,21 +18,21 @@ describe('Enhanced Validation and Error Handling', () => {
         it('should throw error when adding null item', () => {
             expect(() => {
                 agenda.push(null as any);
-            }).toThrow('Cannot add null or undefined item to agenda');
+            }).toThrow('Item must be a valid CognitiveItem with an id and attention value.');
         });
 
         it('should throw error when adding item without ID', () => {
             const item = createCognitiveItem({id: undefined} as any);
             expect(() => {
                 agenda.push(item);
-            }).toThrow('Item must have an ID');
+            }).toThrow('Item must be a valid CognitiveItem with an id and attention value.');
         });
 
         it('should throw error when adding item without attention', () => {
             const item = createCognitiveItem({attention: undefined} as any);
             expect(() => {
                 agenda.push(item);
-            }).toThrow('Item must have an attention value');
+            }).toThrow('Item must be a valid CognitiveItem with an id and attention value.');
         });
 
         it('should throw error when adding item with invalid priority', () => {

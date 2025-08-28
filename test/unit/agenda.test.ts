@@ -217,4 +217,115 @@ describe('PriorityAgenda', () => {
             });
         });
     });
+
+    describe('getStatistics', () => {
+        it('should calculate popRate correctly over a time interval', async () => {
+            agenda.push(createTaskItem({ id: 't1' }));
+            agenda.push(createTaskItem({ id: 't2' }));
+            await agenda.pop();
+            await agenda.pop();
+
+            // Wait for 1 second to get a stable rate
+            await new Promise(resolve => setTimeout(resolve, 1000));
+
+            const stats = agenda.getStatistics();
+            // Expected rate is 2 pops / 1 second = 2 pops/sec.
+            // Allow for timing inaccuracies of async operations.
+            expect(stats.popRate).toBeCloseTo(2, 0);
+            expect(stats.totalPops).toBe(2);
+        });
+    });
+
+    describe('updateTaskStatus', () => {
+        it('should update a task status and its timestamp', async () => {
+            const task = createTaskItem({ task_metadata: { status: 'pending', priority_level: 'low' } });
+            const originalTimestamp = task.updated_at!;
+            agenda.push(task);
+
+            // Add a small delay to ensure the timestamp will be different
+            await new Promise(resolve => setTimeout(resolve, 5));
+
+            const result = agenda.updateTaskStatus(task.id, 'completed');
+            expect(result).toBe(true);
+
+            const updatedTask = agenda.get(task.id)!;
+            expect(updatedTask.task_metadata?.status).toBe('completed');
+            expect(updatedTask.updated_at).toBeGreaterThan(originalTimestamp);
+        });
+
+        it('should return false for a non-existent task', () => {
+            const result = agenda.updateTaskStatus('non-existent-id', 'completed');
+            expect(result).toBe(false);
+        });
+
+        it('should wait for a blocked task, then pop it when its dependency is completed', async () => {
+            const depId = 'dep1';
+            const mainTask = createTaskItem({ id: 'main1', task_metadata: { dependencies: [depId], status: 'pending', priority_level: 'high' } });
+
+            // The dependency's status is 'in_progress', so mainTask is blocked.
+            taskStatuses.set(depId, 'in_progress');
+            agenda.push(mainTask);
+
+            // With only a blocked task in the agenda, peek() should return null.
+            expect(agenda.peek()).toBeNull();
+
+            // Start a pop operation. It should wait because the task is blocked.
+            const popPromise = agenda.pop();
+
+            // In parallel, simulate the dependency completing after a short delay.
+            setTimeout(() => {
+                taskStatuses.set(depId, 'completed');
+                // Push a new dummy item to the agenda. This action will trigger
+                // the waiting pop() promise to re-evaluate its condition.
+                agenda.push(createTaskItem({ id: 'dummy' }));
+            }, 50);
+
+            // The pop promise should now resolve with the unblocked mainTask.
+            const poppedItem = await popPromise;
+            expect(poppedItem.id).toBe(mainTask.id);
+        }, 1000); // Increase timeout for this test
+    });
+
+    describe('getTasksBy', () => {
+        beforeEach(() => {
+            agenda.push(createTaskItem({ id: 'task1', task_metadata: { status: 'pending', priority_level: 'low', tags: ['urgent', 'backend'], categories: ['dev'] } }));
+            agenda.push(createTaskItem({ id: 'task2', task_metadata: { status: 'in_progress', priority_level: 'medium', tags: ['frontend'], categories: ['dev'] } }));
+            agenda.push(createTaskItem({ id: 'task3', task_metadata: { status: 'completed', priority_level: 'high', tags: ['urgent', 'frontend'], categories: ['ops'] } }));
+            agenda.push(createBeliefItem()); // This non-task item should be ignored.
+        });
+
+        it('should filter tasks by status', () => {
+            const pendingTasks = agenda.getTasksBy({ status: 'pending' });
+            expect(pendingTasks.length).toBe(1);
+            expect(pendingTasks[0].id).toBe('task1');
+        });
+
+        it('should filter tasks by tag', () => {
+            const urgentTasks = agenda.getTasksBy({ tag: 'urgent' });
+            expect(urgentTasks.length).toBe(2);
+            expect(urgentTasks.map(t => t.id).sort()).toEqual(['task1', 'task3']);
+        });
+
+        it('should filter tasks by category', () => {
+            const devTasks = agenda.getTasksBy({ category: 'dev' });
+            expect(devTasks.length).toBe(2);
+            expect(devTasks.map(t => t.id).sort()).toEqual(['task1', 'task2']);
+        });
+
+        it('should filter by a combination of status and tag', () => {
+            const completedUrgent = agenda.getTasksBy({ status: 'completed', tag: 'urgent' });
+            expect(completedUrgent.length).toBe(1);
+            expect(completedUrgent[0].id).toBe('task3');
+        });
+
+        it('should return an empty array if no tasks match the filter', () => {
+            const noMatch = agenda.getTasksBy({ tag: 'non-existent-tag' });
+            expect(noMatch.length).toBe(0);
+        });
+
+        it('should return an empty array if a combination of filters has no match', () => {
+            const noMatch = agenda.getTasksBy({ status: 'pending', tag: 'frontend' });
+            expect(noMatch.length).toBe(0);
+        });
+    });
 });
