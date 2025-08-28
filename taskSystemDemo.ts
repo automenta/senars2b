@@ -10,6 +10,8 @@
 import { TaskFactory } from './src/modules/taskFactory';
 import { TaskValidator } from './src/utils/taskValidator';
 import { UnifiedTaskManager } from './src/modules/taskManager';
+import { PriorityAgenda } from './src/core/agenda';
+import { PersistentWorldModel } from './src/core/worldModel';
 
 // Create a simple attention value
 const attention = {
@@ -24,8 +26,8 @@ console.log('1. Creating a basic task:');
 const basicTask = TaskFactory.createTask('Analyze system performance', attention);
 console.log('Created task:', basicTask.label);
 console.log('Task type:', basicTask.type);
-console.log('Task status:', basicTask.status);
-console.log('Task priority level:', basicTask.priority_level);
+console.log('Task status:', basicTask.task_metadata?.status);
+console.log('Task priority level:', basicTask.task_metadata?.priority_level);
 console.log('');
 
 // 2. Create a task with custom properties
@@ -38,23 +40,25 @@ const customTask = TaskFactory.createTask(
 );
 
 // Update the task with additional properties
-customTask.status = 'in_progress';
-customTask.dependencies = ['task-design-db-schema'];
-customTask.deadline = Date.now() + 86400000; // 1 day from now
-customTask.estimated_effort = 8;
-customTask.required_resources = ['database-access', 'auth-library'];
-customTask.outcomes = ['user-can-login', 'user-can-logout'];
-customTask.confidence = 0.9;
-customTask.tags = ['security', 'backend'];
-customTask.categories = ['authentication'];
-customTask.context = { reviewer: 'senior-developer' };
+if (customTask.task_metadata) {
+    customTask.task_metadata.status = 'in_progress';
+    customTask.task_metadata.dependencies = ['task-design-db-schema'];
+    customTask.task_metadata.deadline = Date.now() + 86400000; // 1 day from now
+    customTask.task_metadata.estimated_effort = 8;
+    customTask.task_metadata.required_resources = ['database-access', 'auth-library'];
+    customTask.task_metadata.outcomes = ['user-can-login', 'user-can-logout'];
+    customTask.task_metadata.confidence = 0.9;
+    customTask.task_metadata.tags = ['security', 'backend'];
+    customTask.task_metadata.categories = ['authentication'];
+    customTask.task_metadata.context = { reviewer: 'senior-developer' };
+}
 
 console.log('Created task:', customTask.label);
-console.log('Task status:', customTask.status);
-console.log('Task priority level:', customTask.priority_level);
-console.log('Task deadline:', new Date(customTask.deadline || 0).toISOString());
-console.log('Task effort estimate:', customTask.estimated_effort);
-console.log('Task tags:', customTask.tags);
+console.log('Task status:', customTask.task_metadata?.status);
+console.log('Task priority level:', customTask.task_metadata?.priority_level);
+console.log('Task deadline:', new Date(customTask.task_metadata?.deadline || 0).toISOString());
+console.log('Task effort estimate:', customTask.task_metadata?.estimated_effort);
+console.log('Task tags:', customTask.task_metadata?.tags);
 console.log('');
 
 // 3. Create a derived task
@@ -68,8 +72,8 @@ const derivedTask = TaskFactory.createDerivedTask(
 );
 
 console.log('Created derived task:', derivedTask.label);
-console.log('Parent task IDs:', derivedTask.dependencies);
-console.log('Task categories:', derivedTask.categories);
+console.log('Parent task IDs:', derivedTask.task_metadata?.dependencies);
+console.log('Task categories:', derivedTask.task_metadata?.categories);
 console.log('');
 
 // 4. Validate tasks
@@ -89,13 +93,13 @@ const incompleteTask: any = {
     attention: { priority: 0.5, durability: 0.5 },
     stamp: { timestamp: Date.now(), parent_ids: [], schema_id: 'demo' },
     type: 'TASK'
-    // missing status, priority_level, etc.
+    // missing task_metadata, status, priority_level, etc.
 };
 
-console.log('Before normalization - has status:', !!incompleteTask.status);
+console.log('Before normalization - has task_metadata:', !!incompleteTask.task_metadata);
 const normalizedTask = TaskValidator.normalizeTask(incompleteTask);
-console.log('After normalization - status:', normalizedTask.status);
-console.log('After normalization - priority level:', normalizedTask.priority_level);
+console.log('After normalization - status:', normalizedTask.task_metadata?.status);
+console.log('After normalization - priority level:', normalizedTask.task_metadata?.priority_level);
 console.log('After normalization - subtasks:', normalizedTask.subtasks);
 console.log('');
 

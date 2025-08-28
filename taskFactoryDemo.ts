@@ -32,24 +32,16 @@ console.log('2. Creating a task with metadata:');
 const taskWithMetadata = TaskFactory.createTask(
     'Implement user authentication',
     attention,
+    'high',
     {
-        status: 'pending',
-        priority: 'high',
-        dependencies: ['task-design-db-schema'],
-        deadline: Date.now() + 86400000, // 1 day from now
-        estimated_effort: 8,
-        required_resources: ['database-access', 'auth-library'],
-        outcomes: ['user-can-login', 'user-can-logout'],
-        confidence: 0.9,
-        tags: ['security', 'backend'],
-        categories: ['authentication'],
-        context: { projectId: 'web-app-v2', team: 'backend' }
+        projectId: 'web-app-v2',
+        team: 'backend'
     }
 );
 
 console.log('Created task:', taskWithMetadata.label);
 console.log('Task status:', taskWithMetadata.task_metadata?.status);
-console.log('Task priority:', taskWithMetadata.task_metadata?.priority);
+console.log('Task priority level:', taskWithMetadata.task_metadata?.priority_level);
 console.log('Task deadline:', new Date(taskWithMetadata.task_metadata?.deadline || 0).toISOString());
 console.log('Task effort estimate:', taskWithMetadata.task_metadata?.estimated_effort);
 console.log('Task tags:', taskWithMetadata.task_metadata?.tags);

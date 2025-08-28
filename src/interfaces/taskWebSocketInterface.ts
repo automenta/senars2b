@@ -1,170 +1,105 @@
-import { Task } from './task';
+import { CognitiveItem } from '../interfaces/types';
 import { TaskManager } from '../modules/taskManager';
 import WebSocket = require('ws');
 
-export class TaskWebSocketInterface {
+/**
+ * TaskWebSocketHandler - Handles task-related WebSocket requests
+ * 
+ * This class consolidates task handling functionality that was previously
+ * split between WebSocketInterface and TaskWebSocketInterface.
+ */
+export class TaskWebSocketHandler {
     private taskManager: TaskManager;
-    private ws: WebSocket;
 
-    constructor(taskManager: TaskManager, ws: WebSocket) {
+    constructor(taskManager: TaskManager) {
         this.taskManager = taskManager;
-        this.ws = ws;
-        
-        // Add event listener to broadcast task updates
-        this.taskManager.addEventListener((event: { type: string; task: Task }) => {
-            this.broadcastTaskEvent(event);
-        });
     }
 
-    handleTaskRequest(message: any): void {
+    handleTaskRequest(id: string, method: string, payload?: any): any {
         try {
-            const { id, method, payload } = message;
-            
             switch (method) {
                 case 'addTask':
-                    this.handleAddTask(id, payload);
-                    break;
+                    return this.handleAddTask(payload);
                 case 'updateTask':
-                    this.handleUpdateTask(id, payload);
-                    break;
+                    return this.handleUpdateTask(payload);
                 case 'removeTask':
-                    this.handleRemoveTask(id, payload);
-                    break;
+                    return this.handleRemoveTask(payload);
                 case 'getTask':
-                    this.handleGetTask(id, payload);
-                    break;
+                    return this.handleGetTask(payload);
                 case 'getAllTasks':
-                    this.handleGetAllTasks(id);
-                    break;
+                    return this.handleGetAllTasks();
                 case 'updateTaskStatus':
-                    this.handleUpdateTaskStatus(id, payload);
-                    break;
-                case 'getTaskStatistics': // Added new case
-                    this.handleGetTaskStatistics(id);
-                    break;
+                    return this.handleUpdateTaskStatus(payload);
+                case 'getTaskStatistics':
+                    return this.handleGetTaskStatistics();
                 default:
-                    this.sendError(id, `Unknown task method: ${method}`);
+                    throw new Error(`Unknown task method: ${method}`);
             }
         } catch (error: any) {
-            this.sendError(message.id, error.message);
+            throw new Error(error.message);
         }
     }
 
-    private handleAddTask(id: string, payload: any): void {
-        try {
-            const task = this.taskManager.addTask(payload);
-            this.sendResponse(id, { task });
-        } catch (error: any) {
-            this.sendError(id, error.message);
+    private handleAddTask(payload: any): { task: CognitiveItem } {
+        if (!payload) {
+            throw new Error('Missing payload');
         }
+        const task = this.taskManager.addTask(payload);
+        return { task };
     }
 
-    private handleUpdateTask(id: string, payload: { taskId: string; updates: Partial<Task> }): void {
-        try {
-            const { taskId, updates } = payload;
-            const task = this.taskManager.updateTask(taskId, updates);
-            if (task) {
-                this.sendResponse(id, { task });
-            } else {
-                this.sendError(id, `Task with ID ${taskId} not found`);
-            }
-        } catch (error: any) {
-            this.sendError(id, error.message);
+    private handleUpdateTask(payload: { taskId: string; updates: Partial<CognitiveItem> }): { task: CognitiveItem } {
+        if (!payload?.taskId) {
+            throw new Error('Missing required field: taskId');
         }
+        const task = this.taskManager.updateTask(payload.taskId, payload.updates);
+        if (!task) {
+            throw new Error(`Task with ID ${payload.taskId} not found`);
+        }
+        return { task };
     }
 
-    private handleRemoveTask(id: string, payload: { taskId: string }): void {
-        try {
-            const { taskId } = payload;
-            const success = this.taskManager.removeTask(taskId);
-            this.sendResponse(id, { success });
-        } catch (error: any) {
-            this.sendError(id, error.message);
+    private handleRemoveTask(payload: { taskId: string }): { success: boolean } {
+        if (!payload?.taskId) {
+            throw new Error('Missing required field: taskId');
         }
+        const success = this.taskManager.removeTask(payload.taskId);
+        return { success };
     }
 
-    private handleGetTask(id: string, payload: { taskId: string }): void {
-        try {
-            const { taskId } = payload;
-            const task = this.taskManager.getTask(taskId);
-            if (task) {
-                this.sendResponse(id, { task });
-            } else {
-                this.sendError(id, `Task with ID ${taskId} not found`);
-            }
-        } catch (error: any) {
-            this.sendError(id, error.message);
+    private handleGetTask(payload: { taskId: string }): { task: CognitiveItem } {
+        if (!payload?.taskId) {
+            throw new Error('Missing required field: taskId');
         }
+        const task = this.taskManager.getTask(payload.taskId);
+        if (!task) {
+            throw new Error(`Task with ID ${payload.taskId} not found`);
+        }
+        return { task };
     }
 
-    private handleGetAllTasks(id: string): void {
-        try {
-            const tasks = this.taskManager.getAllTasks();
-            this.sendResponse(id, { tasks });
-        } catch (error: any) {
-            this.sendError(id, error.message);
-        }
+    private handleGetAllTasks(): { tasks: CognitiveItem[] } {
+        const tasks = this.taskManager.getAllTasks();
+        return { tasks };
     }
 
-    private handleUpdateTaskStatus(id: string, payload: { taskId: string; status: Task['status'] }): void {
-        try {
-            const { taskId, status } = payload;
-            const task = this.taskManager.updateTaskStatus(taskId, status);
-            if (task) {
-                this.sendResponse(id, { task });
-            } else {
-                this.sendError(id, `Task with ID ${taskId} not found`);
-            }
-        } catch (error: any) {
-            this.sendError(id, error.message);
+    private handleUpdateTaskStatus(payload: { taskId: string; status: 'pending' | 'in_progress' | 'completed' | 'failed' | 'deferred' }): { task: CognitiveItem } {
+        if (!payload?.taskId || !payload?.status) {
+            throw new Error('Missing required fields: taskId, status');
         }
+        const task = this.taskManager.updateTaskStatus(payload.taskId, payload.status);
+        if (!task) {
+            throw new Error(`Task with ID ${payload.taskId} not found`);
+        }
+        return { task };
     }
 
-    private handleGetTaskStatistics(id: string): void {
-        try {
-            if (typeof (this.taskManager as any).getTaskStatistics !== 'function') {
-                this.sendError(id, 'Task manager does not support statistics');
-                return;
-            }
-            
-            const statistics = (this.taskManager as any).getTaskStatistics();
-            this.sendResponse(id, { taskStatistics: statistics });
-        } catch (error: any) {
-            this.sendError(id, error.message);
+    private handleGetTaskStatistics(): { taskStatistics: any } {
+        if (typeof (this.taskManager as any).getTaskStatistics !== 'function') {
+            throw new Error('Task manager does not support statistics');
         }
-    }
-
-    private sendResponse(id: string, payload: any): void {
-        if (this.ws.readyState === WebSocket.OPEN) {
-            this.ws.send(JSON.stringify({
-                id,
-                type: 'response',
-                payload
-            }));
-        }
-    }
-
-    private sendError(id: string, message: string): void {
-        if (this.ws.readyState === WebSocket.OPEN) {
-            this.ws.send(JSON.stringify({
-                id,
-                type: 'error',
-                error: {
-                    code: 'TASK_ERROR',
-                    message
-                }
-            }));
-        }
-    }
-
-    private broadcastTaskEvent(event: { type: string; task: Task }): void {
-        if (this.ws.readyState === WebSocket.OPEN) {
-            this.ws.send(JSON.stringify({
-                id: `event-${Date.now()}`,
-                type: 'event',
-                method: 'taskUpdate',
-                payload: event
-            }));
-        }
+        
+        const statistics = (this.taskManager as any).getTaskStatistics();
+        return { taskStatistics: statistics };
     }
 }

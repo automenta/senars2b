@@ -24,11 +24,27 @@ export interface DerivationStamp {
     module?: string;
 }
 
+// Task-specific metadata that extends CognitiveItem
+export interface TaskMetadata {
+    status: 'pending' | 'in_progress' | 'completed' | 'failed' | 'deferred';
+    priority_level: 'low' | 'medium' | 'high' | 'critical';
+    dependencies?: string[]; // Array of task IDs
+    deadline?: number; // Timestamp
+    estimated_effort?: number;
+    required_resources?: string[];
+    outcomes?: string[];
+    confidence?: number; // 0.0 to 1.0
+    tags?: string[];
+    categories?: string[];
+    context?: Record<string, any>;
+}
+
 export interface CognitiveItem {
     id: string;                // Unique identifier
     atom_id: string;           // Reference to SemanticAtom (added)
-    type: 'BELIEF' | 'GOAL' | 'QUERY' | 'EVENT'; // Item category
+    type: 'BELIEF' | 'GOAL' | 'QUERY' | 'EVENT' | 'TASK'; // Item category (added TASK)
     label: string;             // Natural language representation (made required)
+    content?: any;             // Content of the item (added for tasks)
     truth?: TruthValue;        // Truth value for beliefs
     attention: AttentionValue; // Attention value for goals (made non-optional)
     meta?: Record<string, any>; // Metadata (domain, source, etc.)
@@ -36,4 +52,15 @@ export interface CognitiveItem {
     goal_status?: "active" | "blocked" | "achieved" | "failed";
     stamp: DerivationStamp;    // Derivation stamp (added)
     payload?: Record<string, any>; // Payload for events/actions (added)
+    
+    // Task-specific properties (only used when type is 'TASK')
+    task_metadata?: TaskMetadata;
+    
+    // Task relationships (only used when type is 'TASK')
+    parent_id?: string;        // Parent task ID
+    subtasks?: string[];       // Subtask IDs
+    
+    // Task timestamps (only used when type is 'TASK')
+    created_at?: number;       // Creation timestamp
+    updated_at?: number;       // Last update timestamp
 }

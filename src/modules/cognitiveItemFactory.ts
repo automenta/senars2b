@@ -1,4 +1,4 @@
-import {AttentionValue, CognitiveItem, DerivationStamp, SemanticAtom, TruthValue} from '../interfaces/types';
+import {AttentionValue, CognitiveItem, DerivationStamp, SemanticAtom, TruthValue, TaskMetadata} from '../interfaces/types';
 import {v4 as uuidv4} from 'uuid';
 
 /**
@@ -95,6 +95,38 @@ export class CognitiveItemFactory {
     }
 
     /**
+     * Create a task cognitive item
+     * @param content The content of the task
+     * @param attention The attention value of the task
+     * @param taskMetadata Optional task metadata
+     * @returns A new task cognitive item
+     */
+    static createTask(content: string, attention: AttentionValue, taskMetadata?: Partial<TaskMetadata>): CognitiveItem {
+        const defaultTaskMetadata: TaskMetadata = {
+            status: 'pending',
+            priority_level: 'medium'
+        };
+        
+        return {
+            id: uuidv4(),
+            atom_id: uuidv4(), // Tasks create their own atom
+            type: 'TASK',
+            label: content,
+            content: content,
+            attention,
+            task_metadata: { ...defaultTaskMetadata, ...taskMetadata },
+            subtasks: [],
+            created_at: Date.now(),
+            updated_at: Date.now(),
+            stamp: {
+                timestamp: Date.now(),
+                parent_ids: [],
+                schema_id: 'cognitive-item-factory'
+            }
+        };
+    }
+
+    /**
      * Create a derived cognitive item
      * @param atomId The ID of the semantic atom this item is based on
      * @param type The type of cognitive item to create
@@ -107,7 +139,7 @@ export class CognitiveItemFactory {
      */
     static createDerivedItem(
         atomId: string,
-        type: 'BELIEF' | 'GOAL' | 'QUERY',
+        type: 'BELIEF' | 'GOAL' | 'QUERY' | 'TASK',
         parentIds: string[],
         schemaId: string,
         attention: AttentionValue,
@@ -133,6 +165,17 @@ export class CognitiveItemFactory {
             if (goalParentId) {
                 item.goal_parent_id = goalParentId;
             }
+        }
+        
+        if (type === 'TASK') {
+            item.content = label;
+            item.task_metadata = {
+                status: 'pending',
+                priority_level: 'medium'
+            };
+            item.subtasks = [];
+            item.created_at = Date.now();
+            item.updated_at = Date.now();
         }
 
         return item;

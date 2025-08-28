@@ -1,98 +1,92 @@
-import { Task, AttentionValue, TruthValue, DerivationStamp } from '../interfaces/task';
-import { v4 as uuidv4 } from 'uuid';
+import { CognitiveItem, AttentionValue } from '../interfaces/types';
+import { CognitiveItemFactory } from './cognitiveItemFactory';
 
+/**
+ * TaskFactory - Factory for creating task cognitive items
+ * 
+ * This factory creates tasks as specialized cognitive items, maintaining
+ * compatibility with the unified cognitive architecture while providing
+ * task-specific functionality.
+ */
 export class TaskFactory {
+    /**
+     * Create a task cognitive item
+     * @param content The content of the task
+     * @param attention The attention value for the task
+     * @param priority_level The priority level of the task
+     * @param metadata Optional metadata for the task
+     * @returns A new task cognitive item
+     */
     static createTask(
         content: string,
         attention: AttentionValue,
         priority_level: 'low' | 'medium' | 'high' | 'critical' = 'medium',
         metadata?: Record<string, any>
-    ): Task {
-        const id = uuidv4();
-        const atom_id = uuidv4();
-        
-        return {
-            id,
-            atom_id,
-            label: content,
-            content,
-            attention,
-            type: 'TASK',
+    ): CognitiveItem {
+        return CognitiveItemFactory.createTask(content, attention, {
             status: 'pending',
             priority_level,
-            subtasks: [],
-            created_at: Date.now(),
-            updated_at: Date.now(),
-            metadata,
-            stamp: {
-                timestamp: Date.now(),
-                parent_ids: [],
-                schema_id: 'task-factory'
-            }
-        };
+            ...metadata
+        });
     }
     
+    /**
+     * Create a derived task cognitive item
+     * @param parentIds The IDs of the parent tasks
+     * @param content The content of the task
+     * @param attention The attention value for the task
+     * @param priority_level The priority level of the task
+     * @param metadata Optional metadata for the task
+     * @returns A new derived task cognitive item
+     */
     static createDerivedTask(
         parentIds: string[],
         content: string,
         attention: AttentionValue,
         priority_level: 'low' | 'medium' | 'high' | 'critical' = 'medium',
         metadata?: Record<string, any>
-    ): Task {
-        const id = uuidv4();
-        const atom_id = uuidv4();
-        
-        return {
-            id,
-            atom_id,
-            label: content,
-            content,
-            attention,
-            type: 'TASK',
+    ): CognitiveItem {
+        const task = CognitiveItemFactory.createTask(content, attention, {
             status: 'pending',
             priority_level,
             dependencies: parentIds,
-            subtasks: [],
-            created_at: Date.now(),
-            updated_at: Date.now(),
-            metadata,
-            stamp: {
-                timestamp: Date.now(),
-                parent_ids: parentIds,
-                schema_id: 'task-factory'
-            }
-        };
+            ...metadata
+        });
+        
+        // Update the stamp to include parent IDs
+        task.stamp.parent_ids = parentIds;
+        task.stamp.schema_id = 'task-factory';
+        
+        return task;
     }
     
+    /**
+     * Create a subtask cognitive item
+     * @param parentId The ID of the parent task
+     * @param content The content of the task
+     * @param attention The attention value for the task
+     * @param priority_level The priority level of the task
+     * @param metadata Optional metadata for the task
+     * @returns A new subtask cognitive item
+     */
     static createSubtask(
         parentId: string,
         content: string,
         attention: AttentionValue,
         priority_level: 'low' | 'medium' | 'high' | 'critical' = 'medium',
         metadata?: Record<string, any>
-    ): Task {
-        const id = uuidv4();
-        const atom_id = uuidv4();
-        
-        return {
-            id,
-            atom_id,
-            label: content,
-            content,
-            attention,
-            type: 'TASK',
+    ): CognitiveItem {
+        const task = CognitiveItemFactory.createTask(content, attention, {
             status: 'pending',
             priority_level,
-            parent_id: parentId,
-            subtasks: [],
-            created_at: Date.now(),
-            updated_at: Date.now(),
-            metadata,
-            stamp: {
-                timestamp: Date.now(),
-                parent_ids: [parentId],
-                schema_id: 'task-factory'
-            }
-        };
+            ...metadata
+        });
+        
+        // Set parent relationship
+        task.parent_id = parentId;
+        task.stamp.parent_ids = [parentId];
+        task.stamp.schema_id = 'task-factory';
+        
+        return task;
     }
 }

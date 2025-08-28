@@ -4,7 +4,7 @@ import {DecentralizedCognitiveCore} from '../core/cognitiveCore';
 import {PerceptionSubsystem} from '../modules/perceptionSubsystem';
 import {AttentionValue, CognitiveItem, TruthValue} from '../interfaces/types';
 import {UnifiedTaskManager} from '../modules/taskManager';
-import {TaskWebSocketInterface} from '../interfaces/taskWebSocketInterface';
+import {TaskWebSocketHandler} from '../interfaces/taskWebSocketInterface';
 import {v4 as uuidv4} from 'uuid';
 
 // Define the message types for our metaprogrammatic interface
@@ -41,7 +41,7 @@ export class WebSocketInterface {
     private readonly core: DecentralizedCognitiveCore;
     private readonly perception: PerceptionSubsystem;
     private readonly taskManager: UnifiedTaskManager;
-    private readonly taskWebSocketInterface: TaskWebSocketInterface;
+    private readonly taskWebSocketHandler: TaskWebSocketHandler;
     private clients: Set<WebSocket> = new Set();
     private readonly componentMethods: ComponentMethods;
     private messageCounter: number = 0;
@@ -58,8 +58,8 @@ export class WebSocketInterface {
             this.core.getWorldModel()
         );
         
-        // Initialize task WebSocket interface
-        this.taskWebSocketInterface = new TaskWebSocketInterface(this.taskManager, null as any); // Will be set per connection
+        // Initialize task WebSocket handler
+        this.taskWebSocketHandler = new TaskWebSocketHandler(this.taskManager);
         
         this.startTime = Date.now();
 
@@ -279,11 +279,8 @@ export class WebSocketInterface {
             console.log('New client connected');
             this.clients.add(ws);
 
-            // Create a task WebSocket interface for this connection
-            const connectionTaskInterface = new TaskWebSocketInterface(this.taskManager, ws);
-            
-            // Store reference for message handling
-            (ws as any)._taskInterface = connectionTaskInterface;
+            // Store reference to the task WebSocket handler for this connection
+            (ws as any)._taskWebSocketHandler = this.taskWebSocketHandler;
 
             // Send welcome message with available methods
             this.sendWelcomeMessage(ws);
@@ -291,12 +288,6 @@ export class WebSocketInterface {
             ws.on('message', (data: WebSocket.Data) => {
                 try {
                     const message: WebSocketMessage = JSON.parse(data.toString());
-                    
-                    // Handle task messages specifically
-                    if (message.target === 'tasks') {
-                        connectionTaskInterface.handleTaskRequest(message);
-                        return;
-                    }
                     
                     this.handleMessage(ws, message);
                 } catch (error) {
@@ -467,8 +458,8 @@ export class WebSocketInterface {
                     return await this.handleGoalRequest(method, payload);
                 case 'reflection':
                     return await this.handleReflectionRequest(method, payload);
-                case 'tasks': // Added for task management
-                    return await this.handleTaskRequest(method, payload);
+                case 'tasks': // Use the consolidated task handler
+                    return this.taskWebSocketHandler.handleTaskRequest(uuidv4(), method, payload);
                 default:
                     throw new Error(`Unknown target: ${target}`);
             }
@@ -902,57 +893,9 @@ export class WebSocketInterface {
     }
 
     // Added for task management
-    private async handleTaskRequest(method: string, payload?: any): Promise<any> {
-        switch (method) {
-            case 'addTask':
-                if (!payload?.title) {
-                    throw new Error('Missing required field: title');
-                }
-                const task = this.taskManager.addTask(payload);
-                return { task };
-            case 'updateTask':
-                if (!payload?.taskId) {
-                    throw new Error('Missing required field: taskId');
-                }
-                const updatedTask = this.taskManager.updateTask(payload.taskId, payload.updates);
-                if (!updatedTask) {
-                    throw new Error(`Task with ID ${payload.taskId} not found`);
-                }
-                return { task: updatedTask };
-            case 'removeTask':
-                if (!payload?.taskId) {
-                    throw new Error('Missing required field: taskId');
-                }
-                const removed = this.taskManager.removeTask(payload.taskId);
-                return { success: removed };
-            case 'getTask':
-                if (!payload?.taskId) {
-                    throw new Error('Missing required field: taskId');
-                }
-                const taskById = this.taskManager.getTask(payload.taskId);
-                if (!taskById) {
-                    throw new Error(`Task with ID ${payload.taskId} not found`);
-                }
-                return { task: taskById };
-            case 'getAllTasks':
-                const tasks = this.taskManager.getAllTasks();
-                return { tasks };
-            case 'updateTaskStatus':
-                if (!payload?.taskId || !payload?.status) {
-                    throw new Error('Missing required fields: taskId, status');
-                }
-                const statusUpdatedTask = this.taskManager.updateTaskStatus(payload.taskId, payload.status);
-                if (!statusUpdatedTask) {
-                    throw new Error(`Task with ID ${payload.taskId} not found`);
-                }
-                return { task: statusUpdatedTask };
-            case 'getTaskStatistics': // Added for task statistics
-                    if (!this.taskManager.getTaskStatistics) {
-                        throw new Error('Task manager does not support statistics');
-                    }
-                    return { taskStatistics: this.taskManager.getTaskStatistics() };
-        }
-    }
+    // private async handleTaskRequest(method: string, payload?: any): Promise<any> {
+    //     // This method is now handled by the TaskWebSocketHandler
+    // }
 
     private sendError(ws: WebSocket, code: string, message: string): void {
         const errorMessage: WebSocketMessage = {
