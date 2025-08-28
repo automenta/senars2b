@@ -20,12 +20,32 @@ export class PriorityAgenda implements Agenda {
     private waitingQueue: (() => void)[] = [];
     private lastPopTime: number = 0;
     private popCount: number = 0;
+    private totalWaitTime: number = 0;
+    private maxWaitTime: number = 0;
 
     /**
      * Add or update an item in the agenda
      * @param item The cognitive item to add or update
+     * @throws Error if item is null or undefined
      */
     push(item: CognitiveItem): void {
+        // Validate input
+        if (!item) {
+            throw new Error('Cannot add null or undefined item to agenda');
+        }
+        
+        if (!item.id) {
+            throw new Error('Item must have an ID');
+        }
+        
+        if (!item.attention) {
+            throw new Error('Item must have an attention value');
+        }
+        
+        if (typeof item.attention.priority !== 'number' || item.attention.priority < 0 || item.attention.priority > 1) {
+            throw new Error('Item attention priority must be a number between 0 and 1');
+        }
+
         // Check if item already exists
         if (this.itemMap.has(item.id)) {
             // Update existing item
@@ -52,6 +72,7 @@ export class PriorityAgenda implements Agenda {
     /**
      * Remove and return the highest priority item from the agenda
      * @returns A promise that resolves to the highest priority cognitive item
+     * @throws Error if agenda is in an invalid state
      */
     async pop(): Promise<CognitiveItem> {
         if (this.items.length > 0) {
@@ -62,8 +83,14 @@ export class PriorityAgenda implements Agenda {
         }
 
         // Return a promise that resolves when an item is added
-        return new Promise<CognitiveItem>(resolve => {
+        return new Promise<CognitiveItem>((resolve, reject) => {
+            // Set a timeout to prevent indefinite waiting
+            const timeout = setTimeout(() => {
+                reject(new Error('Timeout waiting for item to be added to agenda'));
+            }, 30000); // 30 second timeout
+            
             this.waitingQueue.push(() => {
+                clearTimeout(timeout);
                 const item = this.items.shift()!;
                 this.itemMap.delete(item.id);
                 this.trackPopStatistics();
@@ -133,6 +160,8 @@ export class PriorityAgenda implements Agenda {
         size: number;
         popRate: number;
         averageWaitTime: number;
+        maxWaitTime: number;
+        totalPops: number;
     } {
         const now = Date.now();
         const timeElapsed = now - this.lastPopTime;
@@ -145,7 +174,9 @@ export class PriorityAgenda implements Agenda {
         return {
             size: this.items.length,
             popRate,
-            averageWaitTime
+            averageWaitTime,
+            maxWaitTime: this.maxWaitTime,
+            totalPops: this.popCount
         };
     }
 
@@ -160,7 +191,17 @@ export class PriorityAgenda implements Agenda {
      * Track statistics for pop operations
      */
     private trackPopStatistics(): void {
+        const now = Date.now();
         this.popCount++;
-        this.lastPopTime = Date.now();
+        
+        if (this.lastPopTime > 0) {
+            const waitTime = now - this.lastPopTime;
+            this.totalWaitTime += waitTime;
+            if (waitTime > this.maxWaitTime) {
+                this.maxWaitTime = waitTime;
+            }
+        }
+        
+        this.lastPopTime = now;
     }
 }

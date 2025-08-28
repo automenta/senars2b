@@ -51,6 +51,19 @@ export class PersistentWorldModel implements WorldModel {
     }
 
     add_atom(atom: SemanticAtom): string {
+        // Validate input
+        if (!atom) {
+            throw new Error('Cannot add null or undefined atom to world model');
+        }
+        
+        if (!atom.id) {
+            throw new Error('Atom must have an ID');
+        }
+        
+        if (atom.embedding && !Array.isArray(atom.embedding)) {
+            throw new Error('Atom embedding must be an array');
+        }
+
         this.atoms.set(atom.id, atom);
 
         // Update indexes
@@ -64,6 +77,27 @@ export class PersistentWorldModel implements WorldModel {
     }
 
     add_item(item: CognitiveItem): void {
+        // Validate input
+        if (!item) {
+            throw new Error('Cannot add null or undefined item to world model');
+        }
+        
+        if (!item.id) {
+            throw new Error('Item must have an ID');
+        }
+        
+        if (!item.atom_id) {
+            throw new Error('Item must have an atom_id');
+        }
+        
+        if (!item.type) {
+            throw new Error('Item must have a type');
+        }
+        
+        if (!item.stamp) {
+            throw new Error('Item must have a stamp');
+        }
+
         this.items.set(item.id, item);
 
         // Update indexes

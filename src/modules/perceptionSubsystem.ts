@@ -18,6 +18,20 @@ export class PerceptionSubsystem {
     }
 
     async processInput(data: any): Promise<CognitiveItem[]> {
+        // Validate input
+        if (data === undefined || data === null) {
+            throw new Error('Input data is required');
+        }
+        
+        if (typeof data === 'string') {
+            if (data.length < 1) {
+                throw new Error('Input string cannot be empty');
+            }
+            if (data.length > 10000) {
+                throw new Error('Input string is too long (maximum 10,000 characters)');
+            }
+        }
+
         const inputType = this.determineInputType(data);
         const startTime = Date.now();
 

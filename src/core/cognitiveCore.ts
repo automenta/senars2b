@@ -96,8 +96,38 @@ export class DecentralizedCognitiveCore {
      * @param truth The truth value of the belief
      * @param attention The attention value of the belief
      * @param meta Optional metadata for the belief
+     * @throws Error if any required parameters are missing or invalid
      */
     public async addInitialBelief(content: any, truth: TruthValue, attention: AttentionValue, meta?: Record<string, any>): Promise<void> {
+        // Validate input parameters
+        if (content === undefined || content === null) {
+            throw new Error('Content is required for adding a belief');
+        }
+        
+        if (!truth || typeof truth !== 'object') {
+            throw new Error('Truth value is required and must be an object');
+        }
+        
+        if (typeof truth.frequency !== 'number' || truth.frequency < 0 || truth.frequency > 1) {
+            throw new Error('Truth frequency must be a number between 0 and 1');
+        }
+        
+        if (typeof truth.confidence !== 'number' || truth.confidence < 0 || truth.confidence > 1) {
+            throw new Error('Truth confidence must be a number between 0 and 1');
+        }
+        
+        if (!attention || typeof attention !== 'object') {
+            throw new Error('Attention value is required and must be an object');
+        }
+        
+        if (typeof attention.priority !== 'number' || attention.priority < 0 || attention.priority > 1) {
+            throw new Error('Attention priority must be a number between 0 and 1');
+        }
+        
+        if (typeof attention.durability !== 'number' || attention.durability < 0 || attention.durability > 1) {
+            throw new Error('Attention durability must be a number between 0 and 1');
+        }
+
         const atom: SemanticAtom = {
             id: uuidv4(),
             content: content,
@@ -123,8 +153,26 @@ export class DecentralizedCognitiveCore {
      * @param content The content of the goal
      * @param attention The attention value of the goal
      * @param meta Optional metadata for the goal
+     * @throws Error if any required parameters are missing or invalid
      */
     public async addInitialGoal(content: any, attention: AttentionValue, meta?: Record<string, any>): Promise<void> {
+        // Validate input parameters
+        if (content === undefined || content === null) {
+            throw new Error('Content is required for adding a goal');
+        }
+        
+        if (!attention || typeof attention !== 'object') {
+            throw new Error('Attention value is required and must be an object');
+        }
+        
+        if (typeof attention.priority !== 'number' || attention.priority < 0 || attention.priority > 1) {
+            throw new Error('Attention priority must be a number between 0 and 1');
+        }
+        
+        if (typeof attention.durability !== 'number' || attention.durability < 0 || attention.durability > 1) {
+            throw new Error('Attention durability must be a number between 0 and 1');
+        }
+
         const atom: SemanticAtom = {
             id: uuidv4(),
             content: content,
@@ -149,8 +197,14 @@ export class DecentralizedCognitiveCore {
      * Add a schema to the cognitive system
      * @param content The content of the schema
      * @param meta Optional metadata for the schema
+     * @throws Error if content is missing or invalid
      */
     public async addSchema(content: any, meta?: Record<string, any>): Promise<void> {
+        // Validate input parameters
+        if (content === undefined || content === null) {
+            throw new Error('Content is required for adding a schema');
+        }
+
         const atom: SemanticAtom = {
             id: uuidv4(),
             content: content,

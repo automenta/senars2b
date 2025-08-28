@@ -9,6 +9,18 @@ export class ReflectionLoop {
     private lastRun: number = 0;
     private schemaUsage: Map<string, number> = new Map(); // schema_id -> last_used_timestamp
     private kpiHistory: { timestamp: number; kpi: string; value: number }[] = [];
+    private performanceMetrics: {
+        cyclesRun: number;
+        errorsEncountered: number;
+        lastError: string | null;
+        averageCycleTime: number;
+    } = {
+        cyclesRun: 0,
+        errorsEncountered: 0,
+        lastError: null,
+        averageCycleTime: 0
+    };
+    private cycleTimes: number[] = [];
 
     constructor(worldModel: WorldModel, agenda: Agenda, interval: number = 60000) {
         this.worldModel = worldModel;
@@ -28,6 +40,7 @@ export class ReflectionLoop {
     }
 
     runCycle(): void {
+        const cycleStart = Date.now();
         try {
             const now = Date.now();
             this.lastRun = now;
@@ -101,8 +114,29 @@ export class ReflectionLoop {
                 optimizeGoal.label = "(optimize cognitive processes)";
                 this.agenda.push(optimizeGoal);
             }
+            
+            // Update performance metrics
+            const cycleTime = Date.now() - cycleStart;
+            this.cycleTimes.push(cycleTime);
+            // Keep only the last 100 cycle times
+            if (this.cycleTimes.length > 100) {
+                this.cycleTimes = this.cycleTimes.slice(-100);
+            }
+            
+            this.performanceMetrics.cyclesRun++;
+            this.performanceMetrics.averageCycleTime = this.cycleTimes.reduce((a, b) => a + b, 0) / this.cycleTimes.length;
         } catch (error) {
             console.error("Reflection loop error:", error);
+            this.performanceMetrics.errorsEncountered++;
+            this.performanceMetrics.lastError = error instanceof Error ? error.message : String(error);
+            
+            // Update performance metrics even on error
+            const cycleTime = Date.now() - cycleStart;
+            this.cycleTimes.push(cycleTime);
+            if (this.cycleTimes.length > 100) {
+                this.cycleTimes = this.cycleTimes.slice(-100);
+            }
+            this.performanceMetrics.averageCycleTime = this.cycleTimes.reduce((a, b) => a + b, 0) / this.cycleTimes.length;
         }
     }
 
@@ -216,5 +250,13 @@ export class ReflectionLoop {
         // In a full implementation, this would call the schema learning module
         // For now, we'll just log that schema learning was triggered
         console.log("Schema learning cycle triggered");
+    }
+
+    /**
+     * Get performance metrics for the reflection loop
+     * @returns Performance metrics
+     */
+    getPerformanceMetrics(): any {
+        return {...this.performanceMetrics};
     }
 }

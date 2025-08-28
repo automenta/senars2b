@@ -48,8 +48,18 @@ export class SchemaLearningModule {
      * @param schemaId The ID of the schema that was used
      * @param success Whether the application was successful
      * @param items The items involved in the application
+     * @throws Error if schemaId is invalid
      */
     recordSchemaUsage(schemaId: string, success: boolean, items: CognitiveItem[]): void {
+        // Validate input
+        if (!schemaId) {
+            throw new Error('Schema ID is required');
+        }
+        
+        if (!Array.isArray(items)) {
+            throw new Error('Items must be an array');
+        }
+
         if (!this.schemaUsageHistory.has(schemaId)) {
             this.schemaUsageHistory.set(schemaId, {
                 applications: 0,

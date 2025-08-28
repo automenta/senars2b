@@ -35,10 +35,7 @@ describe('PerceptionSubsystem', () => {
         it('should handle empty input', async () => {
             const input = "";
 
-            const items = await perception.processInput(input);
-
-            // Should return an array (could be empty)
-            expect(Array.isArray(items)).toBe(true);
+            await expect(perception.processInput(input)).rejects.toThrow('Input string cannot be empty');
         });
     });
 });

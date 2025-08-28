@@ -9,13 +9,13 @@
   "scripts": {
     "build": "tsc",
     "start": "ts-node src/unifiedCLI.ts",
-    "start:ws": "ts-node src/webSocketServer.ts",
-    "start:web": "ts-node src/webServer.ts",
+    "start:ws": "ts-node src/web/webSocketServer.ts",
+    "start:web": "ts-node src/web/webServer.ts",
     "start:unified": "ts-node src/web/unifiedServer.ts",
     "cli": "ts-node src/unifiedCLI.ts",
-    "demo": "ts-node src/demo.ts",
+    "demo": "ts-node src/testing/demo.ts",
     "demo:unified": "node unifiedDemo.js",
-    "test:unified": "ts-node src/unifiedInterfaceTest.ts",
+    "test:unified": "ts-node src/testing/unifiedInterfaceTest.ts",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
@@ -23,8 +23,8 @@
     "test:integration": "jest test/integration",
     "docs:usability": "cat USABILITY_ENHANCEMENTS.md",
     "docs:enhanced": "cat ENHANCED_USABILITY_FEATURES.md",
-    "dev": "ts-node src/webServer.ts",
-    "dev:unified": "ts-node src/unifiedServer.ts"
+    "dev": "ts-node src/web/webServer.ts",
+    "dev:unified": "ts-node src/web/unifiedServer.ts"
   },
   "keywords": [
     "ai",

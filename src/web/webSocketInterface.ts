@@ -391,46 +391,51 @@ export class WebSocketInterface {
     }
 
     private async handleCoreRequest(method: string, payload?: any): Promise<any> {
-        switch (method) {
-            case 'start':
-                await this.core.start();
-                return {status: 'started'};
-            case 'stop':
-                this.core.stop();
-                return {status: 'stopped'};
-            case 'getSystemStatus':
-                return this.core.getSystemStatus();
-            case 'addInitialBelief':
-                if (!payload?.content || !payload?.truth || !payload?.attention) {
-                    throw new Error('Missing required fields: content, truth, attention');
-                }
-                await this.core.addInitialBelief(
-                    payload.content,
-                    payload.truth as TruthValue,
-                    payload.attention as AttentionValue,
-                    payload.meta
-                );
-                this.broadcastEvent('itemAddedToAgenda', {type: 'BELIEF', content: payload.content});
-                return {success: true};
-            case 'addInitialGoal':
-                if (!payload?.content || !payload?.attention) {
-                    throw new Error('Missing required fields: content, attention');
-                }
-                await this.core.addInitialGoal(
-                    payload.content,
-                    payload.attention as AttentionValue,
-                    payload.meta
-                );
-                this.broadcastEvent('itemAddedToAgenda', {type: 'GOAL', content: payload.content});
-                return {success: true};
-            case 'addSchema':
-                if (!payload?.content) {
-                    throw new Error('Missing required field: content');
-                }
-                await this.core.addSchema(payload.content, payload.meta);
-                return {success: true};
-            default:
-                throw new Error(`Unknown core method: ${method}`);
+        try {
+            switch (method) {
+                case 'start':
+                    await this.core.start();
+                    return {status: 'started'};
+                case 'stop':
+                    this.core.stop();
+                    return {status: 'stopped'};
+                case 'getSystemStatus':
+                    return this.core.getSystemStatus();
+                case 'addInitialBelief':
+                    if (!payload?.content || !payload?.truth || !payload?.attention) {
+                        throw new Error('Missing required fields: content, truth, attention');
+                    }
+                    await this.core.addInitialBelief(
+                        payload.content,
+                        payload.truth as TruthValue,
+                        payload.attention as AttentionValue,
+                        payload.meta
+                    );
+                    this.broadcastEvent('itemAddedToAgenda', {type: 'BELIEF', content: payload.content});
+                    return {success: true};
+                case 'addInitialGoal':
+                    if (!payload?.content || !payload?.attention) {
+                        throw new Error('Missing required fields: content, attention');
+                    }
+                    await this.core.addInitialGoal(
+                        payload.content,
+                        payload.attention as AttentionValue,
+                        payload.meta
+                    );
+                    this.broadcastEvent('itemAddedToAgenda', {type: 'GOAL', content: payload.content});
+                    return {success: true};
+                case 'addSchema':
+                    if (!payload?.content) {
+                        throw new Error('Missing required field: content');
+                    }
+                    await this.core.addSchema(payload.content, payload.meta);
+                    return {success: true};
+                default:
+                    throw new Error(`Unknown core method: ${method}`);
+            }
+        } catch (error: any) {
+            console.error(`Error in core.${method}:`, error);
+            throw new Error(`Core operation failed: ${error.message || 'Unknown error'}`);
         }
     }
 
