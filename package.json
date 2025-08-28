@@ -7,8 +7,8 @@
     "senars3": "./dist/unifiedCLI.js"
   },
   "scripts": {
-    "build": "tsc && cp src/web/unifiedInterface.html dist/web/ && cp -r src/web/components dist/web/",
-    "build:unified": "tsc && cp src/web/unifiedInterface.html dist/web/ && cp -r src/web/components dist/web/",
+    "build": "tsc && cp src/web/newUnifiedInterface.html dist/web/ && cp src/web/unifiedInterface.html dist/web/ && cp src/web/planner.html dist/web/ && cp src/web/planner.css dist/web/ && cp -r src/web/components dist/web/",
+    "build:unified": "tsc && cp src/web/newUnifiedInterface.html dist/web/ && cp src/web/unifiedInterface.html dist/web/ && cp src/web/planner.html dist/web/ && cp src/web/planner.css dist/web/ && cp -r src/web/components dist/web/",
     "start": "ts-node src/unifiedCLI.ts",
     "start:ws": "ts-node src/web/webSocketServer.ts",
     "start:web": "ts-node src/web/webServer.ts",
@@ -17,6 +17,8 @@
     "demo": "ts-node src/testing/demo.ts",
     "demo:unified": "node unifiedDemo.js",
     "test:unified": "ts-node src/testing/unifiedInterfaceTest.ts",
+    "test:community": "ts-node src/testing/communitySimulatorTest.ts",
+    "test:community-integration": "ts-node src/testing/communitySimulatorIntegrationTest.ts",
     "test:usability": "ts-node src/testing/usabilityIntegrityTest.ts",
     "test": "jest",
     "test:watch": "jest --watch",

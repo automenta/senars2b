@@ -296,6 +296,7 @@ The system's goal-directed cognition is supported by a sophisticated task manage
 - **Unified Interface Access**: Single interface for CLI and Web through WebSocket backend for consistent interaction
 - **Enhanced Usability**: Improved error handling, status monitoring, and user feedback for better experience
 - **Personalization Support**: Adapts to individual user preferences and interaction patterns
+- **Community Simulator**: Collaborative problem-solving environment with deployable agent participants, each with their own cognitive context
 
 ### Self-Modification
 

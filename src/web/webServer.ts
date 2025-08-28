@@ -15,11 +15,16 @@ const port = process.env.PORT || 3000;
 // Serve node_modules for charting libraries
 app.use('/node_modules', express.static(path.join(__dirname, '../../node_modules')));
 
-// Serve static files from the src directory
+// Serve static files from the web directory
 app.use(express.static(path.join(__dirname)));
 
-// Serve the new planner interface as the main page
+// Serve the new unified interface as the main page
 app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'newUnifiedInterface.html'));
+});
+
+// Serve the original planner interface at /planner
+app.get('/planner', (req, res) => {
     res.sendFile(path.join(__dirname, 'planner.html'));
 });
 

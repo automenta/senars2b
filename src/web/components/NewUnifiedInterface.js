@@ -8,7 +8,6 @@ class UnifiedInterface {
         this.maxReconnectAttempts = 5;
         this.startTime = Date.now();
         this.currentView = 'dashboard';
-        this.views = {};
         
         this.demoInputs = {
             medical: "A 45-year-old male presents with chest pain, shortness of breath, and diaphoresis that started 30 minutes ago. He has a history of hypertension and smoking. What is the most likely diagnosis and immediate treatment considering the uncertainty in symptom presentation?",
@@ -20,20 +19,13 @@ class UnifiedInterface {
         };
 
         this.cacheDOMElements();
-        this.initializeComponents();
         this.setupEventListeners();
         this.connectWebSocket();
     }
 
     cacheDOMElements() {
-        // Main containers
-        this.mainContainer = document.querySelector('.main-container');
-        this.sidebar = document.querySelector('.sidebar');
-        this.contentArea = document.querySelector('.content-area');
-        
         // Navigation
         this.navItems = document.querySelectorAll('.nav-item');
-        this.viewContainers = document.querySelectorAll('.view-container');
         
         // Status elements
         this.connectionStatusEl = document.getElementById('connection-status');
@@ -41,7 +33,6 @@ class UnifiedInterface {
         this.notificationContainer = document.getElementById('notification-container');
         
         // Dashboard elements
-        this.statsCards = document.querySelectorAll('.stat-card');
         this.agendaCountEl = document.getElementById('agenda-count');
         this.atomCountEl = document.getElementById('atom-count');
         this.itemCountEl = document.getElementById('item-count');
@@ -66,55 +57,23 @@ class UnifiedInterface {
         this.addTaskBtn = document.getElementById('add-task-btn');
         this.taskListContainer = document.getElementById('task-list-container');
         
-        // System configuration
-        this.configSections = document.querySelectorAll('.config-section');
-        this.updateButtons = document.querySelectorAll('.update-btn');
-        
         // CLI elements
         this.cliOutput = document.getElementById('cli-output');
         this.cliInput = document.getElementById('cli-input');
         this.cliExecuteBtn = document.getElementById('cli-execute-btn');
-    }
-
-    initializeComponents() {
-        // Initialize any components that need initialization
-        this.setupViews();
-    }
-
-    setupViews() {
-        // Set up view containers and their associated data
-        this.views = {
-            dashboard: {
-                container: document.getElementById('dashboard-view'),
-                title: 'System Dashboard',
-                icon: '📊'
-            },
-            processing: {
-                container: document.getElementById('processing-view'),
-                title: 'Cognitive Processing',
-                icon: '🧠'
-            },
-            tasks: {
-                container: document.getElementById('tasks-view'),
-                title: 'Task Management',
-                icon: '📋'
-            },
-            configuration: {
-                container: document.getElementById('configuration-view'),
-                title: 'System Configuration',
-                icon: '⚙️'
-            },
-            cli: {
-                container: document.getElementById('cli-view'),
-                title: 'Command Line Interface',
-                icon: '🖥️'
-            },
-            community: {
-                container: document.getElementById('community-view'),
-                title: 'Community Simulator',
-                icon: '👥'
-            }
-        };
+        
+        // Community simulator elements
+        this.problemSelector = document.getElementById('problem-selector');
+        this.startSimulationBtn = document.getElementById('start-simulation-btn');
+        this.stopSimulationBtn = document.getElementById('stop-simulation-btn');
+        this.addParticipantBtn = document.getElementById('add-participant-btn');
+        this.participantName = document.getElementById('participant-name');
+        this.participantsList = document.getElementById('participants-list');
+        this.problemDisplay = document.getElementById('problem-display');
+        this.collaborationFeed = document.getElementById('collaboration-feed');
+        this.simulationStatus = document.getElementById('simulation-status');
+        this.simulationUserInput = document.getElementById('simulation-user-input');
+        this.submitSimulationInput = document.getElementById('submit-simulation-input');
     }
 
     connectWebSocket() {
@@ -535,13 +494,49 @@ class UnifiedInterface {
             });
         }
         
-        // Configuration updates
-        if (this.updateButtons) {
-            this.updateButtons.forEach(button => {
-                button.addEventListener('click', (e) => {
-                    const section = e.target.getAttribute('data-section');
-                    this.updateConfiguration(section);
-                });
+        // Community simulator
+        if (this.addParticipantBtn) {
+            this.addParticipantBtn.addEventListener('click', () => {
+                if (!this.communitySimulator) {
+                    this.communitySimulator = new CommunitySimulator(this);
+                }
+                this.communitySimulator.deployAgent();
+            });
+        }
+        
+        if (this.startSimulationBtn) {
+            this.startSimulationBtn.addEventListener('click', () => {
+                if (!this.communitySimulator) {
+                    this.communitySimulator = new CommunitySimulator(this);
+                }
+                this.communitySimulator.startSimulation();
+            });
+        }
+        
+        if (this.stopSimulationBtn) {
+            this.stopSimulationBtn.addEventListener('click', () => {
+                if (this.communitySimulator) {
+                    this.communitySimulator.stopSimulation();
+                }
+            });
+        }
+        
+        if (this.submitSimulationInput) {
+            this.submitSimulationInput.addEventListener('click', () => {
+                if (this.communitySimulator) {
+                    this.communitySimulator.submitUserInput();
+                }
+            });
+        }
+        
+        if (this.simulationUserInput) {
+            this.simulationUserInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    if (this.communitySimulator) {
+                        this.communitySimulator.submitUserInput();
+                    }
+                }
             });
         }
     }
@@ -559,20 +554,17 @@ class UnifiedInterface {
         }
         
         // Show/hide views
-        Object.keys(this.views).forEach(viewKey => {
-            const view = this.views[viewKey];
-            if (viewKey === viewName) {
-                if (view.container) {
-                    view.container.classList.add('active');
-                }
+        const viewContainers = document.querySelectorAll('.view-container');
+        viewContainers.forEach(container => {
+            if (container.id === `${viewName}-view`) {
+                container.classList.add('active');
                 // Update page title
-                if (view.title) {
-                    document.title = `Senars3 - ${view.title}`;
+                const pageTitle = container.querySelector('.page-title');
+                if (pageTitle) {
+                    document.title = `Senars3 - ${pageTitle.textContent}`;
                 }
             } else {
-                if (view.container) {
-                    view.container.classList.remove('active');
-                }
+                container.classList.remove('active');
             }
         });
         
@@ -586,7 +578,7 @@ class UnifiedInterface {
         } else if (viewName === 'community') {
             // Initialize the Community Simulator if not already done
             if (!this.communitySimulator) {
-                this.communitySimulator = CommunitySimulator.initialize(this);
+                this.communitySimulator = new CommunitySimulator(this);
             }
         }
     }
@@ -614,10 +606,6 @@ class UnifiedInterface {
         
         this.sendWebSocketMessage(target, method, payload);
         this.cliInput.value = '';
-    }
-
-    updateConfiguration(section) {
-        this.showNotification(`Configuration updated for ${section} (simulated)`, 'success');
     }
 
     // Task management methods
@@ -822,11 +810,4 @@ class UnifiedInterface {
         div.textContent = text;
         return div.innerHTML;
     }
-}
-
-// Initialize the unified interface when the page loads
-if (typeof window !== 'undefined') {
-    window.addEventListener('DOMContentLoaded', () => {
-        window.unifiedInterface = new UnifiedInterface();
-    });
 }
