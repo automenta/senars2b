@@ -18,13 +18,13 @@ app.use('/node_modules', express.static(path.join(__dirname, '../../node_modules
 // Serve static files from the src directory
 app.use(express.static(path.join(__dirname)));
 
-// Serve the unified interface as the main page
+// Serve the new planner interface as the main page
 app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'unifiedInterface.html'));
+    res.sendFile(path.join(__dirname, 'planner.html'));
 });
 
-// Serve the unified interface as the main page for all routes (SPA)
-app.get('*', (req, res) => {
+// Serve the original unified interface at /dev
+app.get('/dev', (req, res) => {
     res.sendFile(path.join(__dirname, 'unifiedInterface.html'));
 });
 
