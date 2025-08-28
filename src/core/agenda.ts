@@ -225,12 +225,6 @@ export class PriorityAgenda implements Agenda {
             const item = this.items.splice(unblockedItemIndex, 1)[0];
             this.itemMap.delete(item.id);
 
-            // If the popped item is a task, update its status and timestamp.
-            if (item.type === 'TASK' && item.task_metadata) {
-                item.task_metadata.status = 'in_progress';
-                item.updated_at = Date.now();
-            }
-
             this.trackPopStatistics();
             return item;
         }

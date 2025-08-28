@@ -1,12 +1,12 @@
-import {AttentionValue, CognitiveItem, SemanticAtom, TruthValue} from '@/interfaces/types';
+import {AttentionValue, CognitiveItem, SemanticAtom, TruthValue, TaskStatus} from '@/interfaces/types';
 import {CognitiveSchema, WorldModel} from '@/core/worldModel';
 import {PriorityAgenda} from '@/core/agenda';
 import {createCognitiveItem, createSemanticAtom, createTruthValue, createAttentionValue, createMockSchema, createBeliefItem, createGoalItem, createTaskItem} from './testUtils';
 
 describe('PriorityAgenda', () => {
     let agenda: PriorityAgenda;
-    let taskStatuses: Map<string, 'pending' | 'in_progress' | 'completed' | 'failed' | 'deferred'>;
-    let getTaskStatus: (taskId: string) => 'pending' | 'in_progress' | 'completed' | 'failed' | 'deferred' | null;
+    let taskStatuses: Map<string, TaskStatus>;
+    let getTaskStatus: (taskId: string) => TaskStatus | null;
 
 
     beforeEach(() => {
@@ -131,7 +131,7 @@ describe('PriorityAgenda', () => {
                 const mainTask = createTaskItem({ id: 'main1', task_metadata: { dependencies: ['dep1'], status: 'pending', priority_level: 'high' } });
                 const unblockedTask = createTaskItem({ id: 'unblocked1', attention: { priority: 0.1, durability: 0.1 } });
 
-                taskStatuses.set('dep1', 'in_progress'); // Not completed
+                taskStatuses.set('dep1', 'awaiting_dependencies'); // Not completed
                 agenda.push(mainTask);
                 agenda.push(unblockedTask);
 
@@ -195,27 +195,6 @@ describe('PriorityAgenda', () => {
             });
         });
 
-        describe('Lifecycle Management on Pop', () => {
-            it('should change task status to in_progress on pop', async () => {
-                const task = createTaskItem({ task_metadata: { status: 'pending', priority_level: 'medium' } });
-                agenda.push(task);
-
-                const popped = await agenda.pop();
-                expect(popped.task_metadata?.status).toBe('in_progress');
-            });
-
-            it('should update the updated_at timestamp on pop', async () => {
-                const task = createTaskItem();
-                const originalTimestamp = task.updated_at!;
-                agenda.push(task);
-
-                // Add a small delay to ensure Date.now() will be different
-                await new Promise(resolve => setTimeout(resolve, 5));
-
-                const popped = await agenda.pop();
-                expect(popped.updated_at).toBeGreaterThan(originalTimestamp);
-            });
-        });
     });
 
     describe('getStatistics', () => {
@@ -262,8 +241,8 @@ describe('PriorityAgenda', () => {
             const depId = 'dep1';
             const mainTask = createTaskItem({ id: 'main1', task_metadata: { dependencies: [depId], status: 'pending', priority_level: 'high' } });
 
-            // The dependency's status is 'in_progress', so mainTask is blocked.
-            taskStatuses.set(depId, 'in_progress');
+            // The dependency's status is 'awaiting_dependencies', so mainTask is blocked.
+            taskStatuses.set(depId, 'awaiting_dependencies');
             agenda.push(mainTask);
 
             // With only a blocked task in the agenda, peek() should return null.
@@ -289,7 +268,7 @@ describe('PriorityAgenda', () => {
     describe('getTasksBy', () => {
         beforeEach(() => {
             agenda.push(createTaskItem({ id: 'task1', task_metadata: { status: 'pending', priority_level: 'low', tags: ['urgent', 'backend'], categories: ['dev'] } }));
-            agenda.push(createTaskItem({ id: 'task2', task_metadata: { status: 'in_progress', priority_level: 'medium', tags: ['frontend'], categories: ['dev'] } }));
+            agenda.push(createTaskItem({ id: 'task2', task_metadata: { status: 'awaiting_dependencies', priority_level: 'medium', tags: ['frontend'], categories: ['dev'] } }));
             agenda.push(createTaskItem({ id: 'task3', task_metadata: { status: 'completed', priority_level: 'high', tags: ['urgent', 'frontend'], categories: ['ops'] } }));
             agenda.push(createBeliefItem()); // This non-task item should be ignored.
         });

@@ -1,37 +1,85 @@
-import {AttentionValue, CognitiveItem, SemanticAtom, TruthValue} from '@/interfaces/types';
-import {CognitiveSchema, WorldModel} from '@/core/worldModel';
-import {ActionSubsystem} from '@/actions/actionSubsystem';
-import {createCognitiveItem, createSemanticAtom, createTruthValue, createAttentionValue, createMockSchema, createGoalItem} from './testUtils';
+import { ActionSubsystem } from '@/actions/actionSubsystem';
+import { TaskManager } from '@/modules/taskManager';
+import { createGoalItem, createTaskItem } from './testUtils';
+
+// Create a mock TaskManager
+const mockTaskManager: jest.Mocked<TaskManager> = {
+    updateTaskStatus: jest.fn(),
+    getTask: jest.fn(),
+    addSubtask: jest.fn(),
+    updateTask: jest.fn(),
+    addTask: jest.fn(),
+    removeTask: jest.fn(),
+    getAllTasks: jest.fn(),
+    getTasksByStatus: jest.fn(),
+    getTasksByPriority: jest.fn(),
+    getTasksByGroupId: jest.fn(),
+    assignTaskToGroup: jest.fn(),
+    getSubtasks: jest.fn(),
+    addEventListener: jest.fn(),
+    getTaskStatistics: jest.fn(),
+};
+
 
 describe('ActionSubsystem', () => {
     let actionSubsystem: ActionSubsystem;
 
     beforeEach(() => {
-        actionSubsystem = new ActionSubsystem();
+        jest.clearAllMocks();
+        actionSubsystem = new ActionSubsystem(mockTaskManager);
     });
 
     describe('executeGoal', () => {
-        it('should execute a goal and return a result', async () => {
+        it('should find the WebSearchExecutor for a search goal', async () => {
             const goal = createGoalItem({
-                attention: {priority: 0.9, durability: 0.8},
                 label: "Web search for pet safety information"
             });
 
-            // Note: We're not actually executing the action in tests,
-            // just checking that the method exists and returns a promise
-            expect(typeof actionSubsystem.executeGoal).toBe('function');
+            const result = await actionSubsystem.executeGoal(goal);
+
+            expect(result).not.toBeNull();
+            expect(result?.label).toContain('Search results for');
+        });
+
+        it('should execute an atomic task goal using AtomicTaskExecutor', async () => {
+            const goal = createGoalItem({
+                label: 'Execute atomic task: My Task',
+                meta: { isAtomicExecution: true, taskId: 'task123' }
+            });
+
+            const result = await actionSubsystem.executeGoal(goal);
+
+            expect(mockTaskManager.updateTaskStatus).toHaveBeenCalledWith('task123', 'completed');
+            expect(result).not.toBeNull();
+            expect(result?.label).toContain('Successfully executed atomic task task123');
+        });
+
+        it('should return a failure belief if no executor is found', async () => {
+            const goal = createGoalItem({ label: 'An unhandled goal' });
+            const result = await actionSubsystem.executeGoal(goal);
+            expect(result).not.toBeNull();
+            expect(result?.label).toContain('No executor found for goal');
         });
     });
 
     describe('getStatistics', () => {
-        it('should return execution statistics', () => {
+        it('should return initial empty statistics', () => {
             const stats = actionSubsystem.getStatistics();
 
-            // Should return an object with expected properties
-            expect(stats).toHaveProperty('totalExecutions');
-            expect(stats).toHaveProperty('successRate');
-            expect(stats).toHaveProperty('averageDuration');
-            expect(stats).toHaveProperty('executorStats');
+            expect(stats.totalExecutions).toBe(0);
+            expect(stats.successRate).toBe(0);
+            expect(stats.averageDuration).toBe(0);
+        });
+
+        it('should update statistics after a successful execution', async () => {
+            const goal = createGoalItem({ label: 'search for something' });
+            await actionSubsystem.executeGoal(goal);
+            const stats = actionSubsystem.getStatistics();
+
+            expect(stats.totalExecutions).toBe(1);
+            expect(stats.successRate).toBe(1);
+            expect(stats.averageDuration).toBeGreaterThan(0);
+            expect(stats.executorStats['WebSearchExecutor'].count).toBe(1);
         });
     });
 });

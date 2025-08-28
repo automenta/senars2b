@@ -25,8 +25,10 @@ export interface DerivationStamp {
 }
 
 // Task-specific metadata that extends CognitiveItem
+export type TaskStatus = 'pending' | 'awaiting_dependencies' | 'decomposing' | 'awaiting_subtasks' | 'ready_for_execution' | 'completed' | 'failed' | 'deferred';
+
 export interface TaskMetadata {
-    status: 'pending' | 'in_progress' | 'completed' | 'failed' | 'deferred';
+    status: TaskStatus;
     priority_level: 'low' | 'medium' | 'high' | 'critical';
     dependencies?: string[]; // Array of task IDs
     deadline?: number; // Timestamp

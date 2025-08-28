@@ -195,17 +195,17 @@ describe('DecentralizedCognitiveCore', () => {
         });
     });
 
-    describe('Task Processing via TaskManager', () => {
-        it('should delegate task processing to the TaskManager', async () => {
-            // Get the internal TaskManager instance from the core
-            const taskManager = (core as any).taskManager;
-            // Spy on the executeTask method
-            const executeTaskSpy = jest.spyOn(taskManager, 'executeTask').mockResolvedValue(undefined);
+    describe('Task Processing via TaskOrchestrator', () => {
+        it('should delegate task processing to the TaskOrchestrator', async () => {
+            // Get the internal TaskOrchestrator instance from the core
+            const taskOrchestrator = (core as any).taskOrchestrator;
+            // Spy on the orchestrate method
+            const orchestrateSpy = jest.spyOn(taskOrchestrator, 'orchestrate');
 
             // Create a task item
             const task = createTaskItem({
                 type: 'TASK',
-                task_metadata: { status: 'in_progress', priority_level: 'high' }
+                task_metadata: { status: 'pending', priority_level: 'high' }
             });
 
             // Get the internal processItem method to test the core logic
@@ -214,24 +214,30 @@ describe('DecentralizedCognitiveCore', () => {
             // Process the task
             await processItem(task);
 
-            // Expect that the TaskManager's executeTask method was called with the task
-            expect(executeTaskSpy).toHaveBeenCalledWith(task);
+            // Expect that the TaskOrchestrator's orchestrate method was called with the task
+            expect(orchestrateSpy).toHaveBeenCalledWith(task);
         });
 
         it('should report task statistics in getSystemStatus', () => {
-            const worldModel = (core as any).worldModel;
-            // Spy on and mock getAllItems to return our test tasks
-            jest.spyOn(worldModel, 'getAllItems').mockReturnValue([
-                createTaskItem({ task_metadata: { status: 'pending', priority_level: 'medium' } }),
-                createTaskItem({ task_metadata: { status: 'in_progress', priority_level: 'medium' } }),
-                createTaskItem({ task_metadata: { status: 'completed', priority_level: 'medium' } })
-            ]);
+            const taskManager = (core as any).taskManager;
+            // Spy on and mock getTaskStatistics to return our test stats
+            jest.spyOn(taskManager, 'getTaskStatistics').mockReturnValue({
+                total: 3,
+                pending: 1,
+                awaiting_dependencies: 0,
+                decomposing: 1,
+                awaiting_subtasks: 0,
+                ready_for_execution: 0,
+                completed: 1,
+                failed: 0,
+                deferred: 0,
+            });
 
             const status = core.getSystemStatus();
 
             expect(status.taskStats).toBeDefined();
             expect(status.taskStats.pending).toBe(1);
-            expect(status.taskStats.in_progress).toBe(1);
+            expect(status.taskStats.decomposing).toBe(1);
             expect(status.taskStats.completed).toBe(1);
             expect(status.taskStats.total).toBe(3);
         });

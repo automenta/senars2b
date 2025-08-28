@@ -1,6 +1,7 @@
 import {CognitiveItem, SemanticAtom, TruthValue} from '../interfaces/types';
 import {Executor} from './actionSubsystem';
 import {CognitiveItemFactory} from '../modules/cognitiveItemFactory';
+import { TaskManager } from '../modules/taskManager';
 
 export class WebSearchExecutor implements Executor {
     can_execute(goal: CognitiveItem): boolean {
@@ -37,6 +38,47 @@ export class WebSearchExecutor implements Executor {
             goal.id
         );
         result.label = resultContent;
+
+        return result;
+    }
+}
+
+export class AtomicTaskExecutor implements Executor {
+    private taskManager: TaskManager;
+
+    constructor(taskManager: TaskManager) {
+        this.taskManager = taskManager;
+    }
+
+    can_execute(goal: CognitiveItem): boolean {
+        return goal.type === 'GOAL' && goal.meta?.isAtomicExecution === true;
+    }
+
+    async execute(goal: CognitiveItem): Promise<CognitiveItem> {
+        const taskId = goal.meta?.taskId;
+        if (!taskId || typeof taskId !== 'string') {
+            throw new Error('AtomicTaskExecutor: Goal is missing a valid taskId in its metadata.');
+        }
+
+        console.log(`Executing atomic task via goal: ${goal.label || goal.id}`);
+
+        // Mark the task as completed
+        this.taskManager.updateTaskStatus(taskId, 'completed');
+
+        // Create a belief that the task was completed
+        const result = CognitiveItemFactory.createBelief(
+            `atomic-task-execution-result-${goal.id}`,
+            {
+                frequency: 1.0,
+                confidence: 1.0
+            },
+            {
+                priority: 0.7,
+                durability: 0.5
+            },
+            goal.id
+        );
+        result.label = `Successfully executed atomic task ${taskId}.`;
 
         return result;
     }

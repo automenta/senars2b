@@ -20,6 +20,7 @@ import {Agenda} from './agenda';
 import {v4 as uuidv4} from 'uuid';
 import {embeddingService} from '../services/embeddingService';
 import { TaskManager, UnifiedTaskManager } from '../modules/taskManager';
+import { TaskOrchestrator } from '../modules/taskOrchestrator';
 
 /**
  * DecentralizedCognitiveCore - The main cognitive processing engine
@@ -29,6 +30,7 @@ export class DecentralizedCognitiveCore {
     private agenda!: Agenda;
     private worldModel!: WorldModel;
     private taskManager!: TaskManager;
+    private taskOrchestrator!: TaskOrchestrator;
     private beliefRevisionEngine!: BeliefRevisionEngine;
     private attentionModule!: AttentionModule;
     private resonanceModule!: ResonanceModule;
@@ -286,12 +288,15 @@ export class DecentralizedCognitiveCore {
         worldModelStats: any;
         workerStats: any;
         taskStats: {
+            total: number;
             pending: number;
-            in_progress: number;
+            awaiting_dependencies: number;
+            decomposing: number;
+            awaiting_subtasks: number;
+            ready_for_execution: number;
             completed: number;
             failed: number;
             deferred: number;
-            total: number;
         };
         performance: {
             uptime: string;
@@ -324,37 +329,7 @@ export class DecentralizedCognitiveCore {
         const activeWorkers = Array.from(this.workerStatistics.values()).filter(stats => stats.itemsProcessed > 0).length;
         const systemLoad = this.workerCount > 0 ? activeWorkers / this.workerCount : 0;
 
-        const allItems = this.worldModel.getAllItems();
-        const taskStats = {
-            pending: 0,
-            in_progress: 0,
-            completed: 0,
-            failed: 0,
-            deferred: 0,
-            total: 0,
-        };
-        for (const item of allItems) {
-            if (item.type === 'TASK' && item.task_metadata) {
-                taskStats.total++;
-                switch (item.task_metadata.status) {
-                    case 'pending':
-                        taskStats.pending++;
-                        break;
-                    case 'in_progress':
-                        taskStats.in_progress++;
-                        break;
-                    case 'completed':
-                        taskStats.completed++;
-                        break;
-                    case 'failed':
-                        taskStats.failed++;
-                        break;
-                    case 'deferred':
-                        taskStats.deferred++;
-                        break;
-                }
-            }
-        }
+        const taskStats = this.taskManager.getTaskStatistics();
 
         return {
             agendaSize: this.agenda.size(),
@@ -405,6 +380,7 @@ export class DecentralizedCognitiveCore {
             return task?.task_metadata?.status || null;
         });
         this.taskManager = new UnifiedTaskManager(this.agenda, this.worldModel);
+        this.taskOrchestrator = new TaskOrchestrator(this.worldModel, this.taskManager, this.agenda);
         this.attentionModule = new DynamicAttentionModule();
 
         this.beliefRevisionEngine = new SimpleBeliefRevisionEngine();
@@ -412,7 +388,7 @@ export class DecentralizedCognitiveCore {
         this.schemaMatcher = new EfficientSchemaMatcher();
         this.goalTreeManager = new HierarchicalGoalTreeManager();
         this.reflectionLoop = new ReflectionLoop(this.worldModel, this.agenda);
-        this.actionSubsystem = new ActionSubsystem();
+        this.actionSubsystem = new ActionSubsystem(this.taskManager);
         this.schemaLearningModule = new SchemaLearningModule(this.worldModel);
 
         this.registerSystemSchemas();
@@ -524,7 +500,7 @@ export class DecentralizedCognitiveCore {
 
             // Process tasks
             if (itemA.type === 'TASK') {
-                await this.taskManager.executeTask(itemA);
+                this.taskOrchestrator.orchestrate(itemA);
             }
 
             // Update goal tree and handle action goals

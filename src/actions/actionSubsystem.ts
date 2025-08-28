@@ -1,6 +1,7 @@
 import {CognitiveItem} from '../interfaces/types';
-import {DiagnosticExecutor, KnowledgeBaseQueryExecutor, PlanningExecutor, WebSearchExecutor} from './action';
+import {AtomicTaskExecutor, DiagnosticExecutor, KnowledgeBaseQueryExecutor, PlanningExecutor, WebSearchExecutor} from './action';
 import {CognitiveItemFactory} from '../modules/cognitiveItemFactory';
+import { TaskManager } from '../modules/taskManager';
 
 export interface Executor {
     can_execute(goal: CognitiveItem): boolean;
@@ -17,12 +18,13 @@ export class ActionSubsystem {
         duration: number
     }[] = [];
 
-    constructor() {
+    constructor(taskManager: TaskManager) {
         // Register default executors
         this.executors.push(new WebSearchExecutor());
         this.executors.push(new DiagnosticExecutor());
         this.executors.push(new KnowledgeBaseQueryExecutor());
         this.executors.push(new PlanningExecutor());
+        this.executors.push(new AtomicTaskExecutor(taskManager));
     }
 
     addExecutor(executor: Executor): void {

@@ -1,4 +1,4 @@
-import { CognitiveItem } from '../interfaces/types';
+import { CognitiveItem, TaskStatus } from '../interfaces/types';
 import { TaskManager } from '../modules/taskManager';
 import WebSocket = require('ws');
 
@@ -83,7 +83,7 @@ export class TaskWebSocketHandler {
         return { tasks };
     }
 
-    private handleUpdateTaskStatus(payload: { taskId: string; status: 'pending' | 'in_progress' | 'completed' | 'failed' | 'deferred' }): { task: CognitiveItem } {
+    private handleUpdateTaskStatus(payload: { taskId: string; status: TaskStatus }): { task: CognitiveItem } {
         if (!payload?.taskId || !payload?.status) {
             throw new Error('Missing required fields: taskId, status');
         }
