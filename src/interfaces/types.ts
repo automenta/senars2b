@@ -24,6 +24,20 @@ export interface DerivationStamp { // Added
     module?: string;
 }
 
+export interface TaskMetadata {
+    status: 'pending' | 'in_progress' | 'completed' | 'failed' | 'deferred';
+    priority: 'low' | 'medium' | 'high' | 'critical';
+    dependencies?: string[]; // Array of task IDs
+    deadline?: number; // Timestamp
+    estimated_effort?: number;
+    required_resources?: string[];
+    outcomes?: string[];
+    confidence?: number; // 0.0 to 1.0
+    tags?: string[];
+    categories?: string[];
+    context?: Record<string, any>;
+}
+
 export interface CognitiveItem {
     id: string;                // Unique identifier
     atom_id: string;           // Reference to SemanticAtom (added)
@@ -36,4 +50,5 @@ export interface CognitiveItem {
     goal_status?: "active" | "blocked" | "achieved" | "failed";
     stamp: DerivationStamp;    // Derivation stamp (added)
     payload?: Record<string, any>; // Payload for events/actions (added)
+    task_metadata?: TaskMetadata; // Task-specific metadata
 }
