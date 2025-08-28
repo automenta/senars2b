@@ -37,6 +37,7 @@ export interface TaskMetadata {
     tags?: string[];
     categories?: string[];
     context?: Record<string, any>;
+    completion_percentage?: number; // 0-100
 }
 
 export interface CognitiveItem {

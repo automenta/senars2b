@@ -158,19 +158,121 @@ describe('UnifiedTaskManager', () => {
         });
     });
 
-    describe('executeTask', () => {
-        it('should execute a task and mark it as completed', async () => {
+    describe('executeTask - Advanced Logic', () => {
+        beforeEach(() => {
             taskManager = new UnifiedTaskManager(mockAgenda, mockWorldModel);
-            const task = createTaskItem({ id: 'task1' });
+        });
+
+        it('should set status to in_progress and then to completed for an atomic task', async () => {
+            const task = createTaskItem({ id: 'task1', task_metadata: { status: 'pending', priority_level: 'medium' } });
+            // Ensure getTask returns a fresh object each time to avoid mutation issues
+            mockWorldModel.get_item.mockImplementation(() => createTaskItem({ id: 'task1', task_metadata: { status: 'pending', priority_level: 'medium' } }));
+
+            await taskManager.executeTask(task);
+
+            // First, it's marked as 'in_progress'
+            expect(mockWorldModel.update_item).toHaveBeenCalledWith(
+                expect.objectContaining({
+                    id: 'task1',
+                    task_metadata: expect.objectContaining({ status: 'in_progress' }),
+                })
+            );
+
+            // Then, it's marked as 'completed'
+            expect(mockWorldModel.update_item).toHaveBeenCalledWith(
+                expect.objectContaining({
+                    id: 'task1',
+                    task_metadata: expect.objectContaining({ status: 'completed' }),
+                })
+            );
+        });
+
+        it('should not execute a task if its dependencies are not met', async () => {
+            const depTask = createTaskItem({ id: 'dep1', task_metadata: { status: 'in_progress', priority_level: 'medium' } });
+            const task = createTaskItem({ id: 'task1', task_metadata: { dependencies: ['dep1'], status: 'in_progress', priority_level: 'medium' } });
+
+            mockWorldModel.get_item.mockImplementation(id => {
+                if (id === 'dep1') return depTask;
+                if (id === 'task1') return task;
+                return null;
+            });
+
+            await taskManager.executeTask(task);
+            // completeTask should not be called
+            expect(mockWorldModel.update_item).not.toHaveBeenCalledWith(expect.objectContaining({
+                id: 'task1',
+                task_metadata: expect.objectContaining({ status: 'completed' })
+            }));
+        });
+
+        it('should decompose a complex task into subtasks', async () => {
+            const task = createTaskItem({ id: 'task1', label: 'Plan the project', task_metadata: { status: 'in_progress', priority_level: 'medium' } });
             mockWorldModel.get_item.mockReturnValue(task);
 
             await taskManager.executeTask(task);
 
+            // Should not complete the parent task
+            expect(mockWorldModel.update_item).not.toHaveBeenCalledWith(expect.objectContaining({
+                id: 'task1',
+                task_metadata: expect.objectContaining({ status: 'completed' })
+            }));
+
+            // Should add subtasks
+            expect(mockWorldModel.add_item).toHaveBeenCalledTimes(3);
+            expect(mockWorldModel.add_item).toHaveBeenCalledWith(expect.objectContaining({ label: "Research for 'Plan the project'" }));
+            expect(mockWorldModel.add_item).toHaveBeenCalledWith(expect.objectContaining({ label: "Outline for 'Plan the project'" }));
+            expect(mockWorldModel.add_item).toHaveBeenCalledWith(expect.objectContaining({ label: "Draft for 'Plan the project'" }));
+
+            // Should update the parent task with subtask IDs
             expect(mockWorldModel.update_item).toHaveBeenCalledWith(expect.objectContaining({
                 id: 'task1',
-                task_metadata: expect.objectContaining({ status: 'completed' }),
+                subtasks: expect.arrayContaining([expect.any(String), expect.any(String), expect.any(String)])
             }));
-            expect(mockAgenda.remove).toHaveBeenCalledWith('task1');
+        });
+
+        it('should update completion_percentage based on subtasks', async () => {
+            const sub1 = createTaskItem({ id: 'sub1', task_metadata: { status: 'completed', priority_level: 'medium' } });
+            const sub2 = createTaskItem({ id: 'sub2', task_metadata: { status: 'in_progress', priority_level: 'medium' } });
+            const sub3 = createTaskItem({ id: 'sub3', task_metadata: { status: 'in_progress', priority_level: 'medium' } });
+            const parentTask = createTaskItem({ id: 'parent1', subtasks: ['sub1', 'sub2', 'sub3'], task_metadata: { status: 'in_progress', priority_level: 'medium' } });
+
+            mockWorldModel.get_item.mockImplementation(id => {
+                if (id === 'parent1') return parentTask;
+                if (id === 'sub1') return sub1;
+                if (id === 'sub2') return sub2;
+                if (id === 'sub3') return sub3;
+                return null;
+            });
+
+            await taskManager.executeTask(parentTask);
+
+            // 1 out of 3 subtasks is complete -> 33%
+            expect(mockWorldModel.update_item).toHaveBeenCalledWith(expect.objectContaining({
+                id: 'parent1',
+                task_metadata: expect.objectContaining({ completion_percentage: 33 })
+            }));
+        });
+
+        it('should complete a parent task when all subtasks are complete', async () => {
+            const sub1 = createTaskItem({ id: 'sub1', task_metadata: { status: 'completed', priority_level: 'medium' } });
+            const sub2 = createTaskItem({ id: 'sub2', task_metadata: { status: 'completed', priority_level: 'medium' } });
+            const parentTask = createTaskItem({ id: 'parent1', subtasks: ['sub1', 'sub2'], task_metadata: { status: 'in_progress', priority_level: 'medium', completion_percentage: 100 } });
+
+            mockWorldModel.get_item.mockImplementation(id => {
+                if (id === 'parent1') return parentTask;
+                if (id === 'sub1') return sub1;
+                if (id === 'sub2') return sub2;
+                return null;
+            });
+
+            await taskManager.executeTask(parentTask);
+
+            // Both subtasks are complete, so the parent should be marked as completed
+            expect(mockWorldModel.update_item).toHaveBeenCalledWith(expect.objectContaining({
+                id: 'parent1',
+                task_metadata: expect.objectContaining({ status: 'completed', completion_percentage: 100 })
+            }));
+            expect(mockAgenda.remove).toHaveBeenCalledWith('parent1');
         });
     });
 });

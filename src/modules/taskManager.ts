@@ -79,6 +79,10 @@ export class UnifiedTaskManager implements TaskManager {
             task.task_metadata = { ...task.task_metadata, ...taskData.task_metadata };
         }
 
+        if (typeof task.task_metadata!.completion_percentage !== 'number') {
+            task.task_metadata!.completion_percentage = 0;
+        }
+
         this.worldModel.add_item(task);
         this.agenda.push(task);
         this.notifyListeners({ type: 'taskAdded', task });
@@ -142,14 +146,17 @@ export class UnifiedTaskManager implements TaskManager {
 
     completeTask(id: string): CognitiveItem | null {
         const task = this.updateTaskStatus(id, 'completed');
-        if (!task) return null;
+        if (!task || !isTask(task)) return null;
 
-        this.agenda.remove(id); // Remove from agenda if it was there
+        if (task.task_metadata) {
+            task.task_metadata.completion_percentage = 100;
+        }
+        this.worldModel.update_item(task);
+
+        this.agenda.remove(id);
         this.notifyListeners({ type: 'taskCompleted', task });
 
         // Future: Check for dependent tasks and unblock them.
-        // This requires querying the world model for items that have `id` in their `dependencies` array.
-        // e.g., this.worldModel.query_by_meta('dependencies', id)
         return task;
     }
 
@@ -207,6 +214,10 @@ export class UnifiedTaskManager implements TaskManager {
             subtask.task_metadata = { ...subtask.task_metadata, ...subtaskData.task_metadata };
         }
 
+        if (typeof subtask.task_metadata!.completion_percentage !== 'number') {
+            subtask.task_metadata!.completion_percentage = 0;
+        }
+
         if (!parentTask.subtasks) {
             parentTask.subtasks = [];
         }
@@ -231,19 +242,90 @@ export class UnifiedTaskManager implements TaskManager {
     }
 
     async executeTask(task: CognitiveItem): Promise<void> {
-        if (!isTask(task)) {
+        if (!isTask(task) || !task.task_metadata) {
             return;
         }
-        console.log(`Executing task ${task.id}: ${task.label}`);
 
-        // Simulate doing work
-        await new Promise(resolve => setTimeout(resolve, 100)); // 100ms delay
+        console.log(`Processing task ${task.id}: ${task.label} with status ${task.task_metadata.status}`);
 
-        // For now, we assume the task is successful.
-        // In a real scenario, this is where the task's work would be done,
-        // and the result would determine if it's completed or failed.
+        // Update status to 'in_progress' if it's pending
+        if (task.task_metadata.status === 'pending') {
+            const updatedTask = this.updateTaskStatus(task.id, 'in_progress');
+            if (!updatedTask) return; // Exit if task was not found
+            task = updatedTask; // Safely reassign to the updated task
+        }
+
+        // After potential reassignment, task_metadata could be undefined again for the compiler.
+        // A simple re-check ensures type safety for the rest of the function.
+        if (!task.task_metadata) return;
+
+        // 1. Check for dependencies
+        if (task.task_metadata.dependencies && task.task_metadata.dependencies.length > 0) {
+            const unresolvedDependencies = task.task_metadata.dependencies.filter(depId => {
+                const depTask = this.getTask(depId);
+                return !depTask || depTask.task_metadata?.status !== 'completed';
+            });
+
+            if (unresolvedDependencies.length > 0) {
+                console.log(`Task ${task.id} is blocked by dependencies: ${unresolvedDependencies.join(', ')}.`);
+                return;
+            }
+        }
+
+        // 2. Handle subtasks (if they exist)
+        if (task.subtasks && task.subtasks.length > 0) {
+            const completedSubtasks = task.subtasks.filter(subId => {
+                const subTask = this.getTask(subId);
+                return subTask && subTask.task_metadata?.status === 'completed';
+            });
+
+            const percentage = Math.round((completedSubtasks.length / task.subtasks.length) * 100);
+            if (task.task_metadata.completion_percentage !== percentage) {
+                task.task_metadata.completion_percentage = percentage;
+                this.worldModel.update_item(task); // Persist progress
+            }
+
+            if (completedSubtasks.length === task.subtasks.length) {
+                console.log(`All subtasks for ${task.id} are complete. Completing parent task.`);
+                this.completeTask(task.id);
+                return;
+            } else {
+                console.log(`Task ${task.id} is waiting for subtasks to complete. Progress: ${percentage}%`);
+                return;
+            }
+        }
+
+        // 3. Decompose complex tasks (if they have no subtasks yet)
+        if (this.shouldDecompose(task)) {
+            console.log(`Decomposing task ${task.id}: ${task.label}`);
+            const subtaskContents = [`Research for '${task.label}'`, `Outline for '${task.label}'`, `Draft for '${task.label}'`];
+            for (const content of subtaskContents) {
+                this.addSubtask(task.id, {
+                    label: content,
+                    attention: task.attention,
+                    task_metadata: {
+                        status: 'pending', // Explicitly set status
+                        priority_level: task.task_metadata.priority_level
+                    }
+                });
+            }
+            return;
+        }
+
+        // 4. Execute atomic task (no dependencies, no subtasks, no decomposition needed)
+        console.log(`Executing atomic task ${task.id}: ${task.label}`);
+        await new Promise(resolve => setTimeout(resolve, 100));
+
         this.completeTask(task.id);
         console.log(`Execution finished for task ${task.id}`);
+    }
+
+    private shouldDecompose(task: CognitiveItem): boolean {
+        if (!isTask(task)) return false;
+        const label = task.label.toLowerCase();
+        const keywords = ['plan', 'develop', 'create', 'organize', 'manage'];
+        // Decompose if it has a decomposition keyword AND it has no subtasks yet.
+        return keywords.some(kw => label.includes(kw)) && (!task.subtasks || task.subtasks.length === 0);
     }
 
     getTaskStatistics(): {
