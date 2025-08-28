@@ -2,89 +2,146 @@ import express from 'express';
 import http from 'http';
 import WebSocket from 'ws';
 import path from 'path';
+import { PersistentWorldModel } from '../core/worldModel';
+import { PriorityAgenda } from '../core/agenda';
+import { UnifiedTaskManager } from '../modules/taskManager';
+import { CognitiveItem, AttentionValue } from '../interfaces/types';
 
-// Create Express app
+// --- Backend Core Initialization ---
+const worldModel = new PersistentWorldModel();
+const agenda = new PriorityAgenda((taskId) => worldModel.get_item(taskId)?.task_metadata?.status || null);
+const taskManager = new UnifiedTaskManager(agenda, worldModel);
+
+const defaultAttention: AttentionValue = { priority: 0.5, durability: 0.5 };
+
+// Add some initial tasks for demonstration
+taskManager.addTask({
+    label: 'First Task: Review the new UI design',
+    attention: defaultAttention,
+    task_metadata: { status: 'pending', priority_level: 'medium' }
+});
+taskManager.addTask({
+    label: 'Second Task: Implement the WebSocket connection',
+    attention: defaultAttention,
+    task_metadata: { status: 'pending', priority_level: 'medium' }
+});
+taskManager.addTask({
+    label: 'Agent Task: Monitor for new user feedback',
+    attention: defaultAttention,
+    task_metadata: { status: 'pending', priority_level: 'medium', categories: ['AGENT'] }
+});
+
+
+// --- Express Server Setup ---
 const app: express.Application = express();
 const server: http.Server = http.createServer(app);
 
-// Serve static files from the web directory
-app.use(express.static(path.join(__dirname, 'web')));
+// Serve static files from the React frontend build directory
+const frontendPath = path.join(__dirname, 'frontend');
+app.use(express.static(frontendPath));
 
-// Serve the main HTML file
-app.get('/', (req: express.Request, res: express.Response) => {
-    res.sendFile(path.join(__dirname, 'web', 'unifiedInterface.html'));
+// Serve the main HTML file for all non-API routes
+app.get('*', (req: express.Request, res: express.Response) => {
+    if (!req.path.startsWith('/api')) {
+        res.sendFile(path.join(frontendPath, 'index.html'));
+    }
 });
 
-// Create WebSocket server
-const wss: WebSocket.Server = new WebSocket.Server({ server });
+// --- WebSocket Server Setup ---
+const wss: WebSocket.Server = new WebSocket.Server({ noServer: true });
 
-// Handle WebSocket connections
-wss.on('connection', (ws: WebSocket, req: http.IncomingMessage) => {
+server.on('upgrade', (request, socket, head) => {
+    if (request.url === '/ws') {
+        wss.handleUpgrade(request, socket, head, (ws) => {
+            wss.emit('connection', ws, request);
+        });
+    } else {
+        socket.destroy();
+    }
+});
+
+const mapTaskToClient = (task: CognitiveItem) => ({
+    id: task.id,
+    title: task.label,
+    description: task.content, // Assuming content can serve as description
+    status: task.task_metadata?.status || 'pending',
+    type: task.task_metadata?.categories?.includes('AGENT') ? 'AGENT' : 'REGULAR'
+});
+
+const broadcastTaskList = () => {
+    const tasks = taskManager.getAllTasks();
+    const taskListUpdate = {
+        type: 'TASK_LIST_UPDATE',
+        payload: { tasks: tasks.map(mapTaskToClient) }
+    };
+    const message = JSON.stringify(taskListUpdate);
+    wss.clients.forEach(client => {
+        if (client.readyState === WebSocket.OPEN) {
+            client.send(message);
+        }
+    });
+};
+
+// Listen for backend task changes and broadcast them
+taskManager.addEventListener((event) => {
+    console.log(`Task event received: ${event.type}. Broadcasting update.`);
+    broadcastTaskList();
+});
+
+
+wss.on('connection', (ws: WebSocket) => {
     console.log('New WebSocket connection established');
     
-    // Send welcome message
-    const welcomeMessage = {
-        id: 'welcome-' + Date.now(),
-        type: 'welcome',
-        payload: {
-            message: 'Welcome to Senars3 Cognitive System',
-            systemInfo: {
-                version: '3.0.0-nal',
-                workerCount: 4
-            },
-            serverStats: {
-                uptime: '00:00:00'
-            }
-        }
-    };
-    ws.send(JSON.stringify(welcomeMessage));
+    // Send the current task list to the newly connected client
+    broadcastTaskList();
     
-    // Handle incoming messages
     ws.on('message', (data: WebSocket.Data) => {
         try {
             const message = JSON.parse(data.toString());
-            console.log('Received message:', message);
-            
-            // Echo the message back as a response for demo purposes
-            const response = {
-                id: message.id,
-                type: 'response',
-                payload: {
-                    message: `Processed ${message.method} on ${message.target}`,
-                    data: message.payload
-                }
-            };
-            ws.send(JSON.stringify(response));
+            const { type, payload } = message;
+
+            console.log(`Received message of type: ${type}`);
+
+            switch (type) {
+                case 'ADD_TASK':
+                    taskManager.addTask({
+                        label: payload.title,
+                        attention: defaultAttention,
+                        task_metadata: {
+                            status: 'pending',
+                            priority_level: 'medium',
+                            categories: payload.type === 'AGENT' ? ['AGENT'] : []
+                        }
+                    });
+                    break;
+                case 'COMPLETE_TASK':
+                    taskManager.completeTask(payload.id);
+                    break;
+                case 'PAUSE_AGENT':
+                    taskManager.updateTaskStatus(payload.id, 'deferred');
+                    break;
+                case 'RESUME_AGENT':
+                    taskManager.updateTaskStatus(payload.id, 'pending');
+                    break;
+                default:
+                    console.warn(`Unknown message type: ${type}`);
+            }
         } catch (error) {
-            console.error('Error processing message:', error);
-            
-            // Send error response
-            const errorResponse = {
-                id: 'error-' + Date.now(),
-                type: 'error',
-                error: {
-                    code: 'PARSE_ERROR',
-                    message: 'Failed to parse message'
-                }
-            };
-            ws.send(JSON.stringify(errorResponse));
+            console.error('Failed to process message:', error);
         }
     });
     
-    // Handle connection close
     ws.on('close', () => {
         console.log('WebSocket connection closed');
     });
     
-    // Handle errors
     ws.on('error', (error: Error) => {
         console.error('WebSocket error:', error);
     });
 });
 
-// Start server
+// --- Server Start ---
 const PORT: number = parseInt(process.env.PORT || '3000', 10);
 server.listen(PORT, () => {
     console.log(`Senars3 Unified Server running on http://localhost:${PORT}`);
-    console.log(`WebSocket server listening on ws://localhost:${PORT}`);
 });
