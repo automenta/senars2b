@@ -25,6 +25,19 @@ export class InMemoryWorldModel implements WorldModel {
         this.items.set(item.id, item);
     }
 
+    update_item(item: CognitiveItem): void {
+        this.items.set(item.id, item);
+    }
+
+    remove_item(id: string): boolean {
+        const item = this.items.get(id);
+        if (!item) {
+            return false;
+        }
+        this.items.delete(id);
+        return true;
+    }
+
     get_atom(id: string): SemanticAtom | null {
         return this.atoms.get(id) || null;
     }
@@ -134,5 +147,9 @@ export class InMemoryWorldModel implements WorldModel {
         }
 
         return {bins, counts};
+    }
+
+    getAllItems(): CognitiveItem[] {
+        return Array.from(this.items.values());
     }
 }

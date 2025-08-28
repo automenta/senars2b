@@ -1,25 +1,25 @@
-import express from 'express';
-import http from 'http';
-import WebSocket from 'ws';
-import path from 'path';
+const express = require('express');
+const http = require('http');
+const WebSocket = require('ws');
+const path = require('path');
 
 // Create Express app
-const app: express.Application = express();
-const server: http.Server = http.createServer(app);
+const app = express();
+const server = http.createServer(app);
 
 // Serve static files from the web directory
 app.use(express.static(path.join(__dirname, 'web')));
 
 // Serve the main HTML file
-app.get('/', (req: express.Request, res: express.Response) => {
+app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'web', 'unifiedInterface.html'));
 });
 
 // Create WebSocket server
-const wss: WebSocket.Server = new WebSocket.Server({ server });
+const wss = new WebSocket.Server({ server });
 
 // Handle WebSocket connections
-wss.on('connection', (ws: WebSocket, req: http.IncomingMessage) => {
+wss.on('connection', (ws, req) => {
     console.log('New WebSocket connection established');
     
     // Send welcome message
@@ -40,9 +40,9 @@ wss.on('connection', (ws: WebSocket, req: http.IncomingMessage) => {
     ws.send(JSON.stringify(welcomeMessage));
     
     // Handle incoming messages
-    ws.on('message', (data: WebSocket.Data) => {
+    ws.on('message', (data) => {
         try {
-            const message = JSON.parse(data.toString());
+            const message = JSON.parse(data);
             console.log('Received message:', message);
             
             // Echo the message back as a response for demo purposes
@@ -77,13 +77,13 @@ wss.on('connection', (ws: WebSocket, req: http.IncomingMessage) => {
     });
     
     // Handle errors
-    ws.on('error', (error: Error) => {
+    ws.on('error', (error) => {
         console.error('WebSocket error:', error);
     });
 });
 
 // Start server
-const PORT: number = parseInt(process.env.PORT || '3000', 10);
+const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {
     console.log(`Senars3 Unified Server running on http://localhost:${PORT}`);
     console.log(`WebSocket server listening on ws://localhost:${PORT}`);

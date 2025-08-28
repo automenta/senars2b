@@ -55,7 +55,10 @@ async function testComponentIntegration(): Promise<void> {
     console.log("\n2. Testing Component Integration...");
 
     // Create components
-    const agenda = new PriorityAgenda();
+    const agenda = new PriorityAgenda((taskId: string) => {
+        // Simple mock implementation for testing
+        return 'pending';
+    });
     const worldModel = new PersistentWorldModel();
     const revisionEngine = new SimpleBeliefRevisionEngine();
     const attentionModule = new DynamicAttentionModule();
@@ -83,8 +86,8 @@ async function testComponentIntegration(): Promise<void> {
         id: uuidv4(),
         content: "Test atom for integration",
         embedding: Array(768).fill(0.5),
-        creationTime: Date.now(), // Added
-        lastAccessTime: Date.now(), // Added
+        creationTime: Date.now(),
+        lastAccessTime: Date.now(),
         meta: {
             type: "Fact",
             source: "integration_test",

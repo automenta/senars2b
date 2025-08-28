@@ -40,7 +40,10 @@ async function runBasicComponentTests() {
  */
 async function testAgenda(): Promise<void> {
     console.log("\n1. Testing Agenda...");
-    const agenda = new PriorityAgenda();
+    const agenda = new PriorityAgenda((taskId: string) => {
+        // Simple mock implementation for testing
+        return 'pending';
+    });
 
     const item1: CognitiveItem = {
         id: uuidv4(),
@@ -80,8 +83,8 @@ async function testWorldModel(): Promise<void> {
         id: uuidv4(),
         content: "Chocolate is toxic to pets",
         embedding: Array(768).fill(0.5),
-        creationTime: Date.now(), // Added
-        lastAccessTime: Date.now(), // Added
+        creationTime: Date.now(),
+        lastAccessTime: Date.now(),
         meta: {
             type: "Fact",
             source: "veterinary_database",
@@ -157,8 +160,8 @@ async function testSchemaMatcher(): Promise<void> {
             }
         },
         embedding: Array(768).fill(0.3),
-        creationTime: Date.now(), // Added
-        lastAccessTime: Date.now(), // Added
+        creationTime: Date.now(),
+        lastAccessTime: Date.now(),
         meta: {
             type: "CognitiveSchema",
             source: "test",
