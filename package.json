@@ -7,15 +7,16 @@
     "senars3": "./dist/unifiedCLI.js"
   },
   "scripts": {
-    "build": "tsc",
+    "build": "tsc && cp src/web/unifiedInterface.html dist/web/ && cp -r src/web/components dist/web/",
     "start": "ts-node src/unifiedCLI.ts",
     "start:ws": "ts-node src/web/webSocketServer.ts",
     "start:web": "ts-node src/web/webServer.ts",
-    "start:unified": "ts-node src/web/unifiedServer.ts",
+    "start:unified": "npm run build && node dist/web/unifiedServer.js",
     "cli": "ts-node src/unifiedCLI.ts",
     "demo": "ts-node src/testing/demo.ts",
     "demo:unified": "node unifiedDemo.js",
     "test:unified": "ts-node src/testing/unifiedInterfaceTest.ts",
+    "test:usability": "ts-node src/testing/usabilityIntegrityTest.ts",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",

@@ -757,6 +757,115 @@
             padding-top: 15px;
             border-top: 1px dashed rgba(255, 255, 255, 0.2);
         }
+        
+        /* Task Management Styles */
+        .task-list {
+            margin-top: 20px;
+        }
+        
+        .task-item {
+            background: var(--card-bg);
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            border: 1px solid rgba(0, 0, 0, 0.05);
+            transition: all 0.3s ease;
+        }
+        
+        .task-item:hover {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+        }
+        
+        .task-item.pending {
+            border-left: 4px solid var(--primary);
+        }
+        
+        .task-item.in-progress {
+            border-left: 4px solid var(--warning);
+        }
+        
+        .task-item.completed {
+            border-left: 4px solid var(--success);
+            opacity: 0.8;
+        }
+        
+        .task-item.failed {
+            border-left: 4px solid var(--danger);
+        }
+        
+        .task-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .task-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.1rem;
+            font-weight: 500;
+        }
+        
+        .task-status-icon {
+            font-size: 1.2rem;
+        }
+        
+        .task-actions {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .btn-small {
+            padding: 6px 12px;
+            font-size: 0.85rem;
+        }
+        
+        .task-description {
+            color: var(--gray);
+            margin-bottom: 15px;
+            line-height: 1.5;
+        }
+        
+        .task-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        
+        .task-priority {
+            flex: 1;
+            min-width: 150px;
+        }
+        
+        .priority-label {
+            font-size: 0.85rem;
+            color: var(--gray);
+            margin-bottom: 5px;
+        }
+        
+        .priority-bar {
+            height: 8px;
+            background: #e2e8f0;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        
+        .priority-fill {
+            height: 100%;
+            border-radius: 4px;
+            transition: width 0.3s ease;
+        }
+        
+        .task-due-date {
+            font-size: 0.85rem;
+            color: var(--gray);
+            white-space: nowrap;
+        }
     </style>
 </head>
 <body>
@@ -797,6 +906,9 @@
         </div>
         <div class="tab" data-tab="custom">
             <span>💬</span> Custom Input
+        </div>
+        <div class="tab" data-tab="tasks">
+            <span>📋</span> Task Management
         </div>
         <div class="tab" data-tab="system">
             <span>📊</span> System Status
@@ -934,6 +1046,18 @@
                 <div class="stat-card">
                     <div class="stat-value" id="uptime">00:00:00</div>
                     <div class="stat-label">System Uptime</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="system-load">0.00</div>
+                    <div class="stat-label">System Load</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="heap-used">0 MB</div>
+                    <div class="stat-label">Heap Used</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="heap-total">0 MB</div>
+                    <div class="stat-label">Heap Total</div>
                 </div>
             </div>
 
@@ -1232,6 +1356,32 @@
                     <div class="cli-line"><span class="cli-output-text">    "self_development": true</span></div>
                     <div class="cli-line"><span class="cli-output-text">  }</span></div>
                     <div class="cli-line"><span class="cli-output-text">}</span></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="tab-content" id="tasks-tab">
+        <div class="card">
+            <div class="card-header">
+                <h2 class="card-title">📋 Real-Time Task Management</h2>
+            </div>
+            <p>Manage your cognitive tasks in real-time. The system automatically processes tasks based on priority and dependencies.</p>
+            
+            <div class="input-group">
+                <input type="text" id="new-task-title" placeholder="Enter a new task...">
+                <textarea id="new-task-description" placeholder="Task description (optional)"></textarea>
+                <div style="display: flex; gap: 10px; margin-top: 10px;">
+                    <input type="number" id="new-task-priority" min="0" max="1" step="0.1" placeholder="Priority (0.0-1.0)" style="flex: 1;">
+                    <input type="datetime-local" id="new-task-due-date" style="flex: 1;">
+                </div>
+            </div>
+            <button class="btn" id="add-task-btn">➕ Add Task</button>
+            
+            <div class="output-section" style="margin-top: 25px;">
+                <h3>📋 Task List</h3>
+                <div id="task-list-container">
+                    <p>No tasks yet. Add a task to get started.</p>
                 </div>
             </div>
         </div>

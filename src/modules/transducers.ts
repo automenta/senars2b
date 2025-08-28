@@ -9,6 +9,15 @@ export interface Transducer {
 export class TextTransducer implements Transducer {
     async process(data: any): Promise<CognitiveItem[]> {
         if (typeof data === 'string') {
+            // Validate input
+            if (data.length === 0) {
+                return []; // Return empty array for empty strings
+            }
+            
+            if (data.length > 10000) {
+                throw new Error('Text input is too long (maximum 10,000 characters)');
+            }
+            
             // Simple text processing - in a real implementation, this would use NLP
             return data
                 .split(/[.!?]+/)
@@ -36,6 +45,12 @@ export class TextTransducer implements Transducer {
         }
 
         if (typeof data === 'object' && data !== null) {
+            // Validate structured data
+            const jsonString = JSON.stringify(data);
+            if (jsonString.length > 10000) {
+                throw new Error('Structured data is too large (maximum 10,000 characters when serialized)');
+            }
+            
             // Process structured data
             const truth: TruthValue = {
                 frequency: 1.0,
@@ -52,12 +67,39 @@ export class TextTransducer implements Transducer {
                 truth,
                 attention
             );
-            item.label = JSON.stringify(data);
+            item.label = jsonString;
 
             return [item];
         }
 
-        return [];
+        // For other data types, convert to string
+        const stringData = String(data);
+        if (stringData.length > 10000) {
+            throw new Error('Data is too long (maximum 10,000 characters)');
+        }
+        
+        if (stringData.length === 0) {
+            return []; // Return empty array for empty strings
+        }
+
+        const truth: TruthValue = {
+            frequency: 1.0,
+            confidence: 0.7
+        };
+
+        const attention: AttentionValue = {
+            priority: 0.5,
+            durability: 0.5
+        };
+
+        const item = CognitiveItemFactory.createBelief(
+            'data-atom-' + uuidv4(),
+            truth,
+            attention
+        );
+        item.label = stringData;
+
+        return [item];
     }
 }
 

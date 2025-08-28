@@ -96,6 +96,22 @@ framework. Examples:
 The system will process your input and add the extracted cognitive items to its agenda for further processing through
 its non-axiomatic reasoning engine.
 
+### Managing Tasks
+
+The Task Management tab allows you to create, track, and manage tasks that the cognitive system will process:
+
+1. **Adding Tasks**: Enter a task title, optional description, priority (0.0-1.0), and due date
+2. **Task Prioritization**: Tasks are automatically prioritized based on their priority value
+3. **Task Dependencies**: Tasks with dependencies will only be processed when all dependencies are completed
+4. **Real-time Tracking**: Task status updates in real-time as the system processes them
+5. **Automated Execution**: Tasks are automatically converted to cognitive goals and processed by the system
+
+Tasks can be in one of four states:
+- **Pending**: Waiting to be processed
+- **In Progress**: Currently being processed by the cognitive system
+- **Completed**: Successfully processed
+- **Failed**: Processing failed or was manually marked as failed
+
 ## Unified Web Interface
 
 ### Starting the Web Server
@@ -123,15 +139,17 @@ The unified web interface provides several tabs for different functionalities:
 
 1. **Cognitive Demos** - Pre-built examples for different domains using non-axiomatic logic
 2. **Custom Input** - Enter your own text for processing (supports Ctrl+Enter)
-3. **System Status** - Real-time monitoring of system statistics
-4. **Metaprogramming** - Direct component access and self-modification interface
-5. **Help & Examples** - Comprehensive guide and input examples
+3. **Task Management** - Real-time task tracking and management with automated execution
+4. **System Status** - Real-time monitoring of system statistics
+5. **Metaprogramming** - Direct component access and self-modification interface
+6. **Help & Examples** - Comprehensive guide and input examples
 
 #### Features:
 
 - Real-time connection status monitoring
 - Interactive demos for different domains (Medical, Scientific, Business, etc.) with uncertainty management
 - Custom input processing with keyboard shortcuts (Ctrl+Enter)
+- Task management with real-time tracking and automated execution
 - CLI mode toggle for command-line experience in the browser
 - System status monitoring with live statistics
 - Metaprogramming interface for self-representation and modification
@@ -186,6 +204,17 @@ Methods:
 - `addInitialGoal` - Add an initial goal to the system
 - `addSchema` - Add a cognitive schema to the system
 - `addCognitiveItem` - Add a cognitive item to the system
+
+#### Tasks Component
+
+Methods:
+
+- `addTask` - Add a new task to the system
+- `updateTask` - Update an existing task
+- `removeTask` - Remove a task from the system
+- `getTask` - Retrieve a specific task by ID
+- `getAllTasks` - Retrieve all tasks
+- `updateTaskStatus` - Update the status of a task
 
 Example:
 
@@ -392,6 +421,55 @@ The system validates all inputs:
    processing
 6. **Be Specific and Clear** - Use clear, unambiguous language while acknowledging inherent uncertainties
 7. **Check Input Length** - Ensure inputs are between 3-10,000 characters
+
+## Task Management
+
+The Senars3 system includes a powerful real-time task management system that integrates with the cognitive processing
+engine. Tasks can be created, updated, and tracked through both the web interface and programmatic APIs.
+
+### Task Creation
+
+Tasks can be created through the web interface or programmatically:
+
+1. **Web Interface**: Use the "Task Management" tab to add new tasks with titles, descriptions, priorities, and due dates
+2. **WebSocket API**: Send a request to the `tasks.addTask` method with task details
+3. **REST API**: POST to the `/api/tasks` endpoint (when implemented)
+
+### Task Properties
+
+Each task includes the following properties:
+
+- **Title**: A concise description of the task
+- **Description**: Detailed information about the task (optional)
+- **Priority**: A value between 0.0 and 1.0 indicating importance
+- **Status**: One of `pending`, `in-progress`, `completed`, or `failed`
+- **Due Date**: Optional deadline for task completion
+- **Dependencies**: Other tasks that must be completed before this task
+- **Subtasks**: Tasks that are part of this larger task
+
+### Task Processing
+
+Tasks are automatically processed by the cognitive system based on:
+
+1. **Priority**: Higher priority tasks are processed first
+2. **Dependencies**: Tasks with unmet dependencies are queued until dependencies are completed
+3. **Availability**: Tasks are converted to CognitiveItems (GOALs) when ready for processing
+
+### Task Status Management
+
+Task status can be updated through:
+
+1. **Manual Updates**: Using the web interface or API calls
+2. **Automatic Updates**: Based on cognitive processing results
+3. **Dependency Resolution**: When dependent tasks are completed
+
+### Integration with Cognitive Processing
+
+Tasks are seamlessly integrated with the cognitive processing engine:
+
+1. **Task-to-GOAL Conversion**: Pending tasks are automatically converted to GOAL CognitiveItems
+2. **Progress Tracking**: Task status is updated based on cognitive processing results
+3. **Result Linking**: CognitiveItems generated from tasks are linked back to their originating tasks
 
 ## Understanding Non-Axiomatic Logic Output
 

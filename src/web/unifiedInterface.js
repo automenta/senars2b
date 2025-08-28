@@ -79,6 +79,24 @@ class Senars3WebApp {
         this.resonanceThresholdValue = document.getElementById('resonance-threshold-value');
         this.schemaThresholdValue = document.getElementById('schema-threshold-value');
         this.learningThresholdValue = document.getElementById('learning-threshold-value');
+        
+        // Task management elements
+        this.newTaskTitle = document.getElementById('new-task-title');
+        this.newTaskDescription = document.getElementById('new-task-description');
+        this.newTaskPriority = document.getElementById('new-task-priority');
+        this.newTaskDueDate = document.getElementById('new-task-due-date');
+        this.addTaskBtn = document.getElementById('add-task-btn');
+        this.taskListContainer = document.getElementById('task-list-container');
+        
+        // System health elements
+        this.systemLoadEl = document.getElementById('system-load');
+        this.heapUsedEl = document.getElementById('heap-used');
+        this.heapTotalEl = document.getElementById('heap-total');
+        
+        // System health elements
+        this.systemLoadEl = document.getElementById('system-load');
+        this.heapUsedEl = document.getElementById('heap-used');
+        this.heapTotalEl = document.getElementById('heap-total');
     }
 
     init() {
@@ -89,6 +107,8 @@ class Senars3WebApp {
             this.addToCliOutput("System initialized with Non-Axiomatic Logic Framework");
             this.addToCliOutput("Ready for cognitive processing. Enter input to begin.");
         }, 1000);
+        // Load initial tasks
+        this.loadTasks();
     }
 
     connectWebSocket() {
@@ -186,6 +206,10 @@ class Senars3WebApp {
                 this.resetUIState();
                 this.demoOutput.innerHTML = '<p class="error">Error processing input. Please try again.</p>';
                 break;
+            case 'taskUpdate':
+                // Handle real-time task updates
+                this.refreshTaskList();
+                break;
             default:
                 console.log('Unknown event:', message.method);
         }
@@ -212,10 +236,49 @@ class Senars3WebApp {
                 this.successfulGeneralizations.textContent = stats.learning.successfulGeneralizations || 0;
             }
         }
+        
+        // Handle system diagnostics
+        if (message.payload && message.payload.system) {
+            const system = message.payload.system;
+            if (system.performance && system.performance.systemLoad !== undefined) {
+                this.systemLoadEl.textContent = system.performance.systemLoad.toFixed(2);
+            }
+        }
+        
+        // Handle memory diagnostics
+        if (message.payload && message.payload.memory) {
+            const memory = message.payload.memory;
+            // Convert bytes to MB
+            this.heapUsedEl.textContent = (memory.heapUsed / (1024 * 1024)).toFixed(2) + ' MB';
+            this.heapTotalEl.textContent = (memory.heapTotal / (1024 * 1024)).toFixed(2) + ' MB';
+        }
         if (message.payload && message.payload.distribution) {
             this.updateConfidenceDistributionChart(message.payload.distribution);
         }
         if (message.payload) {
+            // Handle system status updates
+            if (message.payload.systemInfo) {
+                this.workerCountEl.textContent = message.payload.systemInfo.workerCount || 0;
+            }
+            if (message.payload.performance) {
+                this.uptimeEl.textContent = message.payload.performance.uptime || '00:00:00';
+                if (this.systemLoadEl) {
+                    this.systemLoadEl.textContent = message.payload.performance.systemLoad !== undefined ? 
+                        message.payload.performance.systemLoad.toFixed(2) : '0.00';
+                }
+            }
+            // Handle memory information if available
+            if (message.payload.memory) {
+                if (this.heapUsedEl) {
+                    const heapUsedMB = (message.payload.memory.heapUsed / (1024 * 1024)).toFixed(2);
+                    this.heapUsedEl.textContent = `${heapUsedMB} MB`;
+                }
+                if (this.heapTotalEl) {
+                    const heapTotalMB = (message.payload.memory.heapTotal / (1024 * 1024)).toFixed(2);
+                    this.heapTotalEl.textContent = `${heapTotalMB} MB`;
+                }
+            }
+            
             this.addToCliOutput(`Response: ${JSON.stringify(message.payload, null, 2)}`);
             if (this.commandResult) {
                 this.commandResult.style.display = 'block';
@@ -277,6 +340,8 @@ class Senars3WebApp {
 
     requestSystemStatus() {
         this.sendWebSocketMessage('worldModel', 'getStatistics', {});
+        // Request system diagnostics for enhanced monitoring
+        this.sendWebSocketMessage('core', 'getSystemDiagnostics', {});
     }
 
     requestConfidenceDistribution() {
@@ -362,6 +427,8 @@ class Senars3WebApp {
             if (this.ws && this.ws.readyState === WebSocket.OPEN) {
                 this.requestSystemStatus();
                 this.requestConfidenceDistribution();
+                // Request task statistics
+                this.sendWebSocketMessage('tasks', 'getTaskStatistics', {});
             }
         }, 5000);
     }
@@ -568,6 +635,11 @@ class Senars3WebApp {
                 this.showNotification('Not connected to server. Please wait for reconnection or refresh the page.', 'error');
             }
         });
+        
+        // Task management event listeners
+        if (this.addTaskBtn) {
+            this.addTaskBtn.addEventListener('click', () => this.addTask());
+        }
     }
 
     handleActionCard(actionType) {
@@ -601,6 +673,224 @@ class Senars3WebApp {
         this.methodInput.value = method;
         this.payloadInput.value = payload;
         document.querySelector('.tab[data-tab="metaprogramming"]').click();
+    }
+    
+    // Task management methods
+    async addTask() {
+        const title = this.newTaskTitle.value.trim();
+        if (!title) {
+            this.showNotification('Please enter a task title', 'warning');
+            return;
+        }
+        
+        const description = this.newTaskDescription.value.trim();
+        const priority = parseFloat(this.newTaskPriority.value) || 0.5;
+        const dueDate = this.newTaskDueDate.value ? new Date(this.newTaskDueDate.value).getTime() : undefined;
+        
+        const taskData = {
+            title,
+            description: description || undefined,
+            priority: Math.min(1, Math.max(0, priority)),
+            dueDate,
+            dependencies: [],
+            subtasks: []
+        };
+        
+        try {
+            const success = this.sendWebSocketMessage('tasks', 'addTask', taskData);
+            if (success) {
+                this.showNotification('Task added successfully', 'success');
+                this.newTaskTitle.value = '';
+                this.newTaskDescription.value = '';
+                this.newTaskPriority.value = '';
+                this.newTaskDueDate.value = '';
+                // Refresh task list
+                setTimeout(() => this.refreshTaskList(), 500);
+            }
+        } catch (error) {
+            this.showNotification('Error adding task: ' + error.message, 'error');
+        }
+    }
+    
+    async loadTasks() {
+        try {
+            if (this.ws && this.ws.readyState === WebSocket.OPEN) {
+                const messageId = `tasks-${Date.now()}`;
+                this.sendWebSocketMessage('tasks', 'getAllTasks', {}, messageId);
+                
+                // Wait for response
+                const response = await this.waitForResponse(messageId, 5000);
+                if (response && response.payload && response.payload.tasks) {
+                    this.displayTasks(response.payload.tasks);
+                }
+            }
+        } catch (error) {
+            console.error('Error loading tasks:', error);
+            this.taskListContainer.innerHTML = '<p>Error loading tasks. Please try again.</p>';
+        }
+    }
+    
+    async refreshTaskList() {
+        await this.loadTasks();
+    }
+    
+    displayTasks(tasks) {
+        if (!this.taskListContainer) return;
+        
+        if (!tasks || tasks.length === 0) {
+            this.taskListContainer.innerHTML = '<p>No tasks yet. Add a task to get started.</p>';
+            return;
+        }
+        
+        // Sort tasks by priority (highest first) and status
+        tasks.sort((a, b) => {
+            // Completed tasks last
+            if (a.status === 'completed' && b.status !== 'completed') return 1;
+            if (b.status === 'completed' && a.status !== 'completed') return -1;
+            
+            // Failed tasks next to last
+            if (a.status === 'failed' && b.status !== 'failed') return 1;
+            if (b.status === 'failed' && a.status !== 'failed') return -1;
+            
+            // Then by priority (highest first)
+            return b.priority - a.priority;
+        });
+        
+        let html = '<div class="task-list">';
+        for (const task of tasks) {
+            html += this.createTaskElement(task);
+        }
+        html += '</div>';
+        
+        this.taskListContainer.innerHTML = html;
+        
+        // Add event listeners to task elements
+        this.setupTaskEventListeners();
+    }
+    
+    createTaskElement(task) {
+        const statusIcon = this.getTaskStatusIcon(task.status);
+        const priorityBar = this.createPriorityBar(task.priority);
+        const dueDate = task.dueDate ? new Date(task.dueDate).toLocaleString() : 'No due date';
+        
+        return `
+            <div class="task-item ${task.status}" data-task-id="${task.id}">
+                <div class="task-header">
+                    <div class="task-title">
+                        <span class="task-status-icon">${statusIcon}</span>
+                        <span class="task-title-text">${this.escapeHtml(task.title)}</span>
+                    </div>
+                    <div class="task-actions">
+                        ${task.status === 'pending' ? 
+                            `<button class="btn btn-outline btn-small task-action" data-action="start">▶️ Start</button>` : ''}
+                        ${task.status === 'in-progress' ? 
+                            `<button class="btn btn-success btn-small task-action" data-action="complete">✅ Complete</button>
+                             <button class="btn btn-outline btn-small task-action" data-action="fail">❌ Fail</button>` : ''}
+                        <button class="btn btn-outline btn-small task-action" data-action="delete">🗑️ Delete</button>
+                    </div>
+                </div>
+                ${task.description ? `<div class="task-description">${this.escapeHtml(task.description)}</div>` : ''}
+                <div class="task-meta">
+                    ${priorityBar}
+                    <div class="task-due-date">📅 Due: ${dueDate}</div>
+                </div>
+            </div>
+        `;
+    }
+    
+    getTaskStatusIcon(status) {
+        switch (status) {
+            case 'pending': return '⏸️';
+            case 'in-progress': return '🔄';
+            case 'completed': return '✅';
+            case 'failed': return '❌';
+            default: return '❓';
+        }
+    }
+    
+    createPriorityBar(priority) {
+        const percentage = (priority * 100).toFixed(0);
+        const color = priority > 0.7 ? 'var(--danger)' : priority > 0.4 ? 'var(--warning)' : 'var(--success)';
+        
+        return `
+            <div class="task-priority">
+                <div class="priority-label">Priority: ${percentage}%</div>
+                <div class="priority-bar">
+                    <div class="priority-fill" style="width: ${percentage}%; background-color: ${color};"></div>
+                </div>
+            </div>
+        `;
+    }
+    
+    setupTaskEventListeners() {
+        // Add event listeners to task action buttons
+        const actionButtons = this.taskListContainer.querySelectorAll('.task-action');
+        actionButtons.forEach(button => {
+            button.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const taskId = button.closest('.task-item').getAttribute('data-task-id');
+                const action = button.getAttribute('data-action');
+                this.handleTaskAction(taskId, action);
+            });
+        });
+    }
+    
+    async handleTaskAction(taskId, action) {
+        try {
+            switch (action) {
+                case 'start':
+                    this.updateTaskStatus(taskId, 'in-progress');
+                    break;
+                case 'complete':
+                    this.updateTaskStatus(taskId, 'completed');
+                    break;
+                case 'fail':
+                    this.updateTaskStatus(taskId, 'failed');
+                    break;
+                case 'delete':
+                    this.deleteTask(taskId);
+                    break;
+            }
+        } catch (error) {
+            this.showNotification(`Error performing action: ${error.message}`, 'error');
+        }
+    }
+    
+    async updateTaskStatus(taskId, status) {
+        try {
+            const success = this.sendWebSocketMessage('tasks', 'updateTaskStatus', {
+                taskId,
+                status
+            });
+            if (success) {
+                this.showNotification(`Task status updated to ${status}`, 'success');
+                // Refresh task list
+                setTimeout(() => this.refreshTaskList(), 500);
+            }
+        } catch (error) {
+            this.showNotification(`Error updating task status: ${error.message}`, 'error');
+        }
+    }
+    
+    async deleteTask(taskId) {
+        try {
+            const success = this.sendWebSocketMessage('tasks', 'removeTask', {
+                taskId
+            });
+            if (success) {
+                this.showNotification('Task deleted successfully', 'success');
+                // Refresh task list
+                setTimeout(() => this.refreshTaskList(), 500);
+            }
+        } catch (error) {
+            this.showNotification(`Error deleting task: ${error.message}`, 'error');
+        }
+    }
+    
+    escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
     }
 }
 

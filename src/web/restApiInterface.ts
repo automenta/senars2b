@@ -1,5 +1,6 @@
 import express from 'express';
 import {WebSocketInterface} from './webSocketInterface';
+import path from 'path';
 
 /**
  * REST API Interface that wraps the WebSocket interface
@@ -17,6 +18,20 @@ export class RestApiInterface {
 
         // Middleware
         this.app.use(express.json());
+        
+        // Serve static files
+        this.app.use('/node_modules', express.static(path.join(__dirname, '../../node_modules')));
+        this.app.use(express.static(path.join(__dirname)));
+        
+        // Serve the unified interface as the main page
+        this.app.get('/', (req, res) => {
+            res.sendFile(path.join(__dirname, 'unifiedInterface.html'));
+        });
+        
+        // Serve the unified interface for all routes (SPA)
+        this.app.get('*', (req, res) => {
+            res.sendFile(path.join(__dirname, 'unifiedInterface.html'));
+        });
 
         // Setup routes
         this.setupRoutes();
@@ -37,10 +52,25 @@ export class RestApiInterface {
     private setupRoutes(): void {
         // Health check endpoint
         this.app.get('/health', (req, res) => {
-            res.json({
+            res.status(200).json({
                 status: 'healthy',
                 timestamp: new Date().toISOString(),
                 uptime: process.uptime()
+            });
+        });
+
+        // Enhanced health check endpoint
+        this.app.get('/api/health', (req, res) => {
+            const diagnostics = this.wsInterface.getSystemDiagnostics();
+            res.status(200).json({
+                status: 'healthy',
+                timestamp: new Date().toISOString(),
+                uptime: process.uptime(),
+                diagnostics: {
+                    system: diagnostics.system,
+                    memory: diagnostics.memory,
+                    process: diagnostics.process
+                }
             });
         });
 
@@ -142,6 +172,19 @@ export class RestApiInterface {
             } catch (error) {
                 res.status(500).json({
                     error: 'Failed to get server statistics',
+                    message: error instanceof Error ? error.message : 'Unknown error'
+                });
+            }
+        });
+
+        // System diagnostics endpoint
+        this.app.get('/api/diagnostics', (req, res) => {
+            try {
+                const diagnostics = this.wsInterface.getSystemDiagnostics();
+                res.json(diagnostics);
+            } catch (error) {
+                res.status(500).json({
+                    error: 'Failed to get system diagnostics',
                     message: error instanceof Error ? error.message : 'Unknown error'
                 });
             }

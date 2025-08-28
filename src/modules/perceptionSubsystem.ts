@@ -32,17 +32,29 @@ export class PerceptionSubsystem {
             }
         }
 
+        // Log the input processing for debugging
+        console.log(`Processing input of type: ${typeof data}`);
+        if (typeof data === 'string') {
+            console.log(`Input length: ${data.length} characters`);
+        }
+
         const inputType = this.determineInputType(data);
         const startTime = Date.now();
 
         // Try each transducer
         const allItems = [];
+        const errors = [];
+        
         for (const transducer of this.transducers) {
             try {
                 const items = await transducer.process(data);
                 allItems.push(...items);
             } catch (error) {
-                console.error("Transducer failed:", error);
+                console.error(`Transducer ${transducer.constructor.name} failed:`, error);
+                errors.push({
+                    transducer: transducer.constructor.name,
+                    error: error instanceof Error ? error.message : 'Unknown error'
+                });
             }
         }
 
@@ -55,6 +67,11 @@ export class PerceptionSubsystem {
 
         // Keep only recent history (limit to 100 records)
         this.processingHistory = this.processingHistory.slice(-100);
+
+        // If all transducers failed, throw an error
+        if (allItems.length === 0 && errors.length === this.transducers.length) {
+            throw new Error(`All transducers failed: ${errors.map(e => `${e.transducer}: ${e.error}`).join('; ')}`);
+        }
 
         return allItems;
     }

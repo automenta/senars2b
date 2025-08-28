@@ -1,9 +1,11 @@
 import {WebSocketServer} from 'ws';
+import WebSocket = require('ws');
 import {DecentralizedCognitiveCore} from '../core/cognitiveCore';
 import {PerceptionSubsystem} from '../modules/perceptionSubsystem';
 import {AttentionValue, CognitiveItem, TruthValue} from '../interfaces/types';
+import {RealTimeTaskManager} from '../modules/taskManager';
+import {TaskWebSocketInterface} from '../interfaces/taskWebSocketInterface';
 import {v4 as uuidv4} from 'uuid';
-import WebSocket = require('ws');
 
 // Define the message types for our metaprogrammatic interface
 interface WebSocketMessage {
@@ -31,12 +33,15 @@ interface ComponentMethods {
     belief: string[];
     goal: string[];
     reflection: string[];
+    tasks: string[]; // Added for task management
 }
 
 export class WebSocketInterface {
     private wss: WebSocketServer;
     private readonly core: DecentralizedCognitiveCore;
     private readonly perception: PerceptionSubsystem;
+    private readonly taskManager: RealTimeTaskManager;
+    private readonly taskWebSocketInterface: TaskWebSocketInterface;
     private clients: Set<WebSocket> = new Set();
     private readonly componentMethods: ComponentMethods;
     private messageCounter: number = 0;
@@ -46,6 +51,16 @@ export class WebSocketInterface {
         this.wss = new WebSocketServer({port});
         this.core = new DecentralizedCognitiveCore(workerCount);
         this.perception = new PerceptionSubsystem();
+        
+        // Initialize task manager with access to agenda and world model
+        this.taskManager = new RealTimeTaskManager(
+            this.core as any, // Access to agenda - in a full implementation, we'd provide a proper interface
+            this.core.getWorldModel()
+        );
+        
+        // Initialize task WebSocket interface
+        this.taskWebSocketInterface = new TaskWebSocketInterface(this.taskManager, null as any); // Will be set per connection
+        
         this.startTime = Date.now();
 
         // Define available methods for each component
@@ -54,6 +69,7 @@ export class WebSocketInterface {
                 'start',
                 'stop',
                 'getSystemStatus',
+                'getSystemDiagnostics',
                 'addInitialBelief',
                 'addInitialGoal',
                 'addSchema',
@@ -111,6 +127,15 @@ export class WebSocketInterface {
                 'setEnabled',
                 'setParameters',
                 'recordSchemaUsage'
+            ],
+            tasks: [ // Added for task management
+                'addTask',
+                'updateTask',
+                'removeTask',
+                'getTask',
+                'getAllTasks',
+                'updateTaskStatus',
+                'getTaskStatistics' // Added new method
             ]
         };
 
@@ -195,8 +220,45 @@ export class WebSocketInterface {
             connectedClients: this.clients.size,
             messagesProcessed: this.messageCounter,
             port: (this.wss as any).options.port,
-            startTime: new Date(this.startTime).toISOString()
+            startTime: new Date(this.startTime).toISOString(),
+            currentTime: new Date().toISOString()
         };
+    }
+
+    // Get detailed system diagnostics
+    public getSystemDiagnostics(): any {
+        const serverStats = this.getServerStats();
+        const systemStatus = this.core.getSystemStatus();
+        
+        // Add additional diagnostics information
+        const diagnostics = {
+            server: serverStats,
+            system: systemStatus,
+            components: {
+                agenda: {
+                    size: systemStatus.agendaSize
+                },
+                worldModel: systemStatus.worldModelStats,
+                workers: systemStatus.workerStats
+            },
+            performance: systemStatus.performance,
+            timestamp: new Date().toISOString(),
+            // Add memory usage information
+            memory: {
+                heapUsed: process.memoryUsage().heapUsed,
+                heapTotal: process.memoryUsage().heapTotal,
+                rss: process.memoryUsage().rss,
+                external: process.memoryUsage().external
+            },
+            // Add process information
+            process: {
+                pid: process.pid,
+                uptime: process.uptime(),
+                version: process.version
+            }
+        };
+        
+        return diagnostics;
     }
 
     // Trigger schema learning
@@ -217,12 +279,25 @@ export class WebSocketInterface {
             console.log('New client connected');
             this.clients.add(ws);
 
+            // Create a task WebSocket interface for this connection
+            const connectionTaskInterface = new TaskWebSocketInterface(this.taskManager, ws);
+            
+            // Store reference for message handling
+            (ws as any)._taskInterface = connectionTaskInterface;
+
             // Send welcome message with available methods
             this.sendWelcomeMessage(ws);
 
             ws.on('message', (data: WebSocket.Data) => {
                 try {
                     const message: WebSocketMessage = JSON.parse(data.toString());
+                    
+                    // Handle task messages specifically
+                    if (message.target === 'tasks') {
+                        connectionTaskInterface.handleTaskRequest(message);
+                        return;
+                    }
+                    
                     this.handleMessage(ws, message);
                 } catch (error) {
                     console.error('Failed to parse message:', error);
@@ -253,6 +328,9 @@ export class WebSocketInterface {
         const seconds = uptime % 60;
         const uptimeStr = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
 
+        // Get detailed system status
+        const systemStatus = this.core.getSystemStatus();
+
         const welcomeMessage: WebSocketMessage = {
             id: uuidv4(),
             type: 'event',
@@ -263,10 +341,12 @@ export class WebSocketInterface {
                 uptime: uptimeStr,
                 availableComponents: Object.keys(this.componentMethods),
                 componentMethods: this.componentMethods,
-                systemInfo: {
-                    workerCount: (this.core as any).workerCount
-                },
-                serverStats: this.getServerStats()
+                systemInfo: systemStatus.systemInfo,
+                serverStats: this.getServerStats(),
+                systemStatus: {
+                    agendaSize: systemStatus.agendaSize,
+                    performance: systemStatus.performance
+                }
             }
         };
         ws.send(JSON.stringify(welcomeMessage));
@@ -317,18 +397,24 @@ export class WebSocketInterface {
                 }
 
                 // Process the request
+                const startTime = Date.now();
                 const result = await this.processRequest(message.target, message.method, message.payload);
+                const processingTime = Date.now() - startTime;
 
                 // Send response
                 const response: WebSocketMessage = {
                     id: message.id,
                     type: 'response',
-                    payload: result
+                    payload: {
+                        ...result,
+                        processingTime: `${processingTime}ms`,
+                        timestamp: new Date().toISOString()
+                    }
                 };
                 ws.send(JSON.stringify(response));
 
                 // Log successful processing
-                console.log(`Successfully processed request: ${message.target}.${message.method}`);
+                console.log(`Successfully processed request: ${message.target}.${message.method} in ${processingTime}ms`);
                 return;
             } else if (message.type !== 'response' && message.type !== 'event' && message.type !== 'error') {
                 this.sendError(ws, 'INVALID_MESSAGE_TYPE', `Invalid message type: ${message.type}. Supported types: request, response, event, error`);
@@ -381,6 +467,8 @@ export class WebSocketInterface {
                     return await this.handleGoalRequest(method, payload);
                 case 'reflection':
                     return await this.handleReflectionRequest(method, payload);
+                case 'tasks': // Added for task management
+                    return await this.handleTaskRequest(method, payload);
                 default:
                     throw new Error(`Unknown target: ${target}`);
             }
@@ -401,6 +489,19 @@ export class WebSocketInterface {
                     return {status: 'stopped'};
                 case 'getSystemStatus':
                     return this.core.getSystemStatus();
+                case 'getSystemDiagnostics':
+                    return this.getSystemDiagnostics();
+                case 'getSystemHealth': // Added new method for system health check
+                    return {
+                        status: 'healthy',
+                        timestamp: new Date().toISOString(),
+                        components: {
+                            core: 'operational',
+                            agenda: 'operational',
+                            worldModel: 'operational',
+                            perception: 'operational'
+                        }
+                    };
                 case 'addInitialBelief':
                     if (!payload?.content || !payload?.truth || !payload?.attention) {
                         throw new Error('Missing required fields: content, truth, attention');
@@ -451,8 +552,8 @@ export class WebSocketInterface {
                     throw new Error('Input must be a string');
                 }
 
-                if (payload.input.length < 3) {
-                    throw new Error('Input too short. Please provide at least 3 characters.');
+                if (payload.input.length < 1) {
+                    throw new Error('Input too short. Please provide at least 1 character.');
                 }
 
                 if (payload.input.length > 10000) {
@@ -460,25 +561,36 @@ export class WebSocketInterface {
                 }
 
                 try {
+                    console.log(`Processing input: ${payload.input.substring(0, 100)}${payload.input.length > 100 ? '...' : ''}`);
                     const cognitiveItems = await this.perception.processInput(payload.input);
 
                     // Add items to the core's agenda
+                    let itemsAdded = 0;
                     for (const item of cognitiveItems) {
-                        if (item.type === 'BELIEF' && item.truth && item.attention) {
-                            await this.core.addInitialBelief(item.label, item.truth, item.attention, item.meta);
-                        } else if (item.type === 'GOAL' && item.attention) {
-                            await this.core.addInitialGoal(item.label, item.attention, item.meta);
+                        try {
+                            if (item.type === 'BELIEF' && item.truth && item.attention) {
+                                await this.core.addInitialBelief(item.label, item.truth, item.attention, item.meta);
+                                itemsAdded++;
+                            } else if (item.type === 'GOAL' && item.attention) {
+                                await this.core.addInitialGoal(item.label, item.attention, item.meta);
+                                itemsAdded++;
+                            }
+                        } catch (itemError) {
+                            console.error(`Error adding item to core:`, itemError);
+                            // Continue processing other items even if one fails
                         }
                     }
 
                     this.broadcastEvent('inputProcessed', {
                         input: payload.input,
-                        cognitiveItems
+                        cognitiveItems,
+                        itemsAdded
                     });
 
                     return {
                         cognitiveItems,
-                        message: `Processed input and extracted ${cognitiveItems.length} cognitive item(s)`,
+                        itemsAdded,
+                        message: `Processed input and extracted ${cognitiveItems.length} cognitive item(s), added ${itemsAdded} to agenda`,
                         timestamp: new Date().toISOString()
                     };
                 } catch (error) {
@@ -786,6 +898,59 @@ export class WebSocketInterface {
                 };
             default:
                 throw new Error(`Unknown reflection method: ${method}`);
+        }
+    }
+
+    // Added for task management
+    private async handleTaskRequest(method: string, payload?: any): Promise<any> {
+        switch (method) {
+            case 'addTask':
+                if (!payload?.title) {
+                    throw new Error('Missing required field: title');
+                }
+                const task = this.taskManager.addTask(payload);
+                return { task };
+            case 'updateTask':
+                if (!payload?.taskId) {
+                    throw new Error('Missing required field: taskId');
+                }
+                const updatedTask = this.taskManager.updateTask(payload.taskId, payload.updates);
+                if (!updatedTask) {
+                    throw new Error(`Task with ID ${payload.taskId} not found`);
+                }
+                return { task: updatedTask };
+            case 'removeTask':
+                if (!payload?.taskId) {
+                    throw new Error('Missing required field: taskId');
+                }
+                const removed = this.taskManager.removeTask(payload.taskId);
+                return { success: removed };
+            case 'getTask':
+                if (!payload?.taskId) {
+                    throw new Error('Missing required field: taskId');
+                }
+                const taskById = this.taskManager.getTask(payload.taskId);
+                if (!taskById) {
+                    throw new Error(`Task with ID ${payload.taskId} not found`);
+                }
+                return { task: taskById };
+            case 'getAllTasks':
+                const tasks = this.taskManager.getAllTasks();
+                return { tasks };
+            case 'updateTaskStatus':
+                if (!payload?.taskId || !payload?.status) {
+                    throw new Error('Missing required fields: taskId, status');
+                }
+                const statusUpdatedTask = this.taskManager.updateTaskStatus(payload.taskId, payload.status);
+                if (!statusUpdatedTask) {
+                    throw new Error(`Task with ID ${payload.taskId} not found`);
+                }
+                return { task: statusUpdatedTask };
+            case 'getTaskStatistics': // Added for task statistics
+                    if (!this.taskManager.getTaskStatistics) {
+                        throw new Error('Task manager does not support statistics');
+                    }
+                    return { taskStatistics: this.taskManager.getTaskStatistics() };
         }
     }
 

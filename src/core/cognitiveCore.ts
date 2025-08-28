@@ -66,6 +66,11 @@ export class DecentralizedCognitiveCore {
      * Start the cognitive core processing
      */
     async start(): Promise<void> {
+        if (this.isRunning) {
+            console.warn("Cognitive core is already running");
+            return;
+        }
+        
         this.isRunning = true;
         this.startTime = Date.now();
         console.log(`Starting cognitive core with ${this.workerCount} workers`);
@@ -82,9 +87,15 @@ export class DecentralizedCognitiveCore {
      * Stop the cognitive core processing
      */
     stop(): void {
+        if (!this.isRunning) {
+            console.warn("Cognitive core is not running");
+            return;
+        }
+        
         this.isRunning = false;
         if (this.reflectionInterval) {
             clearInterval(this.reflectionInterval);
+            this.reflectionInterval = null;
         }
         console.log("Cognitive core stopped");
         this.printWorkerStatistics();
@@ -126,6 +137,20 @@ export class DecentralizedCognitiveCore {
         
         if (typeof attention.durability !== 'number' || attention.durability < 0 || attention.durability > 1) {
             throw new Error('Attention durability must be a number between 0 and 1');
+        }
+
+        // Additional validation for content length
+        const contentStr = typeof content === 'string' ? content : JSON.stringify(content);
+        if (contentStr.length < 1) {
+            throw new Error('Content cannot be empty');
+        }
+        if (contentStr.length > 10000) {
+            throw new Error('Content is too long (maximum 10,000 characters)');
+        }
+
+        // Validate meta parameter if provided
+        if (meta && typeof meta !== 'object') {
+            throw new Error('Metadata must be an object if provided');
         }
 
         const atom: SemanticAtom = {
@@ -173,6 +198,20 @@ export class DecentralizedCognitiveCore {
             throw new Error('Attention durability must be a number between 0 and 1');
         }
 
+        // Additional validation for content length
+        const contentStr = typeof content === 'string' ? content : JSON.stringify(content);
+        if (contentStr.length < 1) {
+            throw new Error('Content cannot be empty');
+        }
+        if (contentStr.length > 10000) {
+            throw new Error('Content is too long (maximum 10,000 characters)');
+        }
+
+        // Validate meta parameter if provided
+        if (meta && typeof meta !== 'object') {
+            throw new Error('Metadata must be an object if provided');
+        }
+
         const atom: SemanticAtom = {
             id: uuidv4(),
             content: content,
@@ -203,6 +242,20 @@ export class DecentralizedCognitiveCore {
         // Validate input parameters
         if (content === undefined || content === null) {
             throw new Error('Content is required for adding a schema');
+        }
+
+        // Additional validation for content length
+        const contentStr = typeof content === 'string' ? content : JSON.stringify(content);
+        if (contentStr.length < 1) {
+            throw new Error('Content cannot be empty');
+        }
+        if (contentStr.length > 10000) {
+            throw new Error('Content is too long (maximum 10,000 characters)');
+        }
+
+        // Validate meta parameter if provided
+        if (meta && typeof meta !== 'object') {
+            throw new Error('Metadata must be an object if provided');
         }
 
         const atom: SemanticAtom = {
@@ -237,6 +290,14 @@ export class DecentralizedCognitiveCore {
             totalItemsProcessed: number;
             itemsProcessedPerSecond: number;
             averageItemProcessingTime: number;
+            systemLoad: number; // Added system load metric
+        };
+        systemInfo: {
+            workerCount: number;
+            version: string;
+            startTime: number;
+            platform: string; // Added platform information
+            arch: string; // Added architecture information
         }
     } {
         const totalItems = Array.from(this.workerStatistics.values()).reduce((acc, stats) => acc + stats.itemsProcessed, 0);
@@ -251,6 +312,10 @@ export class DecentralizedCognitiveCore {
         const seconds = Math.floor(uptimeSeconds % 60);
         const uptimeStr = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
 
+        // Calculate system load based on active workers and agenda size
+        const activeWorkers = Array.from(this.workerStatistics.values()).filter(stats => stats.itemsProcessed > 0).length;
+        const systemLoad = this.workerCount > 0 ? activeWorkers / this.workerCount : 0;
+
         return {
             agendaSize: this.agenda.size(),
             worldModelStats: (this.worldModel as PersistentWorldModel).getStatistics(),
@@ -259,7 +324,15 @@ export class DecentralizedCognitiveCore {
                 uptime: uptimeStr,
                 totalItemsProcessed: totalItems,
                 itemsProcessedPerSecond: parseFloat(itemsProcessedPerSecond.toFixed(2)),
-                averageItemProcessingTime: parseFloat(averageItemProcessingTime.toFixed(2))
+                averageItemProcessingTime: parseFloat(averageItemProcessingTime.toFixed(2)),
+                systemLoad: parseFloat(systemLoad.toFixed(2))
+            },
+            systemInfo: {
+                workerCount: this.workerCount,
+                version: '1.0.0',
+                startTime: this.startTime,
+                platform: process.platform,
+                arch: process.arch
             }
         };
     }

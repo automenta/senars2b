@@ -32,34 +32,7 @@ function makeRequest(options, postData) {
     });
 }
 
-// Function to send a WebSocket request and wait for a response
-function sendWebSocketRequest(ws, target, method, payload) {
-    return new Promise((resolve, reject) => {
-        const id = Math.random().toString(36).substring(2, 15);
-        const message = {
-            id,
-            type: 'request',
-            target,
-            method,
-            payload
-        };
-
-        // Set up a listener for the response
-        const handleMessage = (data) => {
-            const response = JSON.parse(data);
-            if (response.id === id && response.type === 'response') {
-                ws.off('message', handleMessage);
-                resolve(response.payload);
-            } else if (response.id === id && response.type === 'error') {
-                ws.off('message', handleMessage);
-                reject(new Error(response.error.message));
-            }
-        };
-
-        ws.on('message', handleMessage);
-        ws.send(JSON.stringify(message));
-    });
-}
+// Function to send a WebSocket request and wait for a response\nfunction sendWebSocketRequest(ws, target, method, payload) {\n    return new Promise((resolve, reject) => {\n        const id = Math.random().toString(36).substring(2, 15);\n        const message = {\n            id,\n            type: 'request',\n            target,\n            method,\n            payload\n        };\n\n        // Set up a listener for the response\n        const handleMessage = (data) => {\n            const response = JSON.parse(data);\n            if (response.id === id && response.type === 'response') {\n                ws.off('message', handleMessage);\n                resolve(response.payload);\n            } else if (response.id === id && response.type === 'error') {\n                ws.off('message', handleMessage);\n                reject(new Error(response.error.message));\n            }\n        };\n\n        ws.on('message', handleMessage);\n        ws.send(JSON.stringify(message));\n    });\n}
 
 // WebSocket Demo Functions
 async function websocketDemo() {
@@ -84,8 +57,17 @@ async function websocketDemo() {
         console.error('Error getting system status:', error.message);
     }
 
+    // Get system diagnostics via WebSocket
+    console.log('\n2. Getting system diagnostics via WebSocket...\n');
+    try {
+        const diagnostics = await sendWebSocketRequest(ws, 'core', 'getSystemDiagnostics', {});
+        console.log('System Diagnostics:', JSON.stringify(diagnostics, null, 2));
+    } catch (error) {
+        console.error('Error getting system diagnostics:', error.message);
+    }
+
     // Process input via WebSocket
-    console.log('\n2. Processing input via WebSocket...\n');
+    console.log('\n3. Processing input via WebSocket...\n');
     try {
         const result = await sendWebSocketRequest(ws, 'perception', 'processInput', {
             input: 'My cat seems sick after eating chocolate. What should I do?'
@@ -96,7 +78,7 @@ async function websocketDemo() {
     }
 
     // Add a belief via WebSocket
-    console.log('\n3. Adding a belief via WebSocket...\n');
+    console.log('\n4. Adding a belief via WebSocket...\n');
     try {
         const result = await sendWebSocketRequest(ws, 'core', 'addInitialBelief', {
             content: 'Chocolate is toxic to cats',
@@ -112,89 +94,7 @@ async function websocketDemo() {
     console.log('\nDisconnected from WebSocket interface\n');
 }
 
-// REST API Demo Functions
-async function restApiDemo() {
-    console.log('=== REST API Interface Demo ===\n');
-
-    // Check health
-    console.log('1. Checking server health...\n');
-    try {
-        const options = {
-            hostname: 'localhost',
-            port: 3000,
-            path: '/health',
-            method: 'GET'
-        };
-        const result = await makeRequest(options);
-        console.log('Health Check:', result);
-    } catch (error) {
-        console.error('Error checking health:', error.message);
-    }
-
-    // Get status
-    console.log('\n2. Getting server status...\n');
-    try {
-        const options = {
-            hostname: 'localhost',
-            port: 3000,
-            path: '/api/status',
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json'
-            }
-        };
-        const result = await makeRequest(options);
-        console.log('Server Status:', result);
-    } catch (error) {
-        console.error('Error getting server status:', error.message);
-    }
-
-    // Add a belief
-    console.log('\n3. Adding a belief via REST API...\n');
-    try {
-        const options = {
-            hostname: 'localhost',
-            port: 3000,
-            path: '/api/belief',
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            }
-        };
-        const postData = JSON.stringify({
-            content: 'Cats are curious animals',
-            truth: {frequency: 0.8, confidence: 0.9},
-            attention: {priority: 0.6, durability: 0.5}
-        });
-        const result = await makeRequest(options, postData);
-        console.log('Added Belief:', result);
-    } catch (error) {
-        console.error('Error adding belief:', error.message);
-    }
-
-    // Process input
-    console.log('\n4. Processing input via REST API...\n');
-    try {
-        const options = {
-            hostname: 'localhost',
-            port: 3000,
-            path: '/api/process',
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            }
-        };
-        const postData = JSON.stringify({
-            input: 'How can I keep my cat safe from household hazards?'
-        });
-        const result = await makeRequest(options, postData);
-        console.log('Processed Input:', result);
-    } catch (error) {
-        console.error('Error processing input:', error.message);
-    }
-
-    console.log('\n=== REST API Demo Complete ===\n');
-}
+// REST API Demo Functions\nasync function restApiDemo() {\n    console.log('=== REST API Interface Demo ===\\n');\n\n    // Check health\n    console.log('1. Checking server health...\\n');\n    try {\n        const options = {\n            hostname: 'localhost',\n            port: 3000,\n            path: '/health',\n            method: 'GET'\n        };\n        const result = await makeRequest(options);\n        console.log('Health Check:', result);\n    } catch (error) {\n        console.error('Error checking health:', error.message);\n    }\n\n    // Get status\n    console.log('\\n2. Getting server status...\\n');\n    try {\n        const options = {\n            hostname: 'localhost',\n            port: 3000,\n            path: '/api/status',\n            method: 'GET',\n            headers: {\n                'Content-Type': 'application/json'\n            }\n        };\n        const result = await makeRequest(options);\n        console.log('Server Status:', result);\n    } catch (error) {\n        console.error('Error getting server status:', error.message);\n    }\n\n    // Get diagnostics\n    console.log('\\n3. Getting system diagnostics...\\n');\n    try {\n        const options = {\n            hostname: 'localhost',\n            port: 3000,\n            path: '/api/diagnostics',\n            method: 'GET',\n            headers: {\n                'Content-Type': 'application/json'\n            }\n        };\n        const result = await makeRequest(options);\n        console.log('System Diagnostics:', JSON.stringify(result, null, 2));\n    } catch (error) {\n        console.error('Error getting system diagnostics:', error.message);\n    }\n\n    // Add a belief\n    console.log('\\n4. Adding a belief via REST API...\\n');\n    try {\n        const options = {\n            hostname: 'localhost',\n            port: 3000,\n            path: '/api/belief',\n            method: 'POST',\n            headers: {\n                'Content-Type': 'application/json'\n            }\n        };\n        const postData = JSON.stringify({\n            content: 'Cats are curious animals',\n            truth: {frequency: 0.8, confidence: 0.9},\n            attention: {priority: 0.6, durability: 0.5}\n        });\n        const result = await makeRequest(options, postData);\n        console.log('Added Belief:', result);\n    } catch (error) {\n        console.error('Error adding belief:', error.message);\n    }\n\n    // Process input\n    console.log('\\n5. Processing input via REST API...\\n');\n    try {\n        const options = {\n            hostname: 'localhost',\n            port: 3000,\n            path: '/api/process',\n            method: 'POST',\n            headers: {\n                'Content-Type': 'application/json'\n            }\n        };\n        const postData = JSON.stringify({\n            input: 'How can I keep my cat safe from household hazards?'\n        });\n        const result = await makeRequest(options, postData);\n        console.log('Processed Input:', result);\n    } catch (error) {\n        console.error('Error processing input:', error.message);\n    }\n\n    console.log('\\n=== REST API Demo Complete ===\\n');\n}
 
 // Unified Demo
 async function runUnifiedDemo() {

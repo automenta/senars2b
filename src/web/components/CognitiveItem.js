@@ -96,22 +96,7 @@ class CognitiveItem extends Component {
             metaEl.appendChild(this.createVisualization('Durability', this.item.attention.durability));
         }
 
-        if (this.item.meta) {
-            const metaEntries = Object.entries(this.item.meta);
-            if (metaEntries.length > 0) {
-                const metaTagsContainer = document.createElement('div');
-                metaTagsContainer.style.marginTop = '15px';
-                metaTagsContainer.style.borderTop = '1px solid rgba(255,255,255,0.1)';
-                metaTagsContainer.style.paddingTop = '15px';
-                metaEntries.forEach(([key, value]) => {
-                    const tag = document.createElement('span');
-                    tag.className = 'meta-tag';
-                    tag.textContent = `${key}: ${JSON.stringify(value)}`;
-                    metaTagsContainer.appendChild(tag);
-                });
-                metaEl.appendChild(metaTagsContainer);
-            }
-        }
+        if (this.item.meta) {\n            const metaEntries = Object.entries(this.item.meta);\n            if (metaEntries.length > 0) {\n                const metaTagsContainer = document.createElement('div');\n                metaTagsContainer.style.marginTop = '15px';\n                metaTagsContainer.style.borderTop = '1px solid rgba(255,255,255,0.1)';\n                metaTagsContainer.style.paddingTop = '15px';\n                \n                // Filter out internal metadata\n                const displayMeta = metaEntries.filter(([key]) => \n                    !['type', 'source', 'timestamp', 'trust_score', 'taskId'].includes(key)\n                );\n                \n                // Add task link if this item is related to a task\n                if (this.item.meta.taskId) {\n                    const taskTag = document.createElement('span');\n                    taskTag.className = 'meta-tag';\n                    taskTag.innerHTML = `📋 Related to Task: <a href=\"#\" onclick=\"document.querySelector('.tab[data-tab=\\\"tasks\\\"]').click(); return false;\">View Task</a>`;\n                    metaTagsContainer.appendChild(taskTag);\n                }\n                \n                displayMeta.forEach(([key, value]) => {\n                    const tag = document.createElement('span');\n                    tag.className = 'meta-tag';\n                    tag.textContent = `${key}: ${JSON.stringify(value)}`;\n                    metaTagsContainer.appendChild(tag);\n                });\n                metaEl.appendChild(metaTagsContainer);\n            }\n        }
 
         this.element.appendChild(typeEl);
         this.element.appendChild(contentEl);
