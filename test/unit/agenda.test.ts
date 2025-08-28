@@ -328,4 +328,86 @@ describe('PriorityAgenda', () => {
             expect(noMatch.length).toBe(0);
         });
     });
+
+    describe('Advanced Prioritization and Grouping', () => {
+        it('should throw an error if getTaskStatus is not provided', () => {
+            // Pass null as getTaskStatus and expect constructor to throw
+            expect(() => new PriorityAgenda(null!)).toThrow("A getTaskStatus function must be provided for robust dependency checking.");
+        });
+
+        it('should prioritize tasks based on custom weights', async () => {
+            // Custom weights that heavily favor attention priority over task priority
+            const customWeights = { taskPriority: 0.1, attentionPriority: 0.9, deadlineFactor: 0, completionFactor: 0 };
+            agenda = new PriorityAgenda(getTaskStatus, customWeights);
+
+            const highAttentionTask = createTaskItem({ id: 'high-attention', attention: { priority: 0.9, durability: 0.5 }, task_metadata: { status: 'pending', priority_level: 'low' } });
+            const highPriorityTask = createTaskItem({ id: 'high-priority', attention: { priority: 0.2, durability: 0.5 }, task_metadata: { status: 'pending', priority_level: 'critical' } });
+
+            agenda.push(highAttentionTask);
+            agenda.push(highPriorityTask);
+
+            const popped = await agenda.pop();
+            expect(popped.id).toBe('high-attention');
+        });
+
+        it('should penalize tasks with higher completion percentage', async () => {
+            const newTask = createTaskItem({ id: 'new', attention: { priority: 0.5, durability: 0.5 }, task_metadata: { status: 'pending', priority_level: 'medium', completion_percentage: 0 } });
+            const inProgressTask = createTaskItem({ id: 'inprogress', attention: { priority: 0.5, durability: 0.5 }, task_metadata: { status: 'pending', priority_level: 'medium', completion_percentage: 50 } });
+
+            agenda.push(newTask);
+            agenda.push(inProgressTask);
+
+            const popped = await agenda.pop();
+            // Expect the new task to be popped first due to the negative completionFactor
+            expect(popped.id).toBe('new');
+        });
+
+        it('should update parent task completion percentage when a subtask is completed', () => {
+            const parentTask = createTaskItem({ id: 'parent1', subtasks: ['child1', 'child2'] });
+            const childTask1 = createTaskItem({ id: 'child1', parent_id: 'parent1' });
+            const childTask2 = createTaskItem({ id: 'child2', parent_id: 'parent1' });
+
+            agenda.push(parentTask);
+            agenda.push(childTask1);
+            agenda.push(childTask2);
+
+            // Mark child1 as completed in the external status tracker
+            taskStatuses.set('child1', 'completed');
+            // Mark child2 as still pending
+            taskStatuses.set('child2', 'pending');
+
+            // Update status of child1 within the agenda, which should trigger the parent update
+            agenda.updateTaskStatus('child1', 'completed');
+
+            const updatedParent = agenda.get('parent1');
+            expect(updatedParent?.task_metadata?.completion_percentage).toBe(50);
+
+            // Now complete the second child
+            taskStatuses.set('child2', 'completed');
+            agenda.updateTaskStatus('child2', 'completed');
+
+            const finalParent = agenda.get('parent1');
+            expect(finalParent?.task_metadata?.completion_percentage).toBe(100);
+        });
+
+        it('should retrieve tasks by group ID', () => {
+            const group1Task1 = createTaskItem({ task_metadata: { status: 'pending', priority_level: 'medium', group_id: 'group1' } });
+            const group1Task2 = createTaskItem({ task_metadata: { status: 'pending', priority_level: 'medium', group_id: 'group1' } });
+            const group2Task1 = createTaskItem({ task_metadata: { status: 'pending', priority_level: 'medium', group_id: 'group2' } });
+            const noGroupTask = createTaskItem();
+
+            agenda.push(group1Task1);
+            agenda.push(group1Task2);
+            agenda.push(group2Task1);
+            agenda.push(noGroupTask);
+
+            const group1Tasks = agenda.getTasksByGroup('group1');
+            expect(group1Tasks.length).toBe(2);
+            expect(group1Tasks.map(t => t.id).sort()).toEqual([group1Task1.id, group1Task2.id].sort());
+
+            const group2Tasks = agenda.getTasksByGroup('group2');
+            expect(group2Tasks.length).toBe(1);
+            expect(group2Tasks[0].id).toBe(group2Task1.id);
+        });
+    });
 });

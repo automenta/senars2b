@@ -64,7 +64,34 @@ export interface Agenda {
      * @returns An array of cognitive items that match the filter criteria.
      */
     getTasksBy(filter: { tag?: string; category?: string; status?: TaskMetadata['status'] }): CognitiveItem[];
+
+    /**
+     * Retrieves all tasks belonging to a specific group.
+     * @param groupId The ID of the group to retrieve tasks for.
+     * @returns An array of cognitive items that belong to the specified group.
+     */
+    getTasksByGroup(groupId: string): CognitiveItem[];
 }
+
+/**
+ * @interface PriorityWeighting
+ * @description Defines the weights for different factors in priority calculation.
+ */
+export interface PriorityWeighting {
+    taskPriority: number;
+    deadlineFactor: number;
+    attentionPriority: number;
+    completionFactor: number;
+}
+
+// Default weights for the priority calculation logic.
+const DEFAULT_WEIGHTING: PriorityWeighting = {
+    taskPriority: 0.4,
+    deadlineFactor: 0.5,
+    attentionPriority: 0.1,
+    completionFactor: -0.1, // Negative weight penalizes already started tasks slightly, promoting work on new tasks.
+};
+
 
 /**
  * @class PriorityAgenda
@@ -74,10 +101,8 @@ export interface Agenda {
  * and provides detailed statistics for monitoring system performance.
  */
 export class PriorityAgenda implements Agenda {
-    // Constants for priority calculation
-    private static readonly TASK_PRIORITY_WEIGHT = 0.4;
-    private static readonly DEADLINE_FACTOR_WEIGHT = 0.5;
-    private static readonly ATTENTION_PRIORITY_WEIGHT = 0.1;
+    // --- Priority Calculation Configuration ---
+    private readonly weighting: PriorityWeighting;
     private static readonly DEADLINE_WINDOW_MS = 24 * 60 * 60 * 1000; // 1 day
 
     private items: CognitiveItem[] = [];
@@ -97,21 +122,22 @@ export class PriorityAgenda implements Agenda {
 
     /**
      * Creates an instance of PriorityAgenda.
-     * @param {function(string): TaskMetadata['status'] | null} [getTaskStatus]
+     * @param {function(string): TaskMetadata['status'] | null} getTaskStatus
      * A function to resolve the status of a task by its ID. This is crucial for robust
-     * dependency checking. If not provided, it defaults to checking only within the agenda's
-     * current items, which may not be sufficient for complex, persistent task chains.
+     * dependency checking against a persistent WorldModel.
+     * @param {Partial<PriorityWeighting>} [weighting={}] Optional custom weights for priority calculation.
      */
-    constructor(getTaskStatus?: (taskId: string) => TaskMetadata['status'] | null) {
-        this.getTaskStatus = getTaskStatus || ((taskId: string) => {
-            const task = this.itemMap.get(taskId);
-            return task?.task_metadata?.status || null;
-        });
+    constructor(getTaskStatus: (taskId: string) => TaskMetadata['status'] | null, weighting: Partial<PriorityWeighting> = {}) {
+        if (!getTaskStatus) {
+            throw new Error("A getTaskStatus function must be provided for robust dependency checking.");
+        }
+        this.getTaskStatus = getTaskStatus;
+        this.weighting = { ...DEFAULT_WEIGHTING, ...weighting };
     }
 
     /**
      * Updates the status of a specific task within the agenda.
-     * If the task's new status is 'completed', this may unblock dependent tasks.
+     * If a task is completed, it may unblock dependent tasks and updates its parent's completion percentage.
      * @param {string} taskId The ID of the task to update.
      * @param {TaskMetadata['status']} status The new status for the task.
      * @returns {boolean} True if the task was found and updated, false otherwise.
@@ -123,9 +149,30 @@ export class PriorityAgenda implements Agenda {
             item.task_metadata.status = status;
             item.updated_at = Date.now();
 
-            // If a task is completed, it might unblock other tasks that depend on it.
             if (status === 'completed') {
+                // Potentially unblock dependent tasks
                 this.resolveWaitingPop();
+
+                // Update parent task's completion percentage if applicable
+                if (item.parent_id) {
+                    const parentTask = this.itemMap.get(item.parent_id);
+                    if (parentTask && parentTask.type === 'TASK' && parentTask.task_metadata && parentTask.subtasks) {
+                        const totalSubtasks = parentTask.subtasks.length;
+                        if (totalSubtasks > 0) {
+                            let completedCount = 0;
+                            for (const subtaskId of parentTask.subtasks) {
+                                // Use the injected getTaskStatus for a reliable status check
+                                if (this.getTaskStatus(subtaskId) === 'completed') {
+                                    completedCount++;
+                                }
+                            }
+                            parentTask.task_metadata.completion_percentage = (completedCount / totalSubtasks) * 100;
+                            parentTask.updated_at = Date.now();
+                            // Re-sort because the parent's priority may have changed
+                            this.sortItemsByPriority();
+                        }
+                    }
+                }
             }
 
             return true;
@@ -265,8 +312,7 @@ export class PriorityAgenda implements Agenda {
 
     /**
      * Provides detailed statistics about the agenda's performance.
-     * @returns {{size: number, popRate: number, averageWaitTime: number, maxWaitTime: number, totalPops: number}}
-     * An object containing performance metrics.
+     * @returns An object containing performance metrics.
      */
     getStatistics(): {
         size: number;
@@ -306,33 +352,41 @@ export class PriorityAgenda implements Agenda {
      */
     getTasksBy(filter: { tag?: string; category?: string; status?: TaskMetadata['status'] }): CognitiveItem[] {
         return this.items.filter(item => {
-            if (item.type !== 'TASK' || !item.task_metadata) {
-                return false;
-            }
+            if (item.type !== 'TASK' || !item.task_metadata) return false;
 
-            if (filter.status && item.task_metadata.status !== filter.status) {
-                return false;
-            }
-
-            if (filter.tag && (!item.task_metadata.tags || !item.task_metadata.tags.includes(filter.tag))) {
-                return false;
-            }
-
-            if (filter.category && (!item.task_metadata.categories || !item.task_metadata.categories.includes(filter.category))) {
-                return false;
-            }
+            const metadata = item.task_metadata;
+            if (filter.status && metadata.status !== filter.status) return false;
+            if (filter.tag && (!metadata.tags || !metadata.tags.includes(filter.tag))) return false;
+            if (filter.category && (!metadata.categories || !metadata.categories.includes(filter.category))) return false;
 
             return true;
         });
     }
 
     /**
+     * Retrieves all tasks belonging to a specific group.
+     * @param {string} groupId The ID of the group to retrieve tasks for.
+     * @returns {CognitiveItem[]} An array of tasks that belong to the specified group.
+     */
+    getTasksByGroup(groupId: string): CognitiveItem[] {
+        return this.items.filter(item =>
+            item.type === 'TASK' &&
+            item.task_metadata?.group_id === groupId
+        );
+    }
+
+    /**
      * Calculates the combined priority score for a cognitive item.
-     * This score is a weighted average of the item's intrinsic attention,
-     * its task priority level, and its deadline proximity.
+     * This score is a weighted average of several factors:
+     * 1. Task Priority: The assigned importance ('low', 'medium', 'high', 'critical').
+     * 2. Deadline Factor: Urgency based on proximity to the deadline.
+     * 3. Attention Priority: The item's intrinsic attention value.
+     * 4. Completion Factor: A penalty for partially completed tasks to encourage starting new work.
+     *
+     * Non-task items are prioritized based on their attention value only.
      * @private
      * @param {CognitiveItem} item The item to score.
-     * @returns {number} The calculated priority score.
+     * @returns {number} The calculated priority score, clamped between 0 and 1.
      */
     private getCombinedPriority(item: CognitiveItem): number {
         const attentionPriority = item.attention.priority;
@@ -348,19 +402,33 @@ export class PriorityAgenda implements Agenda {
                 if (timeLeft < 0) {
                     deadlineFactor = 1.0; // Overdue tasks get max factor.
                 } else if (timeLeft < PriorityAgenda.DEADLINE_WINDOW_MS) {
+                    // Urgency increases as the deadline approaches.
                     deadlineFactor = 1.0 - (timeLeft / PriorityAgenda.DEADLINE_WINDOW_MS);
                 }
             }
 
-            return (
-                taskPriority * PriorityAgenda.TASK_PRIORITY_WEIGHT +
-                deadlineFactor * PriorityAgenda.DEADLINE_FACTOR_WEIGHT +
-                attentionPriority * PriorityAgenda.ATTENTION_PRIORITY_WEIGHT
+            // Factor in the completion percentage.
+            let completionFactor = 0;
+            if (item.task_metadata.completion_percentage) {
+                // Normalize to a 0-1 scale.
+                completionFactor = item.task_metadata.completion_percentage / 100;
+            }
+
+            const score = (
+                taskPriority * this.weighting.taskPriority +
+                deadlineFactor * this.weighting.deadlineFactor +
+                attentionPriority * this.weighting.attentionPriority +
+                completionFactor * this.weighting.completionFactor
             );
+
+            // Clamp the score between 0 and 1 to ensure it's a valid priority.
+            return Math.max(0, Math.min(1, score));
         }
 
         return attentionPriority;
     }
+
+
 
     /**
      * Sorts the internal items array by priority in descending order.

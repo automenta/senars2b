@@ -12,7 +12,7 @@ describe('Enhanced Validation and Error Handling', () => {
         let agenda: PriorityAgenda;
 
         beforeEach(() => {
-            agenda = new PriorityAgenda();
+            agenda = new PriorityAgenda(() => null);
         });
 
         it('should throw error when adding null item', () => {
@@ -182,7 +182,7 @@ describe('Enhanced Validation and Error Handling', () => {
 
         beforeEach(() => {
             worldModel = new PersistentWorldModel();
-            agenda = new PriorityAgenda();
+            agenda = new PriorityAgenda(() => null);
             reflectionLoop = new ReflectionLoop(worldModel, agenda);
         });
 

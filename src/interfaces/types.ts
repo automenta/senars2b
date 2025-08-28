@@ -38,6 +38,7 @@ export interface TaskMetadata {
     categories?: string[];
     context?: Record<string, any>;
     completion_percentage?: number; // 0-100
+    group_id?: string; // Identifier for grouping related tasks
 }
 
 export interface CognitiveItem {

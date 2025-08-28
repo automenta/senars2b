@@ -282,6 +282,14 @@ focusing on enhanced applicability, utility, enjoyability, and potential ubiquit
 - **Self-Reflective Operation**: System audits its own performance for continuous improvement
 - **Schema Learning**: Automatic evolution of reasoning patterns through experience for adaptive intelligence
 
+### Enhanced Task Management
+
+The system's goal-directed cognition is supported by a sophisticated task management system with the following enhancements:
+
+- **Automatic Progress Tracking**: When a task is composed of several subtasks, the system automatically calculates and updates the parent task's completion percentage as subtasks are finished. This provides a clear and real-time view of progress on complex goals.
+- **Task Grouping**: Tasks can be assigned to a group, allowing for better organization and the ability to manage and query related tasks together. This is useful for managing complex projects that involve multiple interdependent steps.
+- **Configurable Prioritization**: The agenda's algorithm for prioritizing tasks is highly configurable, allowing developers to fine-tune how factors like deadlines, assigned priority level, and progress influence what the system works on next.
+
 ### User Experience
 
 - **Unified Interface Access**: Single interface for CLI and Web through WebSocket backend for consistent interaction

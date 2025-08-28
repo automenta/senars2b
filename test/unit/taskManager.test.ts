@@ -15,6 +15,7 @@ const mockAgenda: jest.Mocked<Agenda> = {
     get: jest.fn(),
     updateTaskStatus: jest.fn(),
     getTasksBy: jest.fn().mockReturnValue([]),
+    getTasksByGroup: jest.fn().mockReturnValue([]),
 };
 
 const mockWorldModel: jest.Mocked<WorldModel> = {
