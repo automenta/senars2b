@@ -4,6 +4,12 @@ import {WorldModel} from '@/core/worldModel';
 
 // Mock WorldModel for testing
 class MockWorldModel implements WorldModel {
+    update_item(item: CognitiveItem): void {
+        // Mock
+    }
+    remove_item(id: string): boolean {
+        return true;
+    }
     query_atoms_by_meta(key: string, value: any): SemanticAtom[] {
         return [];
     }

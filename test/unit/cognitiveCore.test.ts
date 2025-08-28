@@ -195,56 +195,37 @@ describe('DecentralizedCognitiveCore', () => {
         });
     });
 
-    describe('Task Processing', () => {
-        it('should change a pending task to in_progress', async () => {
+    describe('Task Processing via TaskManager', () => {
+        it('should delegate task processing to the TaskManager', async () => {
+            // Get the internal TaskManager instance from the core
+            const taskManager = (core as any).taskManager;
+            // Spy on the executeTask method
+            const executeTaskSpy = jest.spyOn(taskManager, 'executeTask').mockResolvedValue(undefined);
+
+            // Create a task item
             const task = createTaskItem({
-                task_metadata: { status: 'pending', priority_level: 'high' }
-            });
-            const processItem = (item: CognitiveItem) => (core as any).processItem(item, 0);
-
-            await processItem(task);
-
-            expect(task.task_metadata!.status).toBe('in_progress');
-        });
-
-        it('should change an in_progress task to completed', async () => {
-            const task = createTaskItem({
+                type: 'TASK',
                 task_metadata: { status: 'in_progress', priority_level: 'high' }
             });
 
-            // Mock the completion check to return true
-            (core as any).isTaskCompleted = jest.fn().mockReturnValue(true);
-
+            // Get the internal processItem method to test the core logic
             const processItem = (item: CognitiveItem) => (core as any).processItem(item, 0);
 
+            // Process the task
             await processItem(task);
 
-            expect(task.task_metadata!.status).toBe('completed');
-        });
-
-        it('should decompose a task into subtasks', async () => {
-            const parentTask = createTaskItem({
-                subtasks: ['Subtask 1', 'Subtask 2']
-            });
-
-            const agenda = (core as any).agenda;
-            const agendaPushSpy = jest.spyOn(agenda, 'push');
-
-            const processItem = (item: CognitiveItem) => (core as any).processItem(item, 0);
-
-            await processItem(parentTask);
-
-            // Should have pushed the parent task (updated) and two new subtasks
-            expect(agendaPushSpy).toHaveBeenCalledTimes(2);
-            expect(parentTask.meta).toBeDefined();
-            expect(parentTask.meta!.subtask_ids).toHaveLength(2);
+            // Expect that the TaskManager's executeTask method was called with the task
+            expect(executeTaskSpy).toHaveBeenCalledWith(task);
         });
 
         it('should report task statistics in getSystemStatus', () => {
             const worldModel = (core as any).worldModel;
-            worldModel.add_item(createTaskItem({ task_metadata: { status: 'pending', priority_level: 'medium' } }));
-            worldModel.add_item(createTaskItem({ task_metadata: { status: 'in_progress', priority_level: 'medium' } }));
-            worldModel.add_item(createTaskItem({ task_metadata: { status: 'completed', priority_level: 'medium' } }));
+            // Spy on and mock getAllItems to return our test tasks
+            jest.spyOn(worldModel, 'getAllItems').mockReturnValue([
+                createTaskItem({ task_metadata: { status: 'pending', priority_level: 'medium' } }),
+                createTaskItem({ task_metadata: { status: 'in_progress', priority_level: 'medium' } }),
+                createTaskItem({ task_metadata: { status: 'completed', priority_level: 'medium' } })
+            ]);
 
             const status = core.getSystemStatus();
 

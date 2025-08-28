@@ -15,6 +15,12 @@ export interface Agenda {
  * Items are sorted by a combined priority score, and task dependencies are handled.
  */
 export class PriorityAgenda implements Agenda {
+    // Constants for priority calculation
+    private static readonly TASK_PRIORITY_WEIGHT = 0.4;
+    private static readonly DEADLINE_FACTOR_WEIGHT = 0.5;
+    private static readonly ATTENTION_PRIORITY_WEIGHT = 0.1;
+    private static readonly DEADLINE_WINDOW_MS = 24 * 60 * 60 * 1000; // 1 day
+
     private items: CognitiveItem[] = [];
     private itemMap: Map<string, CognitiveItem> = new Map(); // For O(1) lookups
     private waitingQueue: (() => void)[] = [];
@@ -247,14 +253,16 @@ export class PriorityAgenda implements Agenda {
                 const timeLeft = item.task_metadata.deadline - now;
                 if (timeLeft < 0) {
                     deadlineFactor = 1.0; // Overdue tasks get max factor.
-                } else if (timeLeft < 24 * 60 * 60 * 1000) { // Less than a day
+                } else if (timeLeft < PriorityAgenda.DEADLINE_WINDOW_MS) { // Less than a day
                     // Factor increases as deadline approaches.
-                    deadlineFactor = 1.0 - (timeLeft / (24 * 60 * 60 * 1000));
+                    deadlineFactor = 1.0 - (timeLeft / PriorityAgenda.DEADLINE_WINDOW_MS);
                 }
             }
 
-            // Weighted average: 40% task priority, 50% deadline, 10% attention
-            return (taskPriority * 0.4) + (deadlineFactor * 0.5) + (attentionPriority * 0.1);
+            // Weighted average using named constants
+            return (taskPriority * PriorityAgenda.TASK_PRIORITY_WEIGHT) +
+                   (deadlineFactor * PriorityAgenda.DEADLINE_FACTOR_WEIGHT) +
+                   (attentionPriority * PriorityAgenda.ATTENTION_PRIORITY_WEIGHT);
         }
 
         return attentionPriority;

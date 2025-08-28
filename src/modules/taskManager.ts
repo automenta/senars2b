@@ -25,6 +25,7 @@ export interface TaskManager {
         task_metadata?: Partial<CognitiveItem['task_metadata']>;
     }): CognitiveItem;
     getSubtasks(parentId: string): CognitiveItem[];
+    executeTask(task: CognitiveItem): Promise<void>;
     addEventListener(listener: (event: { type: string; task: CognitiveItem }) => void): void;
     getTaskStatistics(): {
         total: number;
@@ -37,7 +38,6 @@ export interface TaskManager {
 }
 
 export class UnifiedTaskManager implements TaskManager {
-    private tasks: Map<string, CognitiveItem> = new Map();
     private agenda: Agenda;
     private worldModel: WorldModel;
     private eventListeners: ((event: { type: string; task: CognitiveItem }) => void)[] = [];
@@ -45,6 +45,18 @@ export class UnifiedTaskManager implements TaskManager {
     constructor(agenda: Agenda, worldModel: WorldModel) {
         this.agenda = agenda;
         this.worldModel = worldModel;
+        this.loadTasksFromWorldModel();
+    }
+
+    private loadTasksFromWorldModel(): void {
+        const allItems = this.worldModel.getAllItems();
+        const tasks = allItems.filter(isTask);
+        for (const task of tasks) {
+            // If the task is pending or in_progress, it should be on the agenda.
+            if (task.task_metadata?.status === 'pending' || task.task_metadata?.status === 'in_progress') {
+                this.agenda.push(task);
+            }
+        }
     }
 
     addTask(taskData: Omit<CognitiveItem, 'id' | 'atom_id' | 'created_at' | 'updated_at' | 'subtasks' | 'stamp' | 'type'> & { 
@@ -63,92 +75,54 @@ export class UnifiedTaskManager implements TaskManager {
             taskData.meta
         );
 
-        // Add task-specific properties
         if (taskData.task_metadata) {
             task.task_metadata = { ...task.task_metadata, ...taskData.task_metadata };
         }
 
-        this.tasks.set(task.id, task);
+        this.worldModel.add_item(task);
+        this.agenda.push(task);
         this.notifyListeners({ type: 'taskAdded', task });
         return task;
     }
 
     updateTask(id: string, updates: Partial<CognitiveItem>): CognitiveItem | null {
-        const task = this.tasks.get(id);
-        if (!task || !isTask(task)) return null;
+        const task = this.getTask(id);
+        if (!task) return null;
 
-        // Update task properties
         Object.assign(task, updates);
         task.updated_at = Date.now();
 
-        this.tasks.set(id, task);
+        this.worldModel.update_item(task);
         this.notifyListeners({ type: 'taskUpdated', task });
         return task;
     }
 
-    getTaskStatistics(): {
-        total: number;
-        pending: number;
-        inProgress: number;
-        completed: number;
-        failed: number;
-        deferred: number;
-    } {
-        const tasks = Array.from(this.tasks.values()).filter(isTask);
-        return {
-            total: tasks.length,
-            pending: tasks.filter(t => t.task_metadata?.status === 'pending').length,
-            inProgress: tasks.filter(t => t.task_metadata?.status === 'in_progress').length,
-            completed: tasks.filter(t => t.task_metadata?.status === 'completed').length,
-            failed: tasks.filter(t => t.task_metadata?.status === 'failed').length,
-            deferred: tasks.filter(t => t.task_metadata?.status === 'deferred').length
-        };
-    }
-
     removeTask(id: string): boolean {
-        const task = this.tasks.get(id);
-        if (!task || !isTask(task)) return false;
-
-        // Remove from parent's subtasks if it has a parent
-        if (task.parent_id) {
-            const parent = this.tasks.get(task.parent_id);
-            if (parent && isTask(parent) && parent.subtasks) {
-                parent.subtasks = parent.subtasks.filter(subtaskId => subtaskId !== id);
-                this.tasks.set(parent.id, parent);
-            }
+        const removedFromWorldModel = this.worldModel.remove_item(id);
+        if (removedFromWorldModel) {
+            this.agenda.remove(id);
+            // We don't have the task object here to notify listeners, which is a flaw.
+            // A better `remove_item` would return the removed item.
+            // For now, we can't notify.
         }
-
-        // Remove subtasks
-        if (task.subtasks) {
-            for (const subtaskId of task.subtasks) {
-                this.removeTask(subtaskId);
-            }
-        }
-
-        this.tasks.delete(id);
-        this.notifyListeners({ type: 'taskRemoved', task: task });
-        return true;
+        return removedFromWorldModel;
     }
 
     getTask(id: string): CognitiveItem | null {
-        const task = this.tasks.get(id);
-        return (task && isTask(task)) ? task : null;
+        const item = this.worldModel.get_item(id);
+        return item && isTask(item) ? item : null;
     }
 
     getAllTasks(): CognitiveItem[] {
-        return Array.from(this.tasks.values()).filter(isTask);
+        return this.worldModel.getAllItems().filter(isTask);
     }
 
     getTasksByStatus(status: 'pending' | 'in_progress' | 'completed' | 'failed' | 'deferred'): CognitiveItem[] {
-        return Array.from(this.tasks.values())
-            .filter(isTask)
-            .filter(task => task.task_metadata?.status === status);
+        return this.getAllTasks().filter(task => task.task_metadata?.status === status);
     }
 
     getTasksByPriority(priority: 'low' | 'medium' | 'high' | 'critical'): CognitiveItem[] {
-        return Array.from(this.tasks.values())
-            .filter(isTask)
-            .filter(task => task.task_metadata?.priority_level === priority);
+        return this.getAllTasks().filter(task => task.task_metadata?.priority_level === priority);
     }
 
     updateTaskStatus(id: string, status: 'pending' | 'in_progress' | 'completed' | 'failed' | 'deferred'): CognitiveItem | null {
@@ -160,29 +134,50 @@ export class UnifiedTaskManager implements TaskManager {
         }
         task.updated_at = Date.now();
 
-        this.tasks.set(id, task);
+        this.worldModel.update_item(task);
         this.notifyListeners({ type: 'taskStatusChanged', task });
 
-        // If task is completed, mark subtasks as completed if they were in-progress
-        if (status === 'completed' && task.subtasks) {
-            for (const subtaskId of task.subtasks) {
-                const subtask = this.getTask(subtaskId);
-                if (subtask && isTask(subtask) && subtask.task_metadata?.status === 'in_progress') {
-                    this.updateTaskStatus(subtaskId, 'completed');
-                }
-            }
-        }
+        return task;
+    }
 
-        // If task is marked as failed, propagate to subtasks
-        if (status === 'failed' && task.subtasks) {
+    completeTask(id: string): CognitiveItem | null {
+        const task = this.updateTaskStatus(id, 'completed');
+        if (!task) return null;
+
+        this.agenda.remove(id); // Remove from agenda if it was there
+        this.notifyListeners({ type: 'taskCompleted', task });
+
+        // Future: Check for dependent tasks and unblock them.
+        // This requires querying the world model for items that have `id` in their `dependencies` array.
+        // e.g., this.worldModel.query_by_meta('dependencies', id)
+        return task;
+    }
+
+    failTask(id: string, reason?: string): CognitiveItem | null {
+        const task = this.updateTaskStatus(id, 'failed');
+        if (!task) return null;
+
+        this.agenda.remove(id);
+        this.notifyListeners({ type: 'taskFailed', task });
+
+        // Propagate failure to subtasks
+        if (task.subtasks) {
             for (const subtaskId of task.subtasks) {
                 const subtask = this.getTask(subtaskId);
                 if (subtask && isTask(subtask) && subtask.task_metadata?.status !== 'completed') {
-                    this.updateTaskStatus(subtaskId, 'failed');
+                    this.failTask(subtaskId, "Parent task failed");
                 }
             }
         }
+        return task;
+    }
 
+    deferTask(id: string): CognitiveItem | null {
+        const task = this.updateTaskStatus(id, 'deferred');
+        if (!task) return null;
+
+        this.agenda.remove(id);
+        this.notifyListeners({ type: 'taskDeferred', task });
         return task;
     }
 
@@ -208,19 +203,18 @@ export class UnifiedTaskManager implements TaskManager {
             subtaskData.meta
         );
 
-        // Add subtask-specific properties
         if (subtaskData.task_metadata) {
             subtask.task_metadata = { ...subtask.task_metadata, ...subtaskData.task_metadata };
         }
 
-        // Add subtask to parent
         if (!parentTask.subtasks) {
             parentTask.subtasks = [];
         }
         parentTask.subtasks.push(subtask.id);
-        this.tasks.set(parentId, parentTask);
+        this.worldModel.update_item(parentTask);
 
-        this.tasks.set(subtask.id, subtask);
+        this.worldModel.add_item(subtask);
+        this.agenda.push(subtask);
         this.notifyListeners({ type: 'taskAdded', task: subtask });
         return subtask;
     }
@@ -233,7 +227,42 @@ export class UnifiedTaskManager implements TaskManager {
 
         return parentTask.subtasks
             .map(subtaskId => this.getTask(subtaskId))
-            .filter((task): task is CognitiveItem => task !== null && isTask(task));
+            .filter((task): task is CognitiveItem => task !== null);
+    }
+
+    async executeTask(task: CognitiveItem): Promise<void> {
+        if (!isTask(task)) {
+            return;
+        }
+        console.log(`Executing task ${task.id}: ${task.label}`);
+
+        // Simulate doing work
+        await new Promise(resolve => setTimeout(resolve, 100)); // 100ms delay
+
+        // For now, we assume the task is successful.
+        // In a real scenario, this is where the task's work would be done,
+        // and the result would determine if it's completed or failed.
+        this.completeTask(task.id);
+        console.log(`Execution finished for task ${task.id}`);
+    }
+
+    getTaskStatistics(): {
+        total: number;
+        pending: number;
+        inProgress: number;
+        completed: number;
+        failed: number;
+        deferred: number;
+    } {
+        const tasks = this.getAllTasks();
+        return {
+            total: tasks.length,
+            pending: tasks.filter(t => t.task_metadata?.status === 'pending').length,
+            inProgress: tasks.filter(t => t.task_metadata?.status === 'in_progress').length,
+            completed: tasks.filter(t => t.task_metadata?.status === 'completed').length,
+            failed: tasks.filter(t => t.task_metadata?.status === 'failed').length,
+            deferred: tasks.filter(t => t.task_metadata?.status === 'deferred').length
+        };
     }
 
     addEventListener(listener: (event: { type: string; task: CognitiveItem }) => void): void {

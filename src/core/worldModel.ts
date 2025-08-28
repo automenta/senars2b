@@ -14,6 +14,8 @@ export type CognitiveSchema = {
 export interface WorldModel {
     add_atom(atom: SemanticAtom): string;
     add_item(item: CognitiveItem): void;
+    update_item(item: CognitiveItem): void;
+    remove_item(id: string): boolean;
     get_atom(id: string): SemanticAtom | null;
     get_item(id: string): CognitiveItem | null;
     query_by_semantic(embedding: number[], k: number): CognitiveItem[];
@@ -132,6 +134,52 @@ export class PersistentWorldModel implements WorldModel {
 
     get_item(id: string): CognitiveItem | null {
         return this.items.get(id) || null;
+    }
+
+    update_item(item: CognitiveItem): void {
+        if (!this.items.has(item.id)) {
+            // For now, we'll allow updates to also function as an add.
+            // A stricter implementation might throw an error here.
+        }
+        this.items.set(item.id, item);
+
+        // Update relevant indexes
+        this.attentionIndex.set(item.id, item.attention.durability);
+        // Note: a full implementation should also update metaIndex and temporalIndex if relevant fields change.
+    }
+
+    remove_item(id: string): boolean {
+        const item = this.items.get(id);
+        if (!item) {
+            return false;
+        }
+
+        this.items.delete(id);
+
+        // Remove from indexes
+        this.attentionIndex.delete(id);
+
+        const timestamp = Math.floor(item.stamp.timestamp / 1000);
+        const itemsAtTime = this.temporalIndex.get(timestamp);
+        if (itemsAtTime) {
+            const index = itemsAtTime.indexOf(id);
+            if (index > -1) {
+                itemsAtTime.splice(index, 1);
+            }
+        }
+
+        if (item.meta) {
+            for (const [key, value] of Object.entries(item.meta)) {
+                const valueMap = this.metaIndex.get(key);
+                if (valueMap) {
+                    const idSet = valueMap.get(value);
+                    if (idSet) {
+                        idSet.delete(id);
+                    }
+                }
+            }
+        }
+        return true;
     }
 
     query_by_semantic(embedding: number[], k: number): CognitiveItem[] {
