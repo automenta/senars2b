@@ -1,3 +1,18 @@
+@keyframes pulse {
+  0% {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 8px var(--primary-color-translucent);
+  }
+  50% {
+    border-color: var(--primary-color-translucent);
+    box-shadow: 0 0 12px var(--primary-color-translucent);
+  }
+  100% {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 8px var(--primary-color-translucent);
+  }
+}
+
 .container {
   margin-bottom: 1rem;
   transition: all 0.2s ease-in-out;
@@ -23,9 +38,23 @@
   box-shadow: 0 4px 12px rgba(0,0,0,0.1);
 }
 
+.item.selected {
+  border-color: var(--primary-color);
+  box-shadow: 0 0 8px var(--primary-color-translucent);
+}
+
 .item.dimmed {
   opacity: 0.5;
   background: var(--background-color-tertiary);
+}
+
+.item.editing {
+  border-color: var(--primary-color);
+  box-shadow: 0 0 8px var(--primary-color-translucent);
+}
+
+.item.processing {
+  animation: pulse 2s infinite;
 }
 
 .mainInfo {
@@ -33,6 +62,16 @@
   display: flex;
   align-items: center;
   gap: 0.5rem;
+}
+
+.dragHandle {
+  cursor: grab;
+  color: var(--text-color-tertiary);
+  padding: 0 0.25rem;
+}
+
+.dragHandle:hover {
+  color: var(--text-color-secondary);
 }
 
 .expandBtn {
@@ -62,6 +101,7 @@
 .titleAndDescription {
   display: flex;
   flex-direction: column;
+  flex-grow: 1;
 }
 
 .title {
@@ -75,6 +115,26 @@
   font-size: 0.9rem;
   color: var(--text-color-secondary);
   margin: 0.25rem 0 0;
+}
+
+.titleInput, .descriptionInput {
+  background: var(--background-color);
+  border: 1px solid var(--border-color-focus);
+  border-radius: 4px;
+  color: var(--text-color-primary);
+  padding: 0.5rem;
+  width: 100%;
+}
+
+.titleInput {
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.descriptionInput {
+  font-size: 0.9rem;
+  margin-top: 0.25rem;
+  resize: vertical;
 }
 
 .metaInfo {
@@ -104,6 +164,12 @@
   border-top: 1px solid var(--border-color);
   padding-top: 0.75rem;
   margin-top: 0.25rem;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.saveBtn {
+  color: var(--primary-color);
 }
 
 .subTaskContainer {

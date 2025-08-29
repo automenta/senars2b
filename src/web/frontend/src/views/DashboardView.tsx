@@ -4,6 +4,8 @@ import { useWebSocket } from '../hooks/useWebSocket';
 import PerformanceChart from '../components/PerformanceChart';
 import StatsPanel from '../components/StatsPanel';
 import SystemStatusPanel from '../components/SystemStatusPanel';
+import TasksByStatusPieChart from '../components/TasksByStatusPieChart';
+import TasksByPriorityBarChart from '../components/TasksByPriorityBarChart';
 import styles from './DashboardView.module.css';
 
 const DashboardView: React.FC = () => {
@@ -43,6 +45,16 @@ const DashboardView: React.FC = () => {
     <div className={styles.container}>
       <h2>Dashboard</h2>
       <StatsPanel stats={stats} />
+      <div className={styles.chartGrid}>
+        <div className={styles.chartContainer}>
+          <h3>Tasks by Status</h3>
+          <TasksByStatusPieChart />
+        </div>
+        <div className={styles.chartContainer}>
+          <h3>Tasks by Priority</h3>
+          <TasksByPriorityBarChart />
+        </div>
+      </div>
       <div className={styles.chartContainer}>
         <PerformanceChart statsHistory={statsHistory} />
       </div>

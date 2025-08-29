@@ -10,6 +10,12 @@
 
 .taskListItem {
   position: relative;
+  transition: opacity 0.2s ease;
+}
+
+.dragging {
+  opacity: 0.5;
+  background: var(--background-color-tertiary);
 }
 
 /* Horizontal line connecting the vertical line to the task item */

@@ -1,4 +1,4 @@
-import React, { useEffect, useCallback } from 'react';
+import React, { useCallback } from 'react';
 import Sidebar from './components/Sidebar';
 import Header from './components/Header';
 import DashboardView from './views/DashboardView';
@@ -9,24 +9,30 @@ import CliView from './views/CliView';
 import AddTaskModal from './components/AddTaskModal';
 import { useWebSocket } from './hooks/useWebSocket';
 import { useStore } from './store';
-import { Task } from './types';
+import { Task, TaskPriority } from './types';
+import { useHotkeys } from './hooks/useHotkeys';
+import { useNotifier } from './context/NotificationProvider';
 
 function App() {
   const {
     activeView,
     tasks,
-    searchTerm,
-    statusFilter,
     isModalOpen,
     theme,
+    searchInputRef,
     setActiveView,
     setTasks,
     addTask,
-    setSearchTerm,
-    setStatusFilter,
     setIsModalOpen,
     toggleTheme,
   } = useStore();
+
+  const { addNotification } = useNotifier();
+
+  useHotkeys({
+    'n': () => setIsModalOpen(true),
+    '/': () => searchInputRef?.current?.focus(),
+  }, [searchInputRef]);
 
   const handleMessage = useCallback((message: any) => {
     if (message.type === 'TASK_LIST_UPDATE') {
@@ -39,11 +45,16 @@ function App() {
             task.id === tempId ? newTasks.find((t: Task) => t.title === task.title) || task : task
           )
         );
+        addNotification('Task created successfully!', 'success');
       } else {
         setTasks(newTasks);
       }
+    } else if (message.type === 'TASK_UPDATE') {
+      addNotification(`Task "${message.payload.title}" updated.`, 'info');
+    } else if (message.type === 'TASK_DELETED') {
+        addNotification(`Task deleted.`, 'error');
     }
-  }, [setTasks, tasks]);
+  }, [setTasks, tasks, addNotification]);
 
   const { sendMessage } = useWebSocket(handleMessage);
 
@@ -84,16 +95,7 @@ function App() {
       case 'Processing':
         return <ProcessingView />;
       case 'Tasks':
-        return (
-          <TasksView
-            tasks={tasks}
-            sendMessage={sendMessage}
-            searchTerm={searchTerm}
-            setSearchTerm={setSearchTerm}
-            statusFilter={statusFilter}
-            setStatusFilter={setStatusFilter}
-          />
-        );
+        return <TasksView sendMessage={sendMessage} />;
       case 'Configuration':
         return <ConfigurationView />;
       case 'CLI':
@@ -115,7 +117,7 @@ function App() {
         />
         {renderView()}
       </main>
-      <AddTaskModal onAddTask={handleAddTask} />
+      {isModalOpen && <AddTaskModal onAddTask={handleAddTask} />}
     </div>
   );
 }

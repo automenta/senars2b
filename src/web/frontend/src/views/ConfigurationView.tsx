@@ -1,5 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useWebSocket } from '../hooks/useWebSocket';
+import { useStore } from '../store';
+import styles from './ConfigurationView.module.css';
 
 interface AttentionParams {
   priorityWeight: number;
@@ -12,6 +14,7 @@ interface ReflectionParams {
 }
 
 const ConfigurationView: React.FC = () => {
+  const { theme, toggleTheme, notificationsEnabled, toggleNotifications } = useStore();
   const [attentionParams, setAttentionParams] = useState<AttentionParams>({ priorityWeight: 0.7, durabilityWeight: 0.3 });
   const [reflectionParams, setReflectionParams] = useState<ReflectionParams>({ enabled: true, someParameter: 0.5 });
   const [attentionStats, setAttentionStats] = useState<any>(null);
@@ -51,41 +54,61 @@ const ConfigurationView: React.FC = () => {
   };
 
   return (
-    <div>
+    <div className={styles.container}>
       <h2>System Configuration</h2>
-      <p>Fine-tune the parameters of the cognitive engine.</p>
+      <p>Fine-tune the parameters of the cognitive engine and UI.</p>
 
-      <div style={{ border: '1px solid var(--color-card-border)', borderRadius: 'var(--border-radius)', marginBottom: '2rem' }}>
-        <h3 style={{ padding: '1rem', margin: 0, background: 'var(--color-card-background)', borderBottom: '1px solid var(--color-card-border)' }}>Attention Module</h3>
-        <div style={{ padding: '1rem' }}>
-          <div style={{ marginBottom: '1rem' }}>
+      <div className={styles.card}>
+        <h3 className={styles.cardHeader}>UI Settings</h3>
+        <div className={styles.cardBody}>
+          <div className={styles.settingRow}>
+            <label>Theme</label>
+            <div className={styles.themeSwitcher}>
+              <button onClick={toggleTheme} disabled={theme === 'light'}>Light</button>
+              <button onClick={toggleTheme} disabled={theme === 'dark'}>Dark</button>
+            </div>
+          </div>
+          <div className={styles.settingRow}>
+            <label>Enable Notifications</label>
+            <label className={styles.switch}>
+              <input type="checkbox" checked={notificationsEnabled} onChange={toggleNotifications} />
+              <span className={styles.slider}></span>
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <div className={styles.card}>
+        <h3 className={styles.cardHeader}>Attention Module</h3>
+        <div className={styles.cardBody}>
+          <div className={styles.settingRow}>
             <label>Priority Weight: </label>
             <input type="number" name="priorityWeight" value={attentionParams.priorityWeight} onChange={handleAttentionChange} step="0.1" min="0" max="1" />
           </div>
-          <div>
+          <div className={styles.settingRow}>
             <label>Durability Weight: </label>
             <input type="number" name="durabilityWeight" value={attentionParams.durabilityWeight} onChange={handleAttentionChange} step="0.1" min="0" max="1" />
           </div>
-          {attentionStats && <pre style={{marginTop: '1rem', whiteSpace: 'pre-wrap', wordBreak: 'break-all'}}>{JSON.stringify(attentionStats, null, 2)}</pre>}
+          {attentionStats && <pre>{JSON.stringify(attentionStats, null, 2)}</pre>}
         </div>
       </div>
 
-      <div style={{ border: '1px solid var(--color-card-border)', borderRadius: 'var(--border-radius)', marginBottom: '2rem' }}>
-        <h3 style={{ padding: '1rem', margin: 0, background: 'var(--color-card-background)', borderBottom: '1px solid var(--color-card-border)' }}>Reflection Module</h3>
-        <div style={{ padding: '1rem' }}>
-          <div style={{ marginBottom: '1rem' }}>
+      <div className={styles.card}>
+        <h3 className={styles.cardHeader}>Reflection Module</h3>
+        <div className={styles.cardBody}>
+          <div className={styles.settingRow}>
             <label>Enabled: </label>
             <input type="checkbox" name="enabled" checked={reflectionParams.enabled} onChange={handleReflectionChange} />
           </div>
-          <div>
+          <div className={styles.settingRow}>
             <label>Some Parameter: </label>
             <input type="number" name="someParameter" value={reflectionParams.someParameter} onChange={handleReflectionChange} step="0.1" min="0" max="1" />
           </div>
-          {reflectionStats && <pre style={{marginTop: '1rem', whiteSpace: 'pre-wrap', wordBreak: 'break-all'}}>{JSON.stringify(reflectionStats, null, 2)}</pre>}
+          {reflectionStats && <pre>{JSON.stringify(reflectionStats, null, 2)}</pre>}
         </div>
       </div>
 
-      <button onClick={handleSave} style={{ padding: '0.75rem 1.5rem', border: 'none', backgroundColor: 'var(--color-primary)', color: 'white', borderRadius: 'var(--border-radius)', cursor: 'pointer' }}>
+      <button onClick={handleSave} className={styles.saveButton}>
         Save Configuration
       </button>
     </div>
