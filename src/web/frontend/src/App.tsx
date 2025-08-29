@@ -1,51 +1,81 @@
-import React, { useState, useEffect } from 'react';
-import TaskList from './components/TaskList';
-import { Task } from './types';
+import React, { useState, useEffect, useCallback } from 'react';
+import Sidebar from './components/Sidebar';
+import Header from './components/Header';
+import DashboardView from './views/DashboardView';
+import ProcessingView from './views/ProcessingView';
+import TasksView from './views/TasksView';
+import ConfigurationView from './views/ConfigurationView';
+import CliView from './views/CliView';
+import AddTaskModal from './components/AddTaskModal';
+import { Task, TaskPriority, TaskStatistics } from './types';
 import { useWebSocket } from './hooks/useWebSocket';
 
 function App() {
+  const [activeView, setActiveView] = useState('Dashboard');
   const [tasks, setTasks] = useState<Task[]>([]);
-  const [newTaskTitle, setNewTaskTitle] = useState('');
-  const { isConnected, lastMessage, sendMessage } = useWebSocket();
+  const [searchTerm, setSearchTerm] = useState('');
+  const [statusFilter, setStatusFilter] = useState<string>('ALL');
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
-  useEffect(() => {
-    if (lastMessage) {
-      const { type, payload } = lastMessage;
-      if (type === 'TASK_LIST_UPDATE') {
-        setTasks(payload.tasks);
-      }
+  const handleMessage = useCallback((message: any) => {
+    if (message.type === 'TASK_LIST_UPDATE') {
+      setTasks(message.payload.tasks);
     }
-  }, [lastMessage]);
+  }, []);
 
-  const handleAddTask = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (newTaskTitle.trim()) {
-      sendMessage({
-        type: 'ADD_TASK',
-        payload: { title: newTaskTitle.trim(), type: 'REGULAR' }
-      });
-      setNewTaskTitle('');
+  const { sendMessage } = useWebSocket(handleMessage);
+
+  const handleAddTask = (task: { title: string; description?: string; priority: TaskPriority, type: 'REGULAR' | 'AGENT' }) => {
+    sendMessage({
+      type: 'ADD_TASK',
+      payload: {
+        title: task.title,
+        type: task.type,
+        priority_level: task.priority,
+        description: task.description,
+      }
+    });
+    setIsModalOpen(false);
+  };
+
+  const renderView = () => {
+    switch (activeView) {
+      case 'Dashboard':
+        return <DashboardView />;
+      case 'Processing':
+        return <ProcessingView />;
+      case 'Tasks':
+        return (
+          <TasksView
+            tasks={tasks}
+            sendMessage={sendMessage}
+            searchTerm={searchTerm}
+            setSearchTerm={setSearchTerm}
+            statusFilter={statusFilter}
+            setStatusFilter={setStatusFilter}
+          />
+        );
+      case 'Configuration':
+        return <ConfigurationView />;
+      case 'CLI':
+        return <CliView />;
+      default:
+        return <DashboardView />;
     }
   };
 
-  const connectionStatus = isConnected ? 'Connected' : 'Disconnected';
-
   return (
-    <div>
-      <h1>Senars3 Planner</h1>
-      <p>Connection Status: {connectionStatus}</p>
-
-      <form onSubmit={handleAddTask}>
-        <input
-          type="text"
-          value={newTaskTitle}
-          onChange={(e) => setNewTaskTitle(e.target.value)}
-          placeholder="Enter a new task..."
-        />
-        <button type="submit">Add Task</button>
-      </form>
-
-      <TaskList tasks={tasks} sendMessage={sendMessage} />
+    <div className="app-container">
+      <Sidebar activeView={activeView} onSelectView={setActiveView} />
+      <main className="main-content">
+        <Header title={activeView} onAddTask={() => setIsModalOpen(true)} />
+        {renderView()}
+      </main>
+      <AddTaskModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onAddTask={handleAddTask}
+      />
     </div>
   );
 }

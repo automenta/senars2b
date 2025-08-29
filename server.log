@@ -1,0 +1,15 @@
+
+> senars3@1.0.0 start:unified
+> npm run build && node dist/web/unifiedServer.js
+
+
+> senars3@1.0.0 build
+> npm run build:frontend && tsc
+
+
+> senars3@1.0.0 build:frontend
+> vite build
+
+[33mThe CJS build of Vite's Node API is deprecated. See https://vite.dev/guide/troubleshooting.html#vite-cjs-node-api-deprecated for more details.[39m
+vite v5.4.19 building for production...
+transforming...

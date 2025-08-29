@@ -1,50 +1,80 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 
-const WS_URL = `ws://${window.location.host}/ws`;
+const WS_URL = `ws://${window.location.host.replace(':3000', ':8080')}/ws`;
 
-export const useWebSocket = () => {
-  const [isConnecting, setIsConnecting] = useState(true);
-  const [isConnected, setIsConnected] = useState(false);
-  const [lastMessage, setLastMessage] = useState<any>(null);
-  const webSocketRef = useRef<WebSocket | null>(null);
+type MessageListener = (message: any) => void;
 
-  useEffect(() => {
-    const ws = new WebSocket(WS_URL);
-    webSocketRef.current = ws;
+class WebSocketManager {
+  private ws: WebSocket | null = null;
+  private listeners: Set<MessageListener> = new Set();
+  public isConnected = false;
 
-    ws.onopen = () => {
+  constructor() {
+    this.connect();
+  }
+
+  private connect() {
+    this.ws = new WebSocket(WS_URL);
+
+    this.ws.onopen = () => {
       console.log('WebSocket connected');
-      setIsConnecting(false);
-      setIsConnected(true);
+      this.isConnected = true;
+      this.listeners.forEach(listener => listener({ type: 'CONNECTION_STATUS', payload: { isConnected: true } }));
     };
 
-    ws.onmessage = (event) => {
+    this.ws.onmessage = (event) => {
       const message = JSON.parse(event.data);
-      setLastMessage(message);
+      this.listeners.forEach(listener => listener(message));
     };
 
-    ws.onerror = (error) => {
+    this.ws.onerror = (error) => {
       console.error('WebSocket error:', error);
     };
 
-    ws.onclose = () => {
+    this.ws.onclose = () => {
       console.log('WebSocket disconnected');
-      setIsConnecting(false);
-      setIsConnected(false);
+      this.isConnected = false;
+      this.listeners.forEach(listener => listener({ type: 'CONNECTION_STATUS', payload: { isConnected: false } }));
+      // Optional: implement reconnection logic here
     };
+  }
 
-    return () => {
-      ws.close();
-    };
-  }, []);
+  public addListener(listener: MessageListener) {
+    this.listeners.add(listener);
+  }
 
-  const sendMessage = (message: any) => {
-    if (webSocketRef.current && webSocketRef.current.readyState === WebSocket.OPEN) {
-      webSocketRef.current.send(JSON.stringify(message));
+  public removeListener(listener: MessageListener) {
+    this.listeners.delete(listener);
+  }
+
+  public sendMessage(message: any) {
+    if (this.ws && this.ws.readyState === WebSocket.OPEN) {
+      this.ws.send(JSON.stringify(message));
     } else {
       console.error('WebSocket is not connected.');
     }
-  };
+  }
+}
 
-  return { isConnecting, isConnected, lastMessage, sendMessage };
+const webSocketManager = new WebSocketManager();
+
+export const useWebSocket = (messageHandler: (message: any) => void) => {
+  const [isConnected, setIsConnected] = useState(webSocketManager.isConnected);
+
+  const handleMessage = useCallback((message: any) => {
+    if (message.type === 'CONNECTION_STATUS') {
+      setIsConnected(message.payload.isConnected);
+    } else {
+      messageHandler(message);
+    }
+  }, [messageHandler]);
+
+  useEffect(() => {
+    webSocketManager.addListener(handleMessage);
+    return () => {
+      webSocketManager.removeListener(handleMessage);
+    };
+  }, [handleMessage]);
+
+  return { isConnected, sendMessage: webSocketManager.sendMessage.bind(webSocketManager) };
 };
