@@ -1,0 +1,12 @@
+.badge {
+  font-size: 0.75em;
+  padding: 0.25em 0.5em;
+  border-radius: var(--border-radius);
+  color: #fff;
+  text-transform: capitalize;
+}
+
+.low { background-color: #6c757d; }
+.medium { background-color: #0d6efd; }
+.high { background-color: #ffc107; }
+.critical { background-color: #dc3545; }

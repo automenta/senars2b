@@ -1,0 +1,24 @@
+.taskList {
+  position: relative;
+}
+
+.subTaskList {
+  padding-left: 2rem;
+  margin-left: 1.25rem; /* Aligns with the expand button */
+  border-left: 2px solid var(--border-color);
+}
+
+.taskListItem {
+  position: relative;
+}
+
+/* Horizontal line connecting the vertical line to the task item */
+.subTaskList .taskListItem::before {
+  content: '';
+  position: absolute;
+  left: -2rem; /* (padding-left of subTaskList) * -1 */
+  top: 2.25rem; /* Adjust to vertically center with the expand button */
+  width: 1.5rem;
+  height: 2px;
+  background-color: var(--border-color);
+}

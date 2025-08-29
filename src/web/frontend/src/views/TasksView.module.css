@@ -1,0 +1,35 @@
+.filters {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  align-items: center;
+}
+
+.searchInput {
+  flex-grow: 1;
+  padding: 0.75rem;
+  border: 1px solid var(--color-card-border);
+  border-radius: var(--border-radius);
+  background-color: var(--color-background);
+  color: var(--color-foreground);
+}
+
+.statusFilters {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.statusButton {
+  padding: 0.5rem 1rem;
+  border: 1px solid var(--color-card-border);
+  background-color: transparent;
+  color: var(--color-foreground);
+  border-radius: var(--border-radius);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.statusButton.active {
+  background-color: var(--color-primary);
+  color: white;
+}

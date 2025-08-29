@@ -1,24 +1,21 @@
 import React from 'react';
 import TaskList from '../components/TaskList';
-import { Task } from '../types';
+import { useStore } from '../store';
+import styles from './TasksView.module.css';
 
 interface TasksViewProps {
-  tasks: Task[];
   sendMessage: (message: any) => void;
-  searchTerm: string;
-  setSearchTerm: (term: string) => void;
-  statusFilter: string;
-  setStatusFilter: (status: string) => void;
 }
 
-const TasksView: React.FC<TasksViewProps> = ({
-  tasks,
-  sendMessage,
-  searchTerm,
-  setSearchTerm,
-  statusFilter,
-  setStatusFilter,
-}) => {
+const TasksView: React.FC<TasksViewProps> = ({ sendMessage }) => {
+  const {
+    tasks,
+    searchTerm,
+    setSearchTerm,
+    statusFilter,
+    setStatusFilter,
+  } = useStore();
+
   const filteredTasks = tasks
     .filter(task =>
       task.title.toLowerCase().includes(searchTerm.toLowerCase())
@@ -29,28 +26,20 @@ const TasksView: React.FC<TasksViewProps> = ({
 
   return (
     <div>
-      <div className="task-filters" style={{ display: 'flex', gap: '1rem', marginBottom: '2rem', alignItems: 'center' }}>
+      <div className={styles.filters}>
         <input
           type="text"
           placeholder="Search tasks..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          style={{ flexGrow: 1, padding: '0.75rem', border: '1px solid var(--color-card-border)', borderRadius: 'var(--border-radius)' }}
+          className={styles.searchInput}
         />
-        <div className="status-filters" style={{ display: 'flex', gap: '0.5rem' }}>
+        <div className={styles.statusFilters}>
           {['ALL', 'PENDING', 'COMPLETED', 'FAILED'].map(status => (
             <button
               key={status}
               onClick={() => setStatusFilter(status)}
-              style={{
-                padding: '0.5rem 1rem',
-                border: '1px solid var(--color-card-border)',
-                backgroundColor: statusFilter === status ? 'var(--color-primary)' : 'transparent',
-                color: statusFilter === status ? 'white' : 'var(--color-foreground)',
-                borderRadius: 'var(--border-radius)',
-                cursor: 'pointer',
-                transition: 'all 0.2s'
-              }}
+              className={`${styles.statusButton} ${statusFilter === status ? styles.active : ''}`}
             >
               {status.charAt(0) + status.slice(1).toLowerCase()}
             </button>

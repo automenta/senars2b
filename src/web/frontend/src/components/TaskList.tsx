@@ -1,6 +1,8 @@
 import React from 'react';
+import { AnimatePresence } from 'framer-motion';
 import { Task } from '../types';
 import TaskItem from './TaskItem';
+import styles from './TaskList.module.css';
 
 interface TaskListProps {
   tasks: Task[];
@@ -11,24 +13,25 @@ interface TaskListProps {
 const TaskList: React.FC<TaskListProps> = ({ tasks, sendMessage, isSublist = false }) => {
   const taskMap = new Map(tasks.map(t => [t.id, t]));
 
-  // For the main list, we only want to render top-level tasks.
-  // A task is top-level if its parent is not in the current filtered list.
   const tasksToRender = isSublist
     ? tasks
     : tasks.filter(t => !t.parent_id || !taskMap.has(t.parent_id));
 
-  const listClassName = isSublist ? "sub-task-list" : "task-list";
+  const listClassName = `${styles.taskList} ${isSublist ? styles.subTaskList : ''}`;
 
   return (
     <div className={listClassName}>
-      {tasksToRender.map(task => (
-        <TaskItem
-          key={task.id}
-          task={task}
-          allFilteredTasks={tasks} // Pass the whole filtered list for context
-          sendMessage={sendMessage}
-        />
-      ))}
+      <AnimatePresence>
+        {tasksToRender.map(task => (
+          <div key={task.id} className={styles.taskListItem}>
+            <TaskItem
+              task={task}
+              allFilteredTasks={tasks}
+              sendMessage={sendMessage}
+            />
+          </div>
+        ))}
+      </AnimatePresence>
     </div>
   );
 };

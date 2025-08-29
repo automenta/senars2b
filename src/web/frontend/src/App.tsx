@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useEffect, useCallback } from 'react';
 import Sidebar from './components/Sidebar';
 import Header from './components/Header';
 import DashboardView from './views/DashboardView';
@@ -7,25 +7,63 @@ import TasksView from './views/TasksView';
 import ConfigurationView from './views/ConfigurationView';
 import CliView from './views/CliView';
 import AddTaskModal from './components/AddTaskModal';
-import { Task, TaskPriority, TaskStatistics } from './types';
 import { useWebSocket } from './hooks/useWebSocket';
+import { useStore } from './store';
+import { Task } from './types';
 
 function App() {
-  const [activeView, setActiveView] = useState('Dashboard');
-  const [tasks, setTasks] = useState<Task[]>([]);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [statusFilter, setStatusFilter] = useState<string>('ALL');
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const {
+    activeView,
+    tasks,
+    searchTerm,
+    statusFilter,
+    isModalOpen,
+    theme,
+    setActiveView,
+    setTasks,
+    addTask,
+    setSearchTerm,
+    setStatusFilter,
+    setIsModalOpen,
+    toggleTheme,
+  } = useStore();
 
   const handleMessage = useCallback((message: any) => {
     if (message.type === 'TASK_LIST_UPDATE') {
-      setTasks(message.payload.tasks);
+      const newTasks = message.payload.tasks;
+      const tempId = message.payload.tempId;
+
+      if (tempId) {
+        setTasks(
+          tasks.map(task =>
+            task.id === tempId ? newTasks.find((t: Task) => t.title === task.title) || task : task
+          )
+        );
+      } else {
+        setTasks(newTasks);
+      }
     }
-  }, []);
+  }, [setTasks, tasks]);
 
   const { sendMessage } = useWebSocket(handleMessage);
 
   const handleAddTask = (task: { title: string; description?: string; priority: TaskPriority, type: 'REGULAR' | 'AGENT' }) => {
+    const tempId = `temp-${Date.now()}`;
+    const newTask: Task = {
+      id: tempId,
+      title: task.title,
+      description: task.description,
+      priority: task.priority,
+      type: task.type,
+      status: 'PENDING',
+      completion_percentage: 0,
+      parent_id: null,
+      subtasks: [],
+    };
+
+    addTask(newTask);
+    setIsModalOpen(false);
+
     sendMessage({
       type: 'ADD_TASK',
       payload: {
@@ -33,10 +71,11 @@ function App() {
         type: task.type,
         priority_level: task.priority,
         description: task.description,
+        tempId: tempId,
       }
     });
-    setIsModalOpen(false);
   };
+
 
   const renderView = () => {
     switch (activeView) {
@@ -68,14 +107,15 @@ function App() {
     <div className="app-container">
       <Sidebar activeView={activeView} onSelectView={setActiveView} />
       <main className="main-content">
-        <Header title={activeView} onAddTask={() => setIsModalOpen(true)} />
+        <Header
+          title={activeView}
+          onAddTask={() => setIsModalOpen(true)}
+          theme={theme}
+          toggleTheme={toggleTheme}
+        />
         {renderView()}
       </main>
-      <AddTaskModal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        onAddTask={handleAddTask}
-      />
+      <AddTaskModal onAddTask={handleAddTask} />
     </div>
   );
 }

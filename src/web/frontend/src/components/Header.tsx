@@ -1,32 +1,22 @@
 import React from 'react';
 import { FaPlus } from 'react-icons/fa';
+import ThemeSwitcher from './ThemeSwitcher';
+import { useStore } from '../store';
+import styles from './Header.module.css';
 
-interface HeaderProps {
-  title: string;
-  onAddTask: () => void;
-}
+const Header: React.FC = () => {
+  const { activeView, setIsModalOpen, theme, toggleTheme } = useStore();
 
-const Header: React.FC<HeaderProps> = ({ title, onAddTask }) => {
   return (
-    <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem', borderBottom: '1px solid var(--color-card-border)', paddingBottom: '1rem' }}>
-      <h1>{title}</h1>
-      <button
-        onClick={onAddTask}
-        style={{
-            padding: '0.75rem 1.5rem',
-            border: 'none',
-            backgroundColor: 'var(--color-primary)',
-            color: 'white',
-            borderRadius: 'var(--border-radius)',
-            cursor: 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '0.5rem'
-        }}
-      >
-        <FaPlus />
-        Add Task
-      </button>
+    <header className={styles.header}>
+      <h1>{activeView}</h1>
+      <div className={styles.controls}>
+        <ThemeSwitcher theme={theme} toggleTheme={toggleTheme} />
+        <button onClick={() => setIsModalOpen(true)} className={styles.addTaskBtn}>
+          <FaPlus />
+          Add Task
+        </button>
+      </div>
     </header>
   );
 };

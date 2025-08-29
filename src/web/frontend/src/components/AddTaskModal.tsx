@@ -1,66 +1,99 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useStore } from '../store';
 import { TaskPriority } from '../types';
+import { z } from 'zod';
+import styles from './AddTaskModal.module.css';
 
 interface AddTaskModalProps {
-  isOpen: boolean;
-  onClose: () => void;
   onAddTask: (task: { title: string; description?: string; priority: TaskPriority, type: 'REGULAR' | 'AGENT' }) => void;
 }
 
-const AddTaskModal: React.FC<AddTaskModalProps> = ({ isOpen, onClose, onAddTask }) => {
-  const [title, setTitle] = useState('');
-  const [description, setDescription] = useState('');
-  const [priority, setPriority] = useState<TaskPriority>('medium');
-  const [type, setType] = useState<'REGULAR' | 'AGENT'>('REGULAR');
+const taskSchema = z.object({
+  title: z.string().min(1, { message: "Title is required" }),
+  description: z.string().optional(),
+  priority: z.enum(['low', 'medium', 'high', 'critical']),
+  type: z.enum(['REGULAR', 'AGENT']),
+});
+
+type TaskFormData = z.infer<typeof taskSchema>;
+
+const AddTaskModal: React.FC<AddTaskModalProps> = ({ onAddTask }) => {
+  const { isModalOpen, setIsModalOpen } = useStore();
+  const [formData, setFormData] = useState<TaskFormData>({
+    title: '',
+    description: '',
+    priority: 'medium',
+    type: 'REGULAR',
+  });
+  const [errors, setErrors] = useState<z.ZodError['formErrors']['fieldErrors'] | null>(null);
   const [showDetails, setShowDetails] = useState(false);
 
-  if (!isOpen) {
+  useEffect(() => {
+    if (!isModalOpen) {
+      // Reset form when modal closes
+      setFormData({
+        title: '',
+        description: '',
+        priority: 'medium',
+        type: 'REGULAR',
+      });
+      setErrors(null);
+      setShowDetails(false);
+    }
+  }, [isModalOpen]);
+
+  if (!isModalOpen) {
     return null;
   }
 
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (title.trim()) {
-      onAddTask({ title: title.trim(), description, priority, type });
-      onClose(); // Close modal after adding
-      // Reset form
-      setTitle('');
-      setDescription('');
-      setPriority('medium');
-      setType('REGULAR');
-      setShowDetails(false);
+    const result = taskSchema.safeParse(formData);
+    if (result.success) {
+      onAddTask(result.data);
+      setIsModalOpen(false);
+    } else {
+      setErrors(result.error.formErrors.fieldErrors);
     }
   };
 
   return (
-    <div className="modal-overlay" onClick={onClose}>
+    <div className="modal-overlay" onClick={() => setIsModalOpen(false)}>
       <div className="modal-content" onClick={(e) => e.stopPropagation()}>
         <div className="modal-header">
           <h2>Add New Task</h2>
-          <button onClick={onClose} className="modal-close-btn">&times;</button>
+          <button onClick={() => setIsModalOpen(false)} className="modal-close-btn">&times;</button>
         </div>
-        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+        <form onSubmit={handleSubmit} className={styles.form}>
           <input
+            name="title"
             type="text"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
+            value={formData.title}
+            onChange={handleChange}
             placeholder="Task Title"
-            required
-            style={{ padding: '0.5rem', border: '1px solid var(--color-card-border)', borderRadius: 'var(--border-radius)' }}
+            className={styles.input}
           />
+          {errors?.title && <p className={styles.error}>{errors.title[0]}</p>}
 
           {showDetails && (
             <>
               <textarea
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
+                name="description"
+                value={formData.description}
+                onChange={handleChange}
                 placeholder="Description"
-                style={{ padding: '0.5rem', border: '1px solid var(--color-card-border)', borderRadius: 'var(--border-radius)', minHeight: '100px' }}
+                className={styles.textarea}
               />
               <select
-                value={priority}
-                onChange={(e) => setPriority(e.target.value as TaskPriority)}
-                style={{ padding: '0.5rem', border: '1px solid var(--color-card-border)', borderRadius: 'var(--border-radius)' }}
+                name="priority"
+                value={formData.priority}
+                onChange={handleChange}
+                className={styles.select}
               >
                 <option value="low">Low</option>
                 <option value="medium">Medium</option>
@@ -68,9 +101,10 @@ const AddTaskModal: React.FC<AddTaskModalProps> = ({ isOpen, onClose, onAddTask 
                 <option value="critical">Critical</option>
               </select>
               <select
-                value={type}
-                onChange={(e) => setType(e.target.value as 'REGULAR' | 'AGENT')}
-                style={{ padding: '0.5rem', border: '1px solid var(--color-card-border)', borderRadius: 'var(--border-radius)' }}
+                name="type"
+                value={formData.type}
+                onChange={handleChange}
+                className={styles.select}
               >
                 <option value="REGULAR">Regular</option>
                 <option value="AGENT">Agent</option>
@@ -78,25 +112,15 @@ const AddTaskModal: React.FC<AddTaskModalProps> = ({ isOpen, onClose, onAddTask 
             </>
           )}
 
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '1rem' }}>
+          <div className={styles.footer}>
             <button
               type="button"
               onClick={() => setShowDetails(!showDetails)}
-              style={{ background: 'none', border: 'none', color: 'var(--color-primary)', cursor: 'pointer' }}
+              className={styles.detailsBtn}
             >
               {showDetails ? 'Hide Details' : 'Add Details'}
             </button>
-            <button
-              type="submit"
-              style={{
-                padding: '0.5rem 1rem',
-                border: 'none',
-                backgroundColor: 'var(--color-primary)',
-                color: 'white',
-                borderRadius: 'var(--border-radius)',
-                cursor: 'pointer'
-              }}
-            >
+            <button type="submit" className={styles.submitBtn}>
               Create Task
             </button>
           </div>
