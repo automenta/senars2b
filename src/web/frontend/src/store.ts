@@ -1,5 +1,5 @@
-import {create} from 'zustand';
-import {Task} from './types';
+import { create } from 'zustand';
+import { Task, TaskPriority } from './types';
 import React from 'react';
 
 type SortOption = 'priority-desc' | 'priority-asc' | 'date-desc' | 'date-asc' | 'title-asc' | 'title-desc';
@@ -28,6 +28,13 @@ interface AppState {
     setSearchInputRef: (ref: React.RefObject<HTMLInputElement>) => void;
 }
 
+const priorityOrder: Record<TaskPriority, number> = {
+    'critical': 4,
+    'high': 3,
+    'medium': 2,
+    'low': 1,
+};
+
 export const useStore = create<AppState>((set, get) => ({
     activeView: 'Dashboard',
     tasks: [],
@@ -39,19 +46,22 @@ export const useStore = create<AppState>((set, get) => ({
     theme: 'light',
     notificationsEnabled: true,
     searchInputRef: null,
-    setActiveView: (view) => set({activeView: view}),
-    setTasks: (tasks) => set({tasks}),
-    addTask: (task) => set((state) => ({tasks: [...state.tasks, task]})),
-    setSearchTerm: (term) => set({searchTerm: term}),
-    setStatusFilter: (filter) => set({statusFilter: filter}),
-    setTypeFilter: (filter) => set({typeFilter: filter}),
-    setSortOption: (option) => set({sortOption: option}),
-    setIsModalOpen: (isOpen) => set({isModalOpen: isOpen}),
+    setActiveView: (view) => set({ activeView: view }),
+    setTasks: (tasks) => set({ tasks }),
+    addTask: (task) => set((state) => ({ tasks: [...state.tasks, task] })),
+    setSearchTerm: (term) => set({ searchTerm: term }),
+    setStatusFilter: (filter) => set({ statusFilter: filter }),
+    setTypeFilter: (filter) => set({ typeFilter: filter }),
+    setSortOption: (option) => set({ sortOption: option }),
+    setIsModalOpen: (isOpen) => set({ isModalOpen: isOpen }),
     toggleTheme: () => {
         const newTheme = get().theme === 'light' ? 'dark' : 'light';
         document.documentElement.setAttribute('data-theme', newTheme);
-        set({theme: newTheme});
+        set({ theme: newTheme });
     },
-    toggleNotifications: () => set((state) => ({notificationsEnabled: !state.notificationsEnabled})),
-    setSearchInputRef: (ref) => set({searchInputRef: ref}),
+    toggleNotifications: () => set((state) => ({ notificationsEnabled: !state.notificationsEnabled })),
+    setSearchInputRef: (ref) => set({ searchInputRef: ref }),
 }));
+
+// Export the priority order for use in other components
+export { priorityOrder };

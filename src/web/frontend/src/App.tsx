@@ -1,4 +1,4 @@
-import React, {useCallback} from 'react';
+import React, { useCallback, useEffect } from 'react';
 import Sidebar from './components/Sidebar';
 import Header from './components/Header';
 import DashboardView from './views/DashboardView';
@@ -7,11 +7,11 @@ import TasksView from './views/TasksView';
 import ConfigurationView from './views/ConfigurationView';
 import CliView from './views/CliView';
 import AddTaskModal from './components/AddTaskModal';
-import {useWebSocket} from './hooks/useWebSocket';
-import {useStore} from './store';
-import {Task, TaskPriority} from './types';
-import {useHotkeys} from './hooks/useHotkeys';
-import {useNotifier} from './context/NotificationProvider';
+import { useWebSocket } from './hooks/useWebSocket';
+import { useStore } from './store';
+import { Task, TaskPriority } from './types';
+import { useHotkeys } from './hooks/useHotkeys';
+import { useNotifier } from './context/NotificationProvider';
 
 function App() {
     const {
@@ -27,7 +27,7 @@ function App() {
         toggleTheme,
     } = useStore();
 
-    const {addNotification} = useNotifier();
+    const { addNotification } = useNotifier();
 
     useHotkeys({
         'n': () => setIsModalOpen(true),
@@ -53,10 +53,21 @@ function App() {
             addNotification(`Task "${message.payload.title}" updated.`, 'info');
         } else if (message.type === 'TASK_DELETED') {
             addNotification(`Task deleted.`, 'error');
+        } else if (message.type === 'ERROR') {
+            addNotification(`Error: ${message.payload.message}`, 'error');
         }
     }, [setTasks, tasks, addNotification]);
 
-    const {sendMessage} = useWebSocket(handleMessage);
+    const { sendMessage, isConnected } = useWebSocket(handleMessage);
+
+    // Notify user about connection status
+    useEffect(() => {
+        if (isConnected) {
+            addNotification('Connected to server', 'success');
+        } else {
+            addNotification('Disconnected from server', 'error');
+        }
+    }, [isConnected, addNotification]);
 
     const handleAddTask = (task: {
         title: string;
@@ -92,37 +103,37 @@ function App() {
         });
     };
 
-
     const renderView = () => {
         switch (activeView) {
             case 'Dashboard':
-                return <DashboardView/>;
+                return <DashboardView />;
             case 'Processing':
-                return <ProcessingView/>;
+                return <ProcessingView />;
             case 'Tasks':
-                return <TasksView sendMessage={sendMessage}/>;
+                return <TasksView sendMessage={sendMessage} />;
             case 'Configuration':
-                return <ConfigurationView/>;
+                return <ConfigurationView />;
             case 'CLI':
-                return <CliView/>;
+                return <CliView />;
             default:
-                return <DashboardView/>;
+                return <DashboardView />;
         }
     };
 
     return (
         <div className="app-container">
-            <Sidebar activeView={activeView} onSelectView={setActiveView}/>
+            <Sidebar activeView={activeView} onSelectView={setActiveView} />
             <main className="main-content">
                 <Header
                     title={activeView}
                     onAddTask={() => setIsModalOpen(true)}
                     theme={theme}
                     toggleTheme={toggleTheme}
+                    isConnected={isConnected}
                 />
                 {renderView()}
             </main>
-            {isModalOpen && <AddTaskModal onAddTask={handleAddTask}/>}
+            {isModalOpen && <AddTaskModal onAddTask={handleAddTask} />}
         </div>
     );
 }

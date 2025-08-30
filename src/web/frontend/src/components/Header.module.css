@@ -7,6 +7,35 @@
     padding-bottom: 1rem;
 }
 
+.titleContainer {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.connectionIndicator {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.875rem;
+    padding: 0.25rem 0.75rem;
+    border-radius: var(--border-radius);
+}
+
+.connectionIndicator svg {
+    font-size: 0.5rem;
+}
+
+.connected {
+    background-color: rgba(76, 175, 80, 0.2);
+    color: var(--color-success);
+}
+
+.disconnected {
+    background-color: rgba(244, 67, 54, 0.2);
+    color: var(--color-danger);
+}
+
 .controls {
     display: flex;
     align-items: center;
@@ -23,4 +52,8 @@
     display: flex;
     align-items: center;
     gap: 0.5rem;
+}
+
+.addTaskBtn:hover {
+    opacity: 0.9;
 }

@@ -60,14 +60,15 @@
 .mainInfo {
     grid-area: main;
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     gap: 0.5rem;
 }
 
 .dragHandle {
     cursor: grab;
     color: var(--text-color-tertiary);
-    padding: 0 0.25rem;
+    padding: 0.25rem;
+    margin-top: 0.25rem;
 }
 
 .dragHandle:hover {
@@ -82,6 +83,7 @@
     font-size: 1rem;
     color: var(--text-color-secondary);
     transition: color 0.2s;
+    margin-top: 0.25rem;
 }
 
 .expandBtn:not(:disabled):hover {
@@ -96,12 +98,14 @@
 .expandPlaceholder {
     display: inline-block;
     width: calc(1rem + 0.5rem); /* icon size + padding */
+    margin-top: 0.25rem;
 }
 
 .titleAndDescription {
     display: flex;
     flex-direction: column;
     flex-grow: 1;
+    gap: 0.5rem;
 }
 
 .title {
@@ -114,7 +118,13 @@
 .description {
     font-size: 0.9rem;
     color: var(--text-color-secondary);
-    margin: 0.25rem 0 0;
+    margin: 0;
+    line-height: 1.4;
+}
+
+.noDescription {
+    color: var(--text-color-tertiary);
+    font-style: italic;
 }
 
 .titleInput, .descriptionInput {
@@ -124,6 +134,7 @@
     color: var(--text-color-primary);
     padding: 0.5rem;
     width: 100%;
+    font-family: inherit;
 }
 
 .titleInput {
@@ -133,8 +144,53 @@
 
 .descriptionInput {
     font-size: 0.9rem;
-    margin-top: 0.25rem;
     resize: vertical;
+    min-height: 60px;
+}
+
+.editActions {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+}
+
+.button {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    background: var(--background-color);
+    color: var(--text-color-primary);
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: all 0.2s ease;
+}
+
+.button:hover {
+    background: var(--background-color-tertiary);
+    border-color: var(--border-color-focus);
+}
+
+.saveBtn {
+    background: var(--primary-color);
+    color: white;
+    border-color: var(--primary-color);
+}
+
+.saveBtn:hover {
+    background: var(--primary-color-dark);
+    border-color: var(--primary-color-dark);
+}
+
+.cancelBtn {
+    background: var(--background-color-secondary);
+    border-color: var(--border-color);
+}
+
+.cancelBtn:hover {
+    background: var(--background-color-tertiary);
 }
 
 .metaInfo {
@@ -166,9 +222,22 @@
     margin-top: 0.25rem;
     display: flex;
     justify-content: flex-end;
+    gap: 0.5rem;
 }
 
-.saveBtn {
+.button svg {
+    font-size: 0.875rem;
+}
+
+.editBtn {
+    background: none;
+    border: none;
+    color: var(--text-color-secondary);
+    padding: 0.25rem;
+    cursor: pointer;
+}
+
+.editBtn:hover {
     color: var(--primary-color);
 }
 

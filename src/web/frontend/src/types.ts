@@ -25,6 +25,7 @@ export interface Task {
     completion_percentage?: number;
     parent_id?: string;
     subtasks: string[];
+    creation_time?: number;
 }
 
 export interface TaskStatistics {

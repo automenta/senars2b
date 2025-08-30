@@ -1,19 +1,33 @@
 import React from 'react';
-import {FaPlus} from 'react-icons/fa';
+import { FaPlus, FaCircle } from 'react-icons/fa';
 import ThemeSwitcher from './ThemeSwitcher';
-import {useStore} from '../store';
+import { useStore } from '../store';
 import styles from './Header.module.css';
 
-const Header: React.FC = () => {
-    const {activeView, setIsModalOpen, theme, toggleTheme} = useStore();
+interface HeaderProps {
+    title: string;
+    onAddTask: () => void;
+    theme: string;
+    toggleTheme: () => void;
+    isConnected?: boolean;
+}
 
+const Header: React.FC<HeaderProps> = ({ title, onAddTask, theme, toggleTheme, isConnected }) => {
     return (
         <header className={styles.header}>
-            <h1>{activeView}</h1>
+            <div className={styles.titleContainer}>
+                <h1>{title}</h1>
+                {isConnected !== undefined && (
+                    <div className={`${styles.connectionIndicator} ${isConnected ? styles.connected : styles.disconnected}`}>
+                        <FaCircle />
+                        <span>{isConnected ? 'Connected' : 'Disconnected'}</span>
+                    </div>
+                )}
+            </div>
             <div className={styles.controls}>
-                <ThemeSwitcher theme={theme} toggleTheme={toggleTheme}/>
-                <button onClick={() => setIsModalOpen(true)} className={styles.addTaskBtn}>
-                    <FaPlus/>
+                <ThemeSwitcher theme={theme} toggleTheme={toggleTheme} />
+                <button onClick={onAddTask} className={styles.addTaskBtn}>
+                    <FaPlus />
                     Add Task
                 </button>
             </div>
