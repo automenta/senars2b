@@ -1,5 +1,5 @@
-import {AttentionValue, CognitiveItem, SemanticAtom, TruthValue} from '../interfaces/types';
-import {Transducer, TextTransducer, SensorStreamTransducer} from './transducers';
+import {AttentionValue, CognitiveItem, TruthValue} from '../interfaces/types';
+import {SensorStreamTransducer, TextTransducer, Transducer} from './transducers';
 import {CognitiveItemFactory} from './cognitiveItemFactory';
 import {v4 as uuidv4} from 'uuid';
 
@@ -22,7 +22,7 @@ export class PerceptionSubsystem {
         if (data === undefined || data === null) {
             throw new Error('Input data is required');
         }
-        
+
         if (typeof data === 'string') {
             if (data.length < 1) {
                 throw new Error('Input string cannot be empty');
@@ -44,7 +44,7 @@ export class PerceptionSubsystem {
         // Try each transducer
         const allItems = [];
         const errors = [];
-        
+
         for (const transducer of this.transducers) {
             try {
                 const items = await transducer.process(data);

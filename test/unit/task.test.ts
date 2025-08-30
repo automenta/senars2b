@@ -1,6 +1,6 @@
-import { TaskFactory } from '../../src/modules/taskFactory';
-import { TaskValidator } from '../../src/utils/taskValidator';
-import { AttentionValue } from '../../src/interfaces/types';
+import {TaskFactory} from '../../src/modules/taskFactory';
+import {TaskValidator} from '../../src/utils/taskValidator';
+import {AttentionValue} from '../../src/interfaces/types';
 
 describe('TaskFactory', () => {
     const mockAttention: AttentionValue = {
@@ -11,7 +11,7 @@ describe('TaskFactory', () => {
     it('should create a task with basic properties', () => {
         const content = 'Test task';
         const task = TaskFactory.createTask(content, mockAttention);
-        
+
         expect(task).toBeDefined();
         expect(task.type).toBe('TASK');
         expect(task.label).toBe(content);
@@ -25,7 +25,7 @@ describe('TaskFactory', () => {
     it('should create a task with custom priority', () => {
         const content = 'High priority task';
         const task = TaskFactory.createTask(content, mockAttention, 'high');
-        
+
         expect(task.task_metadata?.priority_level).toBe('high');
     });
 
@@ -33,7 +33,7 @@ describe('TaskFactory', () => {
         const parentIds = ['parent1', 'parent2'];
         const content = 'Derived task';
         const task = TaskFactory.createDerivedTask(parentIds, content, mockAttention, 'critical');
-        
+
         expect(task).toBeDefined();
         expect(task.type).toBe('TASK');
         expect(task.label).toBe(content);
@@ -45,7 +45,7 @@ describe('TaskFactory', () => {
         const parentId = 'parent1';
         const content = 'Subtask';
         const task = TaskFactory.createSubtask(parentId, content, mockAttention, 'low');
-        
+
         expect(task).toBeDefined();
         expect(task.type).toBe('TASK');
         expect(task.label).toBe(content);
@@ -61,8 +61,8 @@ describe('TaskValidator', () => {
             atom_id: 'atom1',
             label: 'Valid task',
             content: 'Valid task content',
-            attention: { priority: 0.8, durability: 0.6 },
-            stamp: { timestamp: Date.now(), parent_ids: [], schema_id: 'test' },
+            attention: {priority: 0.8, durability: 0.6},
+            stamp: {timestamp: Date.now(), parent_ids: [], schema_id: 'test'},
             type: 'TASK',
             task_metadata: {
                 status: 'pending',
@@ -75,7 +75,7 @@ describe('TaskValidator', () => {
                 confidence: 0.9,
                 tags: ['tag1'],
                 categories: ['category1'],
-                context: { projectId: 'project1' },
+                context: {projectId: 'project1'},
                 subtasks: []
             },
             created_at: Date.now(),
@@ -89,8 +89,8 @@ describe('TaskValidator', () => {
         const invalidTask: any = {
             id: 'task1',
             // missing atom_id, label, content
-            attention: { priority: 0.8, durability: 0.6 },
-            stamp: { timestamp: Date.now(), parent_ids: [], schema_id: 'test' },
+            attention: {priority: 0.8, durability: 0.6},
+            stamp: {timestamp: Date.now(), parent_ids: [], schema_id: 'test'},
             type: 'TASK',
             task_metadata: {
                 status: 'pending',
@@ -107,8 +107,8 @@ describe('TaskValidator', () => {
             atom_id: 'atom1',
             label: 'Invalid task',
             content: 'Invalid task content',
-            attention: { priority: 0.8, durability: 0.6 },
-            stamp: { timestamp: Date.now(), parent_ids: [], schema_id: 'test' },
+            attention: {priority: 0.8, durability: 0.6},
+            stamp: {timestamp: Date.now(), parent_ids: [], schema_id: 'test'},
             type: 'TASK',
             task_metadata: {
                 status: 'invalid_status',
@@ -125,14 +125,14 @@ describe('TaskValidator', () => {
             atom_id: 'atom1',
             label: 'Task to normalize',
             content: 'Task content',
-            attention: { priority: 0.8, durability: 0.6 },
-            stamp: { timestamp: Date.now(), parent_ids: [], schema_id: 'test' },
+            attention: {priority: 0.8, durability: 0.6},
+            stamp: {timestamp: Date.now(), parent_ids: [], schema_id: 'test'},
             type: 'TASK'
             // missing task_metadata, status, priority_level, etc.
         };
 
         const normalizedTask = TaskValidator.normalizeTask(task);
-        
+
         expect(normalizedTask.task_metadata?.status).toBe('pending');
         expect(normalizedTask.task_metadata?.priority_level).toBe('medium');
         expect(normalizedTask.task_metadata?.subtasks).toEqual([]);

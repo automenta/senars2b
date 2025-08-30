@@ -1,6 +1,6 @@
-import { DecompositionSchema } from '@/modules/decompositionSchema';
-import { WorldModel } from '@/core/worldModel';
-import { createTaskItem, createGoalItem, createBeliefItem, createSemanticAtom } from './testUtils';
+import {DecompositionSchema} from '@/modules/decompositionSchema';
+import {WorldModel} from '@/core/worldModel';
+import {createBeliefItem, createGoalItem, createSemanticAtom, createTaskItem} from './testUtils';
 
 // Mock the WorldModel
 const mockWorldModel: jest.Mocked<WorldModel> = {
@@ -82,9 +82,9 @@ describe('DecompositionSchema', () => {
     });
 
     it('should return an empty array if no relevant knowledge is found', () => {
-        const taskToDecompose = createTaskItem({ label: 'Do something unknown' });
-        const decompositionGoal = createGoalItem({ label: `Decompose: ${taskToDecompose.label}` });
-        const taskAtom = createSemanticAtom({ embedding: [4, 5, 6] });
+        const taskToDecompose = createTaskItem({label: 'Do something unknown'});
+        const decompositionGoal = createGoalItem({label: `Decompose: ${taskToDecompose.label}`});
+        const taskAtom = createSemanticAtom({embedding: [4, 5, 6]});
 
         mockWorldModel.get_atom.mockReturnValue(taskAtom);
         mockWorldModel.query_by_semantic.mockReturnValue([]); // No knowledge found
@@ -95,8 +95,8 @@ describe('DecompositionSchema', () => {
     });
 
     it('should return an empty array if the task has no atom/embedding', () => {
-        const taskToDecompose = createTaskItem({ label: 'A task with no atom' });
-        const decompositionGoal = createGoalItem({ label: `Decompose: ${taskToDecompose.label}` });
+        const taskToDecompose = createTaskItem({label: 'A task with no atom'});
+        const decompositionGoal = createGoalItem({label: `Decompose: ${taskToDecompose.label}`});
 
         mockWorldModel.get_atom.mockReturnValue(null); // No atom found
 

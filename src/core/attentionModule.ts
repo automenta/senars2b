@@ -1,23 +1,18 @@
-import {
-    Agenda
-} from './agenda';
-import {
-    CognitiveSchema,
-    WorldModel
-} from './worldModel';
-import {
-    AttentionValue,
-    CognitiveItem
-} from '../interfaces/types';
+import {Agenda} from './agenda';
+import {CognitiveSchema, WorldModel} from './worldModel';
+import {AttentionValue, CognitiveItem} from '../interfaces/types';
 
 export interface AttentionModule {
     calculate_initial(item: CognitiveItem): AttentionValue;
+
     calculate_derived(
         parents: CognitiveItem[],
         schema: CognitiveSchema,
         source_trust?: number
     ): AttentionValue;
+
     update_on_access(items: CognitiveItem[]): void;
+
     run_decay_cycle(world_model: WorldModel, agenda: Agenda): void;
 }
 

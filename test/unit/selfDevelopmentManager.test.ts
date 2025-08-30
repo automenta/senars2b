@@ -14,7 +14,7 @@ describe('SelfDevelopmentManager', () => {
     beforeEach(() => {
         // Create minimal instances for testing
 
-        core = createCoreWithRealDependencies({ workerCount: 1 });
+        core = createCoreWithRealDependencies({workerCount: 1});
         perception = new PerceptionSubsystem();
 
         // Create the self-development manager

@@ -4,8 +4,13 @@ import {DecentralizedCognitiveCore} from '@/core/cognitiveCore';
 import {PerceptionSubsystem} from '@/modules/perceptionSubsystem';
 import {SchemaLearningModule} from '@/modules/schemaLearningModule';
 import {ReflectionLoop} from '@/core/reflectionLoop';
-import {createCognitiveItem, createSemanticAtom, createAttentionValue, createTruthValue, createCoreWithRealDependencies} from './testUtils';
-import {CognitiveItem, SemanticAtom, AttentionValue, TruthValue} from '@/interfaces/types';
+import {
+    createAttentionValue,
+    createCognitiveItem,
+    createCoreWithRealDependencies,
+    createSemanticAtom,
+    createTruthValue
+} from './testUtils';
 
 describe('Enhanced Validation and Error Handling', () => {
     describe('PriorityAgenda', () => {
@@ -93,7 +98,7 @@ describe('Enhanced Validation and Error Handling', () => {
         let core: DecentralizedCognitiveCore;
 
         beforeEach(() => {
-            core = createCoreWithRealDependencies({ workerCount: 1 }); // 1 worker for testing
+            core = createCoreWithRealDependencies({workerCount: 1}); // 1 worker for testing
         });
 
         it('should throw error when adding belief without content', async () => {

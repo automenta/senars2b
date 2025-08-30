@@ -55,7 +55,7 @@ export class SchemaLearningModule {
         if (!schemaId) {
             throw new Error('Schema ID is required');
         }
-        
+
         if (!Array.isArray(items)) {
             throw new Error('Items must be an array');
         }

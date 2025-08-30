@@ -2,16 +2,13 @@
 
 /**
  * Unified Task System Demo
- * 
+ *
  * This script demonstrates the new consolidated task system that replaces
  * the separate Task and CognitiveItem systems.
  */
 
-import { TaskFactory } from './src/modules/taskFactory';
-import { TaskValidator } from './src/utils/taskValidator';
-import { UnifiedTaskManager } from './src/modules/taskManager';
-import { PriorityAgenda } from './src/core/agenda';
-import { PersistentWorldModel } from './src/core/worldModel';
+import {TaskFactory} from './src/modules/taskFactory';
+import {TaskValidator} from './src/utils/taskValidator';
 
 // Create a simple attention value
 const attention = {
@@ -36,7 +33,7 @@ const customTask = TaskFactory.createTask(
     'Implement user authentication',
     attention,
     'high',
-    { projectId: 'web-app-v2', team: 'backend' }
+    {projectId: 'web-app-v2', team: 'backend'}
 );
 
 // Update the task with additional properties
@@ -50,7 +47,7 @@ if (customTask.task_metadata) {
     customTask.task_metadata.confidence = 0.9;
     customTask.task_metadata.tags = ['security', 'backend'];
     customTask.task_metadata.categories = ['authentication'];
-    customTask.task_metadata.context = { reviewer: 'senior-developer' };
+    customTask.task_metadata.context = {reviewer: 'senior-developer'};
 }
 
 console.log('Created task:', customTask.label);
@@ -68,7 +65,7 @@ const derivedTask = TaskFactory.createDerivedTask(
     'Review authentication implementation',
     attention,
     'medium',
-    { reviewer: 'senior-developer' }
+    {reviewer: 'senior-developer'}
 );
 
 console.log('Created derived task:', derivedTask.label);
@@ -90,8 +87,8 @@ const incompleteTask: any = {
     atom_id: 'atom1',
     label: 'Incomplete task',
     content: 'Incomplete task content',
-    attention: { priority: 0.5, durability: 0.5 },
-    stamp: { timestamp: Date.now(), parent_ids: [], schema_id: 'demo' },
+    attention: {priority: 0.5, durability: 0.5},
+    stamp: {timestamp: Date.now(), parent_ids: [], schema_id: 'demo'},
     type: 'TASK'
     // missing task_metadata, status, priority_level, etc.
 };

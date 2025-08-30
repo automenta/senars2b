@@ -1,7 +1,4 @@
-import {
-    CognitiveItem,
-    SemanticAtom
-} from '../interfaces/types';
+import {CognitiveItem, SemanticAtom} from '../interfaces/types';
 import {v4 as uuidv4} from 'uuid';
 import {BeliefRevisionEngine, SimpleBeliefRevisionEngine} from './beliefRevisionEngine';
 import {CognitiveItemFactory} from '../modules/cognitiveItemFactory';
@@ -13,26 +10,42 @@ export type CognitiveSchema = {
 
 export interface WorldModel {
     add_atom(atom: SemanticAtom): string;
+
     add_item(item: CognitiveItem): void;
+
     update_item(item: CognitiveItem): void;
+
     remove_item(id: string): boolean;
+
     get_atom(id: string): SemanticAtom | null;
+
     get_item(id: string): CognitiveItem | null;
+
     query_by_semantic(embedding: number[], k: number): CognitiveItem[];
+
     query_by_symbolic(pattern: any, k?: number): CognitiveItem[];
+
     query_by_structure(pattern: any, k?: number): CognitiveItem[];
+
     query_by_meta(key: string, value: any): CognitiveItem[];
+
     query_atoms_by_meta(key: string, value: any): SemanticAtom[];
+
     revise_belief(new_item: CognitiveItem): [CognitiveItem | null, CognitiveItem | null];
+
     register_schema_atom(atom: SemanticAtom): CognitiveSchema;
+
     getStatistics(): {
         atomCount: number;
         itemCount: number;
         schemaCount: number;
         averageItemDurability: number;
     };
+
     getItemHistory(itemId: string): CognitiveItem[];
+
     getConfidenceDistribution(): { bins: string[], counts: number[] };
+
     getAllItems(): CognitiveItem[];
 }
 
@@ -58,11 +71,11 @@ export class PersistentWorldModel implements WorldModel {
         if (!atom) {
             throw new Error('Cannot add null or undefined atom to world model');
         }
-        
+
         if (!atom.id) {
             throw new Error('Atom must have an ID');
         }
-        
+
         if (atom.embedding && !Array.isArray(atom.embedding)) {
             throw new Error('Atom embedding must be an array');
         }
@@ -84,19 +97,19 @@ export class PersistentWorldModel implements WorldModel {
         if (!item) {
             throw new Error('Cannot add null or undefined item to world model');
         }
-        
+
         if (!item.id) {
             throw new Error('Item must have an ID');
         }
-        
+
         if (!item.atom_id) {
             throw new Error('Item must have an atom_id');
         }
-        
+
         if (!item.type) {
             throw new Error('Item must have a type');
         }
-        
+
         if (!item.stamp) {
             throw new Error('Item must have a stamp');
         }

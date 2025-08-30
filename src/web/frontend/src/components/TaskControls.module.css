@@ -1,28 +1,39 @@
 .controls {
-  display: flex;
-  gap: 0.5rem;
+    display: flex;
+    gap: 0.5rem;
 }
 
 .button {
-  background: none;
-  border: 1px solid transparent;
-  color: var(--color-secondary);
-  padding: 0.5rem;
-  border-radius: var(--border-radius);
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-size: 1rem;
-  transition: all 0.2s ease-in-out;
+    background: none;
+    border: 1px solid transparent;
+    color: var(--color-secondary);
+    padding: 0.5rem;
+    border-radius: var(--border-radius);
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 1rem;
+    transition: all 0.2s ease-in-out;
 }
 
 .button:hover {
-  background-color: #e9ecef;
-  color: var(--color-foreground);
+    background-color: #e9ecef;
+    color: var(--color-foreground);
 }
 
-.completeBtn:hover { color: var(--color-success); }
-.pauseBtn:hover { color: var(--color-warning); }
-.resumeBtn:hover { color: var(--color-info); }
-.stopBtn:hover { color: var(--color-danger); }
+.completeBtn:hover {
+    color: var(--color-success);
+}
+
+.pauseBtn:hover {
+    color: var(--color-warning);
+}
+
+.resumeBtn:hover {
+    color: var(--color-info);
+}
+
+.stopBtn:hover {
+    color: var(--color-danger);
+}

@@ -1,6 +1,6 @@
-import { ActionSubsystem } from '@/actions/actionSubsystem';
-import { TaskManager } from '@/modules/taskManager';
-import { createGoalItem, createTaskItem } from './testUtils';
+import {ActionSubsystem} from '@/actions/actionSubsystem';
+import {TaskManager} from '@/modules/taskManager';
+import {createGoalItem} from './testUtils';
 
 // Create a mock TaskManager
 const mockTaskManager: jest.Mocked<TaskManager> = {
@@ -44,7 +44,7 @@ describe('ActionSubsystem', () => {
         it('should execute an atomic task goal using AtomicTaskExecutor', async () => {
             const goal = createGoalItem({
                 label: 'Execute atomic task: My Task',
-                meta: { isAtomicExecution: true, taskId: 'task123' }
+                meta: {isAtomicExecution: true, taskId: 'task123'}
             });
 
             const result = await actionSubsystem.executeGoal(goal);
@@ -55,7 +55,7 @@ describe('ActionSubsystem', () => {
         });
 
         it('should return a failure belief if no executor is found', async () => {
-            const goal = createGoalItem({ label: 'An unhandled goal' });
+            const goal = createGoalItem({label: 'An unhandled goal'});
             const result = await actionSubsystem.executeGoal(goal);
             expect(result).not.toBeNull();
             expect(result?.label).toContain('No executor found for goal');
@@ -72,7 +72,7 @@ describe('ActionSubsystem', () => {
         });
 
         it('should update statistics after a successful execution', async () => {
-            const goal = createGoalItem({ label: 'search for something' });
+            const goal = createGoalItem({label: 'search for something'});
             await actionSubsystem.executeGoal(goal);
             const stats = actionSubsystem.getStatistics();
 

@@ -1,11 +1,14 @@
-import { CognitiveItem, TaskMetadata } from '../interfaces/types';
-import { WorldModel } from '../core/worldModel';
-import { TaskManager } from './taskManager';
-import { CognitiveItemFactory } from './cognitiveItemFactory';
-import { v4 as uuidv4 } from 'uuid';
+import {CognitiveItem, TaskMetadata} from '../interfaces/types';
+import {WorldModel} from '../core/worldModel';
+import {TaskManager} from './taskManager';
+import {CognitiveItemFactory} from './cognitiveItemFactory';
+import {v4 as uuidv4} from 'uuid';
 
 // A type guard to ensure we are dealing with a task.
-function isTask(item: CognitiveItem): item is CognitiveItem & { type: 'TASK'; task_metadata: NonNullable<CognitiveItem['task_metadata']> } {
+function isTask(item: CognitiveItem): item is CognitiveItem & {
+    type: 'TASK';
+    task_metadata: NonNullable<CognitiveItem['task_metadata']>
+} {
     return item.type === 'TASK' && item.task_metadata != null;
 }
 
@@ -60,7 +63,7 @@ export class TaskOrchestrator {
                     // Create a goal to trigger the new DecompositionSchema.
                     const decompositionGoal = CognitiveItemFactory.createGoal(
                         uuidv4(), // placeholder atomId
-                        { ...updatedTask.attention, priority: 0.95 } // Decomposition is high priority
+                        {...updatedTask.attention, priority: 0.95} // Decomposition is high priority
                     );
                     decompositionGoal.label = `Decompose: ${updatedTask.label}`;
                     decompositionGoal.meta = {
@@ -90,7 +93,7 @@ export class TaskOrchestrator {
                     updatedTask.attention
                 );
                 goal.label = `Execute atomic task: ${updatedTask.label}`;
-                goal.meta = { taskId: updatedTask.id, isAtomicExecution: true };
+                goal.meta = {taskId: updatedTask.id, isAtomicExecution: true};
                 newItems.push(goal);
                 // Task remains in this state until an external actor (ActionSubsystem) marks it completed.
                 break;
@@ -107,7 +110,7 @@ export class TaskOrchestrator {
             updatedTask.updated_at = Date.now();
         }
 
-        return { updatedTask, newItems };
+        return {updatedTask, newItems};
     }
 
     private shouldDecompose(task: CognitiveItem & { task_metadata: TaskMetadata }): boolean {

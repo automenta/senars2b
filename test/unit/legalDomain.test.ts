@@ -1,8 +1,11 @@
-import {AttentionValue, CognitiveItem, SemanticAtom, TruthValue} from '@/interfaces/types';
-import {CognitiveSchema, WorldModel} from '@/core/worldModel';
 import {DecentralizedCognitiveCore} from '@/core/cognitiveCore';
 
-import {createCognitiveItem, createSemanticAtom, createAttentionValue, createTruthValue, createCoreWithRealDependencies, createCognitiveMetadata} from './testUtils';
+import {
+    createAttentionValue,
+    createCognitiveMetadata,
+    createCoreWithRealDependencies,
+    createTruthValue
+} from './testUtils';
 import {embeddingService} from '@/services/embeddingService';
 
 jest.mock('@/services/embeddingService');
@@ -13,7 +16,7 @@ describe('Legal Domain Tests', () => {
 
     beforeEach(() => {
 
-        core = createCoreWithRealDependencies({ workerCount: 2 });
+        core = createCoreWithRealDependencies({workerCount: 2});
         mockEmbeddingService.generateEmbedding.mockResolvedValue(Array(384).fill(0.5));
     });
 

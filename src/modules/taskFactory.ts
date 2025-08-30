@@ -1,9 +1,9 @@
-import { CognitiveItem, AttentionValue } from '../interfaces/types';
-import { CognitiveItemFactory } from './cognitiveItemFactory';
+import {AttentionValue, CognitiveItem} from '../interfaces/types';
+import {CognitiveItemFactory} from './cognitiveItemFactory';
 
 /**
  * TaskFactory - Factory for creating task cognitive items
- * 
+ *
  * This factory creates tasks as specialized cognitive items, maintaining
  * compatibility with the unified cognitive architecture while providing
  * task-specific functionality.
@@ -29,7 +29,7 @@ export class TaskFactory {
             ...metadata
         });
     }
-    
+
     /**
      * Create a derived task cognitive item
      * @param parentIds The IDs of the parent tasks
@@ -52,14 +52,14 @@ export class TaskFactory {
             dependencies: parentIds,
             ...metadata
         });
-        
+
         // Update the stamp to include parent IDs
         task.stamp.parent_ids = parentIds;
         task.stamp.schema_id = 'task-factory';
-        
+
         return task;
     }
-    
+
     /**
      * Create a subtask cognitive item
      * @param parentId The ID of the parent task
@@ -81,14 +81,14 @@ export class TaskFactory {
             priority_level,
             ...metadata
         });
-        
+
         // Set parent relationship
         if (task.task_metadata) {
             task.task_metadata.parent_id = parentId;
         }
         task.stamp.parent_ids = [parentId];
         task.stamp.schema_id = 'task-factory';
-        
+
         return task;
     }
 }

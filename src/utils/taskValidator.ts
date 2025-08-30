@@ -1,4 +1,4 @@
-import { CognitiveItem, TaskStatus, TaskMetadata } from '../interfaces/types';
+import {CognitiveItem, TaskMetadata, TaskStatus} from '../interfaces/types';
 
 /**
  * A type guard to check if a CognitiveItem is a well-formed Task.

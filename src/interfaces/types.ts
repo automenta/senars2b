@@ -25,7 +25,15 @@ export interface DerivationStamp {
 }
 
 // Task-specific metadata that extends CognitiveItem
-export type TaskStatus = 'pending' | 'awaiting_dependencies' | 'decomposing' | 'awaiting_subtasks' | 'ready_for_execution' | 'completed' | 'failed' | 'deferred';
+export type TaskStatus =
+    'pending'
+    | 'awaiting_dependencies'
+    | 'decomposing'
+    | 'awaiting_subtasks'
+    | 'ready_for_execution'
+    | 'completed'
+    | 'failed'
+    | 'deferred';
 
 export interface TaskMetadata {
     status: TaskStatus;
@@ -58,10 +66,10 @@ export interface CognitiveItem {
     goal_status?: "active" | "blocked" | "achieved" | "failed";
     stamp: DerivationStamp;    // Derivation stamp (added)
     payload?: Record<string, any>; // Payload for events/actions (added)
-    
+
     // Task-specific properties (only used when type is 'TASK')
     task_metadata?: TaskMetadata;
-    
+
     // Task timestamps (only used when type is 'TASK')
     created_at?: number;       // Creation timestamp
     updated_at?: number;       // Last update timestamp

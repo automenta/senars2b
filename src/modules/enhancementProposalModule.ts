@@ -295,7 +295,7 @@ export class EnhancementProposalModule {
             item.label = proposal.title;
 
             // Add metadata
-            item.meta = { ...item.meta, proposal: proposal };
+            item.meta = {...item.meta, proposal: proposal};
 
             items.push(item);
         }

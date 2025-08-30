@@ -1,10 +1,12 @@
 # Community Simulator User Guide
 
-The Community Simulator is a powerful tool for demonstrating collaborative problem-solving with multiple cognitive agents. This guide will help you understand how to use the simulator effectively.
+The Community Simulator is a powerful tool for demonstrating collaborative problem-solving with multiple cognitive
+agents. This guide will help you understand how to use the simulator effectively.
 
 ## Overview
 
 The Community Simulator allows you to:
+
 - Deploy multiple cognitive agents with different roles and expertise
 - Select from a variety of educational problems across different domains
 - Simulate collaborative problem-solving sessions
@@ -14,17 +16,18 @@ The Community Simulator allows you to:
 
 1. Navigate to the "Community" view in the unified interface
 2. Select a problem from the dropdown menu:
-   - Medical Diagnosis Challenge
-   - Environmental Impact Assessment
-   - Strategic Business Decision
-   - Cybersecurity Threat Analysis
-   - Scientific Hypothesis Testing
+    - Medical Diagnosis Challenge
+    - Environmental Impact Assessment
+    - Strategic Business Decision
+    - Cybersecurity Threat Analysis
+    - Scientific Hypothesis Testing
 3. Deploy agent participants by entering names and clicking "Add Participant"
 4. Click "Start Simulation" to begin the collaborative session
 
 ## Agent Deployment
 
 Each agent you deploy has:
+
 - A unique name
 - A randomly assigned role (e.g., Medical Doctor, Environmental Scientist)
 - Specific expertise in a domain area
@@ -42,6 +45,7 @@ Agents can be removed at any time during the simulation.
 ## Educational Value
 
 The Community Simulator demonstrates:
+
 - Peer-to-peer collaboration between cognitive agents
 - How different expertise areas can contribute to problem-solving
 - The integration of the cognitive system in collaborative contexts
@@ -50,6 +54,7 @@ The Community Simulator demonstrates:
 ## Problem Domains
 
 The simulator includes problems from:
+
 - Healthcare and Medicine
 - Environmental Science
 - Business Strategy

@@ -2,13 +2,13 @@
 
 /**
  * Task Factory Demo
- * 
+ *
  * This script demonstrates the new task factory functionality implemented in Phase 1.
  * It shows how to create tasks with the TaskFactory and validate them with TaskValidator.
  */
 
-import { TaskFactory } from './src/modules/taskFactory';
-import { TaskValidator } from './src/utils/taskValidator';
+import {TaskFactory} from './src/modules/taskFactory';
+import {TaskValidator} from './src/utils/taskValidator';
 
 // Create a simple attention value
 const attention = {
@@ -58,7 +58,7 @@ const derivedTask = TaskFactory.createDerivedTask(
         priority: 'medium',
         dependencies: [taskWithMetadata.id],
         categories: ['code-review'],
-        context: { reviewer: 'senior-developer' }
+        context: {reviewer: 'senior-developer'}
     }
 );
 
@@ -77,7 +77,7 @@ console.log('');
 
 // 5. Normalize a task without metadata
 console.log('5. Normalizing a task without metadata:');
-const normalizedTask = TaskValidator.normalizeTask({ ...basicTask });
+const normalizedTask = TaskValidator.normalizeTask({...basicTask});
 console.log('Normalized task has metadata:', !!normalizedTask.task_metadata);
 console.log('Normalized task status:', normalizedTask.task_metadata?.status);
 console.log('Normalized task priority:', normalizedTask.task_metadata?.priority);

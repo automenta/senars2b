@@ -6,17 +6,17 @@ export const MAX_CONTENT_LENGTH = 10000; // Maximum character length for content
 
 // Task Manager Constants
 export const TASK_PRIORITY_LEVELS = {
-  LOW: 'low',
-  MEDIUM: 'medium',
-  HIGH: 'high',
-  CRITICAL: 'critical',
+    LOW: 'low',
+    MEDIUM: 'medium',
+    HIGH: 'high',
+    CRITICAL: 'critical',
 } as const;
 
 export const TASK_PRIORITY_VALUES = {
-  [TASK_PRIORITY_LEVELS.LOW]: 0.25,
-  [TASK_PRIORITY_LEVELS.MEDIUM]: 0.5,
-  [TASK_PRIORITY_LEVELS.HIGH]: 0.75,
-  [TASK_PRIORITY_LEVELS.CRITICAL]: 1.0,
+    [TASK_PRIORITY_LEVELS.LOW]: 0.25,
+    [TASK_PRIORITY_LEVELS.MEDIUM]: 0.5,
+    [TASK_PRIORITY_LEVELS.HIGH]: 0.75,
+    [TASK_PRIORITY_LEVELS.CRITICAL]: 1.0,
 } as const;
 
 export const DEFAULT_TASK_DURABILITY = 0.5;

@@ -1,8 +1,7 @@
-import {PersistentWorldModel} from '@/core/worldModel';
+import {PersistentWorldModel, WorldModel} from '@/core/worldModel';
 import {HistoryAnalysisSchema} from '@/modules/systemSchemas';
 import {CognitiveItemFactory} from '@/modules/cognitiveItemFactory';
-import {CognitiveItem, TruthValue, SemanticAtom} from '@/interfaces/types';
-import {WorldModel} from '@/core/worldModel';
+import {CognitiveItem, SemanticAtom, TruthValue} from '@/interfaces/types';
 import {v4 as uuidv4} from 'uuid';
 
 describe('HistoryAnalysisSchema', () => {

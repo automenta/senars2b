@@ -1,32 +1,31 @@
 import {WebSocketInterface} from '../web/webSocketInterface';
-import { v4 as uuidv4 } from 'uuid';
 
 async function testCommunitySimulatorIntegration() {
     console.log('Testing Community Simulator Integration with WebSocket Interface...');
-    
+
     // Create WebSocket interface
     const wsInterface = new WebSocketInterface(8082, 2);
-    
+
     // Test server stats
     const stats = wsInterface.getServerStats();
     console.log('Server stats:', stats);
-    
+
     // Test system diagnostics
     try {
         const diagnostics = wsInterface.getSystemDiagnostics();
         console.log('System diagnostics retrieved successfully');
-        
+
         // Check that diagnostics contain expected properties
         if (diagnostics.server && diagnostics.system && diagnostics.performance) {
             console.log('✓ System diagnostics structure test passed');
         } else {
             console.error('✗ System diagnostics structure test failed');
         }
-        
+
     } catch (error) {
         console.error('✗ System diagnostics test failed:', error);
     }
-    
+
     // Test task management through WebSocket interface by sending messages
     try {
         // Simulate sending a task-related message
@@ -42,9 +41,9 @@ async function testCommunitySimulatorIntegration() {
                 priority_level: "high"
             }
         };
-        
+
         console.log('✓ Task creation data structure validated');
-        
+
         // Test that the tasks component methods are defined
         const componentMethods = {
             tasks: [
@@ -57,13 +56,13 @@ async function testCommunitySimulatorIntegration() {
                 'getTaskStatistics'
             ]
         };
-        
+
         console.log('✓ Task component methods structure validated');
-        
+
     } catch (error) {
         console.error('✗ Task management test failed:', error);
     }
-    
+
     // Close the interface
     wsInterface.close();
     console.log('Community Simulator Integration test completed successfully!');
@@ -74,4 +73,4 @@ if (require.main === module) {
     testCommunitySimulatorIntegration().catch(console.error);
 }
 
-export { testCommunitySimulatorIntegration };
+export {testCommunitySimulatorIntegration};

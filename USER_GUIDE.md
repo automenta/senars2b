@@ -107,6 +107,7 @@ The Task Management tab allows you to create, track, and manage tasks that the c
 5. **Automated Execution**: Tasks are automatically converted to cognitive goals and processed by the system
 
 Tasks can be in one of four states:
+
 - **Pending**: Waiting to be processed
 - **In Progress**: Currently being processed by the cognitive system
 - **Completed**: Successfully processed
@@ -431,7 +432,8 @@ engine. Tasks can be created, updated, and tracked through both the web interfac
 
 Tasks can be created through the web interface or programmatically:
 
-1. **Web Interface**: Use the "Task Management" tab to add new tasks with titles, descriptions, priorities, and due dates
+1. **Web Interface**: Use the "Task Management" tab to add new tasks with titles, descriptions, priorities, and due
+   dates
 2. **WebSocket API**: Send a request to the `tasks.addTask` method with task details
 3. **REST API**: POST to the `/api/tasks` endpoint (when implemented)
 

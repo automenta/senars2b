@@ -1,4 +1,4 @@
-import {AttentionValue, CognitiveItem, DerivationStamp, SemanticAtom, TruthValue, TaskMetadata} from '../interfaces/types';
+import {AttentionValue, CognitiveItem, DerivationStamp, TaskMetadata, TruthValue} from '../interfaces/types';
 import {v4 as uuidv4} from 'uuid';
 
 /**
@@ -107,7 +107,7 @@ export class CognitiveItemFactory {
             priority_level: 'medium',
             subtasks: []
         };
-        
+
         return {
             id: uuidv4(),
             atom_id: atomId || uuidv4(), // Use provided atomId or create a new one
@@ -115,7 +115,7 @@ export class CognitiveItemFactory {
             label: content,
             content: content,
             attention,
-            task_metadata: { ...defaultTaskMetadata, ...taskMetadata },
+            task_metadata: {...defaultTaskMetadata, ...taskMetadata},
             created_at: Date.now(),
             updated_at: Date.now(),
             stamp: {
@@ -166,7 +166,7 @@ export class CognitiveItemFactory {
                 item.goal_parent_id = goalParentId;
             }
         }
-        
+
         if (type === 'TASK') {
             item.content = label;
             item.task_metadata = {

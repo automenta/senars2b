@@ -1,8 +1,6 @@
-import {CognitiveItem, SemanticAtom} from '@/interfaces/types';
+import {CognitiveItem} from '@/interfaces/types';
 import {DecentralizedCognitiveCore} from '@/core/cognitiveCore';
-import {WorldModel} from '@/core/worldModel';
-import {createAttentionValue, createTruthValue, createTaskItem, createCoreWithRealDependencies} from './testUtils';
-import {v4 as uuidv4} from 'uuid';
+import {createAttentionValue, createCoreWithRealDependencies, createTaskItem, createTruthValue} from './testUtils';
 import {embeddingService} from '@/services/embeddingService';
 
 jest.mock('@/services/embeddingService');
@@ -12,7 +10,7 @@ describe('DecentralizedCognitiveCore', () => {
     const mockEmbeddingService = embeddingService as jest.Mocked<typeof embeddingService>;
 
     beforeEach(() => {
-        core = createCoreWithRealDependencies({ workerCount: 2 });
+        core = createCoreWithRealDependencies({workerCount: 2});
         mockEmbeddingService.generateEmbedding.mockClear();
     });
 
@@ -94,7 +92,7 @@ describe('DecentralizedCognitiveCore', () => {
             // Create a task item
             const task = createTaskItem({
                 type: 'TASK',
-                task_metadata: { status: 'pending', priority_level: 'high' }
+                task_metadata: {status: 'pending', priority_level: 'high'}
             });
 
             // Get the internal processItem method to test the core logic

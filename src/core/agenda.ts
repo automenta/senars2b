@@ -1,4 +1,4 @@
-import { AttentionValue, CognitiveItem, TaskMetadata } from '../interfaces/types';
+import {AttentionValue, CognitiveItem, TaskMetadata} from '../interfaces/types';
 
 /**
  * @interface Agenda
@@ -101,10 +101,9 @@ const DEFAULT_WEIGHTING: PriorityWeighting = {
  * and provides detailed statistics for monitoring system performance.
  */
 export class PriorityAgenda implements Agenda {
+    private static readonly DEADLINE_WINDOW_MS = 24 * 60 * 60 * 1000; // 1 day
     // --- Priority Calculation Configuration ---
     private readonly weighting: PriorityWeighting;
-    private static readonly DEADLINE_WINDOW_MS = 24 * 60 * 60 * 1000; // 1 day
-
     private items: CognitiveItem[] = [];
     private itemMap: Map<string, CognitiveItem> = new Map(); // For O(1) lookups
     private waitingQueue: (() => void)[] = [];
@@ -132,7 +131,7 @@ export class PriorityAgenda implements Agenda {
             throw new Error("A getTaskStatus function must be provided for robust dependency checking.");
         }
         this.getTaskStatus = getTaskStatus;
-        this.weighting = { ...DEFAULT_WEIGHTING, ...weighting };
+        this.weighting = {...DEFAULT_WEIGHTING, ...weighting};
     }
 
     /**
@@ -386,7 +385,7 @@ export class PriorityAgenda implements Agenda {
         const attentionPriority = item.attention.priority;
 
         if (item.type === 'TASK' && item.task_metadata) {
-            const priorityMap = { low: 0.25, medium: 0.5, high: 0.75, critical: 1.0 };
+            const priorityMap = {low: 0.25, medium: 0.5, high: 0.75, critical: 1.0};
             const taskPriority = priorityMap[item.task_metadata.priority_level] || 0.5;
 
             let deadlineFactor = 0;
@@ -421,7 +420,6 @@ export class PriorityAgenda implements Agenda {
 
         return attentionPriority;
     }
-
 
 
     /**

@@ -18,16 +18,16 @@ export class RestApiInterface {
 
         // Middleware
         this.app.use(express.json());
-        
+
         // Serve static files
         this.app.use('/node_modules', express.static(path.join(__dirname, '../../node_modules')));
         this.app.use(express.static(path.join(__dirname)));
-        
+
         // Serve the unified interface as the main page
         this.app.get('/', (req, res) => {
             res.sendFile(path.join(__dirname, 'unifiedInterface.html'));
         });
-        
+
         // Serve the unified interface for all routes (SPA)
         this.app.get('*', (req, res) => {
             res.sendFile(path.join(__dirname, 'unifiedInterface.html'));

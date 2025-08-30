@@ -1,10 +1,17 @@
 import {CognitiveItem} from '../interfaces/types';
-import {AtomicTaskExecutor, DiagnosticExecutor, KnowledgeBaseQueryExecutor, PlanningExecutor, WebSearchExecutor} from './action';
+import {
+    AtomicTaskExecutor,
+    DiagnosticExecutor,
+    KnowledgeBaseQueryExecutor,
+    PlanningExecutor,
+    WebSearchExecutor
+} from './action';
 import {CognitiveItemFactory} from '../modules/cognitiveItemFactory';
-import { TaskManager } from '../modules/taskManager';
+import {TaskManager} from '../modules/taskManager';
 
 export interface Executor {
     can_execute(goal: CognitiveItem): boolean;
+
     execute(goal: CognitiveItem): Promise<CognitiveItem>;
 }
 

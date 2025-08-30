@@ -2,35 +2,35 @@ import express from 'express';
 import http from 'http';
 import WebSocket from 'ws';
 import path from 'path';
-import { PersistentWorldModel } from '../core/worldModel';
-import { PriorityAgenda } from '../core/agenda';
-import { UnifiedTaskManager } from '../modules/taskManager';
-import { CognitiveItem, AttentionValue } from '../interfaces/types';
+import {PersistentWorldModel} from '../core/worldModel';
+import {PriorityAgenda} from '../core/agenda';
+import {UnifiedTaskManager} from '../modules/taskManager';
+import {AttentionValue, CognitiveItem} from '../interfaces/types';
 
 // --- Backend Core Initialization ---
 const worldModel = new PersistentWorldModel();
 const agenda = new PriorityAgenda((taskId) => worldModel.get_item(taskId)?.task_metadata?.status || null);
 const taskManager = new UnifiedTaskManager(agenda, worldModel);
 
-const defaultAttention: AttentionValue = { priority: 0.5, durability: 0.5 };
+const defaultAttention: AttentionValue = {priority: 0.5, durability: 0.5};
 
 // Add some initial tasks for demonstration
 const parentTask = taskManager.addTask({
     label: 'First Task: Review the new UI design',
     attention: defaultAttention,
-    task_metadata: { status: 'pending', priority_level: 'medium' }
+    task_metadata: {status: 'pending', priority_level: 'medium'}
 });
 
 taskManager.addSubtask(parentTask.id, {
     label: 'Subtask: Implement the WebSocket connection',
     attention: defaultAttention,
-    task_metadata: { status: 'pending', priority_level: 'low' }
+    task_metadata: {status: 'pending', priority_level: 'low'}
 });
 
 taskManager.addTask({
     label: 'Agent Task: Monitor for new user feedback',
     attention: defaultAttention,
-    task_metadata: { status: 'pending', priority_level: 'medium', categories: ['AGENT'] }
+    task_metadata: {status: 'pending', priority_level: 'medium', categories: ['AGENT']}
 });
 
 
@@ -50,7 +50,7 @@ app.get('*', (req: express.Request, res: express.Response) => {
 });
 
 // --- WebSocket Server Setup ---
-const wss: WebSocket.Server = new WebSocket.Server({ noServer: true });
+const wss: WebSocket.Server = new WebSocket.Server({noServer: true});
 
 server.on('upgrade', (request, socket, head) => {
     if (request.url === '/ws') {
@@ -78,7 +78,7 @@ const broadcastTaskList = () => {
     const tasks = taskManager.getAllTasks();
     const taskListUpdate = {
         type: 'TASK_LIST_UPDATE',
-        payload: { tasks: tasks.map(mapTaskToClient) }
+        payload: {tasks: tasks.map(mapTaskToClient)}
     };
     const message = JSON.stringify(taskListUpdate);
     wss.clients.forEach(client => {
@@ -98,7 +98,7 @@ const broadcastStats = () => {
     const stats = taskManager.getTaskStatistics();
     const statsUpdate = {
         type: 'STATS_UPDATE',
-        payload: { stats }
+        payload: {stats}
     };
     const message = JSON.stringify(statsUpdate);
     wss.clients.forEach(client => {
@@ -114,14 +114,14 @@ setInterval(broadcastStats, 5000);
 
 wss.on('connection', (ws: WebSocket) => {
     console.log('New WebSocket connection established');
-    
+
     // Send the current task list to the newly connected client
     broadcastTaskList();
-    
+
     ws.on('message', (data: WebSocket.Data) => {
         try {
             const message = JSON.parse(data.toString());
-            const { type, payload } = message;
+            const {type, payload} = message;
 
             console.log(`Received message of type: ${type}`);
 
@@ -157,11 +157,11 @@ wss.on('connection', (ws: WebSocket) => {
             console.error('Failed to process message:', error);
         }
     });
-    
+
     ws.on('close', () => {
         console.log('WebSocket connection closed');
     });
-    
+
     ws.on('error', (error: Error) => {
         console.error('WebSocket error:', error);
     });

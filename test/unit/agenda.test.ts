@@ -1,7 +1,6 @@
-import {AttentionValue, CognitiveItem, SemanticAtom, TruthValue, TaskStatus} from '@/interfaces/types';
-import {CognitiveSchema, WorldModel} from '@/core/worldModel';
+import {TaskStatus} from '@/interfaces/types';
 import {PriorityAgenda} from '@/core/agenda';
-import {createCognitiveItem, createSemanticAtom, createTruthValue, createAttentionValue, createMockSchema, createBeliefItem, createGoalItem, createTaskItem} from './testUtils';
+import {createBeliefItem, createGoalItem, createTaskItem} from './testUtils';
 
 describe('PriorityAgenda', () => {
     let agenda: PriorityAgenda;
@@ -104,8 +103,12 @@ describe('PriorityAgenda', () => {
 
         describe('Dependency Checking', () => {
             it('should block a task if its dependency is not completed, then unblock it', async () => {
-                const depTask = createTaskItem({ id: 'dep1', attention: {priority: 0.9, durability: 0.5 } });
-                const mainTask = createTaskItem({ id: 'main1', attention: {priority: 0.8, durability: 0.5 }, task_metadata: { dependencies: ['dep1'], status: 'pending', priority_level: 'high' } });
+                const depTask = createTaskItem({id: 'dep1', attention: {priority: 0.9, durability: 0.5}});
+                const mainTask = createTaskItem({
+                    id: 'main1',
+                    attention: {priority: 0.8, durability: 0.5},
+                    task_metadata: {dependencies: ['dep1'], status: 'pending', priority_level: 'high'}
+                });
 
                 taskStatuses.set('dep1', 'pending');
                 agenda.push(depTask);
@@ -127,9 +130,12 @@ describe('PriorityAgenda', () => {
             });
 
             it('should not pop a blocked task', async () => {
-                const depTask = createTaskItem({ id: 'dep1' });
-                const mainTask = createTaskItem({ id: 'main1', task_metadata: { dependencies: ['dep1'], status: 'pending', priority_level: 'high' } });
-                const unblockedTask = createTaskItem({ id: 'unblocked1', attention: { priority: 0.1, durability: 0.1 } });
+                const depTask = createTaskItem({id: 'dep1'});
+                const mainTask = createTaskItem({
+                    id: 'main1',
+                    task_metadata: {dependencies: ['dep1'], status: 'pending', priority_level: 'high'}
+                });
+                const unblockedTask = createTaskItem({id: 'unblocked1', attention: {priority: 0.1, durability: 0.1}});
 
                 taskStatuses.set('dep1', 'awaiting_dependencies'); // Not completed
                 agenda.push(mainTask);
@@ -140,7 +146,10 @@ describe('PriorityAgenda', () => {
             });
 
             it('should pop a task once its dependency is completed', async () => {
-                const mainTask = createTaskItem({ id: 'main1', task_metadata: { dependencies: ['dep1'], status: 'pending', priority_level: 'high' } });
+                const mainTask = createTaskItem({
+                    id: 'main1',
+                    task_metadata: {dependencies: ['dep1'], status: 'pending', priority_level: 'high'}
+                });
                 agenda.push(mainTask);
 
                 // Initially blocked
@@ -160,10 +169,10 @@ describe('PriorityAgenda', () => {
 
         describe('Prioritization with Deadlines', () => {
             it('should prioritize task with an imminent deadline', async () => {
-                const normalTask = createTaskItem({ id: 'normal', attention: { priority: 0.8, durability: 0.5 } });
+                const normalTask = createTaskItem({id: 'normal', attention: {priority: 0.8, durability: 0.5}});
                 const urgentTask = createTaskItem({
                     id: 'urgent',
-                    attention: { priority: 0.5, durability: 0.5 },
+                    attention: {priority: 0.5, durability: 0.5},
                     task_metadata: {
                         status: 'pending',
                         priority_level: 'medium',
@@ -178,7 +187,10 @@ describe('PriorityAgenda', () => {
             });
 
             it('should prioritize an overdue task very highly', async () => {
-                const highPriorityTask = createTaskItem({ id: 'highPrio', task_metadata: { status: 'pending', priority_level: 'high' } });
+                const highPriorityTask = createTaskItem({
+                    id: 'highPrio',
+                    task_metadata: {status: 'pending', priority_level: 'high'}
+                });
                 const overdueTask = createTaskItem({
                     id: 'overdue',
                     task_metadata: {
@@ -199,8 +211,8 @@ describe('PriorityAgenda', () => {
 
     describe('getStatistics', () => {
         it('should calculate popRate correctly over a time interval', async () => {
-            agenda.push(createTaskItem({ id: 't1' }));
-            agenda.push(createTaskItem({ id: 't2' }));
+            agenda.push(createTaskItem({id: 't1'}));
+            agenda.push(createTaskItem({id: 't2'}));
             await agenda.pop();
             await agenda.pop();
 
@@ -217,7 +229,7 @@ describe('PriorityAgenda', () => {
 
     describe('updateTaskStatus', () => {
         it('should update a task status and its timestamp', async () => {
-            const task = createTaskItem({ task_metadata: { status: 'pending', priority_level: 'low' } });
+            const task = createTaskItem({task_metadata: {status: 'pending', priority_level: 'low'}});
             const originalTimestamp = task.updated_at!;
             agenda.push(task);
 
@@ -239,7 +251,10 @@ describe('PriorityAgenda', () => {
 
         it('should wait for a blocked task, then pop it when its dependency is completed', async () => {
             const depId = 'dep1';
-            const mainTask = createTaskItem({ id: 'main1', task_metadata: { dependencies: [depId], status: 'pending', priority_level: 'high' } });
+            const mainTask = createTaskItem({
+                id: 'main1',
+                task_metadata: {dependencies: [depId], status: 'pending', priority_level: 'high'}
+            });
 
             // The dependency's status is 'awaiting_dependencies', so mainTask is blocked.
             taskStatuses.set(depId, 'awaiting_dependencies');
@@ -256,7 +271,7 @@ describe('PriorityAgenda', () => {
                 taskStatuses.set(depId, 'completed');
                 // Push a new dummy item to the agenda. This action will trigger
                 // the waiting pop() promise to re-evaluate its condition.
-                agenda.push(createTaskItem({ id: 'dummy' }));
+                agenda.push(createTaskItem({id: 'dummy'}));
             }, 50);
 
             // The pop promise should now resolve with the unblocked mainTask.
@@ -267,43 +282,67 @@ describe('PriorityAgenda', () => {
 
     describe('getTasksBy', () => {
         beforeEach(() => {
-            agenda.push(createTaskItem({ id: 'task1', task_metadata: { status: 'pending', priority_level: 'low', tags: ['urgent', 'backend'], categories: ['dev'] } }));
-            agenda.push(createTaskItem({ id: 'task2', task_metadata: { status: 'awaiting_dependencies', priority_level: 'medium', tags: ['frontend'], categories: ['dev'] } }));
-            agenda.push(createTaskItem({ id: 'task3', task_metadata: { status: 'completed', priority_level: 'high', tags: ['urgent', 'frontend'], categories: ['ops'] } }));
+            agenda.push(createTaskItem({
+                id: 'task1',
+                task_metadata: {
+                    status: 'pending',
+                    priority_level: 'low',
+                    tags: ['urgent', 'backend'],
+                    categories: ['dev']
+                }
+            }));
+            agenda.push(createTaskItem({
+                id: 'task2',
+                task_metadata: {
+                    status: 'awaiting_dependencies',
+                    priority_level: 'medium',
+                    tags: ['frontend'],
+                    categories: ['dev']
+                }
+            }));
+            agenda.push(createTaskItem({
+                id: 'task3',
+                task_metadata: {
+                    status: 'completed',
+                    priority_level: 'high',
+                    tags: ['urgent', 'frontend'],
+                    categories: ['ops']
+                }
+            }));
             agenda.push(createBeliefItem()); // This non-task item should be ignored.
         });
 
         it('should filter tasks by status', () => {
-            const pendingTasks = agenda.getTasksBy({ status: 'pending' });
+            const pendingTasks = agenda.getTasksBy({status: 'pending'});
             expect(pendingTasks.length).toBe(1);
             expect(pendingTasks[0].id).toBe('task1');
         });
 
         it('should filter tasks by tag', () => {
-            const urgentTasks = agenda.getTasksBy({ tag: 'urgent' });
+            const urgentTasks = agenda.getTasksBy({tag: 'urgent'});
             expect(urgentTasks.length).toBe(2);
             expect(urgentTasks.map(t => t.id).sort()).toEqual(['task1', 'task3']);
         });
 
         it('should filter tasks by category', () => {
-            const devTasks = agenda.getTasksBy({ category: 'dev' });
+            const devTasks = agenda.getTasksBy({category: 'dev'});
             expect(devTasks.length).toBe(2);
             expect(devTasks.map(t => t.id).sort()).toEqual(['task1', 'task2']);
         });
 
         it('should filter by a combination of status and tag', () => {
-            const completedUrgent = agenda.getTasksBy({ status: 'completed', tag: 'urgent' });
+            const completedUrgent = agenda.getTasksBy({status: 'completed', tag: 'urgent'});
             expect(completedUrgent.length).toBe(1);
             expect(completedUrgent[0].id).toBe('task3');
         });
 
         it('should return an empty array if no tasks match the filter', () => {
-            const noMatch = agenda.getTasksBy({ tag: 'non-existent-tag' });
+            const noMatch = agenda.getTasksBy({tag: 'non-existent-tag'});
             expect(noMatch.length).toBe(0);
         });
 
         it('should return an empty array if a combination of filters has no match', () => {
-            const noMatch = agenda.getTasksBy({ status: 'pending', tag: 'frontend' });
+            const noMatch = agenda.getTasksBy({status: 'pending', tag: 'frontend'});
             expect(noMatch.length).toBe(0);
         });
     });
@@ -316,11 +355,19 @@ describe('PriorityAgenda', () => {
 
         it('should prioritize tasks based on custom weights', async () => {
             // Custom weights that heavily favor attention priority over task priority
-            const customWeights = { taskPriority: 0.1, attentionPriority: 0.9, deadlineFactor: 0, completionFactor: 0 };
+            const customWeights = {taskPriority: 0.1, attentionPriority: 0.9, deadlineFactor: 0, completionFactor: 0};
             agenda = new PriorityAgenda(getTaskStatus, customWeights);
 
-            const highAttentionTask = createTaskItem({ id: 'high-attention', attention: { priority: 0.9, durability: 0.5 }, task_metadata: { status: 'pending', priority_level: 'low' } });
-            const highPriorityTask = createTaskItem({ id: 'high-priority', attention: { priority: 0.2, durability: 0.5 }, task_metadata: { status: 'pending', priority_level: 'critical' } });
+            const highAttentionTask = createTaskItem({
+                id: 'high-attention',
+                attention: {priority: 0.9, durability: 0.5},
+                task_metadata: {status: 'pending', priority_level: 'low'}
+            });
+            const highPriorityTask = createTaskItem({
+                id: 'high-priority',
+                attention: {priority: 0.2, durability: 0.5},
+                task_metadata: {status: 'pending', priority_level: 'critical'}
+            });
 
             agenda.push(highAttentionTask);
             agenda.push(highPriorityTask);
@@ -330,8 +377,16 @@ describe('PriorityAgenda', () => {
         });
 
         it('should penalize tasks with higher completion percentage', async () => {
-            const newTask = createTaskItem({ id: 'new', attention: { priority: 0.5, durability: 0.5 }, task_metadata: { status: 'pending', priority_level: 'medium', completion_percentage: 0 } });
-            const inProgressTask = createTaskItem({ id: 'inprogress', attention: { priority: 0.5, durability: 0.5 }, task_metadata: { status: 'pending', priority_level: 'medium', completion_percentage: 50 } });
+            const newTask = createTaskItem({
+                id: 'new',
+                attention: {priority: 0.5, durability: 0.5},
+                task_metadata: {status: 'pending', priority_level: 'medium', completion_percentage: 0}
+            });
+            const inProgressTask = createTaskItem({
+                id: 'inprogress',
+                attention: {priority: 0.5, durability: 0.5},
+                task_metadata: {status: 'pending', priority_level: 'medium', completion_percentage: 50}
+            });
 
             agenda.push(newTask);
             agenda.push(inProgressTask);
@@ -342,9 +397,18 @@ describe('PriorityAgenda', () => {
         });
 
         it('should update parent task completion percentage when a subtask is completed', () => {
-            const parentTask = createTaskItem({ id: 'parent1', task_metadata: { subtasks: ['child1', 'child2'], status: 'pending', priority_level: 'medium' } });
-            const childTask1 = createTaskItem({ id: 'child1', task_metadata: { parent_id: 'parent1', status: 'pending', priority_level: 'medium' } });
-            const childTask2 = createTaskItem({ id: 'child2', task_metadata: { parent_id: 'parent1', status: 'pending', priority_level: 'medium' } });
+            const parentTask = createTaskItem({
+                id: 'parent1',
+                task_metadata: {subtasks: ['child1', 'child2'], status: 'pending', priority_level: 'medium'}
+            });
+            const childTask1 = createTaskItem({
+                id: 'child1',
+                task_metadata: {parent_id: 'parent1', status: 'pending', priority_level: 'medium'}
+            });
+            const childTask2 = createTaskItem({
+                id: 'child2',
+                task_metadata: {parent_id: 'parent1', status: 'pending', priority_level: 'medium'}
+            });
 
             agenda.push(parentTask);
             agenda.push(childTask1);
@@ -370,9 +434,27 @@ describe('PriorityAgenda', () => {
         });
 
         it('should retrieve tasks by group ID', () => {
-            const group1Task1 = createTaskItem({ task_metadata: { status: 'pending', priority_level: 'medium', group_id: 'group1' } });
-            const group1Task2 = createTaskItem({ task_metadata: { status: 'pending', priority_level: 'medium', group_id: 'group1' } });
-            const group2Task1 = createTaskItem({ task_metadata: { status: 'pending', priority_level: 'medium', group_id: 'group2' } });
+            const group1Task1 = createTaskItem({
+                task_metadata: {
+                    status: 'pending',
+                    priority_level: 'medium',
+                    group_id: 'group1'
+                }
+            });
+            const group1Task2 = createTaskItem({
+                task_metadata: {
+                    status: 'pending',
+                    priority_level: 'medium',
+                    group_id: 'group1'
+                }
+            });
+            const group2Task1 = createTaskItem({
+                task_metadata: {
+                    status: 'pending',
+                    priority_level: 'medium',
+                    group_id: 'group2'
+                }
+            });
             const noGroupTask = createTaskItem();
 
             agenda.push(group1Task1);

@@ -1,15 +1,18 @@
-import {AttentionValue, CognitiveItem, SemanticAtom, TruthValue} from '@/interfaces/types';
-import {CognitiveSchema, WorldModel} from '@/core/worldModel';
 import {DecentralizedCognitiveCore} from '@/core/cognitiveCore';
 
-import {createCognitiveItem, createSemanticAtom, createAttentionValue, createTruthValue, createCoreWithRealDependencies, createCognitiveMetadata} from './testUtils';
+import {
+    createAttentionValue,
+    createCognitiveMetadata,
+    createCoreWithRealDependencies,
+    createTruthValue
+} from './testUtils';
 
 describe('Enhanced Components Integration Tests', () => {
     let core: DecentralizedCognitiveCore;
 
     beforeEach(() => {
 
-        core = createCoreWithRealDependencies({ workerCount: 2 });
+        core = createCoreWithRealDependencies({workerCount: 2});
     });
 
     it('should work with standard components and process multi-domain knowledge', () => {

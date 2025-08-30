@@ -1,16 +1,16 @@
-import { TaskValidator } from '../../src/utils/taskValidator';
-import { CognitiveItem, TaskMetadata, AttentionValue } from '../../src/interfaces/types';
-import { v4 as uuidv4 } from 'uuid';
+import {TaskValidator} from '../../src/utils/taskValidator';
+import {AttentionValue, CognitiveItem, TaskMetadata} from '../../src/interfaces/types';
+import {v4 as uuidv4} from 'uuid';
 
 // Helper to create a base for cognitive items
 const createBaseItem = (): Partial<CognitiveItem> => ({
     id: uuidv4(),
     atom_id: uuidv4(),
     label: 'Test Task',
-    attention: { priority: 0.5, durability: 0.5 } as AttentionValue,
+    attention: {priority: 0.5, durability: 0.5} as AttentionValue,
     created_at: Date.now(),
     updated_at: Date.now(),
-    stamp: { parent_ids: [], schema_id: 'test', timestamp: Date.now() }
+    stamp: {parent_ids: [], schema_id: 'test', timestamp: Date.now()}
 });
 
 // Helper to create a valid task with full metadata
@@ -44,7 +44,7 @@ describe('TaskValidator', () => {
                 deadline: Date.now() + 100000,
                 estimated_effort: 5,
                 confidence: 0.8,
-                context: { project: 'Senars3' },
+                context: {project: 'Senars3'},
                 completion_percentage: 25,
                 group_id: 'group-1'
             });
@@ -58,44 +58,44 @@ describe('TaskValidator', () => {
         });
 
         it('should return false if required fields like id are missing', () => {
-            const task = createValidTask({ id: undefined });
+            const task = createValidTask({id: undefined});
             expect(TaskValidator.validateTask(task)).toBe(false);
         });
 
         it('should return false for an invalid status', () => {
-            const task = createValidTask({}, { status: 'invalid_status' as any });
+            const task = createValidTask({}, {status: 'invalid_status' as any});
             expect(TaskValidator.validateTask(task)).toBe(false);
         });
 
         it('should return false for an invalid priority level', () => {
-            const task = createValidTask({}, { priority_level: 'invalid_priority' as any });
+            const task = createValidTask({}, {priority_level: 'invalid_priority' as any});
             expect(TaskValidator.validateTask(task)).toBe(false);
         });
 
         it('should return false for a non-array dependencies field', () => {
-            const task = createValidTask({}, { dependencies: 'not-an-array' as any });
+            const task = createValidTask({}, {dependencies: 'not-an-array' as any});
             expect(TaskValidator.validateTask(task)).toBe(false);
         });
 
         it('should return false for a negative deadline', () => {
-            const task = createValidTask({}, { deadline: -100 });
+            const task = createValidTask({}, {deadline: -100});
             expect(TaskValidator.validateTask(task)).toBe(false);
         });
 
         it('should return false for a confidence value greater than 1', () => {
-            const task = createValidTask({}, { confidence: 1.1 });
+            const task = createValidTask({}, {confidence: 1.1});
             expect(TaskValidator.validateTask(task)).toBe(false);
         });
 
         it('should return false for a completion percentage less than 0', () => {
-            const task = createValidTask({}, { completion_percentage: -10 });
+            const task = createValidTask({}, {completion_percentage: -10});
             expect(TaskValidator.validateTask(task)).toBe(false);
         });
     });
 
     describe('normalizeTask', () => {
         it('should convert a non-task item into a default task', () => {
-            const item = { ...createBaseItem(), type: 'BELIEF' } as CognitiveItem;
+            const item = {...createBaseItem(), type: 'BELIEF'} as CognitiveItem;
             const normalized = TaskValidator.normalizeTask(item);
 
             expect(normalized.type).toBe('TASK');
@@ -117,7 +117,7 @@ describe('TaskValidator', () => {
         });
 
         it('should not overwrite existing valid data', () => {
-            const task = createValidTask({}, { status: 'completed', priority_level: 'high', subtasks: ['subtask-1'] });
+            const task = createValidTask({}, {status: 'completed', priority_level: 'high', subtasks: ['subtask-1']});
             const normalized = TaskValidator.normalizeTask(task);
 
             expect(normalized.task_metadata?.status).toBe('completed');
@@ -126,13 +126,13 @@ describe('TaskValidator', () => {
         });
 
         it('should ensure array fields are arrays', () => {
-            const task = createValidTask({}, { tags: 'not-an-array' as any });
+            const task = createValidTask({}, {tags: 'not-an-array' as any});
             const normalized = TaskValidator.normalizeTask(task);
             expect(normalized.task_metadata?.tags).toEqual([]);
         });
 
         it('should ensure context is an object', () => {
-            const task = createValidTask({}, { context: 'not-an-object' as any });
+            const task = createValidTask({}, {context: 'not-an-object' as any});
             const normalized = TaskValidator.normalizeTask(task);
             expect(normalized.task_metadata?.context).toEqual({});
         });

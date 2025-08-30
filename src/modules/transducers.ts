@@ -13,11 +13,11 @@ export class TextTransducer implements Transducer {
             if (data.length === 0) {
                 return []; // Return empty array for empty strings
             }
-            
+
             if (data.length > 10000) {
                 throw new Error('Text input is too long (maximum 10,000 characters)');
             }
-            
+
             // Simple text processing - in a real implementation, this would use NLP
             return data
                 .split(/[.!?]+/)
@@ -50,7 +50,7 @@ export class TextTransducer implements Transducer {
             if (jsonString.length > 10000) {
                 throw new Error('Structured data is too large (maximum 10,000 characters when serialized)');
             }
-            
+
             // Process structured data
             const truth: TruthValue = {
                 frequency: 1.0,
@@ -77,7 +77,7 @@ export class TextTransducer implements Transducer {
         if (stringData.length > 10000) {
             throw new Error('Data is too long (maximum 10,000 characters)');
         }
-        
+
         if (stringData.length === 0) {
             return []; // Return empty array for empty strings
         }

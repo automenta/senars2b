@@ -1,10 +1,10 @@
-import { CognitiveItem, TaskStatus } from '../interfaces/types';
-import { TaskManager } from '../modules/taskManager';
-import WebSocket = require('ws');
+import {CognitiveItem, TaskStatus} from '../interfaces/types';
+import {TaskManager} from '../modules/taskManager';
+
 
 /**
  * TaskWebSocketHandler - Handles task-related WebSocket requests
- * 
+ *
  * This class consolidates task handling functionality that was previously
  * split between WebSocketInterface and TaskWebSocketInterface.
  */
@@ -45,7 +45,7 @@ export class TaskWebSocketHandler {
             throw new Error('Missing payload');
         }
         const task = this.taskManager.addTask(payload);
-        return { task };
+        return {task};
     }
 
     private handleUpdateTask(payload: { taskId: string; updates: Partial<CognitiveItem> }): { task: CognitiveItem } {
@@ -56,7 +56,7 @@ export class TaskWebSocketHandler {
         if (!task) {
             throw new Error(`Task with ID ${payload.taskId} not found`);
         }
-        return { task };
+        return {task};
     }
 
     private handleRemoveTask(payload: { taskId: string }): { success: boolean } {
@@ -64,7 +64,7 @@ export class TaskWebSocketHandler {
             throw new Error('Missing required field: taskId');
         }
         const success = this.taskManager.removeTask(payload.taskId);
-        return { success };
+        return {success};
     }
 
     private handleGetTask(payload: { taskId: string }): { task: CognitiveItem } {
@@ -75,12 +75,12 @@ export class TaskWebSocketHandler {
         if (!task) {
             throw new Error(`Task with ID ${payload.taskId} not found`);
         }
-        return { task };
+        return {task};
     }
 
     private handleGetAllTasks(): { tasks: CognitiveItem[] } {
         const tasks = this.taskManager.getAllTasks();
-        return { tasks };
+        return {tasks};
     }
 
     private handleUpdateTaskStatus(payload: { taskId: string; status: TaskStatus }): { task: CognitiveItem } {
@@ -91,15 +91,15 @@ export class TaskWebSocketHandler {
         if (!task) {
             throw new Error(`Task with ID ${payload.taskId} not found`);
         }
-        return { task };
+        return {task};
     }
 
     private handleGetTaskStatistics(): { taskStatistics: any } {
         if (typeof (this.taskManager as any).getTaskStatistics !== 'function') {
             throw new Error('Task manager does not support statistics');
         }
-        
+
         const statistics = (this.taskManager as any).getTaskStatistics();
-        return { taskStatistics: statistics };
+        return {taskStatistics: statistics};
     }
 }

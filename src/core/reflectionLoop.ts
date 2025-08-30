@@ -114,7 +114,7 @@ export class ReflectionLoop {
                 optimizeGoal.label = "(optimize cognitive processes)";
                 this.agenda.push(optimizeGoal);
             }
-            
+
             // Update performance metrics
             const cycleTime = Date.now() - cycleStart;
             this.cycleTimes.push(cycleTime);
@@ -122,14 +122,14 @@ export class ReflectionLoop {
             if (this.cycleTimes.length > 100) {
                 this.cycleTimes = this.cycleTimes.slice(-100);
             }
-            
+
             this.performanceMetrics.cyclesRun++;
             this.performanceMetrics.averageCycleTime = this.cycleTimes.reduce((a, b) => a + b, 0) / this.cycleTimes.length;
         } catch (error) {
             console.error("Reflection loop error:", error);
             this.performanceMetrics.errorsEncountered++;
             this.performanceMetrics.lastError = error instanceof Error ? error.message : String(error);
-            
+
             // Update performance metrics even on error
             const cycleTime = Date.now() - cycleStart;
             this.cycleTimes.push(cycleTime);
@@ -143,6 +143,14 @@ export class ReflectionLoop {
     recordSchemaUsage(schemaId: string): void {
         // Record that a schema was used
         this.schemaUsage.set(schemaId, Date.now());
+    }
+
+    /**
+     * Get performance metrics for the reflection loop
+     * @returns Performance metrics
+     */
+    getPerformanceMetrics(): any {
+        return {...this.performanceMetrics};
     }
 
     private updateKPIs(): void {
@@ -250,13 +258,5 @@ export class ReflectionLoop {
         // In a full implementation, this would call the schema learning module
         // For now, we'll just log that schema learning was triggered
         console.log("Schema learning cycle triggered");
-    }
-
-    /**
-     * Get performance metrics for the reflection loop
-     * @returns Performance metrics
-     */
-    getPerformanceMetrics(): any {
-        return {...this.performanceMetrics};
     }
 }

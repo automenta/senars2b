@@ -1,8 +1,8 @@
-import { CognitiveItem, AttentionValue, TaskStatus } from '../interfaces/types';
-import { TaskFactory } from './taskFactory';
-import { Agenda } from '../core/agenda';
-import { WorldModel } from '../core/worldModel';
-import { DEFAULT_TASK_DURABILITY, TASK_PRIORITY_LEVELS, TASK_PRIORITY_VALUES } from '../utils/constants';
+import {AttentionValue, CognitiveItem, TaskStatus} from '../interfaces/types';
+import {TaskFactory} from './taskFactory';
+import {Agenda} from '../core/agenda';
+import {WorldModel} from '../core/worldModel';
+import {DEFAULT_TASK_DURABILITY, TASK_PRIORITY_LEVELS, TASK_PRIORITY_VALUES} from '../utils/constants';
 
 // Type guard to check if a CognitiveItem is a Task
 function isTask(item: CognitiveItem): item is CognitiveItem & { type: 'TASK' } {
@@ -14,21 +14,34 @@ export interface TaskManager {
         type?: 'TASK';
         task_metadata?: Partial<CognitiveItem['task_metadata']>;
     }): CognitiveItem;
+
     updateTask(id: string, updates: Partial<CognitiveItem>): CognitiveItem | null;
+
     removeTask(id: string): boolean;
+
     getTask(id: string): CognitiveItem | null;
+
     getAllTasks(): CognitiveItem[];
+
     getTasksByStatus(status: TaskStatus): CognitiveItem[];
+
     getTasksByPriority(priority: 'low' | 'medium' | 'high' | 'critical'): CognitiveItem[];
+
     getTasksByGroupId(groupId: string): CognitiveItem[];
+
     assignTaskToGroup(taskId: string, groupId: string): CognitiveItem | null;
+
     updateTaskStatus(id: string, status: TaskStatus): CognitiveItem | null;
+
     addSubtask(parentId: string, subtask: Omit<CognitiveItem, 'id' | 'atom_id' | 'created_at' | 'updated_at' | 'stamp' | 'type'> & {
         type?: 'TASK';
         task_metadata?: Partial<CognitiveItem['task_metadata']>;
     }): CognitiveItem;
+
     getSubtasks(parentId: string): CognitiveItem[];
+
     addEventListener(listener: (event: { type: string; task: CognitiveItem }) => void): void;
+
     getTaskStatistics(): {
         total: number;
         pending: number;
@@ -53,18 +66,6 @@ export class UnifiedTaskManager implements TaskManager {
         this.loadTasksFromWorldModel();
     }
 
-    private loadTasksFromWorldModel(): void {
-        const allItems = this.worldModel.getAllItems();
-        const tasks = allItems.filter(isTask);
-        for (const task of tasks) {
-            // If the task is not in a terminal state, it should be on the agenda.
-            const terminalStates: TaskStatus[] = ['completed', 'failed', 'deferred'];
-            if (task.task_metadata && !terminalStates.includes(task.task_metadata.status)) {
-                this.agenda.push(task);
-            }
-        }
-    }
-
     addTask(taskData: Omit<CognitiveItem, 'id' | 'atom_id' | 'created_at' | 'updated_at' | 'subtasks' | 'stamp' | 'type'> & {
         type?: 'TASK';
         task_metadata?: Partial<CognitiveItem['task_metadata']>;
@@ -80,7 +81,7 @@ export class UnifiedTaskManager implements TaskManager {
         task.updated_at = Date.now();
 
         this.worldModel.update_item(task);
-        this.notifyListeners({ type: 'taskUpdated', task });
+        this.notifyListeners({type: 'taskUpdated', task});
         return task;
     }
 
@@ -92,7 +93,7 @@ export class UnifiedTaskManager implements TaskManager {
         const removedFromWorldModel = this.worldModel.remove_item(id);
         if (removedFromWorldModel) {
             this.agenda.remove(id);
-            this.notifyListeners({ type: 'taskRemoved', task });
+            this.notifyListeners({type: 'taskRemoved', task});
         }
         return removedFromWorldModel;
     }
@@ -132,7 +133,7 @@ export class UnifiedTaskManager implements TaskManager {
             };
         }
 
-        return this.updateTask(taskId, { task_metadata: task.task_metadata });
+        return this.updateTask(taskId, {task_metadata: task.task_metadata});
     }
 
     updateTaskStatus(id: string, status: TaskStatus): CognitiveItem | null {
@@ -145,7 +146,7 @@ export class UnifiedTaskManager implements TaskManager {
         task.updated_at = Date.now();
 
         this.worldModel.update_item(task);
-        this.notifyListeners({ type: 'taskStatusChanged', task });
+        this.notifyListeners({type: 'taskStatusChanged', task});
 
         return task;
     }
@@ -160,7 +161,7 @@ export class UnifiedTaskManager implements TaskManager {
         this.worldModel.update_item(task);
 
         this.agenda.remove(id);
-        this.notifyListeners({ type: 'taskCompleted', task });
+        this.notifyListeners({type: 'taskCompleted', task});
 
         // Future: Check for dependent tasks and unblock them.
         return task;
@@ -171,7 +172,7 @@ export class UnifiedTaskManager implements TaskManager {
         if (!task || !task.task_metadata) return null;
 
         this.agenda.remove(id);
-        this.notifyListeners({ type: 'taskFailed', task });
+        this.notifyListeners({type: 'taskFailed', task});
 
         // Propagate failure to subtasks
         if (task.task_metadata.subtasks) {
@@ -190,7 +191,7 @@ export class UnifiedTaskManager implements TaskManager {
         if (!task) return null;
 
         this.agenda.remove(id);
-        this.notifyListeners({ type: 'taskDeferred', task });
+        this.notifyListeners({type: 'taskDeferred', task});
         return task;
     }
 
@@ -212,48 +213,6 @@ export class UnifiedTaskManager implements TaskManager {
         this.worldModel.update_item(parentTask);
 
         return subtask;
-    }
-
-    private _createAndStoreTask(
-        taskData: Omit<CognitiveItem, 'id' | 'atom_id' | 'created_at' | 'updated_at' | 'stamp' | 'type'> & {
-            type?: 'TASK';
-            task_metadata?: Partial<CognitiveItem['task_metadata']>;
-        },
-        parentId?: string
-    ): CognitiveItem {
-        const priorityLevel = taskData.task_metadata?.priority_level || TASK_PRIORITY_LEVELS.MEDIUM;
-        const attention: AttentionValue = {
-            priority: this.mapPriorityLevelToValue(priorityLevel),
-            durability: DEFAULT_TASK_DURABILITY,
-        };
-
-        const task = parentId
-            ? TaskFactory.createSubtask(
-                parentId,
-                taskData.label || (taskData.content as string) || 'Unnamed Subtask',
-                attention,
-                priorityLevel,
-                taskData.meta
-            )
-            : TaskFactory.createTask(
-                taskData.label || (taskData.content as string) || 'Unnamed Task',
-                attention,
-                priorityLevel,
-                taskData.meta
-            );
-
-        if (taskData.task_metadata) {
-            task.task_metadata = { ...task.task_metadata, ...taskData.task_metadata };
-        }
-
-        if (typeof task.task_metadata!.completion_percentage !== 'number') {
-            task.task_metadata!.completion_percentage = 0;
-        }
-
-        this.worldModel.add_item(task);
-        this.agenda.push(task);
-        this.notifyListeners({ type: 'taskAdded', task });
-        return task;
     }
 
     getSubtasks(parentId: string): CognitiveItem[] {
@@ -294,6 +253,60 @@ export class UnifiedTaskManager implements TaskManager {
 
     addEventListener(listener: (event: { type: string; task: CognitiveItem }) => void): void {
         this.eventListeners.push(listener);
+    }
+
+    private loadTasksFromWorldModel(): void {
+        const allItems = this.worldModel.getAllItems();
+        const tasks = allItems.filter(isTask);
+        for (const task of tasks) {
+            // If the task is not in a terminal state, it should be on the agenda.
+            const terminalStates: TaskStatus[] = ['completed', 'failed', 'deferred'];
+            if (task.task_metadata && !terminalStates.includes(task.task_metadata.status)) {
+                this.agenda.push(task);
+            }
+        }
+    }
+
+    private _createAndStoreTask(
+        taskData: Omit<CognitiveItem, 'id' | 'atom_id' | 'created_at' | 'updated_at' | 'stamp' | 'type'> & {
+            type?: 'TASK';
+            task_metadata?: Partial<CognitiveItem['task_metadata']>;
+        },
+        parentId?: string
+    ): CognitiveItem {
+        const priorityLevel = taskData.task_metadata?.priority_level || TASK_PRIORITY_LEVELS.MEDIUM;
+        const attention: AttentionValue = {
+            priority: this.mapPriorityLevelToValue(priorityLevel),
+            durability: DEFAULT_TASK_DURABILITY,
+        };
+
+        const task = parentId
+            ? TaskFactory.createSubtask(
+                parentId,
+                taskData.label || (taskData.content as string) || 'Unnamed Subtask',
+                attention,
+                priorityLevel,
+                taskData.meta
+            )
+            : TaskFactory.createTask(
+                taskData.label || (taskData.content as string) || 'Unnamed Task',
+                attention,
+                priorityLevel,
+                taskData.meta
+            );
+
+        if (taskData.task_metadata) {
+            task.task_metadata = {...task.task_metadata, ...taskData.task_metadata};
+        }
+
+        if (typeof task.task_metadata!.completion_percentage !== 'number') {
+            task.task_metadata!.completion_percentage = 0;
+        }
+
+        this.worldModel.add_item(task);
+        this.agenda.push(task);
+        this.notifyListeners({type: 'taskAdded', task});
+        return task;
     }
 
     private notifyListeners(event: { type: string; task: CognitiveItem }): void {

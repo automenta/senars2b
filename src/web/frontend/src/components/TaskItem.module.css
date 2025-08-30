@@ -1,179 +1,179 @@
 @keyframes pulse {
-  0% {
-    border-color: var(--primary-color);
-    box-shadow: 0 0 8px var(--primary-color-translucent);
-  }
-  50% {
-    border-color: var(--primary-color-translucent);
-    box-shadow: 0 0 12px var(--primary-color-translucent);
-  }
-  100% {
-    border-color: var(--primary-color);
-    box-shadow: 0 0 8px var(--primary-color-translucent);
-  }
+    0% {
+        border-color: var(--primary-color);
+        box-shadow: 0 0 8px var(--primary-color-translucent);
+    }
+    50% {
+        border-color: var(--primary-color-translucent);
+        box-shadow: 0 0 12px var(--primary-color-translucent);
+    }
+    100% {
+        border-color: var(--primary-color);
+        box-shadow: 0 0 8px var(--primary-color-translucent);
+    }
 }
 
 .container {
-  margin-bottom: 1rem;
-  transition: all 0.2s ease-in-out;
+    margin-bottom: 1rem;
+    transition: all 0.2s ease-in-out;
 }
 
 .item {
-  background: var(--background-color-secondary);
-  border: 1px solid var(--border-color);
-  border-radius: 8px;
-  padding: 1rem;
-  display: grid;
-  grid-template-areas:
+    background: var(--background-color-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 1rem;
+    display: grid;
+    grid-template-areas:
     "main meta"
     "progress progress"
     "controls controls";
-  grid-template-columns: 1fr auto;
-  gap: 0.75rem;
-  transition: all 0.2s ease-in-out;
+    grid-template-columns: 1fr auto;
+    gap: 0.75rem;
+    transition: all 0.2s ease-in-out;
 }
 
 .item:hover {
-  border-color: var(--primary-color);
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    border-color: var(--primary-color);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 .item.selected {
-  border-color: var(--primary-color);
-  box-shadow: 0 0 8px var(--primary-color-translucent);
+    border-color: var(--primary-color);
+    box-shadow: 0 0 8px var(--primary-color-translucent);
 }
 
 .item.dimmed {
-  opacity: 0.5;
-  background: var(--background-color-tertiary);
+    opacity: 0.5;
+    background: var(--background-color-tertiary);
 }
 
 .item.editing {
-  border-color: var(--primary-color);
-  box-shadow: 0 0 8px var(--primary-color-translucent);
+    border-color: var(--primary-color);
+    box-shadow: 0 0 8px var(--primary-color-translucent);
 }
 
 .item.processing {
-  animation: pulse 2s infinite;
+    animation: pulse 2s infinite;
 }
 
 .mainInfo {
-  grid-area: main;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
+    grid-area: main;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
 }
 
 .dragHandle {
-  cursor: grab;
-  color: var(--text-color-tertiary);
-  padding: 0 0.25rem;
+    cursor: grab;
+    color: var(--text-color-tertiary);
+    padding: 0 0.25rem;
 }
 
 .dragHandle:hover {
-  color: var(--text-color-secondary);
+    color: var(--text-color-secondary);
 }
 
 .expandBtn {
-  background: none;
-  border: none;
-  cursor: pointer;
-  padding: 0.25rem;
-  font-size: 1rem;
-  color: var(--text-color-secondary);
-  transition: color 0.2s;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0.25rem;
+    font-size: 1rem;
+    color: var(--text-color-secondary);
+    transition: color 0.2s;
 }
 
 .expandBtn:not(:disabled):hover {
-  color: var(--primary-color);
+    color: var(--primary-color);
 }
 
 .expandBtn:disabled {
-  cursor: default;
-  color: var(--border-color);
+    cursor: default;
+    color: var(--border-color);
 }
 
 .expandPlaceholder {
-  display: inline-block;
-  width: calc(1rem + 0.5rem); /* icon size + padding */
+    display: inline-block;
+    width: calc(1rem + 0.5rem); /* icon size + padding */
 }
 
 .titleAndDescription {
-  display: flex;
-  flex-direction: column;
-  flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
 }
 
 .title {
-  font-size: 1.1rem;
-  font-weight: 600;
-  margin: 0;
-  color: var(--text-color-primary);
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin: 0;
+    color: var(--text-color-primary);
 }
 
 .description {
-  font-size: 0.9rem;
-  color: var(--text-color-secondary);
-  margin: 0.25rem 0 0;
+    font-size: 0.9rem;
+    color: var(--text-color-secondary);
+    margin: 0.25rem 0 0;
 }
 
 .titleInput, .descriptionInput {
-  background: var(--background-color);
-  border: 1px solid var(--border-color-focus);
-  border-radius: 4px;
-  color: var(--text-color-primary);
-  padding: 0.5rem;
-  width: 100%;
+    background: var(--background-color);
+    border: 1px solid var(--border-color-focus);
+    border-radius: 4px;
+    color: var(--text-color-primary);
+    padding: 0.5rem;
+    width: 100%;
 }
 
 .titleInput {
-  font-size: 1.1rem;
-  font-weight: 600;
+    font-size: 1.1rem;
+    font-weight: 600;
 }
 
 .descriptionInput {
-  font-size: 0.9rem;
-  margin-top: 0.25rem;
-  resize: vertical;
+    font-size: 0.9rem;
+    margin-top: 0.25rem;
+    resize: vertical;
 }
 
 .metaInfo {
-  grid-area: meta;
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
+    grid-area: meta;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
 }
 
 .subtaskIndicator {
-  display: flex;
-  align-items: center;
-  gap: 0.35rem;
-  font-size: 0.85rem;
-  color: var(--text-color-secondary);
-  background-color: var(--background-color-tertiary);
-  padding: 0.25rem 0.5rem;
-  border-radius: 12px;
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    font-size: 0.85rem;
+    color: var(--text-color-secondary);
+    background-color: var(--background-color-tertiary);
+    padding: 0.25rem 0.5rem;
+    border-radius: 12px;
 }
 
 .progressContainer {
-  grid-area: progress;
+    grid-area: progress;
 }
 
 .controlsContainer {
-  grid-area: controls;
-  border-top: 1px solid var(--border-color);
-  padding-top: 0.75rem;
-  margin-top: 0.25rem;
-  display: flex;
-  justify-content: flex-end;
+    grid-area: controls;
+    border-top: 1px solid var(--border-color);
+    padding-top: 0.75rem;
+    margin-top: 0.25rem;
+    display: flex;
+    justify-content: flex-end;
 }
 
 .saveBtn {
-  color: var(--primary-color);
+    color: var(--primary-color);
 }
 
 .subTaskContainer {
-  margin-left: 2rem;
-  padding-left: 1rem;
-  border-left: 2px solid var(--border-color);
+    margin-left: 2rem;
+    padding-left: 1rem;
+    border-left: 2px solid var(--border-color);
 }

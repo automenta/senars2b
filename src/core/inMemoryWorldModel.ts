@@ -1,9 +1,5 @@
-import {
-    CognitiveItem,
-    SemanticAtom
-} from '../interfaces/types';
+import {CognitiveItem, SemanticAtom} from '../interfaces/types';
 import {CognitiveSchema, WorldModel} from './worldModel';
-import {BeliefRevisionEngine} from './beliefRevisionEngine';
 
 // Simple in-memory implementation of WorldModel for testing
 export class InMemoryWorldModel implements WorldModel {

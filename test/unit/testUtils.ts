@@ -1,11 +1,23 @@
 import {v4 as uuidv4} from 'uuid';
-import {
-    AttentionValue,
-    CognitiveItem,
-    SemanticAtom,
-    TruthValue
-} from '@/interfaces/types';
-import {CognitiveSchema, WorldModel} from '@/core/worldModel';
+/**
+ * Creates a CognitiveItem of type TASK
+ * @param overrides Partial CognitiveItem properties to override defaults
+ * @returns A new CognitiveItem of type TASK with default properties and any provided overrides
+ */
+import {AttentionValue, CognitiveItem, SemanticAtom, TaskMetadata, TruthValue} from '@/interfaces/types';
+import {CognitiveSchema, PersistentWorldModel} from '@/core/worldModel';
+import {CognitiveCoreConfig, CognitiveCoreDependencies, DecentralizedCognitiveCore} from '@/core/cognitiveCore';
+import {PriorityAgenda} from '@/core/agenda';
+import {UnifiedTaskManager} from '@/modules/taskManager';
+import {TaskOrchestrator} from '@/modules/taskOrchestrator';
+import {DynamicAttentionModule} from '@/core/attentionModule';
+import {SimpleBeliefRevisionEngine} from '@/core/beliefRevisionEngine';
+import {HybridResonanceModule} from '@/core/resonanceModule';
+import {EfficientSchemaMatcher} from '@/core/schemaMatcher';
+import {HierarchicalGoalTreeManager} from '@/core/goalTreeManager';
+import {ReflectionLoop} from '@/core/reflectionLoop';
+import {ActionSubsystem} from '@/actions/actionSubsystem';
+import {SchemaLearningModule} from '@/modules/schemaLearningModule';
 
 /**
  * Creates a basic CognitiveItem with default values
@@ -24,26 +36,6 @@ export function createCognitiveItem(overrides: Partial<CognitiveItem> = {}): Cog
     };
 }
 
-
-/**
- * Creates a CognitiveItem of type TASK
- * @param overrides Partial CognitiveItem properties to override defaults
- * @returns A new CognitiveItem of type TASK with default properties and any provided overrides
- */
-import { TaskMetadata } from '@/interfaces/types';
-import { CognitiveCoreDependencies, DecentralizedCognitiveCore, CognitiveCoreConfig } from '@/core/cognitiveCore';
-import { PriorityAgenda } from '@/core/agenda';
-import { PersistentWorldModel } from '@/core/worldModel';
-import { UnifiedTaskManager } from '@/modules/taskManager';
-import { TaskOrchestrator } from '@/modules/taskOrchestrator';
-import { DynamicAttentionModule } from '@/core/attentionModule';
-import { SimpleBeliefRevisionEngine } from '@/core/beliefRevisionEngine';
-import { HybridResonanceModule } from '@/core/resonanceModule';
-import { EfficientSchemaMatcher } from '@/core/schemaMatcher';
-import { HierarchicalGoalTreeManager } from '@/core/goalTreeManager';
-import { ReflectionLoop } from '@/core/reflectionLoop';
-import { ActionSubsystem } from '@/actions/actionSubsystem';
-import { SchemaLearningModule } from '@/modules/schemaLearningModule';
 
 export function createCoreWithRealDependencies(config: CognitiveCoreConfig = {}): DecentralizedCognitiveCore {
     const worldModel = new PersistentWorldModel();
@@ -78,7 +70,7 @@ export function createTaskItem(overrides: Partial<CognitiveItem> = {}): Cognitiv
     };
 
     const taskMetadata = overrides.task_metadata
-        ? { ...defaultTaskMetadata, ...overrides.task_metadata }
+        ? {...defaultTaskMetadata, ...overrides.task_metadata}
         : defaultTaskMetadata;
 
     const now = Date.now();

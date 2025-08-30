@@ -1,22 +1,22 @@
 import {WebSocketServer} from 'ws';
-import WebSocket = require('ws');
-import {DecentralizedCognitiveCore, CognitiveCoreDependencies} from '../core/cognitiveCore';
+import {CognitiveCoreDependencies, DecentralizedCognitiveCore} from '../core/cognitiveCore';
 import {PerceptionSubsystem} from '../modules/perceptionSubsystem';
 import {AttentionValue, CognitiveItem, TruthValue} from '../interfaces/types';
-import { PriorityAgenda } from '../core/agenda';
-import { PersistentWorldModel } from '../core/worldModel';
-import { UnifiedTaskManager } from '../modules/taskManager';
-import { TaskOrchestrator } from '../modules/taskOrchestrator';
-import { DynamicAttentionModule } from '../core/attentionModule';
-import { SimpleBeliefRevisionEngine } from '../core/beliefRevisionEngine';
-import { HybridResonanceModule } from '../core/resonanceModule';
-import { EfficientSchemaMatcher } from '../core/schemaMatcher';
-import { HierarchicalGoalTreeManager } from '../core/goalTreeManager';
-import { ReflectionLoop } from '../core/reflectionLoop';
-import { ActionSubsystem } from '../actions/actionSubsystem';
-import { SchemaLearningModule } from '../modules/schemaLearningModule';
+import {PriorityAgenda} from '../core/agenda';
+import {PersistentWorldModel} from '../core/worldModel';
+import {UnifiedTaskManager} from '../modules/taskManager';
+import {TaskOrchestrator} from '../modules/taskOrchestrator';
+import {DynamicAttentionModule} from '../core/attentionModule';
+import {SimpleBeliefRevisionEngine} from '../core/beliefRevisionEngine';
+import {HybridResonanceModule} from '../core/resonanceModule';
+import {EfficientSchemaMatcher} from '../core/schemaMatcher';
+import {HierarchicalGoalTreeManager} from '../core/goalTreeManager';
+import {ReflectionLoop} from '../core/reflectionLoop';
+import {ActionSubsystem} from '../actions/actionSubsystem';
+import {SchemaLearningModule} from '../modules/schemaLearningModule';
 import {TaskWebSocketHandler} from '../interfaces/taskWebSocketInterface';
 import {v4 as uuidv4} from 'uuid';
+import WebSocket = require('ws');
 
 // Define the message types for our metaprogrammatic interface
 interface WebSocketMessage {
@@ -83,18 +83,18 @@ export class WebSocketInterface {
             schemaLearningModule: new SchemaLearningModule(worldModel),
         };
 
-        this.core = new DecentralizedCognitiveCore(dependencies, { workerCount: workerCount });
+        this.core = new DecentralizedCognitiveCore(dependencies, {workerCount: workerCount});
         this.perception = new PerceptionSubsystem();
-        
+
         // Initialize task manager with access to agenda and world model
         this.taskManager = new UnifiedTaskManager(
             this.core as any, // Access to agenda - in a full implementation, we'd provide a proper interface
             this.core.getWorldModel()
         );
-        
+
         // Initialize task WebSocket handler
         this.taskWebSocketHandler = new TaskWebSocketHandler(this.taskManager);
-        
+
         this.startTime = Date.now();
 
         // Define available methods for each component
@@ -263,7 +263,7 @@ export class WebSocketInterface {
     public getSystemDiagnostics(): any {
         const serverStats = this.getServerStats();
         const systemStatus = this.core.getSystemStatus();
-        
+
         // Add additional diagnostics information
         const diagnostics = {
             server: serverStats,
@@ -291,7 +291,7 @@ export class WebSocketInterface {
                 version: process.version
             }
         };
-        
+
         return diagnostics;
     }
 
@@ -322,7 +322,7 @@ export class WebSocketInterface {
             ws.on('message', (data: WebSocket.Data) => {
                 try {
                     const message: WebSocketMessage = JSON.parse(data.toString());
-                    
+
                     this.handleMessage(ws, message);
                 } catch (error) {
                     console.error('Failed to parse message:', error);

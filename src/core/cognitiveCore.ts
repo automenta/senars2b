@@ -1,4 +1,4 @@
-import {PersistentWorldModel, CognitiveSchema, WorldModel} from './worldModel';
+import {CognitiveSchema, PersistentWorldModel, WorldModel} from './worldModel';
 import {BeliefRevisionEngine} from './beliefRevisionEngine';
 import {AttentionModule} from './attentionModule';
 import {ResonanceModule} from './resonanceModule';
@@ -10,23 +10,14 @@ import {ActionSubsystem} from '../actions/actionSubsystem';
 import {SchemaLearningModule} from '../modules/schemaLearningModule';
 import {HistoryAnalysisSchema, HistoryRecordingSchema} from '../modules/systemSchemas';
 import {DecompositionSchema} from '../modules/decompositionSchema';
-import {
-    AttentionValue,
-    CognitiveItem,
-    SemanticAtom,
-    TruthValue
-} from '../interfaces/types';
+import {AttentionValue, CognitiveItem, SemanticAtom, TruthValue} from '../interfaces/types';
 import {Agenda} from './agenda';
 import {v4 as uuidv4} from 'uuid';
 import {embeddingService} from '../services/embeddingService';
-import { TaskManager } from '../modules/taskManager';
-import { TaskOrchestrator } from '../modules/taskOrchestrator';
-import { AddBeliefSchema, AddGoalSchema, AddSchemaSchema } from '../utils/validators';
-import {
-    GOAL_ACHIEVED_PROBABILITY,
-    GOAL_ACHIEVED_THRESHOLD,
-    SYSTEM_VERSION
-} from '../utils/constants';
+import {TaskManager} from '../modules/taskManager';
+import {TaskOrchestrator} from '../modules/taskOrchestrator';
+import {AddBeliefSchema, AddGoalSchema, AddSchemaSchema} from '../utils/validators';
+import {SYSTEM_VERSION} from '../utils/constants';
 
 export interface CognitiveCoreConfig {
     workerCount?: number;
@@ -87,7 +78,7 @@ export class DecentralizedCognitiveCore {
      * @param config Optional configuration for the cognitive core
      */
     constructor(dependencies: CognitiveCoreDependencies, config: CognitiveCoreConfig = {}) {
-        this.config = { ...DEFAULT_CONFIG, ...config };
+        this.config = {...DEFAULT_CONFIG, ...config};
 
         // Assign dependencies
         this.agenda = dependencies.agenda;
@@ -117,7 +108,7 @@ export class DecentralizedCognitiveCore {
             console.warn("Cognitive core is already running");
             return;
         }
-        
+
         this.isRunning = true;
         this.startTime = Date.now();
         console.log(`Starting cognitive core with ${this.config.workerCount} workers`);
@@ -138,7 +129,7 @@ export class DecentralizedCognitiveCore {
             console.warn("Cognitive core is not running");
             return;
         }
-        
+
         this.isRunning = false;
         if (this.reflectionInterval) {
             clearInterval(this.reflectionInterval);
@@ -158,11 +149,11 @@ export class DecentralizedCognitiveCore {
      */
     public async addInitialBelief(content: any, truth: TruthValue, attention: AttentionValue, meta?: Record<string, any>): Promise<void> {
         // Validate input using Zod schema
-        const validationResult = AddBeliefSchema.safeParse({ content, truth, attention, meta });
+        const validationResult = AddBeliefSchema.safeParse({content, truth, attention, meta});
         if (!validationResult.success) {
             throw new Error(`Invalid belief input: ${JSON.stringify(validationResult.error.flatten().fieldErrors)}`);
         }
-        const { content: validatedContent } = validationResult.data;
+        const {content: validatedContent} = validationResult.data;
 
         const atomMeta = {
             type: "Fact",
@@ -186,11 +177,11 @@ export class DecentralizedCognitiveCore {
      */
     public async addInitialGoal(content: any, attention: AttentionValue, meta?: Record<string, any>): Promise<void> {
         // Validate input using Zod schema
-        const validationResult = AddGoalSchema.safeParse({ content, attention, meta });
+        const validationResult = AddGoalSchema.safeParse({content, attention, meta});
         if (!validationResult.success) {
             throw new Error(`Invalid goal input: ${JSON.stringify(validationResult.error.flatten().fieldErrors)}`);
         }
-        const { content: validatedContent } = validationResult.data;
+        const {content: validatedContent} = validationResult.data;
 
         const atomMeta = {
             type: "Fact",
@@ -213,11 +204,11 @@ export class DecentralizedCognitiveCore {
      */
     public async addSchema(content: any, meta?: Record<string, any>): Promise<void> {
         // Validate input using Zod schema
-        const validationResult = AddSchemaSchema.safeParse({ content, meta });
+        const validationResult = AddSchemaSchema.safeParse({content, meta});
         if (!validationResult.success) {
             throw new Error(`Invalid schema input: ${JSON.stringify(validationResult.error.flatten().fieldErrors)}`);
         }
-        const { content: validatedContent } = validationResult.data;
+        const {content: validatedContent} = validationResult.data;
 
         const atomMeta = {
             type: "CognitiveSchema",
@@ -229,19 +220,6 @@ export class DecentralizedCognitiveCore {
 
         const atom = await this._createAndStoreAtom(validatedContent, atomMeta);
         this.schemaMatcher.register_schema(atom, this.worldModel);
-    }
-
-    private async _createAndStoreAtom(content: string, meta: Record<string, any>): Promise<SemanticAtom> {
-        const atom: SemanticAtom = {
-            id: uuidv4(),
-            content: content,
-            embedding: await this.generateEmbedding(content),
-            creationTime: Date.now(),
-            lastAccessTime: Date.now(),
-            meta: meta
-        };
-        this.worldModel.add_atom(atom);
-        return atom;
     }
 
     /**
@@ -272,6 +250,35 @@ export class DecentralizedCognitiveCore {
         };
     }
 
+    /**
+     * Get the world model instance
+     * @returns The world model component
+     */
+    public getWorldModel(): WorldModel {
+        return this.worldModel;
+    }
+
+    /**
+     * Set a handler for internally generated events
+     * @param handler The function to call when an event is generated
+     */
+    public setEventHandler(handler: (event: CognitiveItem) => void): void {
+        this.eventHandler = handler;
+    }
+
+    private async _createAndStoreAtom(content: string, meta: Record<string, any>): Promise<SemanticAtom> {
+        const atom: SemanticAtom = {
+            id: uuidv4(),
+            content: content,
+            embedding: await this.generateEmbedding(content),
+            creationTime: Date.now(),
+            lastAccessTime: Date.now(),
+            meta: meta
+        };
+        this.worldModel.add_atom(atom);
+        return atom;
+    }
+
     private _getPerformanceStats() {
         const totalItems = Array.from(this.workerStatistics.values()).reduce((acc, stats) => acc + stats.itemsProcessed, 0);
         const totalTime = Array.from(this.workerStatistics.values()).reduce((acc, stats) => acc + stats.totalProcessingTime, 0);
@@ -296,23 +303,6 @@ export class DecentralizedCognitiveCore {
             systemLoad: parseFloat(systemLoad.toFixed(2))
         };
     }
-
-    /**
-     * Get the world model instance
-     * @returns The world model component
-     */
-    public getWorldModel(): WorldModel {
-        return this.worldModel;
-    }
-
-    /**
-     * Set a handler for internally generated events
-     * @param handler The function to call when an event is generated
-     */
-    public setEventHandler(handler: (event: CognitiveItem) => void): void {
-        this.eventHandler = handler;
-    }
-
 
     /**
      * Register built-in system schemas
@@ -438,7 +428,7 @@ export class DecentralizedCognitiveCore {
             if (itemA.type === 'TASK') {
                 const orchestrationResult = this.taskOrchestrator.orchestrate(itemA);
                 if (orchestrationResult) {
-                    const { updatedTask, newItems } = orchestrationResult;
+                    const {updatedTask, newItems} = orchestrationResult;
 
                     // Persist the updated task state
                     this.taskManager.updateTask(updatedTask.id, updatedTask);
@@ -564,7 +554,8 @@ export class DecentralizedCognitiveCore {
         console.log("Worker Statistics:");
         for (const [workerId, stats] of this.workerStatistics.entries()) {
             console.log(`  Worker ${workerId}: ${stats.itemsProcessed} items processed, ${stats.errors} errors`);
-        };
+        }
+        ;
     }
 
     /**

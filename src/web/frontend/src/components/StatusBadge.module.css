@@ -1,25 +1,54 @@
 .badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5em;
-  padding: 0.35em 0.65em;
-  font-size: 0.8em;
-  font-weight: 700;
-  line-height: 1;
-  color: #fff;
-  text-align: center;
-  white-space: nowrap;
-  vertical-align: baseline;
-  border-radius: var(--border-radius);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5em;
+    padding: 0.35em 0.65em;
+    font-size: 0.8em;
+    font-weight: 700;
+    line-height: 1;
+    color: #fff;
+    text-align: center;
+    white-space: nowrap;
+    vertical-align: baseline;
+    border-radius: var(--border-radius);
 }
 
-.pending { background-color: #6c757d; }
-.inProgress { background-color: #0d6efd; }
-.completed { background-color: #198754; }
-.paused { background-color: #ffc107; }
-.failed { background-color: #dc3545; }
-.deferred { background-color: #ffc107; }
-.awaiting { background-color: #6c757d; }
-.decomposing { background-color: #0d6efd; }
-.ready { background-color: #0d6efd; }
-.default { background-color: #6c757d; }
+.pending {
+    background-color: #6c757d;
+}
+
+.inProgress {
+    background-color: #0d6efd;
+}
+
+.completed {
+    background-color: #198754;
+}
+
+.paused {
+    background-color: #ffc107;
+}
+
+.failed {
+    background-color: #dc3545;
+}
+
+.deferred {
+    background-color: #ffc107;
+}
+
+.awaiting {
+    background-color: #6c757d;
+}
+
+.decomposing {
+    background-color: #0d6efd;
+}
+
+.ready {
+    background-color: #0d6efd;
+}
+
+.default {
+    background-color: #6c757d;
+}

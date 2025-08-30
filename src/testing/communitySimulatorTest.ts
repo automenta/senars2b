@@ -1,19 +1,19 @@
 // Test for the Community Simulator component
 const testCommunitySimulator = () => {
     console.log('Testing Community Simulator Component...');
-    
+
     // Mock the unified interface
     const mockUnifiedInterface = {
         showNotification: (message: string, type: string) => {
             console.log(`Notification: ${type} - ${message}`);
         }
     };
-    
+
     // Test that we can create a CommunitySimulator instance
     try {
         // Since we're in a Node.js environment, we can't directly test the DOM components
         // But we can test the core logic
-        
+
         // Test problem definitions
         const problems = {
             medical: {
@@ -33,9 +33,9 @@ const testCommunitySimulator = () => {
                 skills: ["Environmental Science", "Risk Analysis", "Policy Evaluation"]
             }
         };
-        
+
         console.log('✓ Problem definitions test passed');
-        
+
         // Test agent roles
         const roles = [
             "Medical Doctor",
@@ -49,9 +49,9 @@ const testCommunitySimulator = () => {
             "Data Analyst",
             "Legal Advisor"
         ];
-        
+
         console.log('✓ Agent roles test passed');
-        
+
         // Test expertise areas
         const expertise = [
             "Clinical Diagnosis",
@@ -65,9 +65,9 @@ const testCommunitySimulator = () => {
             "Statistical Modeling",
             "Legal Risk Assessment"
         ];
-        
+
         console.log('✓ Expertise areas test passed');
-        
+
         // Test that we have the required methods
         const requiredMethods = [
             'deployAgent',
@@ -78,13 +78,13 @@ const testCommunitySimulator = () => {
             'generateAgentActions',
             'processCollaborativeInput'
         ];
-        
+
         console.log('✓ Required methods structure test passed');
-        
+
     } catch (error) {
         console.error('✗ Community Simulator test failed:', error);
     }
-    
+
     console.log('Community Simulator Component Tests Completed');
 };
 
@@ -95,18 +95,21 @@ global.document = {
         textContent: '',
         innerHTML: '',
         style: {},
-        appendChild: () => {},
-        addEventListener: () => {},
+        appendChild: () => {
+        },
+        addEventListener: () => {
+        },
         querySelector: () => null,
         querySelectorAll: () => []
     })
 } as any;
 
 global.window = {
-    addEventListener: () => {}
+    addEventListener: () => {
+    }
 } as any;
 
 // Run the test
 testCommunitySimulator();
 
-export { testCommunitySimulator };
+export {testCommunitySimulator};

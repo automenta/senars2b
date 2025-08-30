@@ -1,6 +1,6 @@
-import { CognitiveItem } from '../interfaces/types';
-import { CognitiveSchema, WorldModel } from '../core/worldModel';
-import { TaskFactory } from './taskFactory';
+import {CognitiveItem} from '../interfaces/types';
+import {CognitiveSchema, WorldModel} from '../core/worldModel';
+import {TaskFactory} from './taskFactory';
 
 /**
  * A system-level schema to decompose a complex task into a series of subtasks
@@ -12,7 +12,7 @@ export const DecompositionSchema: CognitiveSchema = {
     apply: (itemA: CognitiveItem, itemB: CognitiveItem, worldModel: WorldModel): CognitiveItem[] => {
         // This schema triggers when a "Decompose" goal is paired with a task.
         const goal = (itemA.type === 'GOAL' && itemA.label.startsWith('Decompose:')) ? itemA :
-                     (itemB.type === 'GOAL' && itemB.label.startsWith('Decompose:')) ? itemB : null;
+            (itemB.type === 'GOAL' && itemB.label.startsWith('Decompose:')) ? itemB : null;
 
         const task = (itemA.type === 'TASK') ? itemA : (itemB.type === 'TASK') ? itemB : null;
 
@@ -44,9 +44,9 @@ export const DecompositionSchema: CognitiveSchema = {
         }
 
         const steps = planText.split('\n')
-                              .map(line => line.trim())
-                              .filter(line => line.match(/^(\d+\.|-|\*)\s/))
-                              .map(line => line.replace(/^(\d+\.|-|\*)\s/, ''));
+            .map(line => line.trim())
+            .filter(line => line.match(/^(\d+\.|-|\*)\s/))
+            .map(line => line.replace(/^(\d+\.|-|\*)\s/, ''));
 
         if (steps.length === 0) {
             console.log(`DecompositionSchema: Found knowledge, but could not extract steps from: "${planText}"`);
@@ -60,7 +60,7 @@ export const DecompositionSchema: CognitiveSchema = {
             return TaskFactory.createSubtask(
                 task.id,
                 stepContent,
-                { ...task.attention, priority: task.attention.priority * 0.9 },
+                {...task.attention, priority: task.attention.priority * 0.9},
                 task.task_metadata!.priority_level
             );
         });

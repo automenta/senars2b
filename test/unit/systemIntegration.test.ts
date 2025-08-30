@@ -13,7 +13,7 @@ describe('System Integration Tests', () => {
     const mockEmbeddingService = embeddingService as jest.Mocked<typeof embeddingService>;
 
     beforeEach(() => {
-        core = createCoreWithRealDependencies({ workerCount: 2 });
+        core = createCoreWithRealDependencies({workerCount: 2});
         perception = new PerceptionSubsystem();
         mockEmbeddingService.generateEmbedding.mockResolvedValue(Array(384).fill(0.5));
     });

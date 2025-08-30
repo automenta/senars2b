@@ -1,127 +1,127 @@
 .container {
-  padding: 2rem;
+    padding: 2rem;
 }
 
 .card {
-  background: var(--background-color-secondary);
-  border: 1px solid var(--border-color);
-  border-radius: 8px;
-  margin-bottom: 2rem;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    background: var(--background-color-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    margin-bottom: 2rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
 }
 
 .cardHeader {
-  padding: 1rem 1.5rem;
-  margin: 0;
-  background: var(--background-color-tertiary);
-  border-bottom: 1px solid var(--border-color);
-  font-size: 1.2rem;
+    padding: 1rem 1.5rem;
+    margin: 0;
+    background: var(--background-color-tertiary);
+    border-bottom: 1px solid var(--border-color);
+    font-size: 1.2rem;
 }
 
 .cardBody {
-  padding: 1.5rem;
+    padding: 1.5rem;
 }
 
 .settingRow {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 1rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
 }
 
 .settingRow:last-child {
-  margin-bottom: 0;
+    margin-bottom: 0;
 }
 
 .settingRow label {
-  font-weight: 500;
+    font-weight: 500;
 }
 
 .themeSwitcher button {
-  padding: 0.5rem 1rem;
-  border: 1px solid var(--border-color);
-  background: var(--background-color);
-  cursor: pointer;
+    padding: 0.5rem 1rem;
+    border: 1px solid var(--border-color);
+    background: var(--background-color);
+    cursor: pointer;
 }
 
 .themeSwitcher button:first-child {
-  border-top-left-radius: 4px;
-  border-bottom-left-radius: 4px;
+    border-top-left-radius: 4px;
+    border-bottom-left-radius: 4px;
 }
 
 .themeSwitcher button:last-child {
-  border-top-right-radius: 4px;
-  border-bottom-right-radius: 4px;
-  border-left: none;
+    border-top-right-radius: 4px;
+    border-bottom-right-radius: 4px;
+    border-left: none;
 }
 
 .themeSwitcher button:disabled {
-  background: var(--primary-color);
-  color: white;
-  cursor: default;
+    background: var(--primary-color);
+    color: white;
+    cursor: default;
 }
 
 .switch {
-  position: relative;
-  display: inline-block;
-  width: 60px;
-  height: 34px;
+    position: relative;
+    display: inline-block;
+    width: 60px;
+    height: 34px;
 }
 
 .switch input {
-  opacity: 0;
-  width: 0;
-  height: 0;
+    opacity: 0;
+    width: 0;
+    height: 0;
 }
 
 .slider {
-  position: absolute;
-  cursor: pointer;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: #ccc;
-  transition: .4s;
-  border-radius: 34px;
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    transition: .4s;
+    border-radius: 34px;
 }
 
 .slider:before {
-  position: absolute;
-  content: "";
-  height: 26px;
-  width: 26px;
-  left: 4px;
-  bottom: 4px;
-  background-color: white;
-  transition: .4s;
-  border-radius: 50%;
+    position: absolute;
+    content: "";
+    height: 26px;
+    width: 26px;
+    left: 4px;
+    bottom: 4px;
+    background-color: white;
+    transition: .4s;
+    border-radius: 50%;
 }
 
 input:checked + .slider {
-  background-color: var(--primary-color);
+    background-color: var(--primary-color);
 }
 
 input:checked + .slider:before {
-  transform: translateX(26px);
+    transform: translateX(26px);
 }
 
 .saveButton {
-  padding: 0.75rem 1.5rem;
-  border: none;
-  background-color: var(--primary-color);
-  color: white;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 1rem;
-  font-weight: 600;
+    padding: 0.75rem 1.5rem;
+    border: none;
+    background-color: var(--primary-color);
+    color: white;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: 600;
 }
 
 pre {
-  margin-top: 1rem;
-  white-space: pre-wrap;
-  word-break: break-all;
-  background: var(--background-color);
-  padding: 1rem;
-  border-radius: 4px;
+    margin-top: 1rem;
+    white-space: pre-wrap;
+    word-break: break-all;
+    background: var(--background-color);
+    padding: 1rem;
+    border-radius: 4px;
 }

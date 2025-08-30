@@ -1,8 +1,6 @@
 import {EfficientSchemaMatcher} from '@/core/schemaMatcher';
 import {PersistentWorldModel} from '@/core/worldModel';
-import {AttentionValue, CognitiveItem, SemanticAtom, TruthValue} from '@/interfaces/types';
-import {CognitiveSchema, WorldModel} from '@/core/worldModel';
-import {createCognitiveItem, createSemanticAtom, createTruthValue, createAttentionValue, createMockSchema, createBeliefItem} from './testUtils';
+import {createBeliefItem, createSemanticAtom} from './testUtils';
 
 describe('EfficientSchemaMatcher', () => {
     let schemaMatcher: EfficientSchemaMatcher;

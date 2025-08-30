@@ -1,8 +1,7 @@
-import { UnifiedTaskManager } from '@/modules/taskManager';
-import { Agenda } from '@/core/agenda';
-import { WorldModel } from '@/core/worldModel';
-import { createTaskItem } from './testUtils';
-import { CognitiveItem, AttentionValue, TruthValue, DerivationStamp } from '@/interfaces/types';
+import {UnifiedTaskManager} from '@/modules/taskManager';
+import {Agenda} from '@/core/agenda';
+import {WorldModel} from '@/core/worldModel';
+import {createTaskItem} from './testUtils';
 
 // Mock the dependencies using jest.Mocked
 const mockAgenda: jest.Mocked<Agenda> = {
@@ -49,10 +48,22 @@ describe('UnifiedTaskManager', () => {
 
     describe('Constructor', () => {
         it('should load non-terminal tasks from the WorldModel on initialization', () => {
-            const pendingTask = createTaskItem({ id: 'task1', task_metadata: { status: 'pending', priority_level: 'medium' } });
-            const awaitingTask = createTaskItem({ id: 'task2', task_metadata: { status: 'awaiting_dependencies', priority_level: 'medium' } });
-            const completedTask = createTaskItem({ id: 'task3', task_metadata: { status: 'completed', priority_level: 'medium' } });
-            const failedTask = createTaskItem({ id: 'task4', task_metadata: { status: 'failed', priority_level: 'medium' } });
+            const pendingTask = createTaskItem({
+                id: 'task1',
+                task_metadata: {status: 'pending', priority_level: 'medium'}
+            });
+            const awaitingTask = createTaskItem({
+                id: 'task2',
+                task_metadata: {status: 'awaiting_dependencies', priority_level: 'medium'}
+            });
+            const completedTask = createTaskItem({
+                id: 'task3',
+                task_metadata: {status: 'completed', priority_level: 'medium'}
+            });
+            const failedTask = createTaskItem({
+                id: 'task4',
+                task_metadata: {status: 'failed', priority_level: 'medium'}
+            });
             mockWorldModel.getAllItems.mockReturnValue([pendingTask, awaitingTask, completedTask, failedTask]);
 
             const taskManager = new UnifiedTaskManager(mockAgenda, mockWorldModel);
@@ -67,7 +78,7 @@ describe('UnifiedTaskManager', () => {
     describe('addTask', () => {
         it('should create a task, add it to the world model, and push it to the agenda', () => {
             taskManager = new UnifiedTaskManager(mockAgenda, mockWorldModel);
-            const taskData = { label: 'Test Task', attention: { priority: 0.5, durability: 0.5 } };
+            const taskData = {label: 'Test Task', attention: {priority: 0.5, durability: 0.5}};
             const task = taskManager.addTask(taskData);
 
             expect(task.label).toBe('Test Task');
@@ -79,10 +90,10 @@ describe('UnifiedTaskManager', () => {
     describe('updateTask', () => {
         it('should update an existing task in the world model', () => {
             taskManager = new UnifiedTaskManager(mockAgenda, mockWorldModel);
-            const task = createTaskItem({ id: 'task1' });
+            const task = createTaskItem({id: 'task1'});
             mockWorldModel.get_item.mockReturnValue(task);
 
-            const updates = { label: 'Updated Task Label' };
+            const updates = {label: 'Updated Task Label'};
             const updatedTask = taskManager.updateTask('task1', updates);
 
             expect(updatedTask?.label).toBe('Updated Task Label');
@@ -109,21 +120,24 @@ describe('UnifiedTaskManager', () => {
         });
 
         it('completeTask should update status and remove from agenda', () => {
-            const task = createTaskItem({ id: 'task1' });
+            const task = createTaskItem({id: 'task1'});
             mockWorldModel.get_item.mockReturnValue(task);
 
             taskManager.completeTask('task1');
 
             expect(mockWorldModel.update_item).toHaveBeenCalledWith(expect.objectContaining({
                 id: 'task1',
-                task_metadata: expect.objectContaining({ status: 'completed' }),
+                task_metadata: expect.objectContaining({status: 'completed'}),
             }));
             expect(mockAgenda.remove).toHaveBeenCalledWith('task1');
         });
 
         it('failTask should update status and propagate to subtasks', () => {
-            const subtask = createTaskItem({ id: 'sub1' });
-            const parentTask = createTaskItem({ id: 'parent1', task_metadata: { subtasks: ['sub1'], status: 'pending', priority_level: 'medium' } });
+            const subtask = createTaskItem({id: 'sub1'});
+            const parentTask = createTaskItem({
+                id: 'parent1',
+                task_metadata: {subtasks: ['sub1'], status: 'pending', priority_level: 'medium'}
+            });
 
             mockWorldModel.get_item.mockImplementation(id => {
                 if (id === 'parent1') return parentTask;
@@ -136,27 +150,27 @@ describe('UnifiedTaskManager', () => {
             // Check parent task failure
             expect(mockWorldModel.update_item).toHaveBeenCalledWith(expect.objectContaining({
                 id: 'parent1',
-                task_metadata: expect.objectContaining({ status: 'failed' }),
+                task_metadata: expect.objectContaining({status: 'failed'}),
             }));
             expect(mockAgenda.remove).toHaveBeenCalledWith('parent1');
 
             // Check subtask failure propagation
             expect(mockWorldModel.update_item).toHaveBeenCalledWith(expect.objectContaining({
                 id: 'sub1',
-                task_metadata: expect.objectContaining({ status: 'failed' }),
+                task_metadata: expect.objectContaining({status: 'failed'}),
             }));
             expect(mockAgenda.remove).toHaveBeenCalledWith('sub1');
         });
 
         it('deferTask should update status and remove from agenda', () => {
-            const task = createTaskItem({ id: 'task1' });
+            const task = createTaskItem({id: 'task1'});
             mockWorldModel.get_item.mockReturnValue(task);
 
             taskManager.deferTask('task1');
 
             expect(mockWorldModel.update_item).toHaveBeenCalledWith(expect.objectContaining({
                 id: 'task1',
-                task_metadata: expect.objectContaining({ status: 'deferred' }),
+                task_metadata: expect.objectContaining({status: 'deferred'}),
             }));
             expect(mockAgenda.remove).toHaveBeenCalledWith('task1');
         });
@@ -169,20 +183,20 @@ describe('UnifiedTaskManager', () => {
         });
 
         it('should assign a task to a group', () => {
-            const task = createTaskItem({ id: 'task1' });
+            const task = createTaskItem({id: 'task1'});
             mockWorldModel.get_item.mockReturnValue(task);
 
             // Mock updateTask to return the modified task
             taskManager.updateTask = jest.fn().mockImplementation((id, updates) => {
-                const updated = { ...task, ...updates };
-                updated.task_metadata = { ...task.task_metadata, ...updates.task_metadata };
+                const updated = {...task, ...updates};
+                updated.task_metadata = {...task.task_metadata, ...updates.task_metadata};
                 return updated;
             });
 
             const updatedTask = taskManager.assignTaskToGroup('task1', 'group1');
 
             expect(taskManager.updateTask).toHaveBeenCalledWith('task1', {
-                task_metadata: expect.objectContaining({ group_id: 'group1' }),
+                task_metadata: expect.objectContaining({group_id: 'group1'}),
             });
             expect(updatedTask?.task_metadata?.group_id).toBe('group1');
         });
@@ -195,9 +209,18 @@ describe('UnifiedTaskManager', () => {
         });
 
         it('should retrieve tasks by group ID', () => {
-            const task1 = createTaskItem({ id: 'task1', task_metadata: { group_id: 'group1', status: 'pending', priority_level: 'medium' } });
-            const task2 = createTaskItem({ id: 'task2', task_metadata: { group_id: 'group2', status: 'pending', priority_level: 'medium' } });
-            const task3 = createTaskItem({ id: 'task3', task_metadata: { group_id: 'group1', status: 'pending', priority_level: 'medium' } });
+            const task1 = createTaskItem({
+                id: 'task1',
+                task_metadata: {group_id: 'group1', status: 'pending', priority_level: 'medium'}
+            });
+            const task2 = createTaskItem({
+                id: 'task2',
+                task_metadata: {group_id: 'group2', status: 'pending', priority_level: 'medium'}
+            });
+            const task3 = createTaskItem({
+                id: 'task3',
+                task_metadata: {group_id: 'group1', status: 'pending', priority_level: 'medium'}
+            });
             mockWorldModel.getAllItems.mockReturnValue([task1, task2, task3]);
 
             const group1Tasks = taskManager.getTasksByGroupId('group1');
@@ -208,7 +231,10 @@ describe('UnifiedTaskManager', () => {
         });
 
         it('should return an empty array if no tasks match the group ID', () => {
-            const task1 = createTaskItem({ id: 'task1', task_metadata: { group_id: 'group1', status: 'pending', priority_level: 'medium' } });
+            const task1 = createTaskItem({
+                id: 'task1',
+                task_metadata: {group_id: 'group1', status: 'pending', priority_level: 'medium'}
+            });
             mockWorldModel.getAllItems.mockReturnValue([task1]);
 
             const group2Tasks = taskManager.getTasksByGroupId('group2');
@@ -221,11 +247,11 @@ describe('UnifiedTaskManager', () => {
         it('should return correct counts for each task status', () => {
             taskManager = new UnifiedTaskManager(mockAgenda, mockWorldModel);
             const tasks = [
-                createTaskItem({ task_metadata: { status: 'pending', priority_level: 'medium' } }),
-                createTaskItem({ task_metadata: { status: 'awaiting_dependencies', priority_level: 'medium' } }),
-                createTaskItem({ task_metadata: { status: 'awaiting_dependencies', priority_level: 'medium' } }),
-                createTaskItem({ task_metadata: { status: 'decomposing', priority_level: 'medium' } }),
-                createTaskItem({ task_metadata: { status: 'completed', priority_level: 'medium' } }),
+                createTaskItem({task_metadata: {status: 'pending', priority_level: 'medium'}}),
+                createTaskItem({task_metadata: {status: 'awaiting_dependencies', priority_level: 'medium'}}),
+                createTaskItem({task_metadata: {status: 'awaiting_dependencies', priority_level: 'medium'}}),
+                createTaskItem({task_metadata: {status: 'decomposing', priority_level: 'medium'}}),
+                createTaskItem({task_metadata: {status: 'completed', priority_level: 'medium'}}),
             ];
             mockWorldModel.getAllItems.mockReturnValue(tasks);
 

@@ -1,7 +1,7 @@
-import {CognitiveItem, SemanticAtom, TruthValue} from '../interfaces/types';
+import {CognitiveItem} from '../interfaces/types';
 import {Executor} from './actionSubsystem';
 import {CognitiveItemFactory} from '../modules/cognitiveItemFactory';
-import { TaskManager } from '../modules/taskManager';
+import {TaskManager} from '../modules/taskManager';
 
 export class WebSearchExecutor implements Executor {
     can_execute(goal: CognitiveItem): boolean {
