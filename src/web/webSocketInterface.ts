@@ -516,16 +516,19 @@ export class WebSocketInterface {
                     return this.core.getSystemStatus();
                 case 'getSystemDiagnostics':
                     return this.getSystemDiagnostics();
-                case 'getSystemHealth': // Added new method for system health check
+                case 'getSystemHealth':
+                    // Get actual system health status
+                    const systemStatus = this.core.getSystemStatus();
+                    const components = {
+                        core: systemStatus ? 'operational' : 'degraded',
+                        agenda: systemStatus.agendaSize !== undefined ? 'operational' : 'degraded',
+                        worldModel: systemStatus.worldModelStats ? 'operational' : 'degraded',
+                        perception: 'operational' // Perception is always available
+                    };
                     return {
-                        status: 'healthy',
+                        status: Object.values(components).every(status => status === 'operational') ? 'healthy' : 'degraded',
                         timestamp: new Date().toISOString(),
-                        components: {
-                            core: 'operational',
-                            agenda: 'operational',
-                            worldModel: 'operational',
-                            perception: 'operational'
-                        }
+                        components
                     };
                 case 'addInitialBelief':
                     if (!payload?.content || !payload?.truth || !payload?.attention) {
@@ -597,6 +600,10 @@ export class WebSocketInterface {
                                 await this.core.addInitialBelief(item.label, item.truth, item.attention, item.meta);
                                 itemsAdded++;
                             } else if (item.type === 'GOAL' && item.attention) {
+                                await this.core.addInitialGoal(item.label, item.attention, item.meta);
+                                itemsAdded++;
+                            } else if (item.type === 'TASK' && item.attention) {
+                                // Handle task items
                                 await this.core.addInitialGoal(item.label, item.attention, item.meta);
                                 itemsAdded++;
                             }
@@ -701,60 +708,104 @@ export class WebSocketInterface {
     }
 
     private async handleAttentionRequest(method: string, payload?: any): Promise<any> {
-        const responses = {
-            getStatistics: {
-                statistics: {
-                    moduleName: 'AttentionModule',
-                    parameters: {
-                        priorityWeight: 0.7,
-                        durabilityWeight: 0.3
-                    }
-                }
-            },
-            setParameters: {
-                success: true,
-                message: 'Attention parameters updated',
-                parameters: payload
-            },
-            calculate_derived: {
-                success: true,
-                message: 'Derived attention calculated',
-                result: {
-                    priority: 0.5,
-                    durability: 0.4
-                }
-            },
-            update_on_access: {
-                success: true,
-                message: 'Attention updated on access',
-                items: payload?.items || []
-            },
-            run_decay_cycle: {
-                success: true,
-                message: 'Attention decay cycle completed'
-            }
-        };
-
-        if (method in responses) {
-            return responses[method as keyof typeof responses];
-        }
-
-        throw new Error(`Unknown attention method: ${method}`);
-    }
-
-    private async handleResonanceRequest(method: string, payload?: any): Promise<any> {
+        // Access the attention module through the core
+        const attentionModule = this.core as any; // In a full implementation, we'd provide a proper interface
+        
         switch (method) {
             case 'getStatistics':
                 return {
                     statistics: {
+                        moduleName: 'AttentionModule',
+                        parameters: attentionModule.attentionModule.getParameters ? 
+                            attentionModule.attentionModule.getParameters() : 
+                            { priorityWeight: 0.7, durabilityWeight: 0.3 }
+                    }
+                };
+            case 'setParameters':
+                if (attentionModule.attentionModule.setParameters) {
+                    attentionModule.attentionModule.setParameters(payload);
+                }
+                return {
+                    success: true,
+                    message: 'Attention parameters updated',
+                    parameters: payload
+                };
+            case 'calculate_derived':
+                if (attentionModule.attentionModule.calculate_derived) {
+                    const result = attentionModule.attentionModule.calculate_derived(
+                        payload?.items || [],
+                        payload?.schema,
+                        payload?.sourceTrust || 0.5
+                    );
+                    return {
+                        success: true,
+                        message: 'Derived attention calculated',
+                        result
+                    };
+                }
+                return {
+                    success: true,
+                    message: 'Derived attention calculated',
+                    result: {
+                        priority: 0.5,
+                        durability: 0.4
+                    }
+                };
+            case 'update_on_access':
+                if (attentionModule.attentionModule.update_on_access) {
+                    attentionModule.attentionModule.update_on_access(payload?.items || []);
+                }
+                return {
+                    success: true,
+                    message: 'Attention updated on access',
+                    items: payload?.items || []
+                };
+            case 'run_decay_cycle':
+                if (attentionModule.attentionModule.run_decay_cycle) {
+                    attentionModule.attentionModule.run_decay_cycle(
+                        this.core.getWorldModel(),
+                        this.core as any // Access to agenda - in a full implementation, we'd provide a proper interface
+                    );
+                }
+                return {
+                    success: true,
+                    message: 'Attention decay cycle completed'
+                };
+            default:
+                throw new Error(`Unknown attention method: ${method}`);
+        }
+    }
+
+    private async handleResonanceRequest(method: string, payload?: any): Promise<any> {
+        // Access the resonance module through the core
+        const resonanceModule = this.core as any; // In a full implementation, we'd provide a proper interface
+        
+        switch (method) {
+            case 'getStatistics':
+                const stats = resonanceModule.resonanceModule.getStatistics ? 
+                    resonanceModule.resonanceModule.getStatistics() : 
+                    { resonanceCount: 0, activePatterns: [] };
+                return {
+                    statistics: {
                         moduleName: 'ResonanceEngine',
-                        resonanceCount: 0,
-                        activePatterns: []
+                        ...stats
                     }
                 };
             case 'find_context':
                 if (!payload?.item) {
                     throw new Error('Missing required field: item');
+                }
+                if (resonanceModule.resonanceModule.find_context) {
+                    const items = resonanceModule.resonanceModule.find_context(
+                        payload.item,
+                        this.core.getWorldModel(),
+                        payload?.limit || 10
+                    );
+                    return {
+                        success: true,
+                        message: `Found ${items.length} context items`,
+                        items
+                    };
                 }
                 return {
                     success: true,
@@ -767,22 +818,41 @@ export class WebSocketInterface {
     }
 
     private async handleSchemaRequest(method: string, payload?: any): Promise<any> {
+        // Access the schema matcher through the core
+        const schemaMatcher = this.core as any; // In a full implementation, we'd provide a proper interface
+        
         switch (method) {
             case 'getStatistics':
+                const stats = schemaMatcher.schemaMatcher.getStatistics ? 
+                    schemaMatcher.schemaMatcher.getStatistics() : 
+                    { schemaCount: 0, activeSchemas: [] };
                 return {
                     statistics: {
                         moduleName: 'SchemaMatcher',
-                        schemaCount: 0,
-                        activeSchemas: []
+                        ...stats
                     }
                 };
             case 'addSchema':
+                if (schemaMatcher.schemaMatcher.register_schema) {
+                    const atom = await this.core.getWorldModel().get_atom(payload?.atomId);
+                    if (atom) {
+                        schemaMatcher.schemaMatcher.register_schema(atom, this.core.getWorldModel());
+                        return {
+                            success: true,
+                            message: 'Schema added successfully',
+                            schema: payload
+                        };
+                    }
+                }
                 return {
                     success: true,
                     message: 'Schema added successfully',
                     schema: payload
                 };
             case 'removeSchema':
+                if (schemaMatcher.schemaMatcher.unregister_schema) {
+                    schemaMatcher.schemaMatcher.unregister_schema(payload?.id);
+                }
                 return {
                     success: true,
                     message: 'Schema removed successfully',
@@ -791,6 +861,18 @@ export class WebSocketInterface {
             case 'find_applicable':
                 if (!payload?.itemA || !payload?.itemB) {
                     throw new Error('Missing required fields: itemA, itemB');
+                }
+                if (schemaMatcher.schemaMatcher.find_applicable) {
+                    const schemas = schemaMatcher.schemaMatcher.find_applicable(
+                        payload.itemA,
+                        payload.itemB,
+                        this.core.getWorldModel()
+                    );
+                    return {
+                        success: true,
+                        message: `Found ${schemas.length} applicable schemas`,
+                        schemas
+                    };
                 }
                 return {
                     success: true,
@@ -801,12 +883,29 @@ export class WebSocketInterface {
                 if (!payload?.schema || !payload?.itemA || !payload?.itemB) {
                     throw new Error('Missing required fields: schema, itemA, itemB');
                 }
+                if (payload.schema.apply) {
+                    const result = payload.schema.apply(
+                        payload.itemA,
+                        payload.itemB,
+                        this.core.getWorldModel()
+                    );
+                    return {
+                        success: true,
+                        message: 'Schema applied successfully',
+                        result
+                    };
+                }
                 return {
                     success: true,
                     message: 'Schema applied successfully',
                     result: []
                 };
             case 'triggerLearning':
+                const schemaLearningModule = this.core as any;
+                if (schemaLearningModule.schemaLearningModule && 
+                    schemaLearningModule.schemaLearningModule.learnNewSchemas) {
+                    schemaLearningModule.schemaLearningModule.learnNewSchemas();
+                }
                 return {
                     success: true,
                     message: 'Schema learning process initiated'
@@ -817,22 +916,31 @@ export class WebSocketInterface {
     }
 
     private async handleBeliefRequest(method: string, payload?: any): Promise<any> {
+        // Access the belief revision engine through the core
+        const beliefRevisionEngine = this.core as any; // In a full implementation, we'd provide a proper interface
+        
         switch (method) {
             case 'getStatistics':
+                const stats = beliefRevisionEngine.beliefRevisionEngine.getStatistics ? 
+                    beliefRevisionEngine.beliefRevisionEngine.getStatistics() : 
+                    { beliefCount: 0, revisionCount: 0 };
                 return {
                     statistics: {
                         moduleName: 'BeliefRevisionEngine',
-                        beliefCount: 0,
-                        revisionCount: 0
+                        ...stats
                     }
                 };
             case 'addBelief':
+                // In a real implementation, we would add the belief to the world model
+                // For now, we'll just return success
                 return {
                     success: true,
                     message: 'Belief added successfully',
                     belief: payload
                 };
             case 'reviseBelief':
+                // In a real implementation, we would revise the belief in the world model
+                // For now, we'll just return success
                 return {
                     success: true,
                     message: 'Belief revised successfully',
@@ -845,22 +953,31 @@ export class WebSocketInterface {
     }
 
     private async handleGoalRequest(method: string, payload?: any): Promise<any> {
+        // Access the goal tree manager through the core
+        const goalTreeManager = this.core as any; // In a full implementation, we'd provide a proper interface
+        
         switch (method) {
             case 'getStatistics':
+                const stats = goalTreeManager.goalTreeManager.getStatistics ? 
+                    goalTreeManager.goalTreeManager.getStatistics() : 
+                    { goalCount: 0, activeGoals: [] };
                 return {
                     statistics: {
                         moduleName: 'GoalTreeManager',
-                        goalCount: 0,
-                        activeGoals: []
+                        ...stats
                     }
                 };
             case 'addGoal':
+                // In a real implementation, we would add the goal to the world model
+                // For now, we'll just return success
                 return {
                     success: true,
                     message: 'Goal added successfully',
                     goal: payload
                 };
             case 'updateGoal':
+                // In a real implementation, we would update the goal in the world model
+                // For now, we'll just return success
                 return {
                     success: true,
                     message: 'Goal updated successfully',
@@ -871,6 +988,14 @@ export class WebSocketInterface {
                 if (!payload?.goal) {
                     throw new Error('Missing required field: goal');
                 }
+                if (goalTreeManager.goalTreeManager.decompose) {
+                    const subgoals = goalTreeManager.goalTreeManager.decompose(payload.goal);
+                    return {
+                        success: true,
+                        message: 'Goal decomposed successfully',
+                        subgoals
+                    };
+                }
                 return {
                     success: true,
                     message: 'Goal decomposed successfully',
@@ -879,6 +1004,9 @@ export class WebSocketInterface {
             case 'mark_achieved':
                 if (!payload?.goalId) {
                     throw new Error('Missing required field: goalId');
+                }
+                if (goalTreeManager.goalTreeManager.mark_achieved) {
+                    goalTreeManager.goalTreeManager.mark_achieved(payload.goalId);
                 }
                 return {
                     success: true,
@@ -891,22 +1019,33 @@ export class WebSocketInterface {
     }
 
     private async handleReflectionRequest(method: string, payload?: any): Promise<any> {
+        // Access the reflection loop through the core
+        const reflectionLoop = this.core as any; // In a full implementation, we'd provide a proper interface
+        
         switch (method) {
             case 'getStatistics':
+                const stats = reflectionLoop.reflectionLoop.getStatistics ? 
+                    reflectionLoop.reflectionLoop.getStatistics() : 
+                    { reflectionCount: 0, enabled: true };
                 return {
                     statistics: {
                         moduleName: 'ReflectionLoop',
-                        reflectionCount: 0,
-                        enabled: true
+                        ...stats
                     }
                 };
             case 'setEnabled':
+                if (reflectionLoop.reflectionLoop.setEnabled) {
+                    reflectionLoop.reflectionLoop.setEnabled(payload?.enabled);
+                }
                 return {
                     success: true,
                     message: `Reflection ${payload?.enabled ? 'enabled' : 'disabled'}`,
                     enabled: payload?.enabled
                 };
             case 'setParameters':
+                if (reflectionLoop.reflectionLoop.setParameters) {
+                    reflectionLoop.reflectionLoop.setParameters(payload);
+                }
                 return {
                     success: true,
                     message: 'Reflection parameters updated',
@@ -915,6 +1054,9 @@ export class WebSocketInterface {
             case 'recordSchemaUsage':
                 if (!payload?.schemaId) {
                     throw new Error('Missing required field: schemaId');
+                }
+                if (reflectionLoop.reflectionLoop.recordSchemaUsage) {
+                    reflectionLoop.reflectionLoop.recordSchemaUsage(payload.schemaId);
                 }
                 return {
                     success: true,
@@ -925,11 +1067,6 @@ export class WebSocketInterface {
                 throw new Error(`Unknown reflection method: ${method}`);
         }
     }
-
-    // Added for task management
-    // private async handleTaskRequest(method: string, payload?: any): Promise<any> {
-    //     // This method is now handled by the TaskWebSocketHandler
-    // }
 
     private sendError(ws: WebSocket, code: string, message: string): void {
         const errorMessage: WebSocketMessage = {
