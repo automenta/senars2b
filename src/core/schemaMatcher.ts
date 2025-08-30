@@ -3,7 +3,6 @@ import {CognitiveSchema, WorldModel} from './worldModel';
 
 export interface SchemaMatcher {
     register_schema(schema: SemanticAtom, world_model: WorldModel): CognitiveSchema;
-
     find_applicable(a: CognitiveItem, b: CognitiveItem, world_model: WorldModel): CognitiveSchema[];
 }
 

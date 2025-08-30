@@ -2,9 +2,7 @@ import {CognitiveItem, TruthValue} from '../interfaces/types';
 
 export interface BeliefRevisionEngine {
     merge(existing: TruthValue, newTv: TruthValue): TruthValue;
-
     detect_conflict(a: TruthValue, b: TruthValue): boolean;
-
     resolve_conflict(existingItem: CognitiveItem, newItem: CognitiveItem): CognitiveItem;
 }
 

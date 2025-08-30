@@ -541,12 +541,6 @@ export class DecentralizedCognitiveCore {
         }
     }
 
-
-    /**
-     * Process a task item through its lifecycle
-     * @param item The cognitive item to process as a task
-     */
-
     /**
      * Print worker statistics to the console
      */
@@ -555,7 +549,6 @@ export class DecentralizedCognitiveCore {
         for (const [workerId, stats] of this.workerStatistics.entries()) {
             console.log(`  Worker ${workerId}: ${stats.itemsProcessed} items processed, ${stats.errors} errors`);
         }
-        ;
     }
 
     /**

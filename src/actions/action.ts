@@ -34,8 +34,7 @@ export class WebSearchExecutor implements Executor {
             {
                 priority: 0.9,
                 durability: 0.8
-            },
-            goal.id
+            }
         );
         result.label = resultContent;
 
@@ -75,8 +74,7 @@ export class AtomicTaskExecutor implements Executor {
             {
                 priority: 0.7,
                 durability: 0.5
-            },
-            goal.id
+            }
         );
         result.label = `Successfully executed atomic task ${taskId}.`;
 
@@ -111,8 +109,7 @@ export class DiagnosticExecutor implements Executor {
             {
                 priority: 0.95,
                 durability: 0.9
-            },
-            goal.id
+            }
         );
         result.label = resultContent;
 
@@ -148,8 +145,7 @@ export class KnowledgeBaseQueryExecutor implements Executor {
             {
                 priority: 0.8,
                 durability: 0.85
-            },
-            goal.id
+            }
         );
         result.label = resultContent;
 
@@ -185,8 +181,7 @@ export class PlanningExecutor implements Executor {
             {
                 priority: 0.85,
                 durability: 0.9
-            },
-            goal.id
+            }
         );
         result.label = resultContent;
 

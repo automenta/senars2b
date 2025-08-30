@@ -10,42 +10,26 @@ export type CognitiveSchema = {
 
 export interface WorldModel {
     add_atom(atom: SemanticAtom): string;
-
     add_item(item: CognitiveItem): void;
-
     update_item(item: CognitiveItem): void;
-
     remove_item(id: string): boolean;
-
     get_atom(id: string): SemanticAtom | null;
-
     get_item(id: string): CognitiveItem | null;
-
     query_by_semantic(embedding: number[], k: number): CognitiveItem[];
-
     query_by_symbolic(pattern: any, k?: number): CognitiveItem[];
-
     query_by_structure(pattern: any, k?: number): CognitiveItem[];
-
     query_by_meta(key: string, value: any): CognitiveItem[];
-
     query_atoms_by_meta(key: string, value: any): SemanticAtom[];
-
     revise_belief(new_item: CognitiveItem): [CognitiveItem | null, CognitiveItem | null];
-
     register_schema_atom(atom: SemanticAtom): CognitiveSchema;
-
     getStatistics(): {
         atomCount: number;
         itemCount: number;
         schemaCount: number;
         averageItemDurability: number;
     };
-
     getItemHistory(itemId: string): CognitiveItem[];
-
     getConfidenceDistribution(): { bins: string[], counts: number[] };
-
     getAllItems(): CognitiveItem[];
 }
 
@@ -276,7 +260,7 @@ export class PersistentWorldModel implements WorldModel {
             // Check for conflict
             if (this.beliefRevisionEngine.detect_conflict(existing.truth, new_item.truth)) {
                 console.warn(`Conflict detected between beliefs for item ${new_item.id}`);
-                revisedItem = (this.beliefRevisionEngine as any).resolve_conflict(existing, new_item);
+                revisedItem = this.beliefRevisionEngine.resolve_conflict(existing, new_item);
             } else {
                 // Merge the beliefs
                 const mergedTruth = this.beliefRevisionEngine.merge(existing.truth, new_item.truth);

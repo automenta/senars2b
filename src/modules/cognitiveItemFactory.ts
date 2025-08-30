@@ -2,8 +2,8 @@ import {AttentionValue, CognitiveItem, DerivationStamp, TaskMetadata, TruthValue
 import {v4 as uuidv4} from 'uuid';
 
 /**
- * CognitiveItemFactory - Factory for creating cognitive items with consistent structure
- *
+ * Factory for creating cognitive items with consistent structure
+ * 
  * This factory ensures that all cognitive items are created with proper UUIDs,
  * timestamps, and consistent structure according to the cognitive architecture.
  */
@@ -13,15 +13,14 @@ export class CognitiveItemFactory {
      * @param atomId The ID of the semantic atom this belief is based on
      * @param truth The truth value of the belief
      * @param attention The attention value of the belief
-     * @param parentId Optional parent ID for derived beliefs
      * @returns A new belief cognitive item
      */
-    static createBelief(atomId: string, truth: TruthValue, attention: AttentionValue, parentId?: string): CognitiveItem {
+    static createBelief(atomId: string, truth: TruthValue, attention: AttentionValue): CognitiveItem {
         return {
             id: uuidv4(),
             atom_id: atomId,
             type: 'BELIEF',
-            label: 'New Belief', // Default label
+            label: 'New Belief',
             truth,
             attention,
             stamp: {
@@ -65,7 +64,7 @@ export class CognitiveItemFactory {
             id: uuidv4(),
             atom_id: atomId,
             type: 'GOAL',
-            label: 'New Goal', // Default label
+            label: 'New Goal',
             attention,
             stamp: {
                 timestamp: Date.now(),
@@ -88,7 +87,7 @@ export class CognitiveItemFactory {
             id: uuidv4(),
             atom_id: atomId,
             type: 'QUERY',
-            label: 'New Query', // Default label
+            label: 'New Query',
             attention,
             stamp: this.createStamp(parentId ? [parentId] : [])
         };
@@ -145,7 +144,7 @@ export class CognitiveItemFactory {
         attention: AttentionValue,
         truth?: TruthValue,
         goalParentId?: string,
-        label: string = 'Derived Item' // Default label
+        label: string = 'Derived Item'
     ): CognitiveItem {
         const item: CognitiveItem = {
             id: uuidv4(),

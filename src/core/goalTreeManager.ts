@@ -3,19 +3,12 @@ import {CognitiveItemFactory} from '../modules/cognitiveItemFactory';
 
 export interface GoalTreeManager {
     decompose(goal: CognitiveItem): CognitiveItem[];
-
     mark_achieved(goal_id: string): void;
-
     mark_failed(goal_id: string): void;
-
     get_ancestors(goal_id: string): string[];
-
     addDependency(goalId: string, dependencyId: string): void;
-
     getDependencies(goalId: string): string[];
-
     registerGoal(goal: CognitiveItem): void;
-
     getGoal(goalId: string): CognitiveItem | null;
 }
 
