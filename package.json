@@ -3,16 +3,9 @@
   "version": "1.0.0",
   "description": "Verifiable, goal-directed, and self-reflective reasoning system with hybrid symbolic and semantic cognition",
   "main": "dist/index.js",
-  "bin": {
-    "senars3": "./dist/unifiedCLI.js"
-  },
   "scripts": {
     "build": "npm run build:frontend && tsc",
-    "start": "ts-node src/unifiedCLI.ts",
-    "start:ws": "ts-node src/web/webSocketServer.ts",
-    "start:web": "ts-node src/web/webServer.ts",
-    "start:unified": "npm run build && node dist/web/unifiedServer.js",
-    "cli": "ts-node src/unifiedCLI.ts",
+    "start": "npm run build && node dist/web/unifiedServer.js",
     "demo": "ts-node src/testing/demo.ts",
     "test:community": "ts-node src/testing/communitySimulatorTest.ts",
     "test:community-integration": "ts-node src/testing/communitySimulatorIntegrationTest.ts",
@@ -24,8 +17,7 @@
     "test:integration": "jest test/integration",
     "docs:usability": "cat USABILITY_ENHANCEMENTS.md",
     "docs:enhanced": "cat ENHANCED_USABILITY_FEATURES.md",
-    "dev": "ts-node src/web/webServer.ts",
-    "dev:unified": "ts-node src/web/unifiedServer.ts",
+    "dev": "ts-node src/web/unifiedServer.ts",
     "dev:frontend": "vite",
     "build:frontend": "vite build",
     "preview:frontend": "vite preview"

@@ -4,13 +4,11 @@ import {CoverageData, TestAnalysisModule, TestResult} from './testAnalysisModule
 import {SelfRepresentationModule} from './selfRepresentationModule';
 import {EnhancementProposal, EnhancementProposalModule} from './enhancementProposalModule';
 import {ImplementationModule} from './implementationModule';
-import {WebSocketInterface} from '../web/webSocketInterface';
 import {CognitiveItem} from '../interfaces/types';
 
 export class SelfDevelopmentManager {
     private core: DecentralizedCognitiveCore;
     private perception: PerceptionSubsystem;
-    private readonly webSocketInterface: WebSocketInterface | null = null;
     private testAnalysis: TestAnalysisModule;
     private selfRepresentation: SelfRepresentationModule;
     private enhancementProposal: EnhancementProposalModule;
@@ -18,10 +16,9 @@ export class SelfDevelopmentManager {
     private isRunning: boolean = false;
     private analysisInterval: NodeJS.Timeout | null = null;
 
-    constructor(core: DecentralizedCognitiveCore, perception: PerceptionSubsystem, webSocketInterface?: WebSocketInterface) {
+    constructor(core: DecentralizedCognitiveCore, perception: PerceptionSubsystem) {
         this.core = core;
         this.perception = perception;
-        this.webSocketInterface = webSocketInterface || null;
 
         this.testAnalysis = new TestAnalysisModule();
         this.selfRepresentation = new SelfRepresentationModule();
@@ -184,17 +181,6 @@ export class SelfDevelopmentManager {
 
         // Update self-representation with new information
         this.updateSelfRepresentation(testResults, coverageData);
-
-        // Broadcast analysis results via WebSocket if available
-        if (this.webSocketInterface) {
-            this.webSocketInterface.broadcastEvent('selfDevelopmentAnalysis', {
-                timestamp: new Date().toISOString(),
-                testResults: testResults.length,
-                failedTests: testResults.filter(t => t.status === 'failed').length,
-                coverageItems: coverageItems.length,
-                proposals: proposals.length
-            });
-        }
     }
 
     // Initialize self-development goals

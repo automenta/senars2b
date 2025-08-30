@@ -2,3 +2,11 @@ coverage
 dist
 node_modules
 .idea
+
+# Log files
+*.log
+dev_server.log
+start_server.log
+
+# Jules scratch directory
+jules-scratch/
