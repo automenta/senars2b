@@ -1,0 +1,150 @@
+.commandBar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background-color: var(--color-card-bg);
+    border-top: 1px solid var(--color-card-border);
+    box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+    overflow: hidden;
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 1rem;
+    height: 48px;
+}
+
+.tabs {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.tab {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    background: none;
+    border: none;
+    border-bottom: 2px solid transparent;
+    color: var(--color-text-secondary);
+    cursor: pointer;
+}
+
+.tab.active {
+    color: var(--color-primary);
+    border-bottom-color: var(--color-primary);
+}
+
+.toggleButton {
+    background: none;
+    border: none;
+    color: var(--color-text-secondary);
+    font-size: 1rem;
+    cursor: pointer;
+}
+
+.content {
+    padding: 1rem;
+    height: calc(100% - 48px);
+    overflow-y: auto;
+    background-color: var(--color-background);
+}
+
+.panelContainer {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+/* CLI Panel Styles */
+.history {
+    flex-grow: 1;
+    overflow-y: auto;
+    font-family: monospace;
+    color: var(--color-text);
+    font-size: 0.875rem;
+    padding-right: 1rem; /* for scrollbar */
+}
+
+.cliInput {
+    width: 100%;
+    margin-top: 1rem;
+    padding: 0.75rem;
+    border: 1px solid var(--color-card-border);
+    border-radius: var(--border-radius);
+    background: var(--color-background-secondary);
+    color: var(--color-text);
+    font-family: monospace;
+}
+
+/* Processing Panel Styles */
+.processingControls {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.processingTextarea {
+    flex-grow: 1;
+    height: 80px;
+    padding: 0.75rem;
+    border: 1px solid var(--color-card-border);
+    border-radius: var(--border-radius);
+    background-color: var(--color-background-secondary);
+    color: var(--color-text);
+    resize: vertical;
+}
+
+.processingButton {
+    padding: 0.5rem 1rem;
+    border: none;
+    background-color: var(--color-primary);
+    color: white;
+    border-radius: var(--border-radius);
+    cursor: pointer;
+    align-self: flex-start;
+}
+
+.processingButton:disabled {
+    background-color: var(--color-secondary);
+    cursor: not-allowed;
+}
+
+.resultsContainer {
+    flex-grow: 1;
+    overflow-y: auto;
+}
+
+.resultCard {
+    border: 1px solid var(--color-card-border);
+    border-radius: var(--border-radius);
+    margin-bottom: 1rem;
+    background-color: var(--color-background-secondary);
+}
+
+.resultHeader {
+    padding: 1rem;
+    background: var(--color-card-bg);
+    border-bottom: 1px solid var(--color-card-border);
+}
+
+.resultContent {
+    padding: 1rem;
+}
+
+.cognitiveItem {
+    margin-bottom: 1rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--color-card-border);
+}
+
+.cognitiveItem:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+    padding-bottom: 0;
+}

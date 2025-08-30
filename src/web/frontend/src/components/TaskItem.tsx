@@ -1,13 +1,14 @@
-import React, {memo, useEffect, useRef, useState} from 'react';
+import React, {memo, useEffect, useMemo, useRef, useState} from 'react';
 import {motion} from 'framer-motion';
 import {Task} from '../types';
-import {FaChevronDown, FaChevronRight, FaEdit, FaGripVertical, FaSave, FaStream} from 'react-icons/fa';
+import {FaChevronDown, FaChevronRight, FaEdit, FaGripVertical, FaSave, FaStream, FaCommentAlt} from 'react-icons/fa';
 import TaskList from './TaskList';
 import StatusBadge from './StatusBadge';
 import PriorityBadge from './PriorityBadge';
 import ProgressBar from './ProgressBar';
 import TaskControls from './TaskControls';
 import styles from './TaskItem.module.css';
+import {useStore} from "../store";
 
 interface TaskItemProps {
     task: Task;
@@ -28,6 +29,7 @@ const TaskItem: React.FC<TaskItemProps> = memo(({
     const [isEditing, setIsEditing] = useState(false);
     const [editedTitle, setEditedTitle] = useState(task.title);
     const [editedDescription, setEditedDescription] = useState(task.description || '');
+    const getPendingPrompts = useStore(state => state.getPendingPrompts);
 
     const titleInputRef = useRef<HTMLInputElement>(null);
 
@@ -40,13 +42,17 @@ const TaskItem: React.FC<TaskItemProps> = memo(({
     const isDimmed = ['COMPLETED', 'FAILED'].includes(task.status.toUpperCase());
     const isProcessing = task.status === 'IN_PROGRESS';
 
-    // Memoize subtasks calculation
-    const subtasks = React.useMemo(
+    const subtasks = useMemo(
         () => allFilteredTasks.filter(t => t.parent_id === task.id),
         [allFilteredTasks, task.id]
     );
 
     const hasSubtasks = subtasks.length > 0;
+
+    const hasPendingPrompt = useMemo(() => {
+        return getPendingPrompts().some(p => p.taskId === task.id);
+    }, [getPendingPrompts, task.id]);
+
 
     const handleToggleExpand = (e: React.MouseEvent) => {
         e.stopPropagation();
@@ -170,6 +176,11 @@ const TaskItem: React.FC<TaskItemProps> = memo(({
                 <div className={styles.metaInfo}>
                     <StatusBadge status={task.status}/>
                     <PriorityBadge priority={task.priority}/>
+                    {hasPendingPrompt && (
+                        <div className={styles.promptIndicator} title="Action required">
+                            <FaCommentAlt />
+                        </div>
+                    )}
                     {hasSubtasks && (
                         <div className={styles.subtaskIndicator} title={`${subtasks.length} subtasks`}>
                             <FaStream/> {subtasks.length}

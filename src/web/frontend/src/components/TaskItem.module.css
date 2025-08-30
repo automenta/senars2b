@@ -203,6 +203,12 @@
 .subtaskIndicator {
     display: flex;
     align-items: center;
+}
+
+.promptIndicator {
+    display: flex;
+    align-items: center;
+    color: var(--color-primary);
     gap: 0.35rem;
     font-size: 0.85rem;
     color: var(--text-color-secondary);

@@ -5,12 +5,17 @@ import styles from './TasksView.module.css';
 import {useHotkeys} from '../hooks/useHotkeys';
 import {useTasks} from '../hooks/useTasks';
 import {FaFilter, FaSearch, FaSort} from 'react-icons/fa';
+import InlineAddTaskForm from '../components/InlineAddTaskForm';
+import {TaskPriority} from '../types';
+import DashboardPanel from '../components/DashboardPanel';
+import {useDashboardStats} from '../hooks/useDashboardStats';
 
 interface TasksViewProps {
     sendMessage: (message: any) => void;
+    onAddTask: (task: { title: string; description?: string; priority: TaskPriority, type: 'REGULAR' | 'AGENT' }) => void;
 }
 
-const TasksView: React.FC<TasksViewProps> = memo(({sendMessage}) => {
+const TasksView: React.FC<TasksViewProps> = memo(({sendMessage, onAddTask}) => {
     const {
         searchTerm,
         setSearchTerm,
@@ -28,7 +33,8 @@ const TasksView: React.FC<TasksViewProps> = memo(({sendMessage}) => {
     const [showFilters, setShowFilters] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
-    const {tasks: sortedAndFilteredTasks, taskStats, allTasks} = useTasks();
+    const {tasks: sortedAndFilteredTasks} = useTasks();
+    const {stats, systemStatus, statsHistory, isLoading} = useDashboardStats();
 
     // Reset selected task index when tasks change
     useEffect(() => {
@@ -44,7 +50,7 @@ const TasksView: React.FC<TasksViewProps> = memo(({sendMessage}) => {
     // Handle task actions with error handling
     const handleTaskAction = useCallback((action: string, payload: any) => {
         try {
-            sendMessage({ type: action, payload });
+            sendMessage({type: action, payload});
         } catch (err) {
             console.error(`Error sending ${action} message:`, err);
             setError(`Failed to ${action.toLowerCase()}: ${err instanceof Error ? err.message : 'Unknown error'}`);
@@ -81,40 +87,39 @@ const TasksView: React.FC<TasksViewProps> = memo(({sendMessage}) => {
 
     // Filter options with proper display names
     const statusOptions = [
-        { value: 'ALL', label: 'All' },
-        { value: 'pending', label: 'Pending' },
-        { value: 'awaiting_dependencies', label: 'Awaiting Dependencies' },
-        { value: 'decomposing', label: 'Decomposing' },
-        { value: 'awaiting_subtasks', label: 'Awaiting Subtasks' },
-        { value: 'ready_for_execution', label: 'Ready for Execution' },
-        { value: 'completed', label: 'Completed' },
-        { value: 'failed', label: 'Failed' },
-        { value: 'deferred', label: 'Deferred' }
+        {value: 'ALL', label: 'All'},
+        {value: 'pending', label: 'Pending'},
+        {value: 'awaiting_dependencies', label: 'Awaiting Dependencies'},
+        {value: 'decomposing', label: 'Decomposing'},
+        {value: 'awaiting_subtasks', label: 'Awaiting Subtasks'},
+        {value: 'ready_for_execution', label: 'Ready for Execution'},
+        {value: 'completed', label: 'Completed'},
+        {value: 'failed', label: 'Failed'},
+        {value: 'deferred', label: 'Deferred'}
     ];
 
     const typeOptions = [
-        { value: 'ALL', label: 'All' },
-        { value: 'REGULAR', label: 'Regular' },
-        { value: 'AGENT', label: 'Agent' }
+        {value: 'ALL', label: 'All'},
+        {value: 'REGULAR', label: 'Regular'},
+        {value: 'AGENT', label: 'Agent'}
     ];
 
     return (
         <div className={styles.tasksView}>
-            <div className={styles.header}>
-                <h2>Tasks</h2>
-                <div className={styles.stats}>
-                    <span className={styles.statItem}>Total: {taskStats.total}</span>
-                    <span className={styles.statItem}>Pending: {taskStats.pending}</span>
-                    <span className={styles.statItem}>In Progress: {taskStats.inProgress}</span>
-                    <span className={styles.statItem}>Completed: {taskStats.completed}</span>
-                </div>
-            </div>
+            <DashboardPanel
+                stats={stats}
+                systemStatus={systemStatus}
+                statsHistory={statsHistory}
+                isLoading={isLoading}
+            />
 
             {error && (
                 <div className={styles.errorBanner}>
                     {error}
                 </div>
             )}
+
+            <InlineAddTaskForm onAddTask={onAddTask}/>
 
             <div className={styles.searchAndFilters}>
                 <div className={styles.searchContainer}>
@@ -200,9 +205,9 @@ const TasksView: React.FC<TasksViewProps> = memo(({sendMessage}) => {
                 </div>
             )}
 
-            <TaskList 
-                tasks={sortedAndFilteredTasks} 
-                sendMessage={handleTaskAction} 
+            <TaskList
+                tasks={sortedAndFilteredTasks}
+                sendMessage={handleTaskAction}
                 selectedTaskIndex={selectedTaskIndex}
             />
         </div>

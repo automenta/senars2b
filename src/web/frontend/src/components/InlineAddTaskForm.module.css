@@ -1,0 +1,52 @@
+.form {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+    background-color: var(--color-card-bg);
+    border-radius: var(--border-radius);
+    margin-bottom: 2rem;
+    box-shadow: var(--shadow-sm);
+}
+
+.icon {
+    color: var(--color-text-secondary);
+}
+
+.input {
+    flex-grow: 1;
+    background: none;
+    border: none;
+    border-bottom: 2px solid var(--color-card-border);
+    color: var(--color-text);
+    font-size: 1rem;
+    padding: 0.5rem;
+    transition: border-color 0.2s;
+}
+
+.input:focus {
+    outline: none;
+    border-bottom-color: var(--color-primary);
+}
+
+.button {
+    padding: 0.75rem 1.5rem;
+    border: none;
+    background-color: var(--color-primary);
+    color: white;
+    border-radius: var(--border-radius);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: opacity 0.2s;
+}
+
+.button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.button:not(:disabled):hover {
+    opacity: 0.9;
+}

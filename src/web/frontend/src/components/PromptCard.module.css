@@ -1,0 +1,76 @@
+.card {
+    background-color: var(--color-card-bg);
+    border: 1px solid var(--color-primary);
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-md);
+    margin-bottom: 1.5rem;
+}
+
+.header {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 1rem;
+    background-color: rgba(var(--color-primary-rgb), 0.1);
+    border-bottom: 1px solid var(--color-primary);
+}
+
+.icon {
+    color: var(--color-primary);
+    font-size: 1.25rem;
+}
+
+.header h4 {
+    margin: 0;
+    color: var(--color-primary);
+}
+
+.content {
+    padding: 1rem;
+}
+
+.message {
+    margin-top: 0;
+    margin-bottom: 1.5rem;
+}
+
+.inputContainer {
+    margin-top: 1rem;
+}
+
+.input {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid var(--color-card-border);
+    border-radius: var(--border-radius);
+    background-color: var(--color-background);
+    color: var(--color-text);
+}
+
+.buttonGroup {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.button {
+    padding: 0.75rem 1.5rem;
+    border: none;
+    background-color: var(--color-primary);
+    color: white;
+    border-radius: var(--border-radius);
+    cursor: pointer;
+}
+
+.button.secondary {
+    background-color: var(--color-secondary);
+}
+
+.footer {
+    display: flex;
+    justify-content: space-between;
+    padding: 1rem;
+    font-size: 0.75rem;
+    color: var(--color-text-secondary);
+    border-top: 1px solid var(--color-card-border);
+}

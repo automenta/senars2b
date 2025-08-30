@@ -1,14 +1,9 @@
-import React, {useCallback, useEffect, useMemo} from 'react';
-import Sidebar from './components/Sidebar';
+import React, {useCallback, useEffect} from 'react';
 import Header from './components/Header';
-import DashboardView from './views/DashboardView';
-import ProcessingView from './views/ProcessingView';
 import TasksView from './views/TasksView';
-import ConfigurationView from './views/ConfigurationView';
-import CliView from './views/CliView';
-import AddTaskModal from './components/AddTaskModal';
 import {useWebSocket} from './hooks/useWebSocket';
 import {useStore} from './store';
+import CommandBar from "./components/CommandBar";
 import {Task, TaskPriority} from './types';
 import {useHotkeys} from './hooks/useHotkeys';
 import {useNotifier} from './context/NotificationProvider';
@@ -39,73 +34,86 @@ class ErrorBoundary extends React.Component<{children: React.ReactNode}, {hasErr
 
 function App() {
     const {
-        activeView,
         tasks,
-        isModalOpen,
         theme,
         searchInputRef,
-        setActiveView,
         setTasks,
         addTask,
-        setIsModalOpen,
         toggleTheme,
+        addPrompt,
+        addNotification,
     } = useStore();
 
-    const {addNotification} = useNotifier();
+    const {addNotification: addToastNotification} = useNotifier();
 
     // Setup keyboard shortcuts
     useHotkeys({
-        'n': () => setIsModalOpen(true),
+        // 'n' is now free, could be used for 'new task' focus
         '/': () => searchInputRef?.current?.focus(),
     }, [searchInputRef]);
 
     // Handle WebSocket messages
     const handleMessage = useCallback((message: any) => {
         try {
-            if (message.type === 'TASK_LIST_UPDATE') {
-                const newTasks = message.payload.tasks;
-                const tempId = message.payload.tempId;
-
-                if (tempId) {
-                    setTasks(
-                        tasks.map(task =>
-                            task.id === tempId ? newTasks.find((t: Task) => t.title === task.title) || task : task
-                        )
-                    );
-                    addNotification('Task created successfully!', 'success');
-                } else {
-                    setTasks(newTasks);
+            switch (message.type) {
+                case 'TASK_LIST_UPDATE': {
+                    const newTasks = message.payload.tasks;
+                    const tempId = message.payload.tempId;
+                    if (tempId) {
+                        setTasks(
+                            tasks.map(task =>
+                                task.id === tempId ? newTasks.find((t: Task) => t.title === task.title) || task : task
+                            )
+                        );
+                        addToastNotification('Task created successfully!', 'success');
+                    } else {
+                        setTasks(newTasks);
+                    }
+                    break;
                 }
-            } else if (message.type === 'TASK_UPDATE') {
-                addNotification(`Task "${message.payload.title}" updated.`, 'info');
-            } else if (message.type === 'TASK_DELETED') {
-                addNotification(`Task deleted.`, 'error');
-            } else if (message.type === 'ERROR') {
-                addNotification(`Error: ${message.payload.message}`, 'error');
-            } else if (message.type === 'WARNING') {
-                addNotification(`Warning: ${message.payload.message}`, 'warning');
-            } else if (message.type === 'STATS_UPDATE') {
-                // Handle stats updates if needed
-                console.log('Stats updated:', message.payload);
+                case 'TASK_UPDATE':
+                    addToastNotification(`Task "${message.payload.title}" updated.`, 'info');
+                    break;
+                case 'TASK_DELETED':
+                    addToastNotification(`Task deleted.`, 'error');
+                    break;
+                case 'ERROR':
+                    addToastNotification(`Error: ${message.payload.message}`, 'error');
+                    break;
+                case 'WARNING':
+                    addToastNotification(`Warning: ${message.payload.message}`, 'warning');
+                    break;
+                case 'PROMPT_NEW':
+                    addPrompt(message.payload);
+                    addToastNotification('You have a new prompt in your inbox!', 'info');
+                    break;
+                case 'NOTIFICATION':
+                    addNotification(message.payload);
+                    break;
+                case 'STATS_UPDATE':
+                    // This is handled by the useDashboardStats hook now
+                    break;
+                default:
+                    // console.log('Unknown message type:', message.type);
             }
         } catch (error) {
             console.error('Error processing WebSocket message:', error);
-            addNotification('Error processing message from server', 'error');
+            addToastNotification('Error processing message from server', 'error');
         }
-    }, [setTasks, tasks, addNotification]);
+    }, [setTasks, tasks, addToastNotification, addPrompt, addNotification]);
 
     const {isConnected, connectionError, sendMessage} = useWebSocket(handleMessage);
 
     // Notify user about connection status
     useEffect(() => {
         if (connectionError) {
-            addNotification(`Connection error: ${connectionError}`, 'error');
+            addToastNotification(`Connection error: ${connectionError}`, 'error');
         } else if (isConnected) {
-            addNotification('Connected to server', 'success');
+            addToastNotification('Connected to server', 'success');
         } else {
-            addNotification('Disconnected from server', 'warning');
+            addToastNotification('Disconnected from server', 'warning');
         }
-    }, [isConnected, connectionError, addNotification]);
+    }, [isConnected, connectionError, addToastNotification]);
 
     // Handle adding a new task
     const handleAddTask = useCallback((task: {
@@ -128,7 +136,6 @@ function App() {
         };
 
         addTask(newTask);
-        setIsModalOpen(false);
 
         // Send message to server with proper format
         sendMessage({
@@ -141,41 +148,24 @@ function App() {
                 tempId: tempId,
             }
         });
-    }, [addTask, setIsModalOpen, sendMessage]);
-
-    // Memoize view rendering for performance
-    const renderView = useMemo(() => {
-        switch (activeView) {
-            case 'Dashboard':
-                return <DashboardView/>;
-            case 'Processing':
-                return <ProcessingView/>;
-            case 'Tasks':
-                return <TasksView sendMessage={sendMessage}/>;
-            case 'Configuration':
-                return <ConfigurationView/>;
-            case 'CLI':
-                return <CliView/>;
-            default:
-                return <DashboardView/>;
-        }
-    }, [activeView, sendMessage]);
+    }, [addTask, sendMessage]);
 
     return (
         <ErrorBoundary>
             <div className="app-container">
-                <Sidebar activeView={activeView} onSelectView={setActiveView}/>
                 <main className="main-content">
                     <Header
-                        title={activeView}
-                        onAddTask={() => setIsModalOpen(true)}
                         theme={theme}
                         toggleTheme={toggleTheme}
                         isConnected={isConnected}
+                        onNavigate={(view) => alert(`Would navigate to ${view}`)}
                     />
-                    {renderView}
+                    <TasksView
+                        sendMessage={sendMessage}
+                        onAddTask={handleAddTask}
+                    />
                 </main>
-                {isModalOpen && <AddTaskModal onAddTask={handleAddTask}/>}
+                <CommandBar/>
             </div>
         </ErrorBoundary>
     );
