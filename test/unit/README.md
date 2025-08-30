@@ -43,6 +43,19 @@ const goal = createGoalItem({
 });
 ```
 
+### `createTaskItem(overrides: Partial<CognitiveItem> = {})`
+
+Creates a CognitiveItem with task metadata (for tasks).
+
+```typescript
+const task = createTaskItem({
+  task_metadata: {
+    status: 'pending',
+    priority_level: 'high'
+  }
+});
+```
+
 ### `createAttentionValue(overrides: Partial<AttentionValue> = {})`
 
 Creates a basic AttentionValue.
@@ -89,9 +102,21 @@ Creates basic CognitiveMetadata with default values.
 
 ```typescript
 const metadata = createCognitiveMetadata({
-  domain: 'medical',
+  domain: 'medicine',
   source: 'medical_journal',
   trust_score: 0.95
+});
+```
+
+### `createTaskMetadata(overrides: Partial<TaskMetadata> = {})`
+
+Creates TaskMetadata with default values.
+
+```typescript
+const taskMetadata = createTaskMetadata({
+  status: 'completed',
+  priority_level: 'critical',
+  completion_percentage: 100
 });
 ```
 
@@ -104,12 +129,14 @@ import {
   createCognitiveItem, 
   createBeliefItem, 
   createGoalItem,
+  createTaskItem,
   createAttentionValue,
   createTruthValue,
   createMockSchema,
   createSemanticAtom,
-  createCognitiveMetadata
-} from './testUtils';
+  createCognitiveMetadata,
+  createTaskMetadata
+} from '../testUtils';
 ```
 
 ## Best Practices
@@ -119,11 +146,18 @@ import {
 2. **Override only what you need**: Rely on default values for properties that aren't relevant to your test
 3. **Combine utilities**: Use multiple utilities together to create complex test scenarios
 4. **Consistent test data**: Using these utilities ensures consistent test data across your test suite
+5. **Test both positive and negative cases**: Create both valid and invalid data to thoroughly test your code
 
 ## Example Test Structure
 
 ```typescript
-import { createBeliefItem, createGoalItem, createCognitiveMetadata } from './testUtils';
+import { 
+  createBeliefItem, 
+  createGoalItem, 
+  createTaskItem, 
+  createAttentionValue,
+  createTruthValue
+} from '../testUtils';
 
 describe('CognitiveCore', () => {
   it('should process beliefs with high confidence', () => {
@@ -141,17 +175,46 @@ describe('CognitiveCore', () => {
     
     // Test implementation
   });
-});
-
-describe('DomainSpecificTests', () => {
-  it('should handle domain-specific knowledge', () => {
-    const metadata = createCognitiveMetadata({
-      domain: 'medicine',
-      source: 'medical_journal',
-      trust_score: 0.95
+  
+  it('should handle task items with proper metadata', () => {
+    const task = createTaskItem({
+      task_metadata: {
+        status: 'pending',
+        priority_level: 'high',
+        dependencies: ['task-1', 'task-2']
+      }
     });
     
     // Test implementation
   });
 });
+
+describe('AttentionModule', () => {
+  it('should correctly calculate priority for different attention values', () => {
+    const lowAttention = createAttentionValue({ priority: 0.1, durability: 0.2 });
+    const highAttention = createAttentionValue({ priority: 0.9, durability: 0.8 });
+    
+    // Test implementation
+  });
+});
+
+describe('BeliefRevisionEngine', () => {
+  it('should properly merge truth values', () => {
+    const truth1 = createTruthValue({ frequency: 0.7, confidence: 0.6 });
+    const truth2 = createTruthValue({ frequency: 0.8, confidence: 0.9 });
+    
+    // Test implementation
+  });
+});
 ```
+
+## Test Data Consistency
+
+These utilities ensure that test data is consistent across the test suite by:
+
+1. **Using realistic default values** that match the expected ranges in the system
+2. **Maintaining proper relationships** between related properties
+3. **Following the same data structures** used in the actual system
+4. **Providing predictable identifiers** for easier debugging
+
+This consistency makes tests more reliable and easier to maintain as the system evolves.

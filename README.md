@@ -6,45 +6,25 @@ fusion of symbolic reasoning and Language Model technology.
 ## Table of Contents
 
 - [Overview](#overview)
-- [Non-Axiomatic Logic Principles](#non-axiomatic-logic-principles)
-    - [1. Experience-Grounded Reasoning](#1-experience-grounded-reasoning)
-    - [2. Uncertainty Management](#2-uncertainty-management)
-    - [3. Goal-Directed Cognition](#3-goal-directed-cognition)
-    - [4. Self-Reflective Operation](#4-self-reflective-operation)
-- [Core Data Model](#core-data-model)
-    - [SemanticAtom](#semanticiatom)
-    - [CognitiveItem](#cognitiveitem)
-- [Cognitive Architecture](#cognitive-architecture)
-    - [1. Agenda System](#1-agenda-system)
-    - [2. World Model](#2-world-model)
-    - [3. Cognitive Core](#3-cognitive-core)
-    - [4. Pluggable Cognitive Modules](#4-pluggable-cognitive-modules)
-    - [5. I/O Subsystems](#5-io-subsystems)
-- [Features](#features)
-- [Reasoning Processes](#reasoning-processes)
-    - [1. Perception and Input Processing](#1-perception-and-input-processing)
-    - [2. Agenda Management](#2-agenda-management)
-    - [3. Inference and Knowledge Generation](#3-inference-and-knowledge-generation)
-    - [4. Learning and Adaptation](#4-learning-and-adaptation)
+- [Current Development Status](#current-development-status)
+- [Core Concepts](#core-concepts)
+  - [Non-Axiomatic Logic Principles](#non-axiomatic-logic-principles)
+  - [Core Data Model](#core-data-model)
 - [System Architecture](#system-architecture)
-    - [Core Components](#core-components)
-    - [Modular Design](#modular-design)
-    - [Cognitive Processes](#cognitive-processes)
-    - [Data Model](#data-model)
-    - [Interface Design](#interface-design)
-- [Input Processing](#input-processing)
-- [Self-Development Capabilities](#self-development-capabilities)
-- [Metaprogramming and Self-Modification](#metaprogramming-and-self-modification)
-- [Design Benefits](#design-benefits)
-- [Future Development Directions](#future-development-directions)
-- [System Capabilities and Applications](#system-capabilities-and-applications)
-- [Design Principles for Enhanced Applicability](#design-principles-for-enhanced-applicability)
-- [Utility Enhancement Strategies](#utility-enhancement-strategies)
-- [Enjoyability and User Experience](#enjoyability-and-user-experience)
-- [Pathways to Ubiquity](#pathways-to-ubiquity)
-- [Future Development Priorities](#future-development-priorities)
-- [Unified Interface](#unified-interface)
-- [Conclusion](#conclusion)
+  - [Cognitive Architecture](#cognitive-architecture)
+  - [Core Components](#core-components)
+- [Implemented Features](#implemented-features)
+- [Planned Features](#planned-features)
+- [Quick Start](#quick-start)
+- [Interfaces](#interfaces)
+  - [Unified Interface](#unified-interface)
+  - [CLI Usage](#cli-usage)
+  - [Web Interface](#web-interface)
+  - [API Access](#api-access)
+- [Task Management System](#task-management-system)
+- [Community Simulator](#community-simulator)
+- [Development Guidelines](#development-guidelines)
+- [Roadmap](#roadmap)
 
 ## Overview
 
@@ -54,43 +34,45 @@ experience-grounded reasoning, enabling the system to handle uncertainty, learn 
 its knowledge base through interaction with its environment.
 
 The system combines symbolic reasoning with Language Model technology to create a system capable of learning,
-adaptation, and self-improvement through interaction with its environment. It features:
+adaptation, and self-improvement through interaction with its environment.
 
-- Experience-grounded reasoning instead of fixed axioms
-- Explicit uncertainty management through truth values (frequency and confidence)
-- Goal-directed cognition with attention mechanisms (priority and durability)
-- Self-reflective operation and adaptation
-- Unified interface with both CLI and Web UI access through a WebSocket backend
+## Current Development Status
 
-### Conceptual Overview
+Senars3 is currently in active development with a focus on implementing a task-centric cognitive architecture. The
+system has a working prototype with basic functionality but many advanced features are still being developed. See the
+[Roadmap](#roadmap) section for details on current development priorities and future plans.
 
-Senars3 is designed as a cognitive system that processes information through multiple interconnected components:
+**Currently Implemented:**
+- Basic cognitive architecture with agenda system and world model
+- Task management system with factory and validation utilities
+- Unified interface (CLI and Web) with WebSocket communication
+- Community Simulator for multi-agent collaboration demonstrations
+- Core reasoning components (perception, attention, resonance modules)
 
-1. **Input Processing**: Natural language inputs are converted into cognitive items with uncertainty measures
-2. **Agenda Management**: Items are prioritized based on their importance and urgency
-3. **Reasoning Engine**: Applies reasoning schemas to generate new knowledge
-4. **Learning Mechanisms**: Evolves its knowledge base through experience
-5. **Output Generation**: Produces responses that account for uncertainty and confidence
+**In Development:**
+- Advanced task processing and execution engine
+- Schema learning and evolution mechanisms
+- Enhanced uncertainty management
+- Self-modification and metaprogramming capabilities
 
-The system operates through continuous cycles of perception, reasoning, and learning, with each component contributing
-to the overall cognitive process.
+## Core Concepts
 
-## Non-Axiomatic Logic Principles
+### Non-Axiomatic Logic Principles
 
 Senars3 is built on four foundational principles of Non-Axiomatic Logic that enable adaptive, uncertainty-aware
 reasoning:
 
-### 1. Experience-Grounded Reasoning
+#### 1. Experience-Grounded Reasoning
 
 Unlike classical logic systems that rely on fixed axioms, NAL grounds all reasoning in experience. Every conclusion is
 derived from observations and interactions rather than predetermined rules. This allows the system to:
 
-- **Adapt to new domains** without reprogramming
-- **Handle incomplete or contradictory information** gracefully
-- **Learn from both positive and negative examples**
-- **Continuously refine its understanding** through experience
+- Adapt to new domains without reprogramming
+- Handle incomplete or contradictory information gracefully
+- Learn from both positive and negative examples
+- Continuously refine its understanding through experience
 
-### 2. Uncertainty Management
+#### 2. Uncertainty Management
 
 All knowledge in the system carries explicit uncertainty measures through truth values:
 
@@ -99,12 +81,12 @@ All knowledge in the system carries explicit uncertainty measures through truth 
 
 These values allow the system to:
 
-- **Distinguish** between well-supported beliefs and tentative hypotheses
-- **Make decisions** based on available evidence even when incomplete
-- **Update beliefs** as new evidence becomes available
-- **Reason about the reliability** of its own conclusions
+- Distinguish between well-supported beliefs and tentative hypotheses
+- Make decisions based on available evidence even when incomplete
+- Update beliefs as new evidence becomes available
+- Reason about the reliability of its own conclusions
 
-### 3. Goal-Directed Cognition
+#### 3. Goal-Directed Cognition
 
 All cognitive processes are driven by goals, which are represented as special types of cognitive items with attention
 values:
@@ -114,12 +96,12 @@ values:
 
 This enables the system to:
 
-- **Focus computational resources** on high-priority tasks
-- **Balance immediate needs** with long-term objectives
-- **Adapt goal priorities** based on changing circumstances
-- **Maintain coherent behavior** across extended reasoning sessions
+- Focus computational resources on high-priority tasks
+- Balance immediate needs with long-term objectives
+- Adapt goal priorities based on changing circumstances
+- Maintain coherent behavior across extended reasoning sessions
 
-### 4. Self-Reflective Operation
+#### 4. Self-Reflective Operation
 
 The system continuously monitors its own performance and adapts its reasoning processes:
 
@@ -128,39 +110,53 @@ The system continuously monitors its own performance and adapts its reasoning pr
 - **Belief Revision**: Update knowledge based on new evidence and internal consistency
 - **Schema Evolution**: Adapt reasoning patterns based on effectiveness
 
-## Core Data Model
+### Core Data Model
 
 The Senars3 system uses two primary data structures to represent knowledge and cognitive states:
 
-### SemanticAtom
+#### SemanticAtom
 
 The fundamental unit of knowledge representation that combines natural language content with semantic embeddings:
 
 ```typescript
 interface SemanticAtom {
     id: string;                // Unique identifier
-    content: string;           // Natural language content
+    content: any;              // Natural language content or object
     embedding: number[];       // Semantic vector representation
     creationTime: number;      // Timestamp of creation
     lastAccessTime: number;    // Timestamp of last access
+    meta: Record<string, any>; // Metadata
 }
 ```
 
 Each SemanticAtom represents a piece of knowledge with both symbolic (content) and sub-symbolic (embedding)
 representations, enabling the system to leverage both logical reasoning and semantic similarity.
 
-### CognitiveItem
+#### CognitiveItem
 
 Contextualized thoughts with associated values that drive the cognitive processes:
 
 ```typescript
 interface CognitiveItem {
     id: string;                // Unique identifier
-    type: 'BELIEF' | 'GOAL' | 'QUERY'; // Item category
+    atom_id: string;           // Reference to SemanticAtom
+    type: 'BELIEF' | 'GOAL' | 'QUERY' | 'EVENT' | 'TASK'; // Item category
     label: string;             // Natural language representation
+    content?: any;             // Content of the item
     truth?: TruthValue;        // Truth value for beliefs
-    attention?: AttentionValue; // Attention value for goals
+    attention: AttentionValue; // Attention value for goals
     meta?: Record<string, any>; // Metadata (domain, source, etc.)
+    goal_parent_id?: string;   // Parent goal ID
+    goal_status?: "active" | "blocked" | "achieved" | "failed";
+    stamp: DerivationStamp;    // Derivation stamp
+    payload?: Record<string, any>; // Payload for events/actions
+
+    // Task-specific properties (only used when type is 'TASK')
+    task_metadata?: TaskMetadata;
+    
+    // Task timestamps (only used when type is 'TASK')
+    created_at?: number;       // Creation timestamp
+    updated_at?: number;       // Last update timestamp
 }
 
 interface TruthValue {
@@ -172,17 +168,39 @@ interface AttentionValue {
     priority: number;          // Current importance (0.0 to 1.0)
     durability: number;        // Persistence of importance (0.0 to 1.0)
 }
+
+// Task-specific metadata
+export interface TaskMetadata {
+    status: 'pending' | 'awaiting_dependencies' | 'decomposing' | 'awaiting_subtasks' | 
+            'ready_for_execution' | 'completed' | 'failed' | 'deferred';
+    priority_level: 'low' | 'medium' | 'high' | 'critical';
+    dependencies?: string[]; // Array of task IDs
+    deadline?: number; // Timestamp
+    estimated_effort?: number;
+    required_resources?: string[];
+    outcomes?: string[];
+    confidence?: number; // 0.0 to 1.0
+    tags?: string[];
+    categories?: string[];
+    context?: Record<string, any>;
+    completion_percentage?: number; // 0-100
+    group_id?: string; // Identifier for grouping related tasks
+    parent_id?: string; // Parent task ID
+    subtasks?: string[]; // Subtask IDs
+}
 ```
 
 CognitiveItems represent the active elements in the system's reasoning process, each with specific types and values that
-determine how they are processed.
+determine how they are processed. Tasks are represented as a special type of CognitiveItem with extended metadata.
 
-## Cognitive Architecture
+## System Architecture
+
+### Cognitive Architecture
 
 The system follows a modular architecture designed for self-reflection and adaptive reasoning, with each component
 serving a specific role in the cognitive process:
 
-### 1. Agenda System
+#### 1. Agenda System
 
 The central cognitive queue that prioritizes processing tasks:
 
@@ -191,13 +209,9 @@ The central cognitive queue that prioritizes processing tasks:
 - **Resource Allocation**: Computational resources are allocated to high-priority items
 
 The Agenda serves as the system's executive function, determining which cognitive tasks to process next based on their
-importance and urgency. This architecture is particularly beneficial for:
+importance and urgency.
 
-- Real-time decision-making systems that must balance multiple competing priorities
-- Resource-constrained environments where computational efficiency is critical
-- Complex planning scenarios with interdependent tasks
-
-### 2. World Model
+#### 2. World Model
 
 The persistent knowledge base with multi-indexed storage:
 
@@ -206,13 +220,9 @@ The persistent knowledge base with multi-indexed storage:
 - **Temporal Indexing**: Time-based retrieval for episodic memory
 
 The World Model maintains all knowledge and beliefs of the system, organized for efficient retrieval through multiple
-access patterns. This multi-indexed approach enables:
+access patterns.
 
-- Rapid retrieval of relevant information for diverse query types
-- Cross-domain reasoning by connecting concepts through multiple pathways
-- Context-sensitive information retrieval based on temporal or relational proximity
-
-### 3. Cognitive Core
+#### 3. Cognitive Core
 
 Worker pool for executing cognitive cycles with parallel processing capabilities:
 
@@ -221,13 +231,9 @@ Worker pool for executing cognitive cycles with parallel processing capabilities
 - **Verifiable Provenance**: Every derived item traces back to its source
 
 The Cognitive Core executes the actual reasoning processes, applying various cognitive schemas to generate new
-knowledge. This design supports:
+knowledge.
 
-- High-throughput reasoning for large-scale knowledge processing
-- Complex inference chains that may take variable amounts of time
-- Auditable reasoning processes for critical applications
-
-### 4. Pluggable Cognitive Modules
+#### 4. Pluggable Cognitive Modules
 
 Specialized components that handle specific cognitive functions:
 
@@ -238,15 +244,7 @@ Specialized components that handle specific cognitive functions:
 - **GoalTreeManager**: Manages complex goal hierarchies and decomposition
 - **ReflectionLoop**: Enables self-monitoring and adaptation
 
-These modules can be extended or replaced to customize the system's reasoning capabilities for specific domains, making
-it adaptable to:
-
-- Scientific reasoning with domain-specific inference patterns
-- Legal reasoning with precedent-based argumentation schemas
-- Medical diagnosis with symptom-to-condition mapping modules
-- Financial analysis with risk assessment and forecasting models
-
-### 5. I/O Subsystems
+#### 5. I/O Subsystems
 
 Interface components for environmental interaction:
 
@@ -254,152 +252,7 @@ Interface components for environmental interaction:
 - **ActionSubsystem**: Executes actions and outputs responses
 
 The I/O Subsystems provide the interface between the cognitive system and its environment, handling both input
-processing and output generation. This modular I/O design allows for:
-
-- Integration with diverse data sources and formats
-- Customized output generation for different user interfaces
-- Seamless interaction with external systems and databases
-
-## Features
-
-Senars3 provides a comprehensive set of capabilities that enable advanced reasoning in uncertain environments while
-focusing on enhanced applicability, utility, enjoyability, and potential ubiquity:
-
-### Core Reasoning Capabilities
-
-- **Non-Axiomatic Logic Principles**: Reasoning with uncertainty management and experience-grounded conclusions
-- **Hybrid Cognition**: Combines symbolic logic with semantic vectors for richer representation
-- **Trust-Aware Inference**: Knowledge weighted by credibility measures for more reliable conclusions
-
-### Architectural Advantages
-
-- **Concurrency-Native**: Built on asynchronous, parallel processing for efficient execution
-- **Modular Abstraction**: Swappable modules with strict interfaces for easy customization
-- **Verifiable Provenance**: Every derived item traces back to its source for transparency and debugging
-
-### Cognitive Functions
-
-- **Goal-Agentic Flow**: All cognition driven by goals for purposeful reasoning
-- **Self-Reflective Operation**: System audits its own performance for continuous improvement
-- **Schema Learning**: Automatic evolution of reasoning patterns through experience for adaptive intelligence
-
-### Enhanced Task Management
-
-The system's goal-directed cognition is supported by a sophisticated task management system with the following
-enhancements:
-
-- **Automatic Progress Tracking**: When a task is composed of several subtasks, the system automatically calculates and
-  updates the parent task's completion percentage as subtasks are finished. This provides a clear and real-time view of
-  progress on complex goals.
-- **Task Grouping**: Tasks can be assigned to a group, allowing for better organization and the ability to manage and
-  query related tasks together. This is useful for managing complex projects that involve multiple interdependent steps.
-- **Configurable Prioritization**: The agenda's algorithm for prioritizing tasks is highly configurable, allowing
-  developers to fine-tune how factors like deadlines, assigned priority level, and progress influence what the system
-  works on next.
-
-### User Experience
-
-- **Unified Interface Access**: Single interface for CLI and Web through WebSocket backend for consistent interaction
-- **Enhanced Usability**: Improved error handling, status monitoring, and user feedback for better experience
-- **Personalization Support**: Adapts to individual user preferences and interaction patterns
-- **Community Simulator**: Collaborative problem-solving environment with deployable agent participants, each with their
-  own cognitive context
-
-### Self-Modification
-
-- **Metaprogramming Capabilities**: System can represent and modify itself for autonomous improvement
-- **Self-Development**: System can analyze its own performance and generate enhancements for evolution
-
-### Application Versatility
-
-- **Decision Support**: Evaluate options under uncertainty for better decision-making
-- **Adaptive Planning**: Create plans that adjust to changing conditions and new information
-- **Creative Problem-Solving**: Explore solution spaces with uncertainty-aware exploration
-- **Personalized Recommendations**: Generate tailored suggestions based on individual preferences and constraints
-- **Risk Assessment**: Analyze potential outcomes with explicit uncertainty quantification
-- **Knowledge Management**: Organize and evolve knowledge bases through experience
-
-### Ubiquity Enablers
-
-- **Cross-Platform Compatibility**: Operate consistently across different environments and devices
-- **Resource Efficiency**: Optimize performance for both high-end and constrained systems
-- **Integration Flexibility**: Connect seamlessly with existing tools and workflows
-
-## Reasoning Processes
-
-The system executes four core reasoning processes that work together to enable adaptive cognition in a continuous cycle:
-
-### 1. Perception and Input Processing
-
-When the system receives input, it transforms raw information into actionable cognitive items:
-
-1. **Tokenizes and Parses**: Break down input into manageable units
-2. **Semantic Analysis**: Extract meaning using semantic embeddings
-3. **Type Classification**: Determine if input represents a belief, goal, or query
-4. **Value Assignment**: Assign initial truth and attention values
-5. **Context Integration**: Connect to existing knowledge in the world model
-
-This process converts external stimuli into the internal representations the system can reason about. This capability is
-essential for:
-
-- Natural language interfaces that make the system accessible to non-technical users
-- Integration with diverse data sources including documents, databases, and sensor feeds
-- Real-time processing of streaming information in dynamic environments
-
-### 2. Agenda Management
-
-The system continuously manages its cognitive tasks through dynamic prioritization:
-
-1. **Priority Assessment**: Evaluate all agenda items based on current context
-2. **Resource Allocation**: Assign processing resources to high-priority items
-3. **Dynamic Reordering**: Reassess priorities as system state changes
-4. **Task Execution**: Process selected items through appropriate modules
-
-This ensures the most important cognitive tasks are addressed first, adapting to changing circumstances. This process is
-particularly valuable for:
-
-- Multi-objective optimization problems where trade-offs must be evaluated
-- Emergency response scenarios where priorities shift rapidly
-- Complex project management with interdependent tasks and deadlines
-
-### 3. Inference and Knowledge Generation
-
-When applying reasoning schemas, the system generates new knowledge through structured processes:
-
-1. **Pattern Matching**: Identify applicable schemas based on item content
-2. **Precondition Checking**: Verify schema applicability conditions
-3. **Inference Execution**: Apply schema to generate new cognitive items
-4. **Uncertainty Calculation**: Compute truth values for conclusions
-5. **Attention Assignment**: Assign attention values to new items
-
-This process enables the system to derive new insights from existing knowledge while tracking their reliability.
-Applications include:
-
-- Scientific hypothesis generation and testing
-- Legal argumentation and case law analysis
-- Diagnostic reasoning in medicine and engineering
-- Financial forecasting and risk assessment
-
-### 4. Learning and Adaptation
-
-The system continuously improves through experience by reflecting on its performance:
-
-1. **Performance Monitoring**: Track success rates of different reasoning approaches
-2. **Schema Effectiveness**: Evaluate which schemas produce useful results
-3. **Knowledge Refinement**: Update beliefs based on new evidence
-4. **Strategy Evolution**: Adapt reasoning strategies based on effectiveness
-
-This meta-cognitive process allows the system to become more effective over time through self-improvement. This
-capability enables:
-
-- Personalized tutoring systems that adapt to individual learning patterns
-- Autonomous systems that improve performance in dynamic environments
-- Research assistants that develop expertise in specific domains
-- Decision support tools that learn from past outcomes
-
-## System Architecture
-
-Senars3 follows a modular architecture designed for flexibility and extensibility:
+processing and output generation.
 
 ### Core Components
 
@@ -411,370 +264,79 @@ The system is built around several core components that work together to enable 
 - **Perception Subsystem**: Transforms inputs into cognitive items
 - **Action Subsystem**: Generates outputs and executes actions
 
-### Modular Design
+## Implemented Features
 
-The system's modular design allows for flexible configuration and extension:
+Senars3 currently has the following features implemented:
 
-- **Pluggable Cognitive Modules**: Specialized components that handle specific cognitive functions
-    - Attention Module: Manages cognitive focus and resource allocation
-    - Resonance Module: Identifies and strengthens coherent knowledge structures
-    - Schema Matcher: Applies reasoning patterns to generate new knowledge
-    - Belief Revision Engine: Maintains knowledge consistency and updates beliefs
-    - Goal Tree Manager: Manages complex goal hierarchies and decomposition
-    - Reflection Loop: Enables self-monitoring and adaptation
+### Core Reasoning Capabilities
 
-- **I/O Subsystems**: Interface components for environmental interaction
-    - Perception Subsystem: Converts inputs into cognitive items
-    - Action Subsystem: Executes actions and generates outputs
+- **Non-Axiomatic Logic Principles**: Basic reasoning with uncertainty management
+- **Hybrid Cognition**: Combines symbolic logic with semantic vectors
+- **Goal-Directed Processing**: Cognitive items processed based on attention values
 
-### Cognitive Processes
+### Architectural Components
 
-The system executes four core cognitive processes that work together to enable adaptive reasoning:
+- **Modular Architecture**: Swappable modules with defined interfaces
+- **Task-Centric Design**: Tasks as fundamental units of cognition
+- **Unified Interface**: Single interface for CLI and Web access
 
-1. **Perception and Input Processing**: Transforms raw inputs into structured cognitive items with uncertainty measures
-2. **Agenda Management**: Dynamically prioritizes tasks based on attention values and system goals
-3. **Inference and Knowledge Generation**: Applies reasoning schemas to derive new knowledge
-4. **Learning and Adaptation**: Refines knowledge and reasoning strategies based on experience
+### Task Management
 
-### Data Model
+- **Task Factory**: Utilities for creating standardized tasks
+- **Task Validation**: Validation and normalization of task structures
+- **Task Metadata**: Rich metadata for task properties and relationships
+- **Hierarchical Tasks**: Parent-child relationships between tasks
 
-The system uses a rich data model to represent knowledge and cognitive states:
+### User Experience
 
-- **Semantic Atoms**: Fundamental units of knowledge that combine natural language content with semantic embeddings
-- **Cognitive Items**: Contextualized thoughts (beliefs, goals, queries) with associated truth and attention values
+- **Unified Interface**: Single interface for CLI and Web through WebSocket backend
+- **Community Simulator**: Multi-agent collaboration environment
+- **Real-time Feedback**: Live system status and performance metrics
 
-### Interface Design
+## Planned Features
 
-Senars3 is designed to support multiple interaction paradigms:
+The following features are planned for future implementation (see [Roadmap](#roadmap) for timeline):
 
-- **Command-Line Interface**: Text-based interaction for developers and power users
-- **Web Interface**: Graphical interface with visualizations and real-time feedback
-- **Programmatic APIs**: Interfaces for integration with other systems (WebSocket and REST-like)
+### Advanced Reasoning Capabilities
 
-## Input Processing
+- **Schema Learning**: Automatic evolution of reasoning patterns through experience
+- **Enhanced Uncertainty Models**: Higher-order uncertainty reasoning
+- **Temporal Reasoning**: Time-based reasoning and planning capabilities
 
-The system is designed to handle various types of input through its non-axiomatic logic framework:
+### Task Management Enhancements
 
-1. **Uncertain Statements**: Information with implicit uncertainty
-    - Example: "Based on my experience, meditation likely reduces stress levels"
-    - Use case: Adding probabilistic knowledge to the system's world model
-
-2. **Probabilistic Questions**: Queries that require uncertainty-aware answers
-    - Example: "What is the probability that this investment will yield positive returns?"
-    - Use case: Decision support systems that need to evaluate risk
-
-3. **Conditional Commands**: Action requests with uncertainty considerations
-    - Example: "If the weather is good tomorrow, then plan a picnic"
-    - Use case: Planning systems that adapt to changing conditions
-
-4. **Exploratory Goals**: Complex objectives with uncertainty evaluation
-    - Example: "Find possible solutions to reduce energy consumption in my home"
-    - Use case: Creative problem-solving and innovation support
-
-5. **Adaptive Requests**: Multi-part requests that adapt based on uncertainty
-    - Example: "Suggest a meal plan for the week, adjusting based on my dietary preferences and budget constraints"
-    - Use case: Personalized recommendation systems
-
-Best practices for effective input design:
-
-- Express uncertainty explicitly using terms like "likely" or "possibly"
-- Use conditional language with "if-then" constructs
-- Specify confidence requirements when needed
-- Break down complex requests into simpler sub-tasks
-
-The system's ability to process these diverse input types makes it suitable for a wide range of applications, from
-decision support and planning to creative problem-solving and personalized recommendations.
-
-## Self-Development Capabilities
-
-One of the key features of Senars3 is its ability to analyze its own performance and generate improvements autonomously:
-
-- **Performance Monitoring**: Tracks the effectiveness of reasoning approaches
-- **Knowledge Refinement**: Updates beliefs based on new evidence
-- **Strategy Evolution**: Adapts reasoning strategies based on success rates
-- **Schema Learning**: Evolves reasoning patterns through experience
-
-## Metaprogramming and Self-Modification
-
-The system's self-representational nature enables powerful metaprogramming capabilities:
-
-### Self-Inspection
-
-- Component Status: Examine internal state of all modules
-- Performance Metrics: Access detailed performance statistics
-- Knowledge Structure: Analyze current knowledge organization
-
-Self-inspection capabilities are particularly valuable for:
-
-- Debugging complex reasoning failures
-- Performance optimization in specialized applications
-- Understanding system behavior in research contexts
+- **Task Execution Engine**: Full execution capabilities for tasks
+- **Task Planning**: Forward and backward chaining planning algorithms
+- **Task Dependencies**: Advanced dependency management and resolution
+- **Task Scheduling**: Temporal scheduling with resource allocation
 
 ### Self-Modification
 
-- Parameter Adjustment: Modify system parameters that affect reasoning
-- Schema Evolution: Add or modify reasoning patterns
-- Attention Control: Configure focus and resource allocation strategies
-
-Self-modification enables the system to:
-
-- Adapt to domain-specific requirements without reprogramming
-- Optimize performance for particular types of problems
-- Evolve new capabilities based on usage patterns
-
-### Self-Development
-
-- Capability Expansion: Add new reasoning capabilities through experience
-- Architecture Evolution: Adapt cognitive architecture based on effectiveness
-- Interface Enhancement: Improve interaction mechanisms through use
-
-Self-development capabilities make the system suitable for:
-
-- Lifelong learning assistants that grow with their users
-- Autonomous research systems that develop new methodologies
-- Adaptive tools that evolve with changing organizational needs
-
-## Design Benefits
-
-The Senars3 system provides several key advantages that make it suitable for complex reasoning tasks in uncertain
-environments while enhancing applicability, utility, enjoyability, and potential ubiquity:
-
-### Robustness
-
-- Graceful Degradation: Continue functioning with incomplete knowledge
-- Uncertainty Awareness: Explicitly handle unknowns and ambiguities
-- Adaptive Behavior: Adjust strategies based on environmental changes
-
-These features make the system particularly valuable for real-world applications where information is often incomplete
-or contradictory, such as:
-
-- Medical diagnosis with uncertain symptoms
-- Financial forecasting with volatile markets
-- Emergency response planning with evolving situations
-
-### Flexibility
-
-- Domain Independence: Apply same reasoning principles across domains
-- Dynamic Adaptation: Modify behavior based on task requirements
-- Incremental Learning: Continuously improve through experience
-
-This flexibility enables the system to be applied across diverse fields including:
-
-- Scientific research and hypothesis generation
-- Business strategy development
-- Educational tutoring systems
-- Creative arts and design
-
-### Transparency
-
-- Explicit Uncertainty: Clear indication of knowledge reliability
-- Traceable Reasoning: Every conclusion linked to its evidence
-- Inspectable Internals: Direct access to cognitive processes
-
-Transparency is crucial for high-stakes applications where understanding the reasoning process is as important as the
-conclusions, such as:
-
-- Legal reasoning and case law analysis
-- Regulatory compliance checking
-- Audit trails in financial systems
-
-### Scalability
-
-- Parallel Processing: Distribute cognitive tasks across workers
-- Resource Management: Efficiently allocate computational resources
-- Modular Architecture: Independent components can be enhanced separately
-
-The scalable design allows the system to handle:
-
-- Large-scale data analysis and pattern recognition
-- Complex multi-objective optimization problems
-- Real-time decision making in dynamic environments
-
-### Ubiquity Support
-
-- Cross-Platform Compatibility: Operate consistently across different environments
-- Resource Efficiency: Function effectively on both high-end and constrained devices
-- Integration Simplicity: Seamlessly connect with existing tools and workflows
-
-These ubiquity-enabling features make the system accessible to a broader user base and facilitate widespread adoption
-across diverse environments and use cases.
-
-## Future Development Directions
-
-The Senars3 system is designed for continuous evolution, with several enhancement paths identified for future
-development that align with our goals of enhanced applicability, utility, enjoyability, and potential ubiquity:
-
-### Advanced Uncertainty Models
-
-- Higher-Order Uncertainty: Reason about uncertainty in uncertainty values
-- Temporal Uncertainty: Model how confidence changes over time
-- Contextual Uncertainty: Adjust uncertainty based on situational factors
-
-These enhancements will enable more sophisticated applications such as:
-
-- Predictive maintenance systems that adapt confidence based on equipment history
-- Personalized medicine platforms that model uncertainty in treatment outcomes
-- Autonomous systems that adjust risk tolerance based on environmental conditions
-
-### Enhanced Metaprogramming
-
-- Self-Programming: Generate new reasoning schemas automatically
-- Architecture Evolution: Dynamically modify cognitive architecture
-- Interface Synthesis: Create custom interfaces for specific tasks
-
-This will allow the system to:
-
-- Automatically optimize its reasoning strategies for specific domains (utility)
-- Generate specialized interfaces for industry-specific applications (applicability)
-- Evolve new cognitive capabilities based on usage patterns (enjoyability)
+- **Metaprogramming Capabilities**: System can represent and modify itself
+- **Self-Development**: Autonomous performance analysis and enhancement
+- **Architecture Evolution**: Dynamic modification of cognitive architecture
 
 ### Multi-Agent Integration
 
-- Collaborative Reasoning: Coordinate with other cognitive systems
-- Knowledge Sharing: Exchange knowledge with complementary systems
-- Collective Intelligence: Leverage group reasoning capabilities
+- **Collaborative Reasoning**: Coordination with other cognitive systems
+- **Knowledge Sharing**: Exchange of knowledge between systems
+- **Collective Intelligence**: Group reasoning capabilities
 
-Multi-agent collaboration will expand applications to:
+## Quick Start
 
-- Distributed scientific research networks
-- Collaborative business strategy development
-- Coordinated emergency response systems
-- Collective problem-solving in complex engineering domains
+To get started with Senars3:
 
-### User Experience Advancement
+1. Install dependencies: `npm install`
+2. Start the system with the unified interface: `npm run start:web`
+3. Access the web interface at: `http://localhost:3000`
+4. Or start the CLI interface: `npm start`
 
-- Conversational Flow Optimization: Improve natural dialogue patterns for more enjoyable interactions
-- Personalized Interface Adaptation: Dynamically adjust UI elements based on user preferences
-- Emotional Intelligence Integration: Incorporate empathy and emotional awareness into responses
+## Interfaces
 
-### Ecosystem Expansion
+### Unified Interface
 
-- Third-Party Integration Framework: Simplify incorporation into existing software ecosystems
-- Cross-Platform Compatibility: Ensure seamless operation across devices and environments
-- Community-Driven Module Development: Enable external contributors to create specialized modules
-
-## System Capabilities and Applications
-
-This Non-Axiomatic Logic foundation positions Senars3 as a next-generation agentic reasoning system capable of genuine
-learning, adaptation, and self-improvement through interaction with complex, uncertain environments. By combining the
-rigor of symbolic reasoning with the flexibility of Language Model technology, Senars3 represents a significant step
-forward in artificial cognitive systems.
-
-The modular architecture, uncertainty-aware reasoning, and self-modification capabilities make it a powerful platform
-for exploring advanced AI concepts and developing intelligent applications across diverse domains:
-
-- **Scientific Research**: Hypothesis generation, experimental design, and knowledge synthesis
-- **Business Intelligence**: Strategic planning, risk assessment, and market analysis
-- **Healthcare**: Diagnostic reasoning, treatment planning, and medical research
-- **Education**: Personalized tutoring, curriculum development, and learning analytics
-- **Engineering**: Design optimization, fault diagnosis, and system modeling
-- **Finance**: Investment analysis, fraud detection, and regulatory compliance
-- **Creative Arts**: Concept generation, composition assistance, and design exploration
-- **Task Management**: Real-time task tracking, prioritization, and automated execution
-
-With its focus on enhanced applicability, utility, enjoyability, and potential ubiquity, Senars3 is designed to become
-more than just a reasoning engine—it aims to be an intelligent companion that adapts to individual needs while
-maintaining the rigorous logical foundation that makes it unique.
-
-Whether you're a researcher exploring the frontiers of artificial intelligence, a developer building intelligent
-applications, or an end-user seeking advanced decision support, Senars3 provides a flexible and powerful foundation for
-tackling complex problems in uncertain environments. Its emphasis on user experience and broad accessibility positions
-it to become a ubiquitous tool that enhances human reasoning and decision-making across all aspects of life and work.
-
-## Design Principles for Enhanced Applicability
-
-To maximize the system's applicability across diverse domains, future development should focus on:
-
-### Universal Design Patterns
-
-- **Domain-Agnostic Core**: Maintain a core reasoning engine that operates independently of specific domains
-- **Plug-and-Play Modules**: Develop standardized interfaces for domain-specific modules
-- **Adaptive Ontologies**: Create flexible knowledge structures that can evolve with new domains
-
-### Broad Integration Capabilities
-
-- **Multi-Protocol Support**: Extend beyond WebSocket/REST to include MQTT, gRPC, and other communication protocols
-- **Data Format Versatility**: Process structured data (JSON, XML), unstructured text, and multimedia inputs
-- **Platform Independence**: Ensure compatibility across cloud, edge, and embedded environments
-
-## Utility Enhancement Strategies
-
-To increase the practical utility of the system, development should prioritize:
-
-### User-Centric Features
-
-- **Personalization Engines**: Implement user profiling to tailor responses and interactions
-- **Context Awareness**: Enhance environmental sensing and context-sensitive responses
-- **Proactive Assistance**: Develop anticipatory reasoning capabilities that predict user needs
-
-### Performance Optimization
-
-- **Resource-Efficient Processing**: Optimize algorithms for minimal computational overhead
-- **Real-Time Responsiveness**: Reduce latency for time-critical applications
-- **Scalable Architecture**: Ensure consistent performance under varying workloads
-
-## Enjoyability and User Experience
-
-To make the system more enjoyable to use, focus on:
-
-### Intuitive Interaction Design
-
-- **Natural Language Mastery**: Improve conversational flow and contextual understanding
-- **Visual Feedback Systems**: Implement rich visualizations of reasoning processes
-- **Gamification Elements**: Introduce progress tracking and achievement systems for learning applications
-
-### Emotional Intelligence
-
-- **Tone Adaptation**: Adjust communication style based on user preferences and context
-- **Empathetic Responses**: Incorporate emotional awareness in interactions
-- **Personality Customization**: Allow users to define system personality traits
-
-## Pathways to Ubiquity
-
-To achieve widespread adoption and integration, consider:
-
-### Ecosystem Development
-
-- **Developer Toolkits**: Create comprehensive SDKs and APIs for third-party integration
-- **Community Building**: Establish forums, documentation, and educational resources
-- **Open Standards Compliance**: Adhere to industry standards for interoperability
-
-### Accessibility and Inclusion
-
-- **Multi-Language Support**: Expand natural language processing to global languages
-- **Assistive Technology Integration**: Ensure compatibility with screen readers and other aids
-- **Low-Resource Deployments**: Optimize for constrained environments and devices
-
-## Future Development Priorities
-
-To guide the evolution toward an ideal design, prioritize these enhancement areas:
-
-### Immediate Goals (Next Release)
-
-- Enhanced uncertainty visualization in web interface
-- Improved schema learning algorithms for faster adaptation
-- Expanded domain-specific module library
-
-### Medium-Term Objectives (6-12 months)
-
-- Multi-agent collaboration framework
-- Advanced context modeling capabilities
-- Personalization engine with user preference learning
-
-### Long-Term Vision (1-3 years)
-
-- Autonomous architecture evolution
-- Cross-modal reasoning (text, image, audio integration)
-- Collective intelligence emergence through networked systems
-
-## Unified Interface
-
-Senars3 now features a completely unified interface that consolidates all system functionality into a single, intuitive
-experience:
-
-### Modern Dashboard Design
-
-The new interface features a sleek sidebar navigation with clearly organized sections:
+Senars3 features a completely unified interface that consolidates all system functionality into a single, intuitive
+experience with a sleek sidebar navigation:
 
 - **Dashboard**: Real-time system status and performance metrics
 - **Processing**: Cognitive input processing and demo exploration
@@ -782,50 +344,615 @@ The new interface features a sleek sidebar navigation with clearly organized sec
 - **Configuration**: System parameter tuning
 - **CLI**: Direct command-line interface access
 
-### Enhanced Usability Features
+#### Enhanced Usability Features
 
 - **Responsive Design**: Works seamlessly across desktop, tablet, and mobile devices
 - **Intuitive Navigation**: One-click access to all system features
 - **Real-time Feedback**: Instant notifications and status updates
 - **Contextual Help**: Integrated documentation and examples
 
-### Total System Control
+### CLI Usage
 
-The unified interface provides complete control over all cognitive system functions:
+#### Starting the Unified CLI
 
-- Process natural language inputs with uncertainty-aware reasoning
-- Monitor real-time system performance metrics
-- Manage complex task hierarchies with automatic progress tracking
-- Fine-tune cognitive parameters for domain-specific optimization
-- Execute direct commands through the integrated CLI
+To start the interactive CLI that connects to the WebSocket backend:
 
-### Visual Data Representation
+```bash
+npm start
+# or
+npm run cli
+```
 
-Advanced visualization components provide clear insights into system operations:
+This will automatically start the WebSocket server in the background and connect the CLI to it.
 
-- Interactive charts for confidence distribution analysis
-- Real-time performance graphs
-- Task priority visualization
-- Cognitive item relationship mapping
+#### CLI Navigation
 
-This unified approach eliminates the complexity of switching between multiple interfaces while providing more powerful
-and accessible control over the entire cognitive system.
+- Use ↑/↓ arrow keys to navigate command history
+- Press Ctrl+C to exit the application
 
-## Conclusion
+#### CLI Commands
 
-The Senars3 cognitive system represents a unique opportunity to create a truly versatile reasoning platform that
-transcends traditional AI limitations. By focusing on enhanced applicability, utility, enjoyability, and potential
-ubiquity, we can develop a system that not only solves complex problems but also becomes an indispensable tool for users
-across all walks of life.
+Once in the CLI, you can use the following commands:
 
-The principles outlined above provide a roadmap for evolving Senars3 from a powerful reasoning engine into an
-intelligent companion that adapts to individual needs while maintaining the rigorous logical foundation that makes it
-unique.
+- `help` - Show help message with available commands and examples
+- `status` - Show system status including agenda size and world model statistics
+- `stats` - Show processing statistics
+- `process <input>` - Process natural language input through non-axiomatic logic
+- `clear` - Clear the screen
+- `quit` or `exit` - Exit the system
 
-## Additional Documentation
+#### Direct Component Access
 
-For detailed information about specific components and implementation details, please refer to:
+The unified CLI allows direct access to system components:
 
-- User Guide (`USER_GUIDE.md`)
-- Test Utilities documentation (`test/unit/README.md`)
-- Architecture Decision Records (`docs/adr/`)
+- `core.<method> <json>` - Call core methods
+- `perception.<method> <json>` - Call perception methods
+- `agenda.<method> <json>` - Call agenda methods
+- `worldModel.<method> <json>` - Call world model methods
+
+Examples:
+
+```bash
+# Process input
+process My cat seems sick after eating chocolate. What should I do considering uncertainty?
+
+# Get system status
+core.getSystemStatus {}
+
+# Process input with perception subsystem
+perception.processInput {"input": "Example input for processing"}
+
+# Get world model statistics
+worldModel.getStatistics {}
+```
+
+### Web Interface
+
+#### Starting the Web Server
+
+To start the unified web interface:
+
+```bash
+npm run start:web
+```
+
+This will start both an HTTP server (for serving the web interface) and a WebSocket server (for communication with the
+cognitive system).
+
+#### Accessing the Web Interface
+
+Once the server is running, open your browser and navigate to:
+
+```
+http://localhost:3000
+```
+
+#### Using the Web Interface
+
+The unified web interface provides several tabs for different functionalities:
+
+1. **Cognitive Demos** - Pre-built examples for different domains using non-axiomatic logic
+2. **Custom Input** - Enter your own text for processing (supports Ctrl+Enter)
+3. **Task Management** - Real-time task tracking and management with automated execution
+4. **System Status** - Real-time monitoring of system statistics
+5. **Metaprogramming** - Direct component access and self-modification interface
+6. **Help & Examples** - Comprehensive guide and input examples
+
+#### Features:
+
+- Real-time connection status monitoring
+- Interactive demos for different domains (Medical, Scientific, Business, etc.) with uncertainty management
+- Custom input processing with keyboard shortcuts (Ctrl+Enter)
+- Task management with real-time tracking and automated execution
+- CLI mode toggle for command-line experience in the browser
+- System status monitoring with live statistics
+- Metaprogramming interface for self-representation and modification
+- Comprehensive help and examples for non-axiomatic logic principles
+- Enhanced error handling and user feedback
+- Responsive design for different screen sizes
+
+#### Keyboard Shortcuts
+
+- **Ctrl+Enter** - Process input in the Custom Input tab
+- **Tab** - Switch between different interface sections
+
+### API Access
+
+#### WebSocket API
+
+The WebSocket API provides programmatic access to the cognitive system's capabilities. It uses a request-response
+pattern with JSON messages.
+
+##### Connecting to the WebSocket Server
+
+If you started the web server with `npm run start:web`, the WebSocket server is available at:
+
+```
+ws://localhost:8080
+```
+
+If you started only the WebSocket server with `npm run start:ws`, it's also available at the same address.
+
+##### WebSocket Message Format
+
+All messages follow this structure:
+
+```json
+{
+  "id": "unique-message-id",
+  "type": "request",
+  "target": "component-name",
+  "method": "method-name",
+  "payload": { /* method-specific data */ }
+}
+```
+
+##### Available Components and Methods
+
+###### Core Component
+
+Methods:
+
+- `start` - Start the cognitive core
+- `stop` - Stop the cognitive core
+- `getSystemStatus` - Get system status information
+- `addInitialBelief` - Add an initial belief to the system
+- `addInitialGoal` - Add an initial goal to the system
+- `addSchema` - Add a cognitive schema to the system
+- `addCognitiveItem` - Add a cognitive item to the system
+
+###### Tasks Component
+
+Methods:
+
+- `addTask` - Add a new task to the system
+- `updateTask` - Update an existing task
+- `removeTask` - Remove a task from the system
+- `getTask` - Retrieve a specific task by ID
+- `getAllTasks` - Retrieve all tasks
+- `updateTaskStatus` - Update the status of a task
+
+Example:
+
+```javascript
+// Start the cognitive core
+ws.send(JSON.stringify({
+  id: 'msg-1',
+  type: 'request',
+  target: 'core',
+  method: 'start',
+  payload: {}
+}));
+
+// Add an initial belief with uncertainty values
+ws.send(JSON.stringify({
+  id: 'msg-2',
+  type: 'request',
+  target: 'core',
+  method: 'addInitialBelief',
+  payload: {
+    content: 'Chocolate is toxic to pets with high probability',
+    truth: { frequency: 0.9, confidence: 0.85 },
+    attention: { priority: 0.8, durability: 0.7 },
+    meta: { domain: 'veterinary', author: 'vetdb.org', uncertainty: 'high' }
+  }
+}));
+```
+
+###### Perception Component
+
+Methods:
+
+- `processInput` - Process natural language input into cognitive items
+
+Example:
+
+```javascript
+// Process natural language input with uncertainty consideration
+ws.send(JSON.stringify({
+  id: 'msg-3',
+  type: 'request',
+  target: 'perception',
+  method: 'processInput',
+  payload: {
+    input: 'My cat seems sick after eating chocolate. What should I do considering uncertainty?'
+  }
+}));
+```
+
+###### Agenda Component
+
+Methods:
+
+- `size` - Get the current size of the agenda
+- `peek` - Peek at the top item in the agenda
+
+Example:
+
+```javascript
+// Get agenda size
+ws.send(JSON.stringify({
+  id: 'msg-4',
+  type: 'request',
+  target: 'agenda',
+  method: 'size',
+  payload: {}
+}));
+```
+
+###### World Model Component
+
+Methods:
+
+- `getStatistics` - Get world model statistics
+
+Example:
+
+```javascript
+// Get world model statistics
+ws.send(JSON.stringify({
+  id: 'msg-5',
+  type: 'request',
+  target: 'worldModel',
+  method: 'getStatistics',
+  payload: {}
+}));
+```
+
+##### Handling Responses
+
+The system sends responses in the following format:
+
+```json
+{
+  "id": "unique-message-id",
+  "type": "response",
+  "payload": { /* response data */ }
+}
+```
+
+The system also sends events and errors:
+
+```json
+{
+  "id": "unique-message-id",
+  "type": "event",
+  "method": "event-name",
+  "payload": { /* event data */ }
+}
+```
+
+```json
+{
+  "id": "unique-message-id",
+  "type": "error",
+  "error": {
+    "code": "error-code",
+    "message": "error message"
+  }
+}
+```
+
+Example response handling:
+
+```javascript
+ws.onmessage = function(event) {
+  const message = JSON.parse(event.data);
+  
+  switch (message.type) {
+    case 'response':
+      console.log('Received response:', message.payload);
+      break;
+    case 'event':
+      console.log('Received event:', message.method, message.payload);
+      break;
+    case 'error':
+      console.error('Error:', message.error);
+      break;
+    case 'welcome':
+      console.log('Connected to system:', message.payload);
+      break;
+  }
+};
+```
+
+#### REST API
+
+The system provides a REST API for programmatic access:
+
+##### Endpoints
+
+- `GET /health` - Health check endpoint
+- `GET /api/status` - Get server status information
+- `POST /api/process` - Process input (asynchronous)
+
+##### Example REST API Usage
+
+```bash
+# Health check
+curl http://localhost:3000/health
+
+# Get server status
+curl http://localhost:3000/api/status
+
+# Process input with uncertainty consideration
+curl -X POST http://localhost:3000/api/process \
+  -H "Content-Type: application/json" \
+  -d '{"input": "My cat seems sick after eating chocolate. What should I do considering uncertainty?"}'
+```
+
+## Task Management System
+
+The Senars3 system includes a powerful real-time task management system that integrates with the cognitive processing
+engine. Tasks can be created, updated, and tracked through both the web interface and programmatic APIs.
+
+### Universal Task Ontology
+
+Tasks are the fundamental unit of cognition in Senars3. Every cognitive process—from simple perception to complex creative
+synthesis—is represented as a structured task. This approach unifies all forms of reasoning under a single, intuitive
+framework.
+
+#### Core Task Structure
+
+The task structure extends `CognitiveItem` with task-specific properties as defined in the data model above.
+
+### Task Creation
+
+Tasks can be created through the web interface or programmatically:
+
+1. **Web Interface**: Use the "Task Management" tab to add new tasks with titles, descriptions, priorities, and due
+   dates
+2. **WebSocket API**: Send a request to the `tasks.addTask` method with task details
+3. **REST API**: POST to the `/api/tasks` endpoint (when implemented)
+
+### Task Properties
+
+Each task includes the following properties:
+
+- **Title**: A concise description of the task
+- **Description**: Detailed information about the task (optional)
+- **Priority**: A value between 0.0 and 1.0 indicating importance
+- **Status**: One of the defined task statuses (`pending`, `awaiting_dependencies`, etc.)
+- **Due Date**: Optional deadline for task completion
+- **Dependencies**: Other tasks that must be completed before this task
+- **Subtasks**: Tasks that are part of this larger task
+
+### Task Processing
+
+Tasks are automatically processed by the cognitive system based on:
+
+1. **Priority**: Higher priority tasks are processed first
+2. **Dependencies**: Tasks with unmet dependencies are queued until dependencies are completed
+3. **Availability**: Tasks are converted to CognitiveItems when ready for processing
+
+### Task Status Management
+
+Task status can be updated through:
+
+1. **Manual Updates**: Using the web interface or API calls
+2. **Automatic Updates**: Based on cognitive processing results
+3. **Dependency Resolution**: When dependent tasks are completed
+
+### Integration with Cognitive Processing
+
+Tasks are seamlessly integrated with the cognitive processing engine:
+
+1. **Task-to-CognitiveItem Conversion**: Pending tasks are automatically converted to CognitiveItems
+2. **Progress Tracking**: Task status is updated based on cognitive processing results
+3. **Result Linking**: CognitiveItems generated from tasks are linked back to their originating tasks
+
+### Current Task Features
+
+- **Task Factory**: Utilities for creating standardized tasks with `createTask`, `createDerivedTask`, and `createSubtask`
+- **Task Validation**: Validation and normalization utilities in `TaskValidator`
+- **Hierarchical Tasks**: Support for parent-child relationships
+- **Task Metadata**: Rich metadata including priority, dependencies, deadlines, and more
+
+### Planned Task Features
+
+- **Task Execution Engine**: Full execution capabilities for tasks
+- **Automatic Progress Tracking**: Real-time progress calculation for hierarchical tasks
+- **Task Grouping**: Grouping related tasks for better organization
+- **Configurable Prioritization**: Advanced agenda algorithms for task prioritization
+
+## Community Simulator
+
+The Community Simulator is a powerful tool for demonstrating collaborative problem-solving with multiple cognitive
+agents.
+
+### Overview
+
+The Community Simulator allows you to:
+
+- Deploy multiple cognitive agents with different roles and expertise
+- Select from a variety of educational problems across different domains
+- Simulate collaborative problem-solving sessions
+- Observe how agents with their own cognitive contexts can work together
+
+### Getting Started
+
+1. Navigate to the "Community" view in the unified interface
+2. Select a problem from the dropdown menu:
+    - Medical Diagnosis Challenge
+    - Environmental Impact Assessment
+    - Strategic Business Decision
+    - Cybersecurity Threat Analysis
+    - Scientific Hypothesis Testing
+3. Deploy agent participants by entering names and clicking "Add Participant"
+4. Click "Start Simulation" to begin the collaborative session
+
+### Agent Deployment
+
+Each agent you deploy has:
+
+- A unique name
+- A randomly assigned role (e.g., Medical Doctor, Environmental Scientist)
+- Specific expertise in a domain area
+- Its own cognitive context with beliefs, goals, and attention mechanisms
+
+Agents can be removed at any time during the simulation.
+
+### Simulation Features
+
+- **Autonomous Agent Actions**: Agents will automatically contribute to the discussion every few seconds
+- **Human Participation**: You can submit your own inputs to the collaboration feed
+- **Cognitive System Responses**: The system will process inputs and provide responses
+- **Real-time Feed**: All interactions are displayed in a real-time collaboration feed
+
+### Educational Value
+
+The Community Simulator demonstrates:
+
+- Peer-to-peer collaboration between cognitive agents
+- How different expertise areas can contribute to problem-solving
+- The integration of the cognitive system in collaborative contexts
+- The potential for multi-agent reasoning systems in real-world applications
+
+### Problem Domains
+
+The simulator includes problems from:
+
+- Healthcare and Medicine
+- Environmental Science
+- Business Strategy
+- Cybersecurity
+- Scientific Research
+
+Each problem is designed to showcase different aspects of the cognitive system's reasoning capabilities.
+
+## Development Guidelines
+
+### Core Principles
+
+- **Elegance**
+    - Abstract and modularize complex functionality
+    - Use concise syntax (ternary operators, switch statements, etc.)
+    - Consolidate related functionality
+    - Eliminate code duplication (DRY principle)
+
+- **Self-Documentation**
+    - Rely on meaningful identifiers rather than comments
+    - Write code that clearly expresses its intent
+    - Structure code to minimize the need for explanatory comments
+
+- **Professional Quality**
+    - Maintain production-grade code quality
+    - Prioritize correctness and performance over educational explanations
+    - Follow established patterns and conventions
+
+### Implementation Standards
+
+- **Type Safety**: Use TypeScript's type system to catch errors at compile time
+- **Immutability**: Prefer immutable data structures where possible
+- **Pure Functions**: Write pure functions when feasible to enable easier testing
+- **Error Handling**: Implement comprehensive error handling with meaningful messages
+- **Performance**: Optimize for efficiency without sacrificing readability
+
+### Testing Requirements
+
+- **Comprehensive Coverage**: All core functionality must be unit tested
+- **Edge Cases**: Tests must cover boundary conditions and error scenarios
+- **Readability**: Tests should clearly demonstrate expected behavior
+- **Maintainability**: Use test utilities to reduce duplication (see `test/unit/README.md`)
+
+### Documentation Standards
+
+- **API Documentation**: All public interfaces must be documented
+- **Inline Documentation**: Use JSDoc/TSDoc for complex algorithms
+- **External Documentation**: Maintain README.md and other markdown files
+
+## Roadmap
+
+### Phase 1: Foundation - Task-Oriented Cognitive Core (In Progress)
+
+#### 1. Universal Task Ontology Implementation
+- [x] Define core task structure extending CognitiveItem interface
+- [x] Implement task factory for creating standardized tasks
+- [x] Add task-specific metadata fields to CognitiveItem
+- [x] Create task validation and normalization utilities
+
+#### 2. Task-Based Reasoning Integration
+- [ ] Modify cognitive cycle to process tasks as primary units
+- [ ] Implement task decomposition mechanisms
+- [ ] Add task prioritization based on attention dynamics
+- [ ] Create task execution tracking and monitoring
+
+#### 3. Enhanced Agenda System for Task Management
+- [ ] Extend PriorityAgenda to handle task-specific sorting
+- [ ] Implement task dependencies and blocking mechanisms
+- [ ] Add task grouping and categorization features
+- [ ] Create task lifecycle management (creation, execution, completion)
+
+#### 4. Task-Centric World Model Integration
+- [ ] Modify world model to store and retrieve tasks
+- [ ] Implement task state persistence
+- [ ] Add task relationship mapping (parent-child, dependencies)
+- [ ] Create task-specific querying mechanisms
+
+### Phase 2: Core Functionality - Essential Reasoning Capabilities
+
+#### 5. Task Planning and Execution Engine
+- [ ] Implement forward-chaining planning for task execution
+- [ ] Add backward-chaining goal regression mechanisms
+- [ ] Create task scheduling with temporal reasoning
+- [ ] Implement resource allocation for task execution
+
+#### 6. Task Knowledge Integration
+- [ ] Develop automatic knowledge requirement identification for tasks
+- [ ] Implement knowledge retrieval based on task context
+- [ ] Add knowledge quality assessment for task inputs
+- [ ] Create knowledge synthesis for complex tasks
+
+#### 7. Task Uncertainty Management
+- [ ] Integrate uncertainty profiles into task structures
+- [ ] Implement confidence propagation through task chains
+- [ ] Add risk assessment for task execution
+- [ ] Create uncertainty-aware task scheduling
+
+### Phase 3: User Interface and Interaction
+
+#### 8. Task Management Interface
+- [ ] Create REST API for task management operations
+- [ ] Implement WebSocket interface for real-time task updates
+- [ ] Add task visualization and monitoring dashboard
+- [ ] Create task filtering and search capabilities
+
+#### 9. Natural Language Task Processing
+- [ ] Implement task creation from natural language requests
+- [ ] Add task modification through natural language commands
+- [ ] Create task querying through conversational interfaces
+- [ ] Implement clarification mechanisms for ambiguous requests
+
+### Phase 4: Advanced Reasoning Capabilities
+
+#### 10. Collaborative Task Processing
+- [ ] Implement multi-agent task coordination
+- [ ] Add task delegation mechanisms
+- [ ] Create consensus building for collaborative tasks
+- [ ] Develop conflict resolution for collaborative work
+
+#### 11. Meta-Cognitive Task Processing
+- [ ] Implement tasks about tasks (meta-reasoning)
+- [ ] Add automatic task strategy selection
+- [ ] Create task approach optimization mechanisms
+- [ ] Implement confidence calibration for task execution
+
+#### 12. Learning-Enhanced Task Processing
+- [ ] Add skill acquisition tracking for tasks
+- [ ] Implement transfer learning for similar tasks
+- [ ] Create task performance optimization based on history
+- [ ] Add automatic task template creation from successful workflows
+
+### Phase 5: System Integration and Optimization
+
+#### 13. Performance Monitoring and Optimization
+- [ ] Implement task execution performance metrics
+- [ ] Add resource utilization tracking for tasks
+- [ ] Create bottleneck identification for task processing
+- [ ] Implement optimization recommendations for task execution
+
+#### 14. Task Security and Validation
+- [ ] Add input validation for task parameters
+- [ ] Implement task execution sandboxing
+- [ ] Create audit trails for task execution
+- [ ] Add integrity checks for task outcomes

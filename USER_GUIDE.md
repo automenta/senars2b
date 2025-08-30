@@ -1,31 +1,42 @@
 # Senars3 Cognitive System - User Guide
 
 This guide provides comprehensive instructions for using the Senars3 cognitive system through its unified interface that
-works across both CLI and Web environments.
+works across both CLI and Web environments. Please note that Senars3 is currently in active development, and some
+features described in this guide may be partially implemented or planned for future releases.
 
-> **Note**: This guide focuses on practical usage. For technical details about the Non-Axiomatic Logic principles,
-> please refer to [core.md](core.md). For system features and setup instructions, see [README.md](README.md).
+## Current Development Status
 
-## System Overview
+Senars3 is currently in active development with a focus on implementing a task-centric cognitive architecture. The
+system has a working prototype with basic functionality but many advanced features are still being developed.
 
-The Senars3 cognitive system is a next-generation agentic reasoning system that uses non-axiomatic logic principles to
-fuse symbolic reasoning with Language Model technology. It processes natural language input through:
+**Currently Available:**
+- Basic cognitive architecture with agenda system and world model
+- Task management system with factory and validation utilities
+- Unified interface (CLI and Web) with WebSocket communication
+- Community Simulator for multi-agent collaboration demonstrations
 
-1. **Perceiving** - Converting text into cognitive items (beliefs, goals, queries) with uncertainty values
-2. **Contextualizing** - Finding relevant knowledge in its memory using resonance mechanisms
-3. **Reasoning** - Applying cognitive schemas to generate new insights with confidence assessment
-4. **Acting** - Executing goals like searching or diagnosing with attention prioritization
-5. **Learning** - Updating its knowledge base with new information through belief revision
+**In Development:**
+- Advanced task processing and execution engine
+- Schema learning and evolution mechanisms
+- Enhanced uncertainty management
+- Self-modification and metaprogramming capabilities
+
+See the README.md file for the complete roadmap and development status.
+
+## Quick Start
+
+1. Start the system: `npm run start:web`
+2. Access the web interface at: `http://localhost:3000`
+3. Or start the CLI: `npm start`
 
 ## Available Interfaces
 
-The system provides a **unified interface** that works seamlessly across both CLI and Web environments:
+Senars3 provides a **unified interface** that works seamlessly across environments:
 
-1. **Unified Command-Line Interface (CLI)** - Interactive text-based interface that connects to the WebSocket backend
-2. **Unified Web Interface** - Browser-based graphical interface with real-time feedback and metaprogramming
-   capabilities
+1. **Unified Command-Line Interface (CLI)** - Text-based interface connecting to the WebSocket backend
+2. **Unified Web Interface** - Browser-based graphical interface with real-time feedback
 3. **WebSocket API** - Programmatic interface for custom applications
-4. **REST API** - HTTP-based interface for programmatic access
+4. **REST API** - HTTP-based interface for programmatic access (limited functionality)
 
 ## Unified Command-Line Interface (CLI)
 
@@ -70,48 +81,14 @@ Examples:
 
 ```bash
 # Process input
-process My cat seems sick after eating chocolate. What should I do considering uncertainty?
+process My cat seems sick after eating chocolate. What should I do?
 
 # Get system status
 core.getSystemStatus {}
 
 # Process input with perception subsystem
 perception.processInput {"input": "Example input for processing"}
-
-# Get world model statistics
-worldModel.getStatistics {}
 ```
-
-### Providing Input
-
-You can enter natural language statements or questions for the system to process through its non-axiomatic logic
-framework. Examples:
-
-- Uncertain Statements: "Chocolate is likely toxic to dogs"
-- Probabilistic Questions: "What is the probability my cat is sick after eating chocolate?"
-- Conditional Commands: "If my plant is wilting due to overwatering, reduce watering frequency"
-- Exploratory Goals: "Diagnose why my plant is wilting considering multiple possible causes"
-- Adaptive Requests: "Create a health plan for my pet that adjusts based on ongoing symptoms"
-
-The system will process your input and add the extracted cognitive items to its agenda for further processing through
-its non-axiomatic reasoning engine.
-
-### Managing Tasks
-
-The Task Management tab allows you to create, track, and manage tasks that the cognitive system will process:
-
-1. **Adding Tasks**: Enter a task title, optional description, priority (0.0-1.0), and due date
-2. **Task Prioritization**: Tasks are automatically prioritized based on their priority value
-3. **Task Dependencies**: Tasks with dependencies will only be processed when all dependencies are completed
-4. **Real-time Tracking**: Task status updates in real-time as the system processes them
-5. **Automated Execution**: Tasks are automatically converted to cognitive goals and processed by the system
-
-Tasks can be in one of four states:
-
-- **Pending**: Waiting to be processed
-- **In Progress**: Currently being processed by the cognitive system
-- **Completed**: Successfully processed
-- **Failed**: Processing failed or was manually marked as failed
 
 ## Unified Web Interface
 
@@ -140,35 +117,38 @@ The unified web interface provides several tabs for different functionalities:
 
 1. **Cognitive Demos** - Pre-built examples for different domains using non-axiomatic logic
 2. **Custom Input** - Enter your own text for processing (supports Ctrl+Enter)
-3. **Task Management** - Real-time task tracking and management with automated execution
+3. **Task Management** - Real-time task tracking and management
 4. **System Status** - Real-time monitoring of system statistics
 5. **Metaprogramming** - Direct component access and self-modification interface
 6. **Help & Examples** - Comprehensive guide and input examples
+7. **Community** - Multi-agent collaboration simulator
 
 #### Features:
 
 - Real-time connection status monitoring
-- Interactive demos for different domains (Medical, Scientific, Business, etc.) with uncertainty management
+- Interactive demos for different domains
 - Custom input processing with keyboard shortcuts (Ctrl+Enter)
-- Task management with real-time tracking and automated execution
+- Task management with real-time tracking
 - CLI mode toggle for command-line experience in the browser
 - System status monitoring with live statistics
 - Metaprogramming interface for self-representation and modification
-- Comprehensive help and examples for non-axiomatic logic principles
+- Comprehensive help and examples
 - Enhanced error handling and user feedback
 - Responsive design for different screen sizes
 
-### Keyboard Shortcuts
+#### Keyboard Shortcuts
 
 - **Ctrl+Enter** - Process input in the Custom Input tab
 - **Tab** - Switch between different interface sections
 
-## WebSocket API
+## API Access
+
+### WebSocket API
 
 The WebSocket API provides programmatic access to the cognitive system's capabilities. It uses a request-response
 pattern with JSON messages.
 
-### Connecting to the WebSocket Server
+#### Connecting to the WebSocket Server
 
 If you started the web server with `npm run start:web`, the WebSocket server is available at:
 
@@ -178,7 +158,7 @@ ws://localhost:8080
 
 If you started only the WebSocket server with `npm run start:ws`, it's also available at the same address.
 
-### WebSocket Message Format
+#### WebSocket Message Format
 
 All messages follow this structure:
 
@@ -192,9 +172,9 @@ All messages follow this structure:
 }
 ```
 
-### Available Components and Methods
+#### Available Components and Methods
 
-#### Core Component
+##### Core Component
 
 Methods:
 
@@ -206,7 +186,7 @@ Methods:
 - `addSchema` - Add a cognitive schema to the system
 - `addCognitiveItem` - Add a cognitive item to the system
 
-#### Tasks Component
+##### Tasks Component
 
 Methods:
 
@@ -236,15 +216,15 @@ ws.send(JSON.stringify({
   target: 'core',
   method: 'addInitialBelief',
   payload: {
-    content: 'Chocolate is toxic to pets with high probability',
+    content: 'Chocolate is toxic to pets',
     truth: { frequency: 0.9, confidence: 0.85 },
     attention: { priority: 0.8, durability: 0.7 },
-    meta: { domain: 'veterinary', author: 'vetdb.org', uncertainty: 'high' }
+    meta: { domain: 'veterinary' }
   }
 }));
 ```
 
-#### Perception Component
+##### Perception Component
 
 Methods:
 
@@ -253,19 +233,19 @@ Methods:
 Example:
 
 ```javascript
-// Process natural language input with uncertainty consideration
+// Process natural language input
 ws.send(JSON.stringify({
   id: 'msg-3',
   type: 'request',
   target: 'perception',
   method: 'processInput',
   payload: {
-    input: 'My cat seems sick after eating chocolate. What should I do considering uncertainty?'
+    input: 'My cat seems sick after eating chocolate. What should I do?'
   }
 }));
 ```
 
-#### Agenda Component
+##### Agenda Component
 
 Methods:
 
@@ -285,7 +265,7 @@ ws.send(JSON.stringify({
 }));
 ```
 
-#### World Model Component
+##### World Model Component
 
 Methods:
 
@@ -304,7 +284,7 @@ ws.send(JSON.stringify({
 }));
 ```
 
-### Handling Responses
+#### Handling Responses
 
 The system sends responses in the following format:
 
@@ -361,17 +341,17 @@ ws.onmessage = function(event) {
 };
 ```
 
-## REST API
+### REST API
 
 The system provides a REST API for programmatic access:
 
-### Endpoints
+#### Endpoints
 
 - `GET /health` - Health check endpoint
 - `GET /api/status` - Get server status information
 - `POST /api/process` - Process input (asynchronous)
 
-### Example REST API Usage
+#### Example REST API Usage
 
 ```bash
 # Health check
@@ -380,62 +360,34 @@ curl http://localhost:3000/health
 # Get server status
 curl http://localhost:3000/api/status
 
-# Process input with uncertainty consideration
+# Process input
 curl -X POST http://localhost:3000/api/process \
   -H "Content-Type: application/json" \
-  -d '{"input": "My cat seems sick after eating chocolate. What should I do considering uncertainty?"}'
+  -d '{"input": "My cat seems sick after eating chocolate. What should I do?"}'
 ```
 
-## Input Types and Best Practices for Non-Axiomatic Logic
+## Input Best Practices
 
 ### Input Types
 
-The system can process different types of input through its non-axiomatic logic framework:
+The system can process different types of input:
 
-1. **Uncertain Statements** - Information with implicit uncertainty like "Chocolate is likely toxic to dogs"
-2. **Probabilistic Questions** - Queries that require uncertainty-aware answers like "What is the probability my cat is
-   sick after eating chocolate?"
-3. **Conditional Commands** - Action requests with uncertainty considerations like "If my plant is wilting due to
-   overwatering, reduce watering frequency"
-4. **Exploratory Goals** - Complex objectives with uncertainty evaluation like "Diagnose why my plant is wilting
-   considering multiple possible causes"
-5. **Adaptive Requests** - Multi-part requests that adapt based on uncertainty like "Create a health plan for my pet
-   that adjusts based on ongoing symptoms"
+1. **Statements** - Factual information like "Chocolate is toxic to dogs"
+2. **Questions** - Queries like "What should I do if my cat is sick?"
+3. **Commands** - Action requests like "Diagnose why my plant is wilting"
+4. **Goals** - Complex objectives like "Find solutions to reduce energy consumption"
 
-### Input Validation
+### Best Practices
 
-The system validates all inputs:
-
-- Minimum length: 3 characters
-- Maximum length: 10,000 characters
-- Must be a string
-
-### Best Practices for Non-Axiomatic Logic Processing
-
-1. **Express Uncertainty Explicitly** - Include phrases like "likely", "possibly", "with high probability" to help the
-   system understand uncertainty levels
-2. **Use Conditional Language** - Frame requests with "if-then" constructs to express conditional relationships
-3. **Specify Confidence Requirements** - Indicate when you need high-confidence answers vs. exploratory responses
-4. **Break Down Complex Requests** - For very complex tasks, consider breaking them down into simpler sub-tasks with
-   explicit uncertainty handling
-5. **Monitor System Status** - Use the status and stats commands to monitor system performance and uncertainty
-   processing
-6. **Be Specific and Clear** - Use clear, unambiguous language while acknowledging inherent uncertainties
-7. **Check Input Length** - Ensure inputs are between 3-10,000 characters
+1. **Be Clear and Specific** - Use clear, unambiguous language
+2. **Break Down Complex Requests** - For complex tasks, consider breaking them into simpler steps
+3. **Check Input Length** - Ensure inputs are between 3-10,000 characters
+4. **Use Natural Language** - The system is designed to work with natural language input
 
 ## Task Management
 
-The Senars3 system includes a powerful real-time task management system that integrates with the cognitive processing
-engine. Tasks can be created, updated, and tracked through both the web interface and programmatic APIs.
-
-### Task Creation
-
-Tasks can be created through the web interface or programmatically:
-
-1. **Web Interface**: Use the "Task Management" tab to add new tasks with titles, descriptions, priorities, and due
-   dates
-2. **WebSocket API**: Send a request to the `tasks.addTask` method with task details
-3. **REST API**: POST to the `/api/tasks` endpoint (when implemented)
+The Senars3 system includes a task management system that integrates with the cognitive processing engine. Tasks can be
+created, updated, and tracked through both the web interface and programmatic APIs.
 
 ### Task Properties
 
@@ -443,60 +395,58 @@ Each task includes the following properties:
 
 - **Title**: A concise description of the task
 - **Description**: Detailed information about the task (optional)
-- **Priority**: A value between 0.0 and 1.0 indicating importance
-- **Status**: One of `pending`, `in-progress`, `completed`, or `failed`
+- **Priority**: Priority level ('low', 'medium', 'high', 'critical')
+- **Status**: Current status ('pending', 'awaiting_dependencies', 'completed', etc.)
 - **Due Date**: Optional deadline for task completion
 - **Dependencies**: Other tasks that must be completed before this task
 - **Subtasks**: Tasks that are part of this larger task
 
-### Task Processing
+### Task Creation
 
-Tasks are automatically processed by the cognitive system based on:
+Tasks can be created through the web interface or programmatically:
 
-1. **Priority**: Higher priority tasks are processed first
-2. **Dependencies**: Tasks with unmet dependencies are queued until dependencies are completed
-3. **Availability**: Tasks are converted to CognitiveItems (GOALs) when ready for processing
+1. **Web Interface**: Use the "Task Management" tab to add new tasks
+2. **WebSocket API**: Send a request to the `tasks.addTask` method with task details
 
-### Task Status Management
+### Current Task Features
 
-Task status can be updated through:
+- **Task Factory**: Utilities for creating standardized tasks
+- **Task Validation**: Validation and normalization of task structures
+- **Hierarchical Tasks**: Support for parent-child relationships
+- **Task Metadata**: Rich metadata including priority, dependencies, deadlines
 
-1. **Manual Updates**: Using the web interface or API calls
-2. **Automatic Updates**: Based on cognitive processing results
-3. **Dependency Resolution**: When dependent tasks are completed
+### Planned Task Features
 
-### Integration with Cognitive Processing
+- **Task Execution Engine**: Full execution capabilities for tasks
+- **Automatic Progress Tracking**: Real-time progress calculation
+- **Task Grouping**: Grouping related tasks
+- **Advanced Scheduling**: Temporal scheduling with resource allocation
 
-Tasks are seamlessly integrated with the cognitive processing engine:
+## Community Simulator
 
-1. **Task-to-GOAL Conversion**: Pending tasks are automatically converted to GOAL CognitiveItems
-2. **Progress Tracking**: Task status is updated based on cognitive processing results
-3. **Result Linking**: CognitiveItems generated from tasks are linked back to their originating tasks
+The Community Simulator is a multi-agent collaboration environment that demonstrates how cognitive agents can work
+together to solve problems.
 
-## Understanding Non-Axiomatic Logic Output
+### Accessing the Simulator
 
-The system categorizes output through its non-axiomatic framework:
+1. Navigate to the "Community" view in the unified interface
+2. Select a problem from the dropdown menu
+3. Deploy agent participants by entering names and clicking "Add Participant"
+4. Click "Start Simulation" to begin the collaborative session
 
-1. **Beliefs** - Factual information the system has learned or inferred with associated truth values (frequency and
-   confidence)
-2. **Goals** - Tasks or objectives the system needs to accomplish with associated attention values (priority and
-   durability)
-3. **Queries** - Questions that require answers or exploration with associated interest values
+### Available Problems
 
-Each cognitive item includes metadata about its truth value and attention value, which help determine its reliability
-and importance in the non-axiomatic framework.
+- Medical Diagnosis Challenge
+- Environmental Impact Assessment
+- Strategic Business Decision
+- Cybersecurity Threat Analysis
+- Scientific Hypothesis Testing
 
-## Metaprogramming and Self-Modification
+### Simulator Features
 
-The unified interface enables direct interaction with the system's self-representational capabilities:
-
-1. **Component Introspection** - Examine internal state of cognitive modules
-2. **Parameter Adjustment** - Modify system parameters that affect reasoning
-3. **Schema Evolution** - Add or modify cognitive patterns that guide reasoning
-4. **Reflection Control** - Configure how the system monitors and adapts itself
-
-Through the metaprogramming interface in both CLI and Web UI, users can directly modify system behavior and observe how
-the system adapts its reasoning processes.
+- **Autonomous Agent Actions**: Agents automatically contribute to discussions
+- **Human Participation**: You can submit your own inputs to the collaboration
+- **Real-time Feed**: All interactions are displayed in real-time
 
 ## Troubleshooting
 
@@ -509,14 +459,13 @@ the system adapts its reasoning processes.
     - Check the web interface for connection status indicators
 
 2. **No results from input processing**
-    - Try rephrasing your input to be more explicit about uncertainty
-    - Make sure your input contains clear statements, questions, or commands with uncertainty considerations
+    - Try rephrasing your input to be more explicit
+    - Make sure your input contains clear statements or questions
     - Check that the system is properly started
     - Use the `help` command in CLI or check the Help tab in the web interface
 
 3. **Performance issues**
     - Monitor agenda size with the status command
-    - Consider reducing the number of concurrent workers if system is overloaded
     - Check system status tab in web interface for real-time statistics
 
 4. **Web interface not loading**
@@ -529,8 +478,5 @@ the system adapts its reasoning processes.
 
 For additional help, refer to:
 
-- This user guide
-- The system's README.md file
-- The core.md specification document
-- The technical documentation in the source code comments
+- The system's README.md file for comprehensive system documentation and development status
 - The Help & Examples tab in the web interface
