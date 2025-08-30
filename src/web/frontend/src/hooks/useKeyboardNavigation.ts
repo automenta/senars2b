@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef } from 'react';
+import {useCallback, useEffect, useRef} from 'react';
 
 interface KeyboardNavigationOptions {
     enableArrowNavigation?: boolean;
@@ -26,9 +26,9 @@ export const useKeyboardNavigation = (
         onExpand,
         onCollapse
     } = options;
-    
+
     const selectedIndexRef = useRef<number>(-1);
-    
+
     // Update selected index ref when selectedId changes
     useEffect(() => {
         if (selectedId) {
@@ -38,11 +38,11 @@ export const useKeyboardNavigation = (
             selectedIndexRef.current = -1;
         }
     }, [selectedId, itemIds]);
-    
+
     const handleKeyDown = useCallback((e: KeyboardEvent) => {
         // Only handle keys if we have items
         if (itemIds.length === 0) return;
-        
+
         switch (e.key) {
             case 'ArrowUp':
                 if (enableArrowNavigation) {
@@ -53,7 +53,7 @@ export const useKeyboardNavigation = (
                     }
                 }
                 break;
-                
+
             case 'ArrowDown':
                 if (enableArrowNavigation) {
                     e.preventDefault();
@@ -63,40 +63,40 @@ export const useKeyboardNavigation = (
                     }
                 }
                 break;
-                
+
             case 'Enter':
                 if (enableSelection && selectedIndexRef.current >= 0) {
                     e.preventDefault();
                     onSelect?.();
                 }
                 break;
-                
+
             case 'ArrowRight':
                 if (enableExpansion && selectedIndexRef.current >= 0) {
                     e.preventDefault();
                     onExpand?.();
                 }
                 break;
-                
+
             case 'ArrowLeft':
                 if (enableExpansion && selectedIndexRef.current >= 0) {
                     e.preventDefault();
                     onCollapse?.();
                 }
                 break;
-                
+
             default:
                 break;
         }
     }, [itemIds, enableArrowNavigation, enableSelection, enableExpansion, onUp, onDown, onSelect, onExpand, onCollapse]);
-    
+
     useEffect(() => {
         window.addEventListener('keydown', handleKeyDown);
         return () => {
             window.removeEventListener('keydown', handleKeyDown);
         };
     }, [handleKeyDown]);
-    
+
     // Return helper functions
     const selectItem = useCallback((id: string) => {
         const index = itemIds.indexOf(id);
@@ -104,19 +104,19 @@ export const useKeyboardNavigation = (
             selectedIndexRef.current = index;
         }
     }, [itemIds]);
-    
+
     const selectFirst = useCallback(() => {
         if (itemIds.length > 0) {
             selectedIndexRef.current = 0;
         }
     }, [itemIds]);
-    
+
     const selectLast = useCallback(() => {
         if (itemIds.length > 0) {
             selectedIndexRef.current = itemIds.length - 1;
         }
     }, [itemIds]);
-    
+
     return {
         selectedIndex: selectedIndexRef.current,
         selectItem,

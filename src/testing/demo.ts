@@ -7,7 +7,6 @@
  * through a series of example interactions.
  */
 
-import {DecentralizedCognitiveCore} from '../core/cognitiveCore';
 import {PerceptionSubsystem} from '../modules/perceptionSubsystem';
 import {createCoreWithRealDependencies} from './testUtils';
 

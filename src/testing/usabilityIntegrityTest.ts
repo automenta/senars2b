@@ -1,6 +1,5 @@
 import {WebSocketInterface} from '../web/webSocketInterface';
 import {RestApiInterface} from '../web/restApiInterface';
-import {DecentralizedCognitiveCore} from '../core/cognitiveCore';
 import {createCoreWithRealDependencies} from './testUtils';
 
 /**

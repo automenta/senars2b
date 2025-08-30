@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo } from 'react';
+import React, {useCallback, useEffect, useMemo} from 'react';
 import Sidebar from './components/Sidebar';
 import Header from './components/Header';
 import DashboardView from './views/DashboardView';
@@ -7,11 +7,11 @@ import TasksView from './views/TasksView';
 import ConfigurationView from './views/ConfigurationView';
 import CliView from './views/CliView';
 import AddTaskModal from './components/AddTaskModal';
-import { useWebSocket } from './hooks/useWebSocket';
-import { useStore } from './store';
-import { Task, TaskPriority } from './types';
-import { useHotkeys } from './hooks/useHotkeys';
-import { useNotifier } from './context/NotificationProvider';
+import {useWebSocket} from './hooks/useWebSocket';
+import {useStore} from './store';
+import {Task, TaskPriority} from './types';
+import {useHotkeys} from './hooks/useHotkeys';
+import {useNotifier} from './context/NotificationProvider';
 
 function App() {
     const {
@@ -27,7 +27,7 @@ function App() {
         toggleTheme,
     } = useStore();
 
-    const { addNotification } = useNotifier();
+    const {addNotification} = useNotifier();
 
     // Setup keyboard shortcuts
     useHotkeys({
@@ -62,7 +62,7 @@ function App() {
         }
     }, [setTasks, tasks, addNotification]);
 
-    const { isConnected, connectionError, sendMessage } = useWebSocket(handleMessage);
+    const {isConnected, connectionError, sendMessage} = useWebSocket(handleMessage);
 
     // Notify user about connection status
     useEffect(() => {
@@ -114,23 +114,23 @@ function App() {
     const renderView = useMemo(() => {
         switch (activeView) {
             case 'Dashboard':
-                return <DashboardView />;
+                return <DashboardView/>;
             case 'Processing':
-                return <ProcessingView />;
+                return <ProcessingView/>;
             case 'Tasks':
-                return <TasksView sendMessage={sendMessage} />;
+                return <TasksView sendMessage={sendMessage}/>;
             case 'Configuration':
-                return <ConfigurationView />;
+                return <ConfigurationView/>;
             case 'CLI':
-                return <CliView />;
+                return <CliView/>;
             default:
-                return <DashboardView />;
+                return <DashboardView/>;
         }
     }, [activeView, sendMessage]);
 
     return (
         <div className="app-container">
-            <Sidebar activeView={activeView} onSelectView={setActiveView} />
+            <Sidebar activeView={activeView} onSelectView={setActiveView}/>
             <main className="main-content">
                 <Header
                     title={activeView}
@@ -141,7 +141,7 @@ function App() {
                 />
                 {renderView}
             </main>
-            {isModalOpen && <AddTaskModal onAddTask={handleAddTask} />}
+            {isModalOpen && <AddTaskModal onAddTask={handleAddTask}/>}
         </div>
     );
 }

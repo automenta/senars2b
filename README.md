@@ -8,19 +8,19 @@ fusion of symbolic reasoning and Language Model technology.
 - [Overview](#overview)
 - [Current Development Status](#current-development-status)
 - [Core Concepts](#core-concepts)
-  - [Non-Axiomatic Logic Principles](#non-axiomatic-logic-principles)
-  - [Core Data Model](#core-data-model)
+    - [Non-Axiomatic Logic Principles](#non-axiomatic-logic-principles)
+    - [Core Data Model](#core-data-model)
 - [System Architecture](#system-architecture)
-  - [Cognitive Architecture](#cognitive-architecture)
-  - [Core Components](#core-components)
+    - [Cognitive Architecture](#cognitive-architecture)
+    - [Core Components](#core-components)
 - [Implemented Features](#implemented-features)
 - [Planned Features](#planned-features)
 - [Quick Start](#quick-start)
 - [Interfaces](#interfaces)
-  - [Unified Interface](#unified-interface)
-  - [CLI Usage](#cli-usage)
-  - [Web Interface](#web-interface)
-  - [API Access](#api-access)
+    - [Unified Interface](#unified-interface)
+    - [CLI Usage](#cli-usage)
+    - [Web Interface](#web-interface)
+    - [API Access](#api-access)
 - [Task Management System](#task-management-system)
 - [Community Simulator](#community-simulator)
 - [Development Guidelines](#development-guidelines)
@@ -43,6 +43,7 @@ system has a working prototype with basic functionality but many advanced featur
 [Roadmap](#roadmap) section for details on current development priorities and future plans.
 
 **Currently Implemented:**
+
 - Basic cognitive architecture with agenda system and world model
 - Task management system with factory and validation utilities
 - Unified interface (CLI and Web) with WebSocket communication
@@ -50,6 +51,7 @@ system has a working prototype with basic functionality but many advanced featur
 - Core reasoning components (perception, attention, resonance modules)
 
 **In Development:**
+
 - Advanced task processing and execution engine
 - Schema learning and evolution mechanisms
 - Enhanced uncertainty management
@@ -688,7 +690,8 @@ engine. Tasks can be created, updated, and tracked through both the web interfac
 
 ### Universal Task Ontology
 
-Tasks are the fundamental unit of cognition in Senars3. Every cognitive process—from simple perception to complex creative
+Tasks are the fundamental unit of cognition in Senars3. Every cognitive process—from simple perception to complex
+creative
 synthesis—is represented as a structured task. This approach unifies all forms of reasoning under a single, intuitive
 framework.
 
@@ -743,7 +746,8 @@ Tasks are seamlessly integrated with the cognitive processing engine:
 
 ### Current Task Features
 
-- **Task Factory**: Utilities for creating standardized tasks with `createTask`, `createDerivedTask`, and `createSubtask`
+- **Task Factory**: Utilities for creating standardized tasks with `createTask`, `createDerivedTask`, and
+  `createSubtask`
 - **Task Validation**: Validation and normalization utilities in `TaskValidator`
 - **Hierarchical Tasks**: Support for parent-child relationships
 - **Task Metadata**: Rich metadata including priority, dependencies, deadlines, and more
@@ -866,24 +870,28 @@ Each problem is designed to showcase different aspects of the cognitive system's
 ### Phase 1: Foundation - Task-Oriented Cognitive Core (In Progress)
 
 #### 1. Universal Task Ontology Implementation
+
 - [x] Define core task structure extending CognitiveItem interface
 - [x] Implement task factory for creating standardized tasks
 - [x] Add task-specific metadata fields to CognitiveItem
 - [x] Create task validation and normalization utilities
 
 #### 2. Task-Based Reasoning Integration
+
 - [ ] Modify cognitive cycle to process tasks as primary units
 - [ ] Implement task decomposition mechanisms
 - [ ] Add task prioritization based on attention dynamics
 - [ ] Create task execution tracking and monitoring
 
 #### 3. Enhanced Agenda System for Task Management
+
 - [ ] Extend PriorityAgenda to handle task-specific sorting
 - [ ] Implement task dependencies and blocking mechanisms
 - [ ] Add task grouping and categorization features
 - [ ] Create task lifecycle management (creation, execution, completion)
 
 #### 4. Task-Centric World Model Integration
+
 - [ ] Modify world model to store and retrieve tasks
 - [ ] Implement task state persistence
 - [ ] Add task relationship mapping (parent-child, dependencies)
@@ -892,18 +900,21 @@ Each problem is designed to showcase different aspects of the cognitive system's
 ### Phase 2: Core Functionality - Essential Reasoning Capabilities
 
 #### 5. Task Planning and Execution Engine
+
 - [ ] Implement forward-chaining planning for task execution
 - [ ] Add backward-chaining goal regression mechanisms
 - [ ] Create task scheduling with temporal reasoning
 - [ ] Implement resource allocation for task execution
 
 #### 6. Task Knowledge Integration
+
 - [ ] Develop automatic knowledge requirement identification for tasks
 - [ ] Implement knowledge retrieval based on task context
 - [ ] Add knowledge quality assessment for task inputs
 - [ ] Create knowledge synthesis for complex tasks
 
 #### 7. Task Uncertainty Management
+
 - [ ] Integrate uncertainty profiles into task structures
 - [ ] Implement confidence propagation through task chains
 - [ ] Add risk assessment for task execution
@@ -912,12 +923,14 @@ Each problem is designed to showcase different aspects of the cognitive system's
 ### Phase 3: User Interface and Interaction
 
 #### 8. Task Management Interface
+
 - [ ] Create REST API for task management operations
 - [ ] Implement WebSocket interface for real-time task updates
 - [ ] Add task visualization and monitoring dashboard
 - [ ] Create task filtering and search capabilities
 
 #### 9. Natural Language Task Processing
+
 - [ ] Implement task creation from natural language requests
 - [ ] Add task modification through natural language commands
 - [ ] Create task querying through conversational interfaces
@@ -926,18 +939,21 @@ Each problem is designed to showcase different aspects of the cognitive system's
 ### Phase 4: Advanced Reasoning Capabilities
 
 #### 10. Collaborative Task Processing
+
 - [ ] Implement multi-agent task coordination
 - [ ] Add task delegation mechanisms
 - [ ] Create consensus building for collaborative tasks
 - [ ] Develop conflict resolution for collaborative work
 
 #### 11. Meta-Cognitive Task Processing
+
 - [ ] Implement tasks about tasks (meta-reasoning)
 - [ ] Add automatic task strategy selection
 - [ ] Create task approach optimization mechanisms
 - [ ] Implement confidence calibration for task execution
 
 #### 12. Learning-Enhanced Task Processing
+
 - [ ] Add skill acquisition tracking for tasks
 - [ ] Implement transfer learning for similar tasks
 - [ ] Create task performance optimization based on history
@@ -946,12 +962,14 @@ Each problem is designed to showcase different aspects of the cognitive system's
 ### Phase 5: System Integration and Optimization
 
 #### 13. Performance Monitoring and Optimization
+
 - [ ] Implement task execution performance metrics
 - [ ] Add resource utilization tracking for tasks
 - [ ] Create bottleneck identification for task processing
 - [ ] Implement optimization recommendations for task execution
 
 #### 14. Task Security and Validation
+
 - [ ] Add input validation for task parameters
 - [ ] Implement task execution sandboxing
 - [ ] Create audit trails for task execution

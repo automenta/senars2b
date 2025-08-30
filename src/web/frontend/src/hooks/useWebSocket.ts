@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import {useCallback, useEffect, useState} from 'react';
 
 const WS_URL = `ws://${window.location.host.replace(':3000', ':8080')}/ws`;
 
@@ -32,6 +32,12 @@ class WebSocketManager {
         }
     }
 
+    public disconnect() {
+        if (this.ws) {
+            this.ws.close(1000, 'Client disconnect');
+        }
+    }
+
     private connect() {
         try {
             this.ws = new WebSocket(WS_URL);
@@ -40,7 +46,7 @@ class WebSocketManager {
                 console.log('WebSocket connected');
                 this.isConnected = true;
                 this.reconnectAttempts = 0;
-                this.listeners.forEach(listener => listener({ type: 'CONNECTION_STATUS', payload: { isConnected: true } }));
+                this.listeners.forEach(listener => listener({type: 'CONNECTION_STATUS', payload: {isConnected: true}}));
             };
 
             this.ws.onmessage = (event) => {
@@ -54,13 +60,19 @@ class WebSocketManager {
 
             this.ws.onerror = (error) => {
                 console.error('WebSocket error:', error);
-                this.listeners.forEach(listener => listener({ type: 'CONNECTION_STATUS', payload: { isConnected: false, error: 'Connection error' } }));
+                this.listeners.forEach(listener => listener({
+                    type: 'CONNECTION_STATUS',
+                    payload: {isConnected: false, error: 'Connection error'}
+                }));
             };
 
             this.ws.onclose = (event) => {
                 console.log('WebSocket disconnected', event.reason);
                 this.isConnected = false;
-                this.listeners.forEach(listener => listener({ type: 'CONNECTION_STATUS', payload: { isConnected: false } }));
+                this.listeners.forEach(listener => listener({
+                    type: 'CONNECTION_STATUS',
+                    payload: {isConnected: false}
+                }));
 
                 // Attempt to reconnect if not explicitly closed
                 if (!event.wasClean && this.reconnectAttempts < this.maxReconnectAttempts) {
@@ -71,13 +83,10 @@ class WebSocketManager {
             };
         } catch (error) {
             console.error('Failed to create WebSocket connection:', error);
-            this.listeners.forEach(listener => listener({ type: 'CONNECTION_STATUS', payload: { isConnected: false, error: 'Connection failed' } }));
-        }
-    }
-
-    public disconnect() {
-        if (this.ws) {
-            this.ws.close(1000, 'Client disconnect');
+            this.listeners.forEach(listener => listener({
+                type: 'CONNECTION_STATUS',
+                payload: {isConnected: false, error: 'Connection failed'}
+            }));
         }
     }
 }
@@ -108,5 +117,5 @@ export const useWebSocket = (messageHandler: (message: any) => void) => {
         webSocketManager.sendMessage(message);
     }, []);
 
-    return { isConnected, connectionError, sendMessage };
+    return {isConnected, connectionError, sendMessage};
 };

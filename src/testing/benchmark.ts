@@ -1,4 +1,3 @@
-import {DecentralizedCognitiveCore} from '../core/cognitiveCore';
 import {AttentionValue, TruthValue} from '../interfaces/types';
 import {createCoreWithRealDependencies} from './testUtils';
 

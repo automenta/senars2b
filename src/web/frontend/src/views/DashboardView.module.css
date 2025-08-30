@@ -75,8 +75,12 @@
 }
 
 @keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
 }
 
 .section {
@@ -136,16 +140,16 @@
     .container {
         padding: 1rem;
     }
-    
+
     .header {
         flex-direction: column;
         align-items: flex-start;
     }
-    
+
     .chartGrid {
         grid-template-columns: 1fr;
     }
-    
+
     .sectionHeader {
         padding: 1rem 1.25rem 0.5rem;
     }

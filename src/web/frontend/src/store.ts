@@ -1,5 +1,5 @@
-import { create } from 'zustand';
-import { Task, TaskPriority, TaskStatus } from './types';
+import {create} from 'zustand';
+import {Task, TaskPriority, TaskStatus} from './types';
 import React from 'react';
 
 export type SortOption = 'priority-desc' | 'priority-asc' | 'date-desc' | 'date-asc' | 'title-asc' | 'title-desc';
@@ -20,7 +20,7 @@ interface AppState {
     notificationsEnabled: boolean;
     searchInputRef: React.RefObject<HTMLInputElement> | null;
     selectedTaskId: string | null;
-    
+
     // Actions
     setActiveView: (view: ViewType) => void;
     setTasks: (tasks: Task[]) => void;
@@ -36,7 +36,7 @@ interface AppState {
     toggleNotifications: () => void;
     setSearchInputRef: (ref: React.RefObject<HTMLInputElement>) => void;
     setSelectedTaskId: (id: string | null) => void;
-    
+
     // Derived actions
     getTaskById: (id: string) => Task | undefined;
     getSubtasks: (parentId: string) => Task[];
@@ -63,33 +63,33 @@ export const useStore = create<AppState>((set, get) => ({
     notificationsEnabled: true,
     searchInputRef: null,
     selectedTaskId: null,
-    
+
     // Actions
-    setActiveView: (view) => set({ activeView: view }),
-    setTasks: (tasks) => set({ tasks }),
-    addTask: (task) => set((state) => ({ tasks: [...state.tasks, task] })),
+    setActiveView: (view) => set({activeView: view}),
+    setTasks: (tasks) => set({tasks}),
+    addTask: (task) => set((state) => ({tasks: [...state.tasks, task]})),
     updateTask: (id, updates) => set((state) => ({
-        tasks: state.tasks.map(task => 
-            task.id === id ? { ...task, ...updates } : task
+        tasks: state.tasks.map(task =>
+            task.id === id ? {...task, ...updates} : task
         )
     })),
     removeTask: (id) => set((state) => ({
         tasks: state.tasks.filter(task => task.id !== id)
     })),
-    setSearchTerm: (term) => set({ searchTerm: term }),
-    setStatusFilter: (filter) => set({ statusFilter: filter }),
-    setTypeFilter: (filter) => set({ typeFilter: filter }),
-    setSortOption: (option) => set({ sortOption: option }),
-    setIsModalOpen: (isOpen) => set({ isModalOpen: isOpen }),
+    setSearchTerm: (term) => set({searchTerm: term}),
+    setStatusFilter: (filter) => set({statusFilter: filter}),
+    setTypeFilter: (filter) => set({typeFilter: filter}),
+    setSortOption: (option) => set({sortOption: option}),
+    setIsModalOpen: (isOpen) => set({isModalOpen: isOpen}),
     toggleTheme: () => {
         const newTheme = get().theme === 'light' ? 'dark' : 'light';
         document.documentElement.setAttribute('data-theme', newTheme);
-        set({ theme: newTheme });
+        set({theme: newTheme});
     },
-    toggleNotifications: () => set((state) => ({ notificationsEnabled: !state.notificationsEnabled })),
-    setSearchInputRef: (ref) => set({ searchInputRef: ref }),
-    setSelectedTaskId: (id) => set({ selectedTaskId: id }),
-    
+    toggleNotifications: () => set((state) => ({notificationsEnabled: !state.notificationsEnabled})),
+    setSearchInputRef: (ref) => set({searchInputRef: ref}),
+    setSelectedTaskId: (id) => set({selectedTaskId: id}),
+
     // Derived actions
     getTaskById: (id) => {
         return get().tasks.find(task => task.id === id);
@@ -97,10 +97,10 @@ export const useStore = create<AppState>((set, get) => ({
     getSubtasks: (parentId) => {
         return get().tasks.filter(task => task.parent_id === parentId);
     },
-    clearFilters: () => set({ 
-        searchTerm: '', 
-        statusFilter: 'ALL', 
-        typeFilter: 'ALL' 
+    clearFilters: () => set({
+        searchTerm: '',
+        statusFilter: 'ALL',
+        typeFilter: 'ALL'
     }),
 }));
 

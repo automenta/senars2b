@@ -1,16 +1,16 @@
-import React, { useEffect, useRef, useState, memo } from 'react';
+import React, {memo, useEffect, useRef, useState} from 'react';
 import TaskList from '../components/TaskList';
-import { useStore } from '../store';
+import {useStore} from '../store';
 import styles from './TasksView.module.css';
-import { useHotkeys } from '../hooks/useHotkeys';
-import { useTasks } from '../hooks/useTasks';
-import { FaSearch, FaFilter, FaSort } from 'react-icons/fa';
+import {useHotkeys} from '../hooks/useHotkeys';
+import {useTasks} from '../hooks/useTasks';
+import {FaFilter, FaSearch, FaSort} from 'react-icons/fa';
 
 interface TasksViewProps {
     sendMessage: (message: any) => void;
 }
 
-const TasksView: React.FC<TasksViewProps> = memo(({ sendMessage }) => {
+const TasksView: React.FC<TasksViewProps> = memo(({sendMessage}) => {
     const {
         searchTerm,
         setSearchTerm,
@@ -26,8 +26,8 @@ const TasksView: React.FC<TasksViewProps> = memo(({ sendMessage }) => {
     const searchInput = useRef<HTMLInputElement>(null);
     const [selectedTaskIndex, setSelectedTaskIndex] = useState(-1);
     const [showFilters, setShowFilters] = useState(true);
-    
-    const { tasks: sortedAndFilteredTasks, taskStats, allTasks } = useTasks();
+
+    const {tasks: sortedAndFilteredTasks, taskStats, allTasks} = useTasks();
 
     useEffect(() => {
         if (searchInput.current) {
@@ -69,7 +69,7 @@ const TasksView: React.FC<TasksViewProps> = memo(({ sendMessage }) => {
 
             <div className={styles.searchAndFilters}>
                 <div className={styles.searchContainer}>
-                    <FaSearch className={styles.searchIcon} />
+                    <FaSearch className={styles.searchIcon}/>
                     <input
                         ref={searchInput}
                         type="text"
@@ -80,11 +80,11 @@ const TasksView: React.FC<TasksViewProps> = memo(({ sendMessage }) => {
                     />
                 </div>
 
-                <button 
+                <button
                     onClick={() => setShowFilters(!showFilters)}
                     className={styles.toggleFiltersBtn}
                 >
-                    <FaFilter /> Filters
+                    <FaFilter/> Filters
                 </button>
             </div>
 
@@ -92,7 +92,7 @@ const TasksView: React.FC<TasksViewProps> = memo(({ sendMessage }) => {
                 <div className={styles.filters}>
                     <div className={styles.filterSection}>
                         <div className={styles.filterHeader}>
-                            <FaFilter className={styles.filterIcon} />
+                            <FaFilter className={styles.filterIcon}/>
                             <span>Filters</span>
                         </div>
                         <div className={styles.filterGroup}>
@@ -129,12 +129,12 @@ const TasksView: React.FC<TasksViewProps> = memo(({ sendMessage }) => {
 
                     <div className={styles.sortSection}>
                         <div className={styles.filterHeader}>
-                            <FaSort className={styles.filterIcon} />
+                            <FaSort className={styles.filterIcon}/>
                             <span>Sort By</span>
                         </div>
                         <div className={styles.sortGroup}>
-                            <select 
-                                value={sortOption} 
+                            <select
+                                value={sortOption}
                                 onChange={(e) => setSortOption(e.target.value as any)}
                                 className={styles.sortSelect}
                                 aria-label="Sort tasks by"
@@ -151,7 +151,7 @@ const TasksView: React.FC<TasksViewProps> = memo(({ sendMessage }) => {
                 </div>
             )}
 
-            <TaskList tasks={sortedAndFilteredTasks} sendMessage={sendMessage} selectedTaskIndex={selectedTaskIndex} />
+            <TaskList tasks={sortedAndFilteredTasks} sendMessage={sendMessage} selectedTaskIndex={selectedTaskIndex}/>
         </div>
     );
 });

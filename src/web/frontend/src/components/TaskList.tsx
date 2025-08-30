@@ -1,9 +1,9 @@
-import React, { useRef, useState, memo, useCallback } from 'react';
-import { AnimatePresence } from 'framer-motion';
-import { Task } from '../types';
+import React, {memo, useCallback, useRef, useState} from 'react';
+import {AnimatePresence} from 'framer-motion';
+import {Task} from '../types';
 import TaskItem from './TaskItem';
 import styles from './TaskList.module.css';
-import { useKeyboardNavigation } from '../hooks/useKeyboardNavigation';
+import {useKeyboardNavigation} from '../hooks/useKeyboardNavigation';
 
 interface TaskListProps {
     tasks: Task[];
@@ -12,11 +12,11 @@ interface TaskListProps {
     selectedTaskIndex?: number;
 }
 
-const TaskList: React.FC<TaskListProps> = memo(({ tasks, sendMessage, isSublist = false, selectedTaskIndex = -1 }) => {
+const TaskList: React.FC<TaskListProps> = memo(({tasks, sendMessage, isSublist = false, selectedTaskIndex = -1}) => {
     const [draggedItemId, setDraggedItemId] = useState<string | null>(null);
     const dropTargetId = useRef<string | null>(null);
     const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);
-    
+
     const taskMap = new Map(tasks.map(t => [t.id, t]));
 
     const tasksToRender = isSublist
@@ -26,7 +26,7 @@ const TaskList: React.FC<TaskListProps> = memo(({ tasks, sendMessage, isSublist 
     const listClassName = `${styles.taskList} ${isSublist ? styles.subTaskList : ''}`;
 
     // Setup keyboard navigation
-    const { selectedIndex, selectItem, selectFirst, selectLast } = useKeyboardNavigation(
+    const {selectedIndex, selectItem, selectFirst, selectLast} = useKeyboardNavigation(
         tasksToRender.map(t => t.id),
         selectedTaskId,
         {
@@ -116,8 +116,8 @@ const TaskList: React.FC<TaskListProps> = memo(({ tasks, sendMessage, isSublist 
     ), [draggedItemId, handleDragOver, handleDragStart, isSublist, selectedTaskIndex, sendMessage, tasks]);
 
     return (
-        <div 
-            className={listClassName} 
+        <div
+            className={listClassName}
             onDragOver={isSublist ? e => e.preventDefault() : undefined}
             onDrop={isSublist ? handleDrop : undefined}
         >

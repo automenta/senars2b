@@ -1,4 +1,4 @@
-import {DecentralizedCognitiveCore, CognitiveCoreDependencies} from '../core/cognitiveCore';
+import {DecentralizedCognitiveCore} from '../core/cognitiveCore';
 import {PriorityAgenda} from '../core/agenda';
 import {PersistentWorldModel} from '../core/worldModel';
 import {SimpleBeliefRevisionEngine} from '../core/beliefRevisionEngine';

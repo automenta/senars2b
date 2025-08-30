@@ -1,7 +1,7 @@
-import React, { memo, useEffect, useRef, useState } from 'react';
-import { motion } from 'framer-motion';
-import { Task } from '../types';
-import { FaChevronDown, FaChevronRight, FaGripVertical, FaSave, FaStream, FaEdit } from 'react-icons/fa';
+import React, {memo, useEffect, useRef, useState} from 'react';
+import {motion} from 'framer-motion';
+import {Task} from '../types';
+import {FaChevronDown, FaChevronRight, FaEdit, FaGripVertical, FaSave, FaStream} from 'react-icons/fa';
 import TaskList from './TaskList';
 import StatusBadge from './StatusBadge';
 import PriorityBadge from './PriorityBadge';
@@ -18,12 +18,12 @@ interface TaskItemProps {
 }
 
 const TaskItem: React.FC<TaskItemProps> = memo(({
-    task,
-    allFilteredTasks,
-    sendMessage,
-    isDraggable = false,
-    isSelected = false
-}) => {
+                                                    task,
+                                                    allFilteredTasks,
+                                                    sendMessage,
+                                                    isDraggable = false,
+                                                    isSelected = false
+                                                }) => {
     const [isExpanded, setIsExpanded] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
     const [editedTitle, setEditedTitle] = useState(task.title);
@@ -45,7 +45,7 @@ const TaskItem: React.FC<TaskItemProps> = memo(({
         () => allFilteredTasks.filter(t => t.parent_id === task.id),
         [allFilteredTasks, task.id]
     );
-    
+
     const hasSubtasks = subtasks.length > 0;
 
     const handleToggleExpand = (e: React.MouseEvent) => {
@@ -92,15 +92,15 @@ const TaskItem: React.FC<TaskItemProps> = memo(({
         <motion.div
             className={styles.container}
             layout
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, transition: { duration: 0.2 } }}
+            initial={{opacity: 0, y: -20}}
+            animate={{opacity: 1, y: 0}}
+            exit={{opacity: 0, transition: {duration: 0.2}}}
         >
             <div className={itemClassName}>
                 <div className={styles.mainInfo}>
                     {isDraggable && (
                         <span className={styles.dragHandle} aria-label="Drag to reorder">
-                            <FaGripVertical />
+                            <FaGripVertical/>
                         </span>
                     )}
                     <button
@@ -111,9 +111,9 @@ const TaskItem: React.FC<TaskItemProps> = memo(({
                         aria-label={isExpanded ? 'Collapse subtasks' : 'Expand subtasks'}
                     >
                         {hasSubtasks ? (
-                            isExpanded ? <FaChevronDown /> : <FaChevronRight />
+                            isExpanded ? <FaChevronDown/> : <FaChevronRight/>
                         ) : (
-                            <span className={styles.expandPlaceholder} />
+                            <span className={styles.expandPlaceholder}/>
                         )}
                     </button>
                     <div className={styles.titleAndDescription}>
@@ -145,7 +145,7 @@ const TaskItem: React.FC<TaskItemProps> = memo(({
                                         title="Save"
                                         aria-label="Save changes"
                                     >
-                                        <FaSave /> Save
+                                        <FaSave/> Save
                                     </button>
                                     <button
                                         onClick={handleCancelEdit}
@@ -168,16 +168,16 @@ const TaskItem: React.FC<TaskItemProps> = memo(({
                     </div>
                 </div>
                 <div className={styles.metaInfo}>
-                    <StatusBadge status={task.status} />
-                    <PriorityBadge priority={task.priority} />
+                    <StatusBadge status={task.status}/>
+                    <PriorityBadge priority={task.priority}/>
                     {hasSubtasks && (
                         <div className={styles.subtaskIndicator} title={`${subtasks.length} subtasks`}>
-                            <FaStream /> {subtasks.length}
+                            <FaStream/> {subtasks.length}
                         </div>
                     )}
                 </div>
                 <div className={styles.progressContainer}>
-                    <ProgressBar percentage={task.completion_percentage} />
+                    <ProgressBar percentage={task.completion_percentage}/>
                 </div>
                 {!isEditing && (
                     <div className={styles.controlsContainer}>
@@ -187,15 +187,15 @@ const TaskItem: React.FC<TaskItemProps> = memo(({
                             title="Edit task"
                             aria-label="Edit task"
                         >
-                            <FaEdit />
+                            <FaEdit/>
                         </button>
-                        <TaskControls task={task} sendMessage={sendMessage} />
+                        <TaskControls task={task} sendMessage={sendMessage}/>
                     </div>
                 )}
             </div>
             {isExpanded && hasSubtasks && (
                 <div className={styles.subTaskContainer}>
-                    <TaskList tasks={subtasks} sendMessage={sendMessage} isSublist={true} />
+                    <TaskList tasks={subtasks} sendMessage={sendMessage} isSublist={true}/>
                 </div>
             )}
         </motion.div>

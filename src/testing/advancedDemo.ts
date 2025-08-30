@@ -7,7 +7,6 @@
  * with a complex, multi-domain scenario.
  */
 
-import {DecentralizedCognitiveCore} from '../core/cognitiveCore';
 import {PerceptionSubsystem} from '../modules/perceptionSubsystem';
 import {createCoreWithRealDependencies} from './testUtils';
 

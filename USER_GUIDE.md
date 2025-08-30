@@ -10,12 +10,14 @@ Senars3 is currently in active development with a focus on implementing a task-c
 system has a working prototype with basic functionality but many advanced features are still being developed.
 
 **Currently Available:**
+
 - Basic cognitive architecture with agenda system and world model
 - Task management system with factory and validation utilities
 - Unified interface (CLI and Web) with WebSocket communication
 - Community Simulator for multi-agent collaboration demonstrations
 
 **In Development:**
+
 - Advanced task processing and execution engine
 - Schema learning and evolution mechanisms
 - Enhanced uncertainty management

@@ -1,6 +1,6 @@
-import { useMemo } from 'react';
-import { useStore, priorityOrder } from '../store';
-import { Task, TaskPriority } from '../types';
+import {useMemo} from 'react';
+import {priorityOrder, useStore} from '../store';
+import {TaskPriority} from '../types';
 
 export const useTasks = () => {
     const {

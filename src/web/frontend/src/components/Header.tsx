@@ -1,7 +1,6 @@
 import React from 'react';
-import { FaPlus, FaCircle } from 'react-icons/fa';
+import {FaCircle, FaPlus} from 'react-icons/fa';
 import ThemeSwitcher from './ThemeSwitcher';
-import { useStore } from '../store';
 import styles from './Header.module.css';
 
 interface HeaderProps {
@@ -12,22 +11,23 @@ interface HeaderProps {
     isConnected?: boolean;
 }
 
-const Header: React.FC<HeaderProps> = ({ title, onAddTask, theme, toggleTheme, isConnected }) => {
+const Header: React.FC<HeaderProps> = ({title, onAddTask, theme, toggleTheme, isConnected}) => {
     return (
         <header className={styles.header}>
             <div className={styles.titleContainer}>
                 <h1>{title}</h1>
                 {isConnected !== undefined && (
-                    <div className={`${styles.connectionIndicator} ${isConnected ? styles.connected : styles.disconnected}`}>
-                        <FaCircle />
+                    <div
+                        className={`${styles.connectionIndicator} ${isConnected ? styles.connected : styles.disconnected}`}>
+                        <FaCircle/>
                         <span>{isConnected ? 'Connected' : 'Disconnected'}</span>
                     </div>
                 )}
             </div>
             <div className={styles.controls}>
-                <ThemeSwitcher theme={theme} toggleTheme={toggleTheme} />
+                <ThemeSwitcher theme={theme} toggleTheme={toggleTheme}/>
                 <button onClick={onAddTask} className={styles.addTaskBtn}>
-                    <FaPlus />
+                    <FaPlus/>
                     Add Task
                 </button>
             </div>

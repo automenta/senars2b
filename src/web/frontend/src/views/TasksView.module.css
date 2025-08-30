@@ -185,11 +185,11 @@
     .filters {
         grid-template-columns: 1fr;
     }
-    
+
     .stats {
         gap: 0.5rem;
     }
-    
+
     .statItem {
         padding: 0.25rem 0.75rem;
         font-size: 0.75rem;

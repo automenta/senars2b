@@ -14,7 +14,7 @@ export const perfUtils = {
             throw error;
         }
     },
-    
+
     // Create a performance observer for component rendering
     observeComponentRender: (componentName: string): PerformanceObserver => {
         const observer = new PerformanceObserver((list) => {
@@ -22,22 +22,22 @@ export const perfUtils = {
                 console.log(`${componentName} rendered in ${entry.duration} milliseconds`);
             }
         });
-        
-        observer.observe({ entryTypes: ['measure'] });
+
+        observer.observe({entryTypes: ['measure']});
         return observer;
     },
-    
+
     // Start a performance mark
     markStart: (name: string): void => {
         performance.mark(`${name}-start`);
     },
-    
+
     // End a performance mark and measure
     markEnd: (name: string): void => {
         performance.mark(`${name}-end`);
         performance.measure(name, `${name}-start`, `${name}-end`);
     },
-    
+
     // Monitor memory usage (if available)
     getMemoryUsage: (): MemoryInfo | null => {
         if ('memory' in performance) {
@@ -45,7 +45,7 @@ export const perfUtils = {
         }
         return null;
     },
-    
+
     // Log memory usage
     logMemoryUsage: (): void => {
         const memory = perfUtils.getMemoryUsage();

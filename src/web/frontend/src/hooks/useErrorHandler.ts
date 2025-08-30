@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import {useCallback, useState} from 'react';
 
 interface ErrorState {
     message: string;
@@ -15,7 +15,7 @@ export interface UseErrorHandlerReturn {
 
 export const useErrorHandler = (): UseErrorHandlerReturn => {
     const [error, setErrorState] = useState<ErrorState | null>(null);
-    
+
     const setError = useCallback((message: string, code?: string) => {
         setErrorState({
             message,
@@ -23,13 +23,13 @@ export const useErrorHandler = (): UseErrorHandlerReturn => {
             timestamp: Date.now()
         });
     }, []);
-    
+
     const clearError = useCallback(() => {
         setErrorState(null);
     }, []);
-    
+
     const hasError = !!error;
-    
+
     return {
         error,
         setError,
@@ -42,7 +42,7 @@ export const useErrorHandler = (): UseErrorHandlerReturn => {
 export const handleApiError = (error: any, setError: (message: string, code?: string) => void) => {
     if (error.response) {
         // Server responded with error status
-        const { status, data } = error.response;
+        const {status, data} = error.response;
         const message = data?.message || `Server error (${status})`;
         setError(message, `API_ERROR_${status}`);
     } else if (error.request) {

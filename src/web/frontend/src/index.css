@@ -355,17 +355,17 @@ body {
     .app-container {
         flex-direction: column;
     }
-    
+
     .sidebar {
         width: 100%;
         border-right: none;
         border-bottom: 1px solid var(--color-card-border);
     }
-    
+
     .main-content {
         padding: 1rem;
     }
-    
+
     #root {
         padding: 0;
     }

@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { TaskStatistics } from '../types';
+import React, {useState} from 'react';
+import {TaskStatistics} from '../types';
 import {
     FaCheckCircle,
     FaChevronDown,
@@ -20,13 +20,13 @@ interface StatsPanelProps {
 }
 
 const StatItem: React.FC<{ icon: React.ReactNode; label: string; value: number | undefined; color?: string }> = ({
-    icon,
-    label,
-    value,
-    color
-}) => (
-    <div className={styles.statItem} style={{ borderColor: color }}>
-        <div className={styles.statIcon} style={{ color }}>
+                                                                                                                     icon,
+                                                                                                                     label,
+                                                                                                                     value,
+                                                                                                                     color
+                                                                                                                 }) => (
+    <div className={styles.statItem} style={{borderColor: color}}>
+        <div className={styles.statIcon} style={{color}}>
             {icon}
         </div>
         <div className={styles.statDetails}>
@@ -36,7 +36,7 @@ const StatItem: React.FC<{ icon: React.ReactNode; label: string; value: number |
     </div>
 );
 
-const StatsPanel: React.FC<StatsPanelProps> = ({ stats }) => {
+const StatsPanel: React.FC<StatsPanelProps> = ({stats}) => {
     const [isOpen, setIsOpen] = useState(true);
 
     if (!stats) {
@@ -49,18 +49,23 @@ const StatsPanel: React.FC<StatsPanelProps> = ({ stats }) => {
 
     // Group stats by category for better organization
     const mainStats = [
-        { icon: <FaTasks />, label: "Total", value: stats.total, color: "#0d6efd" },
-        { icon: <FaCheckCircle />, label: "Completed", value: stats.completed, color: "#198754" },
-        { icon: <FaExclamationCircle />, label: "Failed", value: stats.failed, color: "#dc3545" },
-        { icon: <FaClock />, label: "Pending", value: stats.pending, color: "#6c757d" },
+        {icon: <FaTasks/>, label: "Total", value: stats.total, color: "#0d6efd"},
+        {icon: <FaCheckCircle/>, label: "Completed", value: stats.completed, color: "#198754"},
+        {icon: <FaExclamationCircle/>, label: "Failed", value: stats.failed, color: "#dc3545"},
+        {icon: <FaClock/>, label: "Pending", value: stats.pending, color: "#6c757d"},
     ];
 
     const processingStats = [
-        { icon: <FaProjectDiagram />, label: "Awaiting Dependencies", value: stats.awaiting_dependencies, color: "#fd7e14" },
-        { icon: <FaCogs />, label: "Decomposing", value: stats.decomposing, color: "#20c997" },
-        { icon: <FaHourglassHalf />, label: "Awaiting Subtasks", value: stats.awaiting_subtasks, color: "#0dcaf0" },
-        { icon: <FaRocket />, label: "Ready for Execution", value: stats.ready_for_execution, color: "#ffc107" },
-        { icon: <FaClock />, label: "Deferred", value: stats.deferred, color: "#6f42c1" },
+        {
+            icon: <FaProjectDiagram/>,
+            label: "Awaiting Dependencies",
+            value: stats.awaiting_dependencies,
+            color: "#fd7e14"
+        },
+        {icon: <FaCogs/>, label: "Decomposing", value: stats.decomposing, color: "#20c997"},
+        {icon: <FaHourglassHalf/>, label: "Awaiting Subtasks", value: stats.awaiting_subtasks, color: "#0dcaf0"},
+        {icon: <FaRocket/>, label: "Ready for Execution", value: stats.ready_for_execution, color: "#ffc107"},
+        {icon: <FaClock/>, label: "Deferred", value: stats.deferred, color: "#6f42c1"},
     ];
 
     return (
@@ -71,10 +76,10 @@ const StatsPanel: React.FC<StatsPanelProps> = ({ stats }) => {
                 aria-expanded={isOpen}
                 aria-controls="stats-panel-content"
             >
-                <FaInfoCircle />
+                <FaInfoCircle/>
                 <span>Task Statistics</span>
                 <div className={styles.chevron}>
-                    {isOpen ? <FaChevronDown /> : <FaChevronRight />}
+                    {isOpen ? <FaChevronDown/> : <FaChevronRight/>}
                 </div>
             </button>
             {isOpen && (
@@ -83,12 +88,12 @@ const StatsPanel: React.FC<StatsPanelProps> = ({ stats }) => {
                         <h4>Main Statistics</h4>
                         <div className={styles.contentGrid}>
                             {mainStats.map((stat, index) => (
-                                <StatItem 
-                                    key={index} 
-                                    icon={stat.icon} 
-                                    label={stat.label} 
-                                    value={stat.value} 
-                                    color={stat.color} 
+                                <StatItem
+                                    key={index}
+                                    icon={stat.icon}
+                                    label={stat.label}
+                                    value={stat.value}
+                                    color={stat.color}
                                 />
                             ))}
                         </div>
@@ -97,12 +102,12 @@ const StatsPanel: React.FC<StatsPanelProps> = ({ stats }) => {
                         <h4>Processing States</h4>
                         <div className={styles.contentGrid}>
                             {processingStats.map((stat, index) => (
-                                <StatItem 
-                                    key={index} 
-                                    icon={stat.icon} 
-                                    label={stat.label} 
-                                    value={stat.value} 
-                                    color={stat.color} 
+                                <StatItem
+                                    key={index}
+                                    icon={stat.icon}
+                                    label={stat.label}
+                                    value={stat.value}
+                                    color={stat.color}
                                 />
                             ))}
                         </div>
