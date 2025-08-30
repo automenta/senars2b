@@ -24,20 +24,14 @@ export interface DerivationStamp {
     module?: string;
 }
 
+import { TaskStatus, TaskPriority } from './sharedTypes';
+
 // Task-specific metadata that extends CognitiveItem
-export type TaskStatus =
-    'pending'
-    | 'awaiting_dependencies'
-    | 'decomposing'
-    | 'awaiting_subtasks'
-    | 'ready_for_execution'
-    | 'completed'
-    | 'failed'
-    | 'deferred';
+export type { TaskStatus };
 
 export interface TaskMetadata {
     status: TaskStatus;
-    priority_level: 'low' | 'medium' | 'high' | 'critical';
+    priority_level: TaskPriority;
     dependencies?: string[]; // Array of task IDs
     deadline?: number; // Timestamp
     estimated_effort?: number;

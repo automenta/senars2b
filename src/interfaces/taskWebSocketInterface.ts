@@ -36,22 +36,29 @@ export class TaskWebSocketHandler {
                     throw new Error(`Unknown task method: ${method}`);
             }
         } catch (error: any) {
-            throw new Error(error.message);
+            // Re-throw with more context
+            throw new Error(`Task operation failed: ${error.message}`);
         }
     }
 
     private handleAddTask(payload: any): { task: CognitiveItem } {
         if (!payload) {
-            throw new Error('Missing payload');
+            throw new Error('Missing payload for addTask');
         }
-        const task = this.taskManager.addTask(payload);
-        return {task};
+        
+        try {
+            const task = this.taskManager.addTask(payload);
+            return {task};
+        } catch (error: any) {
+            throw new Error(`Failed to add task: ${error.message}`);
+        }
     }
 
     private handleUpdateTask(payload: { taskId: string; updates: Partial<CognitiveItem> }): { task: CognitiveItem } {
         if (!payload?.taskId) {
             throw new Error('Missing required field: taskId');
         }
+        
         const task = this.taskManager.updateTask(payload.taskId, payload.updates);
         if (!task) {
             throw new Error(`Task with ID ${payload.taskId} not found`);
@@ -59,34 +66,44 @@ export class TaskWebSocketHandler {
         return {task};
     }
 
-    private handleRemoveTask(payload: { taskId: string }): { success: boolean } {
+    private handleRemoveTask(payload: { taskId: string }): { success: boolean; message?: string } {
         if (!payload?.taskId) {
             throw new Error('Missing required field: taskId');
         }
+        
         const success = this.taskManager.removeTask(payload.taskId);
-        return {success};
+        return {
+            success,
+            message: success ? `Task ${payload.taskId} removed successfully` : `Task ${payload.taskId} not found`
+        };
     }
 
-    private handleGetTask(payload: { taskId: string }): { task: CognitiveItem } {
+    private handleGetTask(payload: { taskId: string }): { task: CognitiveItem } | { task: null; message: string } {
         if (!payload?.taskId) {
             throw new Error('Missing required field: taskId');
         }
+        
         const task = this.taskManager.getTask(payload.taskId);
         if (!task) {
-            throw new Error(`Task with ID ${payload.taskId} not found`);
+            return { task: null, message: `Task with ID ${payload.taskId} not found` };
         }
         return {task};
     }
 
     private handleGetAllTasks(): { tasks: CognitiveItem[] } {
-        const tasks = this.taskManager.getAllTasks();
-        return {tasks};
+        try {
+            const tasks = this.taskManager.getAllTasks();
+            return {tasks};
+        } catch (error: any) {
+            throw new Error(`Failed to retrieve tasks: ${error.message}`);
+        }
     }
 
     private handleUpdateTaskStatus(payload: { taskId: string; status: TaskStatus }): { task: CognitiveItem } {
         if (!payload?.taskId || !payload?.status) {
             throw new Error('Missing required fields: taskId, status');
         }
+        
         const task = this.taskManager.updateTaskStatus(payload.taskId, payload.status);
         if (!task) {
             throw new Error(`Task with ID ${payload.taskId} not found`);
@@ -99,7 +116,11 @@ export class TaskWebSocketHandler {
             throw new Error('Task manager does not support statistics');
         }
 
-        const statistics = (this.taskManager as any).getTaskStatistics();
-        return {taskStatistics: statistics};
+        try {
+            const statistics = (this.taskManager as any).getTaskStatistics();
+            return {taskStatistics: statistics};
+        } catch (error: any) {
+            throw new Error(`Failed to retrieve task statistics: ${error.message}`);
+        }
     }
 }

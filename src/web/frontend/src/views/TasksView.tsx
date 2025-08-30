@@ -1,4 +1,4 @@
-import React, {memo, useEffect, useRef, useState} from 'react';
+import React, {memo, useEffect, useRef, useState, useCallback} from 'react';
 import TaskList from '../components/TaskList';
 import {useStore} from '../store';
 import styles from './TasksView.module.css';
@@ -26,14 +26,38 @@ const TasksView: React.FC<TasksViewProps> = memo(({sendMessage}) => {
     const searchInput = useRef<HTMLInputElement>(null);
     const [selectedTaskIndex, setSelectedTaskIndex] = useState(-1);
     const [showFilters, setShowFilters] = useState(true);
+    const [error, setError] = useState<string | null>(null);
 
     const {tasks: sortedAndFilteredTasks, taskStats, allTasks} = useTasks();
+
+    // Reset selected task index when tasks change
+    useEffect(() => {
+        setSelectedTaskIndex(-1);
+    }, [sortedAndFilteredTasks]);
 
     useEffect(() => {
         if (searchInput.current) {
             setSearchInputRef(searchInput);
         }
     }, [setSearchInputRef]);
+
+    // Handle task actions with error handling
+    const handleTaskAction = useCallback((action: string, payload: any) => {
+        try {
+            sendMessage({ type: action, payload });
+        } catch (err) {
+            console.error(`Error sending ${action} message:`, err);
+            setError(`Failed to ${action.toLowerCase()}: ${err instanceof Error ? err.message : 'Unknown error'}`);
+        }
+    }, [sendMessage]);
+
+    // Clear error after 5 seconds
+    useEffect(() => {
+        if (error) {
+            const timer = setTimeout(() => setError(null), 5000);
+            return () => clearTimeout(timer);
+        }
+    }, [error]);
 
     useHotkeys({
         'j': () => {
@@ -55,6 +79,25 @@ const TasksView: React.FC<TasksViewProps> = memo(({sendMessage}) => {
         'f': () => setShowFilters(prev => !prev),
     }, [sortedAndFilteredTasks, selectedTaskIndex]);
 
+    // Filter options with proper display names
+    const statusOptions = [
+        { value: 'ALL', label: 'All' },
+        { value: 'pending', label: 'Pending' },
+        { value: 'awaiting_dependencies', label: 'Awaiting Dependencies' },
+        { value: 'decomposing', label: 'Decomposing' },
+        { value: 'awaiting_subtasks', label: 'Awaiting Subtasks' },
+        { value: 'ready_for_execution', label: 'Ready for Execution' },
+        { value: 'completed', label: 'Completed' },
+        { value: 'failed', label: 'Failed' },
+        { value: 'deferred', label: 'Deferred' }
+    ];
+
+    const typeOptions = [
+        { value: 'ALL', label: 'All' },
+        { value: 'REGULAR', label: 'Regular' },
+        { value: 'AGENT', label: 'Agent' }
+    ];
+
     return (
         <div className={styles.tasksView}>
             <div className={styles.header}>
@@ -66,6 +109,12 @@ const TasksView: React.FC<TasksViewProps> = memo(({sendMessage}) => {
                     <span className={styles.statItem}>Completed: {taskStats.completed}</span>
                 </div>
             </div>
+
+            {error && (
+                <div className={styles.errorBanner}>
+                    {error}
+                </div>
+            )}
 
             <div className={styles.searchAndFilters}>
                 <div className={styles.searchContainer}>
@@ -98,14 +147,14 @@ const TasksView: React.FC<TasksViewProps> = memo(({sendMessage}) => {
                         <div className={styles.filterGroup}>
                             <label>Status:</label>
                             <div className={styles.filterOptions}>
-                                {['ALL', 'PENDING', 'IN_PROGRESS', 'COMPLETED', 'FAILED'].map(status => (
+                                {statusOptions.map(option => (
                                     <button
-                                        key={status}
-                                        onClick={() => setStatusFilter(status)}
-                                        className={`${styles.filterButton} ${statusFilter === status ? styles.active : ''}`}
-                                        aria-pressed={statusFilter === status}
+                                        key={option.value}
+                                        onClick={() => setStatusFilter(option.value as any)}
+                                        className={`${styles.filterButton} ${statusFilter === option.value ? styles.active : ''}`}
+                                        aria-pressed={statusFilter === option.value}
                                     >
-                                        {status.charAt(0) + status.slice(1).toLowerCase().replace('_', ' ')}
+                                        {option.label}
                                     </button>
                                 ))}
                             </div>
@@ -113,14 +162,14 @@ const TasksView: React.FC<TasksViewProps> = memo(({sendMessage}) => {
                         <div className={styles.filterGroup}>
                             <label>Type:</label>
                             <div className={styles.filterOptions}>
-                                {['ALL', 'REGULAR', 'AGENT'].map(type => (
+                                {typeOptions.map(option => (
                                     <button
-                                        key={type}
-                                        onClick={() => setTypeFilter(type)}
-                                        className={`${styles.filterButton} ${typeFilter === type ? styles.active : ''}`}
-                                        aria-pressed={typeFilter === type}
+                                        key={option.value}
+                                        onClick={() => setTypeFilter(option.value as any)}
+                                        className={`${styles.filterButton} ${typeFilter === option.value ? styles.active : ''}`}
+                                        aria-pressed={typeFilter === option.value}
                                     >
-                                        {type.charAt(0) + type.slice(1).toLowerCase()}
+                                        {option.label}
                                     </button>
                                 ))}
                             </div>
@@ -151,7 +200,11 @@ const TasksView: React.FC<TasksViewProps> = memo(({sendMessage}) => {
                 </div>
             )}
 
-            <TaskList tasks={sortedAndFilteredTasks} sendMessage={sendMessage} selectedTaskIndex={selectedTaskIndex}/>
+            <TaskList 
+                tasks={sortedAndFilteredTasks} 
+                sendMessage={handleTaskAction} 
+                selectedTaskIndex={selectedTaskIndex}
+            />
         </div>
     );
 });

@@ -1,31 +1,11 @@
-export type TaskStatus =
-    'PENDING'
-    | 'IN_PROGRESS'
-    | 'COMPLETED'
-    | 'PAUSED'
-    | 'FAILED'
-    | 'AWAITING_DEPENDENCIES'
-    | 'DECOMPOSING'
-    | 'AWAITING_SUBTASKS'
-    | 'READY_FOR_EXECUTION'
-    | 'DEFERRED'
-    | 'completed'
-    | 'failed'
-    | 'deferred'
-    | 'pending';
-export type TaskPriority = 'low' | 'medium' | 'high' | 'critical';
+import { TaskStatus, TaskPriority, Task as SharedTask } from '../../../interfaces/sharedTypes';
 
-export interface Task {
-    id: string;
-    type: 'REGULAR' | 'AGENT';
-    title: string;
-    description?: string;
-    status: TaskStatus;
-    priority: TaskPriority;
-    completion_percentage?: number;
-    parent_id?: string;
-    subtasks: string[];
-    creation_time?: number;
+// Export shared types
+export type { TaskStatus, TaskPriority };
+
+// Extend shared task type for frontend-specific properties if needed
+export interface Task extends SharedTask {
+    // Add any frontend-specific properties here if needed
 }
 
 export interface TaskStatistics {

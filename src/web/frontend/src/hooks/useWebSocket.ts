@@ -1,4 +1,4 @@
-import {useCallback, useEffect, useState} from 'react';
+import {useCallback, useEffect, useRef, useState} from 'react';
 
 const WS_URL = `ws://${window.location.host.replace(':3000', ':8080')}/ws`;
 
@@ -11,6 +11,7 @@ class WebSocketManager {
     private reconnectAttempts = 0;
     private maxReconnectAttempts = 5;
     private reconnectDelay = 1000;
+    private isIntentionallyClosed = false;
 
     constructor() {
         this.connect();
@@ -26,13 +27,18 @@ class WebSocketManager {
 
     public sendMessage(message: any) {
         if (this.ws && this.ws.readyState === WebSocket.OPEN) {
-            this.ws.send(JSON.stringify(message));
+            try {
+                this.ws.send(JSON.stringify(message));
+            } catch (error) {
+                console.error('Error sending WebSocket message:', error);
+            }
         } else {
             console.warn('WebSocket is not connected. Message not sent:', message);
         }
     }
 
     public disconnect() {
+        this.isIntentionallyClosed = true;
         if (this.ws) {
             this.ws.close(1000, 'Client disconnect');
         }
@@ -40,6 +46,11 @@ class WebSocketManager {
 
     private connect() {
         try {
+            // Clear previous connection if exists
+            if (this.ws) {
+                this.ws.close();
+            }
+            
             this.ws = new WebSocket(WS_URL);
 
             this.ws.onopen = () => {
@@ -55,6 +66,10 @@ class WebSocketManager {
                     this.listeners.forEach(listener => listener(message));
                 } catch (error) {
                     console.error('Error parsing WebSocket message:', error);
+                    this.listeners.forEach(listener => listener({
+                        type: 'ERROR',
+                        payload: {message: 'Failed to parse server message'}
+                    }));
                 }
             };
 
@@ -68,14 +83,15 @@ class WebSocketManager {
 
             this.ws.onclose = (event) => {
                 console.log('WebSocket disconnected', event.reason);
+                const wasConnected = this.isConnected;
                 this.isConnected = false;
                 this.listeners.forEach(listener => listener({
                     type: 'CONNECTION_STATUS',
                     payload: {isConnected: false}
                 }));
 
-                // Attempt to reconnect if not explicitly closed
-                if (!event.wasClean && this.reconnectAttempts < this.maxReconnectAttempts) {
+                // Attempt to reconnect if not explicitly closed and was previously connected
+                if (!this.isIntentionallyClosed && wasConnected && this.reconnectAttempts < this.maxReconnectAttempts) {
                     this.reconnectAttempts++;
                     console.log(`Attempting to reconnect... (${this.reconnectAttempts}/${this.maxReconnectAttempts})`);
                     setTimeout(() => this.connect(), this.reconnectDelay * this.reconnectAttempts);
@@ -96,15 +112,25 @@ const webSocketManager = new WebSocketManager();
 export const useWebSocket = (messageHandler: (message: any) => void) => {
     const [isConnected, setIsConnected] = useState(webSocketManager.isConnected);
     const [connectionError, setConnectionError] = useState<string | null>(null);
+    const messageHandlerRef = useRef(messageHandler);
+
+    // Keep ref updated to the latest handler
+    useEffect(() => {
+        messageHandlerRef.current = messageHandler;
+    }, [messageHandler]);
 
     const handleMessage = useCallback((message: any) => {
         if (message.type === 'CONNECTION_STATUS') {
             setIsConnected(message.payload.isConnected);
             setConnectionError(message.payload.error || null);
         } else {
-            messageHandler(message);
+            try {
+                messageHandlerRef.current(message);
+            } catch (error) {
+                console.error('Error in message handler:', error);
+            }
         }
-    }, [messageHandler]);
+    }, []);
 
     useEffect(() => {
         webSocketManager.addListener(handleMessage);
@@ -114,7 +140,18 @@ export const useWebSocket = (messageHandler: (message: any) => void) => {
     }, [handleMessage]);
 
     const sendMessage = useCallback((message: any) => {
-        webSocketManager.sendMessage(message);
+        try {
+            webSocketManager.sendMessage(message);
+        } catch (error) {
+            console.error('Error sending message:', error);
+        }
+    }, []);
+
+    // Cleanup on unmount
+    useEffect(() => {
+        return () => {
+            webSocketManager.disconnect();
+        };
     }, []);
 
     return {isConnected, connectionError, sendMessage};

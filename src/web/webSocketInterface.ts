@@ -1068,15 +1068,19 @@ export class WebSocketInterface {
         }
     }
 
-    private sendError(ws: WebSocket, code: string, message: string): void {
+    private sendError(ws: WebSocket, code: string, message: string, messageId?: string): void {
         const errorMessage: WebSocketMessage = {
-            id: uuidv4(),
+            id: messageId || uuidv4(),
             type: 'error',
             error: {
                 code,
                 message
             }
         };
-        ws.send(JSON.stringify(errorMessage));
+        try {
+            ws.send(JSON.stringify(errorMessage));
+        } catch (sendError) {
+            console.error('Failed to send error message to client:', sendError);
+        }
     }
 }
