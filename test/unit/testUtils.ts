@@ -24,12 +24,52 @@ export function createCognitiveItem(overrides: Partial<CognitiveItem> = {}): Cog
     };
 }
 
+
 /**
  * Creates a CognitiveItem of type TASK
  * @param overrides Partial CognitiveItem properties to override defaults
  * @returns A new CognitiveItem of type TASK with default properties and any provided overrides
  */
 import { TaskMetadata } from '@/interfaces/types';
+import { CognitiveCoreDependencies, DecentralizedCognitiveCore, CognitiveCoreConfig } from '@/core/cognitiveCore';
+import { PriorityAgenda } from '@/core/agenda';
+import { PersistentWorldModel } from '@/core/worldModel';
+import { UnifiedTaskManager } from '@/modules/taskManager';
+import { TaskOrchestrator } from '@/modules/taskOrchestrator';
+import { DynamicAttentionModule } from '@/core/attentionModule';
+import { SimpleBeliefRevisionEngine } from '@/core/beliefRevisionEngine';
+import { HybridResonanceModule } from '@/core/resonanceModule';
+import { EfficientSchemaMatcher } from '@/core/schemaMatcher';
+import { HierarchicalGoalTreeManager } from '@/core/goalTreeManager';
+import { ReflectionLoop } from '@/core/reflectionLoop';
+import { ActionSubsystem } from '@/actions/actionSubsystem';
+import { SchemaLearningModule } from '@/modules/schemaLearningModule';
+
+export function createCoreWithRealDependencies(config: CognitiveCoreConfig = {}): DecentralizedCognitiveCore {
+    const worldModel = new PersistentWorldModel();
+    const agenda = new PriorityAgenda((taskId: string) => {
+        const task = worldModel.get_item(taskId);
+        return task?.task_metadata?.status || null;
+    });
+    const taskManager = new UnifiedTaskManager(agenda, worldModel);
+
+    const dependencies: CognitiveCoreDependencies = {
+        agenda: agenda,
+        worldModel: worldModel,
+        taskManager: taskManager,
+        taskOrchestrator: new TaskOrchestrator(worldModel, taskManager, agenda),
+        attentionModule: new DynamicAttentionModule(),
+        beliefRevisionEngine: new SimpleBeliefRevisionEngine(),
+        resonanceModule: new HybridResonanceModule(),
+        schemaMatcher: new EfficientSchemaMatcher(),
+        goalTreeManager: new HierarchicalGoalTreeManager(),
+        reflectionLoop: new ReflectionLoop(worldModel, agenda),
+        actionSubsystem: new ActionSubsystem(taskManager),
+        schemaLearningModule: new SchemaLearningModule(worldModel),
+    };
+
+    return new DecentralizedCognitiveCore(dependencies, config);
+}
 
 export function createTaskItem(overrides: Partial<CognitiveItem> = {}): CognitiveItem {
     const defaultTaskMetadata: TaskMetadata = {

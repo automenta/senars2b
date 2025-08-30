@@ -2,6 +2,7 @@ import { CognitiveItem, AttentionValue, TaskStatus } from '../interfaces/types';
 import { TaskFactory } from './taskFactory';
 import { Agenda } from '../core/agenda';
 import { WorldModel } from '../core/worldModel';
+import { DEFAULT_TASK_DURABILITY, TASK_PRIORITY_LEVELS, TASK_PRIORITY_VALUES } from '../utils/constants';
 
 // Type guard to check if a CognitiveItem is a Task
 function isTask(item: CognitiveItem): item is CognitiveItem & { type: 'TASK' } {
@@ -64,34 +65,11 @@ export class UnifiedTaskManager implements TaskManager {
         }
     }
 
-    addTask(taskData: Omit<CognitiveItem, 'id' | 'atom_id' | 'created_at' | 'updated_at' | 'subtasks' | 'stamp' | 'type'> & { 
+    addTask(taskData: Omit<CognitiveItem, 'id' | 'atom_id' | 'created_at' | 'updated_at' | 'subtasks' | 'stamp' | 'type'> & {
         type?: 'TASK';
         task_metadata?: Partial<CognitiveItem['task_metadata']>;
     }): CognitiveItem {
-        const attention: AttentionValue = {
-            priority: this.mapPriorityLevelToValue(taskData.task_metadata?.priority_level || 'medium'),
-            durability: 0.5 // Default durability
-        };
-
-        const task = TaskFactory.createTask(
-            taskData.label || (taskData.content as string) || 'Unnamed Task',
-            attention,
-            taskData.task_metadata?.priority_level || 'medium',
-            taskData.meta
-        );
-
-        if (taskData.task_metadata) {
-            task.task_metadata = { ...task.task_metadata, ...taskData.task_metadata };
-        }
-
-        if (typeof task.task_metadata!.completion_percentage !== 'number') {
-            task.task_metadata!.completion_percentage = 0;
-        }
-
-        this.worldModel.add_item(task);
-        this.agenda.push(task);
-        this.notifyListeners({ type: 'taskAdded', task });
-        return task;
+        return this._createAndStoreTask(taskData);
     }
 
     updateTask(id: string, updates: Partial<CognitiveItem>): CognitiveItem | null {
@@ -107,12 +85,14 @@ export class UnifiedTaskManager implements TaskManager {
     }
 
     removeTask(id: string): boolean {
+        const task = this.getTask(id);
+        if (!task) {
+            return false;
+        }
         const removedFromWorldModel = this.worldModel.remove_item(id);
         if (removedFromWorldModel) {
             this.agenda.remove(id);
-            // We don't have the task object here to notify listeners, which is a flaw.
-            // A better `remove_item` would return the removed item.
-            // For now, we can't notify.
+            this.notifyListeners({ type: 'taskRemoved', task });
         }
         return removedFromWorldModel;
     }
@@ -214,7 +194,7 @@ export class UnifiedTaskManager implements TaskManager {
         return task;
     }
 
-    addSubtask(parentId: string, subtaskData: Omit<CognitiveItem, 'id' | 'atom_id' | 'created_at' | 'updated_at' | 'subtasks' | 'stamp' | 'parent_id' | 'type'> & { 
+    addSubtask(parentId: string, subtaskData: Omit<CognitiveItem, 'id' | 'atom_id' | 'created_at' | 'updated_at' | 'subtasks' | 'stamp' | 'parent_id' | 'type'> & {
         type?: 'TASK';
         task_metadata?: Partial<CognitiveItem['task_metadata']>;
     }): CognitiveItem {
@@ -223,26 +203,7 @@ export class UnifiedTaskManager implements TaskManager {
             throw new Error(`Parent task with ID ${parentId} not found`);
         }
 
-        const attention: AttentionValue = {
-            priority: this.mapPriorityLevelToValue(subtaskData.task_metadata?.priority_level || 'medium'),
-            durability: 0.5 // Default durability
-        };
-
-        const subtask = TaskFactory.createSubtask(
-            parentId,
-            subtaskData.label || (subtaskData.content as string) || 'Unnamed Subtask',
-            attention,
-            subtaskData.task_metadata?.priority_level || 'medium',
-            subtaskData.meta
-        );
-
-        if (subtaskData.task_metadata) {
-            subtask.task_metadata = { ...subtask.task_metadata, ...subtaskData.task_metadata };
-        }
-
-        if (typeof subtask.task_metadata!.completion_percentage !== 'number') {
-            subtask.task_metadata!.completion_percentage = 0;
-        }
+        const subtask = this._createAndStoreTask(subtaskData, parentId);
 
         if (!parentTask.subtasks) {
             parentTask.subtasks = [];
@@ -250,10 +211,49 @@ export class UnifiedTaskManager implements TaskManager {
         parentTask.subtasks.push(subtask.id);
         this.worldModel.update_item(parentTask);
 
-        this.worldModel.add_item(subtask);
-        this.agenda.push(subtask);
-        this.notifyListeners({ type: 'taskAdded', task: subtask });
         return subtask;
+    }
+
+    private _createAndStoreTask(
+        taskData: Omit<CognitiveItem, 'id' | 'atom_id' | 'created_at' | 'updated_at' | 'subtasks' | 'stamp' | 'type'> & {
+            type?: 'TASK';
+            task_metadata?: Partial<CognitiveItem['task_metadata']>;
+        },
+        parentId?: string
+    ): CognitiveItem {
+        const priorityLevel = taskData.task_metadata?.priority_level || TASK_PRIORITY_LEVELS.MEDIUM;
+        const attention: AttentionValue = {
+            priority: this.mapPriorityLevelToValue(priorityLevel),
+            durability: DEFAULT_TASK_DURABILITY,
+        };
+
+        const task = parentId
+            ? TaskFactory.createSubtask(
+                parentId,
+                taskData.label || (taskData.content as string) || 'Unnamed Subtask',
+                attention,
+                priorityLevel,
+                taskData.meta
+            )
+            : TaskFactory.createTask(
+                taskData.label || (taskData.content as string) || 'Unnamed Task',
+                attention,
+                priorityLevel,
+                taskData.meta
+            );
+
+        if (taskData.task_metadata) {
+            task.task_metadata = { ...task.task_metadata, ...taskData.task_metadata };
+        }
+
+        if (typeof task.task_metadata!.completion_percentage !== 'number') {
+            task.task_metadata!.completion_percentage = 0;
+        }
+
+        this.worldModel.add_item(task);
+        this.agenda.push(task);
+        this.notifyListeners({ type: 'taskAdded', task });
+        return task;
     }
 
     getSubtasks(parentId: string): CognitiveItem[] {
@@ -306,13 +306,7 @@ export class UnifiedTaskManager implements TaskManager {
         }
     }
 
-    private mapPriorityLevelToValue(priority_level: 'low' | 'medium' | 'high' | 'critical' = 'medium'): number {
-        switch (priority_level) {
-            case 'low': return 0.25;
-            case 'medium': return 0.5;
-            case 'high': return 0.75;
-            case 'critical': return 1.0;
-            default: return 0.5;
-        }
+    private mapPriorityLevelToValue(priority_level: 'low' | 'medium' | 'high' | 'critical' = TASK_PRIORITY_LEVELS.MEDIUM): number {
+        return TASK_PRIORITY_VALUES[priority_level] || TASK_PRIORITY_VALUES.medium;
     }
 }

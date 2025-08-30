@@ -1,13 +1,15 @@
 import {AttentionValue, CognitiveItem, SemanticAtom, TruthValue} from '@/interfaces/types';
 import {CognitiveSchema, WorldModel} from '@/core/worldModel';
 import {DecentralizedCognitiveCore} from '@/core/cognitiveCore';
-import {createCognitiveItem, createSemanticAtom, createTruthValue, createAttentionValue, createMockSchema, createCognitiveMetadata} from './testUtils';
+
+import {createCognitiveItem, createSemanticAtom, createAttentionValue, createTruthValue, createCoreWithRealDependencies, createCognitiveMetadata} from './testUtils';
 
 describe('Cross-Domain Reasoning Tests', () => {
     let core: DecentralizedCognitiveCore;
 
     beforeEach(() => {
-        core = new DecentralizedCognitiveCore(3); // Use enhanced components
+
+        core = createCoreWithRealDependencies({ workerCount: 3 }); // Use enhanced components
     });
 
     it('should transfer knowledge from epidemiology to cybersecurity', () => {

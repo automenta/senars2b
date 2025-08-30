@@ -1,7 +1,7 @@
 import {CognitiveItem, SemanticAtom} from '@/interfaces/types';
 import {DecentralizedCognitiveCore} from '@/core/cognitiveCore';
 import {WorldModel} from '@/core/worldModel';
-import {createAttentionValue, createTruthValue, createTaskItem} from './testUtils';
+import {createAttentionValue, createTruthValue, createTaskItem, createCoreWithRealDependencies} from './testUtils';
 import {v4 as uuidv4} from 'uuid';
 import {embeddingService} from '@/services/embeddingService';
 
@@ -12,7 +12,7 @@ describe('DecentralizedCognitiveCore', () => {
     const mockEmbeddingService = embeddingService as jest.Mocked<typeof embeddingService>;
 
     beforeEach(() => {
-        core = new DecentralizedCognitiveCore(2); // 2 workers for testing
+        core = createCoreWithRealDependencies({ workerCount: 2 });
         mockEmbeddingService.generateEmbedding.mockClear();
     });
 

@@ -1,7 +1,7 @@
 import {AttentionValue, CognitiveItem, SemanticAtom, TruthValue} from '@/interfaces/types';
 import {CognitiveSchema, WorldModel} from '@/core/worldModel';
 import {DecentralizedCognitiveCore} from '@/core/cognitiveCore';
-import {createCognitiveItem, createSemanticAtom, createTruthValue, createAttentionValue, createMockSchema, createCognitiveMetadata} from './testUtils';
+import {createCoreWithRealDependencies, createCognitiveMetadata, createTruthValue, createAttentionValue} from './testUtils';
 import {embeddingService} from '@/services/embeddingService';
 
 jest.mock('@/services/embeddingService');
@@ -11,7 +11,8 @@ describe('Medical Domain Tests', () => {
     const mockEmbeddingService = embeddingService as jest.Mocked<typeof embeddingService>;
 
     beforeEach(() => {
-        core = new DecentralizedCognitiveCore(2);
+
+        core = createCoreWithRealDependencies({ workerCount: 2 });
         mockEmbeddingService.generateEmbedding.mockResolvedValue(Array(384).fill(0.5));
     });
 

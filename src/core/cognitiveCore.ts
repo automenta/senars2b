@@ -1,10 +1,9 @@
-import {PriorityAgenda} from './agenda';
 import {PersistentWorldModel, CognitiveSchema, WorldModel} from './worldModel';
-import {SimpleBeliefRevisionEngine, BeliefRevisionEngine} from './beliefRevisionEngine';
-import {DynamicAttentionModule, AttentionModule} from './attentionModule';
-import {HybridResonanceModule, ResonanceModule} from './resonanceModule';
-import {EfficientSchemaMatcher, SchemaMatcher} from './schemaMatcher';
-import {HierarchicalGoalTreeManager, GoalTreeManager} from './goalTreeManager';
+import {BeliefRevisionEngine} from './beliefRevisionEngine';
+import {AttentionModule} from './attentionModule';
+import {ResonanceModule} from './resonanceModule';
+import {SchemaMatcher} from './schemaMatcher';
+import {GoalTreeManager} from './goalTreeManager';
 import {CognitiveItemFactory} from '../modules/cognitiveItemFactory';
 import {ReflectionLoop} from './reflectionLoop';
 import {ActionSubsystem} from '../actions/actionSubsystem';
@@ -19,27 +18,58 @@ import {
 import {Agenda} from './agenda';
 import {v4 as uuidv4} from 'uuid';
 import {embeddingService} from '../services/embeddingService';
-import { TaskManager, UnifiedTaskManager } from '../modules/taskManager';
+import { TaskManager } from '../modules/taskManager';
 import { TaskOrchestrator } from '../modules/taskOrchestrator';
+import { AddBeliefSchema, AddGoalSchema, AddSchemaSchema } from '../utils/validators';
+import {
+    GOAL_ACHIEVED_PROBABILITY,
+    GOAL_ACHIEVED_THRESHOLD,
+    SYSTEM_VERSION
+} from '../utils/constants';
+
+export interface CognitiveCoreConfig {
+    workerCount?: number;
+    decayCycleInterval?: number;
+}
+
+const DEFAULT_CONFIG: Required<CognitiveCoreConfig> = {
+    workerCount: 4,
+    decayCycleInterval: 100,
+};
 
 /**
  * DecentralizedCognitiveCore - The main cognitive processing engine
  * Implements a hybrid symbolic and semantic reasoning system with attention dynamics
  */
+export interface CognitiveCoreDependencies {
+    agenda: Agenda;
+    worldModel: WorldModel;
+    taskManager: TaskManager;
+    taskOrchestrator: TaskOrchestrator;
+    beliefRevisionEngine: BeliefRevisionEngine;
+    attentionModule: AttentionModule;
+    resonanceModule: ResonanceModule;
+    schemaMatcher: SchemaMatcher;
+    goalTreeManager: GoalTreeManager;
+    reflectionLoop: ReflectionLoop;
+    actionSubsystem: ActionSubsystem;
+    schemaLearningModule: SchemaLearningModule;
+}
+
 export class DecentralizedCognitiveCore {
-    private agenda!: Agenda;
-    private worldModel!: WorldModel;
-    private taskManager!: TaskManager;
-    private taskOrchestrator!: TaskOrchestrator;
-    private beliefRevisionEngine!: BeliefRevisionEngine;
-    private attentionModule!: AttentionModule;
-    private resonanceModule!: ResonanceModule;
-    private schemaMatcher!: SchemaMatcher;
-    private goalTreeManager!: GoalTreeManager;
-    private reflectionLoop!: ReflectionLoop;
-    private actionSubsystem!: ActionSubsystem;
-    private schemaLearningModule!: SchemaLearningModule;
-    private readonly workerCount: number;
+    private readonly agenda: Agenda;
+    private readonly worldModel: WorldModel;
+    private readonly taskManager: TaskManager;
+    private readonly taskOrchestrator: TaskOrchestrator;
+    private readonly beliefRevisionEngine: BeliefRevisionEngine;
+    private readonly attentionModule: AttentionModule;
+    private readonly resonanceModule: ResonanceModule;
+    private readonly schemaMatcher: SchemaMatcher;
+    private readonly goalTreeManager: GoalTreeManager;
+    private readonly reflectionLoop: ReflectionLoop;
+    private readonly actionSubsystem: ActionSubsystem;
+    private readonly schemaLearningModule: SchemaLearningModule;
+    private readonly config: Required<CognitiveCoreConfig>;
     private isRunning: boolean = false;
     private reflectionInterval: NodeJS.Timeout | null = null;
     private workerStatistics: Map<number, {
@@ -52,16 +82,30 @@ export class DecentralizedCognitiveCore {
 
     /**
      * Create a new cognitive core
-     * @param workerCount Number of worker threads to use for processing
+     * @param dependencies The components the core will use
+     * @param config Optional configuration for the cognitive core
      */
-    constructor(workerCount: number = 4) {
-        this.workerCount = workerCount;
+    constructor(dependencies: CognitiveCoreDependencies, config: CognitiveCoreConfig = {}) {
+        this.config = { ...DEFAULT_CONFIG, ...config };
 
-        // Initialize components
-        this.initializeComponents();
+        // Assign dependencies
+        this.agenda = dependencies.agenda;
+        this.worldModel = dependencies.worldModel;
+        this.taskManager = dependencies.taskManager;
+        this.taskOrchestrator = dependencies.taskOrchestrator;
+        this.beliefRevisionEngine = dependencies.beliefRevisionEngine;
+        this.attentionModule = dependencies.attentionModule;
+        this.resonanceModule = dependencies.resonanceModule;
+        this.schemaMatcher = dependencies.schemaMatcher;
+        this.goalTreeManager = dependencies.goalTreeManager;
+        this.reflectionLoop = dependencies.reflectionLoop;
+        this.actionSubsystem = dependencies.actionSubsystem;
+        this.schemaLearningModule = dependencies.schemaLearningModule;
 
         // Initialize worker statistics
         this.initializeWorkerStatistics();
+
+        this.registerSystemSchemas();
     }
 
     /**
@@ -75,13 +119,13 @@ export class DecentralizedCognitiveCore {
         
         this.isRunning = true;
         this.startTime = Date.now();
-        console.log(`Starting cognitive core with ${this.workerCount} workers`);
+        console.log(`Starting cognitive core with ${this.config.workerCount} workers`);
 
         // Start reflection loop
         this.reflectionInterval = this.reflectionLoop.start();
 
         // Start worker pool
-        const workers = Array(this.workerCount).fill(null).map((_, i) => this.createWorker(i));
+        const workers = Array(this.config.workerCount).fill(null).map((_, i) => this.createWorker(i));
         await Promise.all(workers);
     }
 
@@ -112,65 +156,22 @@ export class DecentralizedCognitiveCore {
      * @throws Error if any required parameters are missing or invalid
      */
     public async addInitialBelief(content: any, truth: TruthValue, attention: AttentionValue, meta?: Record<string, any>): Promise<void> {
-        // Validate input parameters
-        if (content === undefined || content === null) {
-            throw new Error('Content is required for adding a belief');
+        // Validate input using Zod schema
+        const validationResult = AddBeliefSchema.safeParse({ content, truth, attention, meta });
+        if (!validationResult.success) {
+            throw new Error(`Invalid belief input: ${JSON.stringify(validationResult.error.flatten().fieldErrors)}`);
         }
-        
-        if (!truth || typeof truth !== 'object') {
-            throw new Error('Truth value is required and must be an object');
-        }
-        
-        if (typeof truth.frequency !== 'number' || truth.frequency < 0 || truth.frequency > 1) {
-            throw new Error('Truth frequency must be a number between 0 and 1');
-        }
-        
-        if (typeof truth.confidence !== 'number' || truth.confidence < 0 || truth.confidence > 1) {
-            throw new Error('Truth confidence must be a number between 0 and 1');
-        }
-        
-        if (!attention || typeof attention !== 'object') {
-            throw new Error('Attention value is required and must be an object');
-        }
-        
-        if (typeof attention.priority !== 'number' || attention.priority < 0 || attention.priority > 1) {
-            throw new Error('Attention priority must be a number between 0 and 1');
-        }
-        
-        if (typeof attention.durability !== 'number' || attention.durability < 0 || attention.durability > 1) {
-            throw new Error('Attention durability must be a number between 0 and 1');
-        }
+        const { content: validatedContent } = validationResult.data;
 
-        // Additional validation for content length
-        const contentStr = typeof content === 'string' ? content : JSON.stringify(content);
-        if (contentStr.length < 1) {
-            throw new Error('Content cannot be empty');
-        }
-        if (contentStr.length > 10000) {
-            throw new Error('Content is too long (maximum 10,000 characters)');
-        }
-
-        // Validate meta parameter if provided
-        if (meta && typeof meta !== 'object') {
-            throw new Error('Metadata must be an object if provided');
-        }
-
-        const atom: SemanticAtom = {
-            id: uuidv4(),
-            content: content,
-            embedding: await this.generateEmbedding(content),
-            creationTime: Date.now(), // Added
-            lastAccessTime: Date.now(), // Added
-            meta: {
-                type: "Fact",
-                source: "user_input",
-                timestamp: new Date().toISOString(),
-                trust_score: truth.confidence,
-                ...meta
-            }
+        const atomMeta = {
+            type: "Fact",
+            source: "user_input",
+            timestamp: new Date().toISOString(),
+            trust_score: truth.confidence,
+            ...meta
         };
 
-        this.worldModel.add_atom(atom);
+        const atom = await this._createAndStoreAtom(validatedContent, atomMeta);
         const belief = CognitiveItemFactory.createBelief(atom.id, truth, attention);
         this.agenda.push(belief);
     }
@@ -183,53 +184,22 @@ export class DecentralizedCognitiveCore {
      * @throws Error if any required parameters are missing or invalid
      */
     public async addInitialGoal(content: any, attention: AttentionValue, meta?: Record<string, any>): Promise<void> {
-        // Validate input parameters
-        if (content === undefined || content === null) {
-            throw new Error('Content is required for adding a goal');
+        // Validate input using Zod schema
+        const validationResult = AddGoalSchema.safeParse({ content, attention, meta });
+        if (!validationResult.success) {
+            throw new Error(`Invalid goal input: ${JSON.stringify(validationResult.error.flatten().fieldErrors)}`);
         }
-        
-        if (!attention || typeof attention !== 'object') {
-            throw new Error('Attention value is required and must be an object');
-        }
-        
-        if (typeof attention.priority !== 'number' || attention.priority < 0 || attention.priority > 1) {
-            throw new Error('Attention priority must be a number between 0 and 1');
-        }
-        
-        if (typeof attention.durability !== 'number' || attention.durability < 0 || attention.durability > 1) {
-            throw new Error('Attention durability must be a number between 0 and 1');
-        }
+        const { content: validatedContent } = validationResult.data;
 
-        // Additional validation for content length
-        const contentStr = typeof content === 'string' ? content : JSON.stringify(content);
-        if (contentStr.length < 1) {
-            throw new Error('Content cannot be empty');
-        }
-        if (contentStr.length > 10000) {
-            throw new Error('Content is too long (maximum 10,000 characters)');
-        }
-
-        // Validate meta parameter if provided
-        if (meta && typeof meta !== 'object') {
-            throw new Error('Metadata must be an object if provided');
-        }
-
-        const atom: SemanticAtom = {
-            id: uuidv4(),
-            content: content,
-            embedding: await this.generateEmbedding(content),
-            creationTime: Date.now(), // Added
-            lastAccessTime: Date.now(), // Added
-            meta: {
-                type: "Fact",
-                source: "user_input",
-                timestamp: new Date().toISOString(),
-                trust_score: attention.priority,
-                ...meta
-            }
+        const atomMeta = {
+            type: "Fact",
+            source: "user_input",
+            timestamp: new Date().toISOString(),
+            trust_score: attention.priority,
+            ...meta
         };
 
-        this.worldModel.add_atom(atom);
+        const atom = await this._createAndStoreAtom(validatedContent, atomMeta);
         const goal = CognitiveItemFactory.createGoal(atom.id, attention);
         this.agenda.push(goal);
     }
@@ -241,42 +211,36 @@ export class DecentralizedCognitiveCore {
      * @throws Error if content is missing or invalid
      */
     public async addSchema(content: any, meta?: Record<string, any>): Promise<void> {
-        // Validate input parameters
-        if (content === undefined || content === null) {
-            throw new Error('Content is required for adding a schema');
+        // Validate input using Zod schema
+        const validationResult = AddSchemaSchema.safeParse({ content, meta });
+        if (!validationResult.success) {
+            throw new Error(`Invalid schema input: ${JSON.stringify(validationResult.error.flatten().fieldErrors)}`);
         }
+        const { content: validatedContent } = validationResult.data;
 
-        // Additional validation for content length
-        const contentStr = typeof content === 'string' ? content : JSON.stringify(content);
-        if (contentStr.length < 1) {
-            throw new Error('Content cannot be empty');
-        }
-        if (contentStr.length > 10000) {
-            throw new Error('Content is too long (maximum 10,000 characters)');
-        }
+        const atomMeta = {
+            type: "CognitiveSchema",
+            source: "system",
+            timestamp: new Date().toISOString(),
+            trust_score: 0.9, // Schemas from user are trusted by default
+            ...meta
+        };
 
-        // Validate meta parameter if provided
-        if (meta && typeof meta !== 'object') {
-            throw new Error('Metadata must be an object if provided');
-        }
+        const atom = await this._createAndStoreAtom(validatedContent, atomMeta);
+        this.schemaMatcher.register_schema(atom, this.worldModel);
+    }
 
+    private async _createAndStoreAtom(content: string, meta: Record<string, any>): Promise<SemanticAtom> {
         const atom: SemanticAtom = {
             id: uuidv4(),
             content: content,
             embedding: await this.generateEmbedding(content),
-            creationTime: Date.now(), // Added
-            lastAccessTime: Date.now(), // Added
-            meta: {
-                type: "CognitiveSchema",
-                source: "system",
-                timestamp: new Date().toISOString(),
-                trust_score: 0.9,
-                ...meta
-            }
+            creationTime: Date.now(),
+            lastAccessTime: Date.now(),
+            meta: meta
         };
-
         this.worldModel.add_atom(atom);
-        this.schemaMatcher.register_schema(atom, this.worldModel);
+        return atom;
     }
 
     /**
@@ -287,32 +251,27 @@ export class DecentralizedCognitiveCore {
         agendaSize: number;
         worldModelStats: any;
         workerStats: any;
-        taskStats: {
-            total: number;
-            pending: number;
-            awaiting_dependencies: number;
-            decomposing: number;
-            awaiting_subtasks: number;
-            ready_for_execution: number;
-            completed: number;
-            failed: number;
-            deferred: number;
-        };
-        performance: {
-            uptime: string;
-            totalItemsProcessed: number;
-            itemsProcessedPerSecond: number;
-            averageItemProcessingTime: number;
-            systemLoad: number; // Added system load metric
-        };
-        systemInfo: {
-            workerCount: number;
-            version: string;
-            startTime: number;
-            platform: string; // Added platform information
-            arch: string; // Added architecture information
-        }
+        taskStats: any;
+        performance: any;
+        systemInfo: any;
     } {
+        return {
+            agendaSize: this.agenda.size(),
+            worldModelStats: (this.worldModel as PersistentWorldModel).getStatistics(),
+            workerStats: Object.fromEntries(this.workerStatistics),
+            taskStats: this.taskManager.getTaskStatistics(),
+            performance: this._getPerformanceStats(),
+            systemInfo: {
+                workerCount: this.config.workerCount,
+                version: SYSTEM_VERSION,
+                startTime: this.startTime,
+                platform: process.platform,
+                arch: process.arch
+            }
+        };
+    }
+
+    private _getPerformanceStats() {
         const totalItems = Array.from(this.workerStatistics.values()).reduce((acc, stats) => acc + stats.itemsProcessed, 0);
         const totalTime = Array.from(this.workerStatistics.values()).reduce((acc, stats) => acc + stats.totalProcessingTime, 0);
         const averageItemProcessingTime = totalItems > 0 ? totalTime / totalItems : 0;
@@ -325,31 +284,15 @@ export class DecentralizedCognitiveCore {
         const seconds = Math.floor(uptimeSeconds % 60);
         const uptimeStr = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
 
-        // Calculate system load based on active workers and agenda size
         const activeWorkers = Array.from(this.workerStatistics.values()).filter(stats => stats.itemsProcessed > 0).length;
-        const systemLoad = this.workerCount > 0 ? activeWorkers / this.workerCount : 0;
-
-        const taskStats = this.taskManager.getTaskStatistics();
+        const systemLoad = this.config.workerCount > 0 ? activeWorkers / this.config.workerCount : 0;
 
         return {
-            agendaSize: this.agenda.size(),
-            worldModelStats: (this.worldModel as PersistentWorldModel).getStatistics(),
-            workerStats: Object.fromEntries(this.workerStatistics),
-            taskStats,
-            performance: {
-                uptime: uptimeStr,
-                totalItemsProcessed: totalItems,
-                itemsProcessedPerSecond: parseFloat(itemsProcessedPerSecond.toFixed(2)),
-                averageItemProcessingTime: parseFloat(averageItemProcessingTime.toFixed(2)),
-                systemLoad: parseFloat(systemLoad.toFixed(2))
-            },
-            systemInfo: {
-                workerCount: this.workerCount,
-                version: '1.0.0',
-                startTime: this.startTime,
-                platform: process.platform,
-                arch: process.arch
-            }
+            uptime: uptimeStr,
+            totalItemsProcessed: totalItems,
+            itemsProcessedPerSecond: parseFloat(itemsProcessedPerSecond.toFixed(2)),
+            averageItemProcessingTime: parseFloat(averageItemProcessingTime.toFixed(2)),
+            systemLoad: parseFloat(systemLoad.toFixed(2))
         };
     }
 
@@ -369,30 +312,6 @@ export class DecentralizedCognitiveCore {
         this.eventHandler = handler;
     }
 
-    /**
-     * Initialize all cognitive components
-     */
-    private initializeComponents(): void {
-        // Use standard components only
-        this.worldModel = new PersistentWorldModel();
-        this.agenda = new PriorityAgenda((taskId: string) => {
-            const task = this.worldModel.get_item(taskId);
-            return task?.task_metadata?.status || null;
-        });
-        this.taskManager = new UnifiedTaskManager(this.agenda, this.worldModel);
-        this.taskOrchestrator = new TaskOrchestrator(this.worldModel, this.taskManager, this.agenda);
-        this.attentionModule = new DynamicAttentionModule();
-
-        this.beliefRevisionEngine = new SimpleBeliefRevisionEngine();
-        this.resonanceModule = new HybridResonanceModule();
-        this.schemaMatcher = new EfficientSchemaMatcher();
-        this.goalTreeManager = new HierarchicalGoalTreeManager();
-        this.reflectionLoop = new ReflectionLoop(this.worldModel, this.agenda);
-        this.actionSubsystem = new ActionSubsystem(this.taskManager);
-        this.schemaLearningModule = new SchemaLearningModule(this.worldModel);
-
-        this.registerSystemSchemas();
-    }
 
     /**
      * Register built-in system schemas
@@ -437,7 +356,7 @@ export class DecentralizedCognitiveCore {
      * Initialize worker statistics tracking
      */
     private initializeWorkerStatistics(): void {
-        for (let i = 0; i < this.workerCount; i++) {
+        for (let i = 0; i < this.config.workerCount; i++) {
             this.workerStatistics.set(i, {itemsProcessed: 0, errors: 0, totalProcessingTime: 0});
         }
     }
@@ -449,7 +368,6 @@ export class DecentralizedCognitiveCore {
     private async createWorker(workerId: number): Promise<void> {
         console.log(`Worker ${workerId} started`);
         let itemCounter = 0;
-        const decayCycleInterval = 100; // Run decay cycle every 100 items
 
         while (this.isRunning) {
             try {
@@ -457,7 +375,7 @@ export class DecentralizedCognitiveCore {
                 await this.processItem(itemA, workerId);
 
                 // Run attention decay cycle periodically
-                if (++itemCounter % decayCycleInterval === 0) {
+                if (++itemCounter % this.config.decayCycleInterval === 0) {
                     this.attentionModule.run_decay_cycle(this.worldModel, this.agenda);
                 }
             } catch (error) {
@@ -689,7 +607,7 @@ export class DecentralizedCognitiveCore {
     private isGoalAchieved(goal: CognitiveItem): boolean {
         // For non-query goals, we'll keep the probabilistic check for now.
         if (!goal.label || !goal.label.includes('?')) {
-            return Math.random() > 0.8;
+            return Math.random() > GOAL_ACHIEVED_PROBABILITY;
         }
 
         // For query goals, find relevant context using the resonance module.
@@ -702,7 +620,7 @@ export class DecentralizedCognitiveCore {
                 item.label &&
                 !item.label.includes('?') &&
                 item.id !== goal.id &&
-                (item.truth?.confidence ?? 0) > 0.6
+                (item.truth?.confidence ?? 0) > GOAL_ACHIEVED_THRESHOLD
             ) {
                 // A relevant, confident belief that is a statement has been found.
                 return true;

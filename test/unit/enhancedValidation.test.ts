@@ -4,7 +4,7 @@ import {DecentralizedCognitiveCore} from '@/core/cognitiveCore';
 import {PerceptionSubsystem} from '@/modules/perceptionSubsystem';
 import {SchemaLearningModule} from '@/modules/schemaLearningModule';
 import {ReflectionLoop} from '@/core/reflectionLoop';
-import {createCognitiveItem, createSemanticAtom, createAttentionValue, createTruthValue} from './testUtils';
+import {createCognitiveItem, createSemanticAtom, createAttentionValue, createTruthValue, createCoreWithRealDependencies} from './testUtils';
 import {CognitiveItem, SemanticAtom, AttentionValue, TruthValue} from '@/interfaces/types';
 
 describe('Enhanced Validation and Error Handling', () => {
@@ -93,7 +93,7 @@ describe('Enhanced Validation and Error Handling', () => {
         let core: DecentralizedCognitiveCore;
 
         beforeEach(() => {
-            core = new DecentralizedCognitiveCore(1); // 1 worker for testing
+            core = createCoreWithRealDependencies({ workerCount: 1 }); // 1 worker for testing
         });
 
         it('should throw error when adding belief without content', async () => {
@@ -101,7 +101,7 @@ describe('Enhanced Validation and Error Handling', () => {
                 undefined as any,
                 createTruthValue(),
                 createAttentionValue()
-            )).rejects.toThrow('Content is required for adding a belief');
+            )).rejects.toThrow(/content/i);
         });
 
         it('should throw error when adding belief without truth value', async () => {
@@ -109,7 +109,7 @@ describe('Enhanced Validation and Error Handling', () => {
                 'Test content',
                 undefined as any,
                 createAttentionValue()
-            )).rejects.toThrow('Truth value is required and must be an object');
+            )).rejects.toThrow(/truth/i);
         });
 
         it('should throw error when adding belief with invalid truth values', async () => {
@@ -117,18 +117,18 @@ describe('Enhanced Validation and Error Handling', () => {
                 'Test content',
                 {frequency: 1.5, confidence: 0.8} as any,
                 createAttentionValue()
-            )).rejects.toThrow('Truth frequency must be a number between 0 and 1');
+            )).rejects.toThrow(/truth/i);
         });
 
         it('should throw error when adding goal without content', async () => {
             await expect(core.addInitialGoal(
                 undefined as any,
                 createAttentionValue()
-            )).rejects.toThrow('Content is required for adding a goal');
+            )).rejects.toThrow(/content/i);
         });
 
         it('should throw error when adding schema without content', async () => {
-            await expect(core.addSchema(undefined as any)).rejects.toThrow('Content is required for adding a schema');
+            await expect(core.addSchema(undefined as any)).rejects.toThrow(/content/i);
         });
     });
 

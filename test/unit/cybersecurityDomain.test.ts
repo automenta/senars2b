@@ -1,13 +1,14 @@
 import {AttentionValue, CognitiveItem, SemanticAtom, TruthValue} from '@/interfaces/types';
 import {CognitiveSchema, WorldModel} from '@/core/worldModel';
 import {DecentralizedCognitiveCore} from '@/core/cognitiveCore';
-import {createCognitiveItem, createSemanticAtom, createTruthValue, createAttentionValue, createMockSchema, createCognitiveMetadata} from './testUtils';
+import {createCoreWithRealDependencies, createCognitiveMetadata, createTruthValue, createAttentionValue} from './testUtils';
 
 describe('Cybersecurity Domain Tests', () => {
     let core: DecentralizedCognitiveCore;
 
     beforeEach(() => {
-        core = new DecentralizedCognitiveCore(2);
+
+        core = createCoreWithRealDependencies({ workerCount: 2 });
     });
 
     it('should handle cybersecurity threat analysis scenarios', () => {

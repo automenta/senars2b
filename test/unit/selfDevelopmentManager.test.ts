@@ -1,6 +1,7 @@
 import {SelfDevelopmentManager} from '@/modules/selfDevelopmentManager';
 import {DecentralizedCognitiveCore} from '@/core/cognitiveCore';
 import {PerceptionSubsystem} from '@/modules/perceptionSubsystem';
+import {createCoreWithRealDependencies} from './testUtils';
 
 // Mock the WebSocketInterface to avoid actually starting a server
 jest.mock('../../src/web/webSocketInterface');
@@ -12,7 +13,8 @@ describe('SelfDevelopmentManager', () => {
 
     beforeEach(() => {
         // Create minimal instances for testing
-        core = new DecentralizedCognitiveCore(1);
+
+        core = createCoreWithRealDependencies({ workerCount: 1 });
         perception = new PerceptionSubsystem();
 
         // Create the self-development manager

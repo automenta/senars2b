@@ -1,9 +1,20 @@
 import {WebSocketServer} from 'ws';
 import WebSocket = require('ws');
-import {DecentralizedCognitiveCore} from '../core/cognitiveCore';
+import {DecentralizedCognitiveCore, CognitiveCoreDependencies} from '../core/cognitiveCore';
 import {PerceptionSubsystem} from '../modules/perceptionSubsystem';
 import {AttentionValue, CognitiveItem, TruthValue} from '../interfaces/types';
-import {UnifiedTaskManager} from '../modules/taskManager';
+import { PriorityAgenda } from '../core/agenda';
+import { PersistentWorldModel } from '../core/worldModel';
+import { UnifiedTaskManager } from '../modules/taskManager';
+import { TaskOrchestrator } from '../modules/taskOrchestrator';
+import { DynamicAttentionModule } from '../core/attentionModule';
+import { SimpleBeliefRevisionEngine } from '../core/beliefRevisionEngine';
+import { HybridResonanceModule } from '../core/resonanceModule';
+import { EfficientSchemaMatcher } from '../core/schemaMatcher';
+import { HierarchicalGoalTreeManager } from '../core/goalTreeManager';
+import { ReflectionLoop } from '../core/reflectionLoop';
+import { ActionSubsystem } from '../actions/actionSubsystem';
+import { SchemaLearningModule } from '../modules/schemaLearningModule';
 import {TaskWebSocketHandler} from '../interfaces/taskWebSocketInterface';
 import {v4 as uuidv4} from 'uuid';
 
@@ -49,7 +60,30 @@ export class WebSocketInterface {
 
     constructor(port: number, workerCount: number = 4) {
         this.wss = new WebSocketServer({port});
-        this.core = new DecentralizedCognitiveCore(workerCount);
+
+        const worldModel = new PersistentWorldModel();
+        const agenda = new PriorityAgenda((taskId: string) => {
+            const task = worldModel.get_item(taskId);
+            return task?.task_metadata?.status || null;
+        });
+        const taskManager = new UnifiedTaskManager(agenda, worldModel);
+
+        const dependencies: CognitiveCoreDependencies = {
+            agenda: agenda,
+            worldModel: worldModel,
+            taskManager: taskManager,
+            taskOrchestrator: new TaskOrchestrator(worldModel, taskManager, agenda),
+            attentionModule: new DynamicAttentionModule(),
+            beliefRevisionEngine: new SimpleBeliefRevisionEngine(),
+            resonanceModule: new HybridResonanceModule(),
+            schemaMatcher: new EfficientSchemaMatcher(),
+            goalTreeManager: new HierarchicalGoalTreeManager(),
+            reflectionLoop: new ReflectionLoop(worldModel, agenda),
+            actionSubsystem: new ActionSubsystem(taskManager),
+            schemaLearningModule: new SchemaLearningModule(worldModel),
+        };
+
+        this.core = new DecentralizedCognitiveCore(dependencies, { workerCount: workerCount });
         this.perception = new PerceptionSubsystem();
         
         // Initialize task manager with access to agenda and world model

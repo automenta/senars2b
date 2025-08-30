@@ -1,13 +1,15 @@
 import {AttentionValue, CognitiveItem, SemanticAtom, TruthValue} from '@/interfaces/types';
 import {CognitiveSchema, WorldModel} from '@/core/worldModel';
 import {DecentralizedCognitiveCore} from '@/core/cognitiveCore';
-import {createCognitiveItem, createSemanticAtom, createTruthValue, createAttentionValue, createMockSchema, createCognitiveMetadata} from './testUtils';
+
+import {createCognitiveItem, createSemanticAtom, createAttentionValue, createTruthValue, createCoreWithRealDependencies, createCognitiveMetadata} from './testUtils';
 
 describe('Environmental Domain Tests', () => {
     let core: DecentralizedCognitiveCore;
 
     beforeEach(() => {
-        core = new DecentralizedCognitiveCore(2);
+
+        core = createCoreWithRealDependencies({ workerCount: 2 });
     });
 
     it('should handle environmental science scenarios', () => {
