@@ -108,22 +108,21 @@ describe('TaskValidator', () => {
             const task = createValidTask();
             // Simulate a missing property to test normalization
             (task.task_metadata as any).status = undefined;
-            delete task.subtasks; // 'subtasks' is optional, so delete is fine here
+            delete task.task_metadata!.subtasks; // 'subtasks' is optional, so delete is fine here
 
             const normalized = TaskValidator.normalizeTask(task);
 
             expect(normalized.task_metadata?.status).toBe('pending');
-            expect(normalized.subtasks).toEqual([]);
+            expect(normalized.task_metadata?.subtasks).toEqual([]);
         });
 
         it('should not overwrite existing valid data', () => {
-            const task = createValidTask({}, { status: 'completed', priority_level: 'high' });
-            task.subtasks = ['subtask-1'];
+            const task = createValidTask({}, { status: 'completed', priority_level: 'high', subtasks: ['subtask-1'] });
             const normalized = TaskValidator.normalizeTask(task);
 
             expect(normalized.task_metadata?.status).toBe('completed');
             expect(normalized.task_metadata?.priority_level).toBe('high');
-            expect(normalized.subtasks).toEqual(['subtask-1']);
+            expect(normalized.task_metadata?.subtasks).toEqual(['subtask-1']);
         });
 
         it('should ensure array fields are arrays', () => {

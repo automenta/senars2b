@@ -41,6 +41,8 @@ export interface TaskMetadata {
     context?: Record<string, any>;
     completion_percentage?: number; // 0-100
     group_id?: string; // Identifier for grouping related tasks
+    parent_id?: string; // Parent task ID
+    subtasks?: string[]; // Subtask IDs
 }
 
 export interface CognitiveItem {
@@ -59,10 +61,6 @@ export interface CognitiveItem {
     
     // Task-specific properties (only used when type is 'TASK')
     task_metadata?: TaskMetadata;
-    
-    // Task relationships (only used when type is 'TASK')
-    parent_id?: string;        // Parent task ID
-    subtasks?: string[];       // Subtask IDs
     
     // Task timestamps (only used when type is 'TASK')
     created_at?: number;       // Creation timestamp

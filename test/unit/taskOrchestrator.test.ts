@@ -47,27 +47,13 @@ describe('TaskOrchestrator', () => {
         expect(result.newItems).toHaveLength(0);
     });
 
-    it('should transition to decomposing when dependencies are met', () => {
+    it('should transition from awaiting_dependencies to decomposing', () => {
         const task = createTaskItem({
-            task_metadata: { status: 'awaiting_dependencies', dependencies: ['dep1'], priority_level: 'medium' },
+            task_metadata: { status: 'awaiting_dependencies', priority_level: 'medium' },
         });
-        const depTask = createTaskItem({ id: 'dep1', task_metadata: { status: 'completed', priority_level: 'medium' } });
-        mockTaskManager.getTask.mockReturnValue(depTask);
 
         const result = orchestrator.orchestrate(task) as OrchestrationResult;
         expect(result.updatedTask.task_metadata!.status).toBe('decomposing');
-    });
-
-    it('should remain in awaiting_dependencies if dependencies are not met', () => {
-        const task = createTaskItem({
-            task_metadata: { status: 'awaiting_dependencies', dependencies: ['dep1'], priority_level: 'medium' },
-        });
-        const depTask = createTaskItem({ id: 'dep1', task_metadata: { status: 'pending', priority_level: 'medium' } });
-        mockTaskManager.getTask.mockReturnValue(depTask);
-
-        const result = orchestrator.orchestrate(task) as OrchestrationResult;
-        // Status should not change
-        expect(result.updatedTask.task_metadata!.status).toBe('awaiting_dependencies');
     });
 
     it('should create a decomposition goal for a complex task', () => {
@@ -98,8 +84,7 @@ describe('TaskOrchestrator', () => {
 
     it('should transition from awaiting_subtasks to completed when subtasks are done', () => {
         const task = createTaskItem({
-            subtasks: ['sub1'],
-            task_metadata: { status: 'awaiting_subtasks', priority_level: 'medium' },
+            task_metadata: { status: 'awaiting_subtasks', priority_level: 'medium', subtasks: ['sub1'] },
         });
         const subtask = createTaskItem({ id: 'sub1', task_metadata: { status: 'completed', priority_level: 'medium' } });
         mockTaskManager.getTask.mockReturnValue(subtask);
@@ -108,10 +93,9 @@ describe('TaskOrchestrator', () => {
         expect(result.updatedTask.task_metadata!.status).toBe('completed');
     });
 
-    it('should update completion percentage if subtasks are not done', () => {
+    it('should remain in awaiting_subtasks if subtasks are not done', () => {
         const task = createTaskItem({
-            subtasks: ['sub1', 'sub2'],
-            task_metadata: { status: 'awaiting_subtasks', priority_level: 'medium', completion_percentage: 0 },
+            task_metadata: { status: 'awaiting_subtasks', priority_level: 'medium', subtasks: ['sub1', 'sub2'] },
         });
         const subtask1 = createTaskItem({ id: 'sub1', task_metadata: { status: 'completed', priority_level: 'medium' } });
         const subtask2 = createTaskItem({ id: 'sub2', task_metadata: { status: 'pending', priority_level: 'medium' } });
@@ -123,7 +107,6 @@ describe('TaskOrchestrator', () => {
 
         const result = orchestrator.orchestrate(task) as OrchestrationResult;
         expect(result.updatedTask.task_metadata!.status).toBe('awaiting_subtasks');
-        expect(result.updatedTask.task_metadata!.completion_percentage).toBe(50);
     });
 
     it('should return a new GOAL when a task is ready_for_execution', () => {

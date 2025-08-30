@@ -74,7 +74,7 @@ describe('DecompositionSchema', () => {
         expect(resultingSubtasks[2].label).toBe('Sell tickets.');
 
         // Check that they are correctly parented
-        expect(resultingSubtasks[0].parent_id).toBe(taskToDecompose.id);
+        expect(resultingSubtasks[0].task_metadata!.parent_id).toBe(taskToDecompose.id);
 
         // Check that they are chained in a dependency
         expect(resultingSubtasks[1].task_metadata!.dependencies).toEqual([resultingSubtasks[0].id]);

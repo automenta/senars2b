@@ -70,8 +70,8 @@ const mapTaskToClient = (task: CognitiveItem) => ({
     type: task.task_metadata?.categories?.includes('AGENT') ? 'AGENT' : 'REGULAR',
     priority: task.task_metadata?.priority_level || 'medium',
     completion_percentage: task.task_metadata?.completion_percentage || 0,
-    parent_id: task.parent_id,
-    subtasks: task.subtasks || [],
+    parent_id: task.task_metadata?.parent_id,
+    subtasks: task.task_metadata?.subtasks || [],
 });
 
 const broadcastTaskList = () => {

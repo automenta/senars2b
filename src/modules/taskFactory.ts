@@ -83,7 +83,9 @@ export class TaskFactory {
         });
         
         // Set parent relationship
-        task.parent_id = parentId;
+        if (task.task_metadata) {
+            task.task_metadata.parent_id = parentId;
+        }
         task.stamp.parent_ids = [parentId];
         task.stamp.schema_id = 'task-factory';
         

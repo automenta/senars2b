@@ -104,7 +104,8 @@ export class CognitiveItemFactory {
     static createTask(content: string, attention: AttentionValue, taskMetadata?: Partial<TaskMetadata>, atomId?: string): CognitiveItem {
         const defaultTaskMetadata: TaskMetadata = {
             status: 'pending',
-            priority_level: 'medium'
+            priority_level: 'medium',
+            subtasks: []
         };
         
         return {
@@ -115,7 +116,6 @@ export class CognitiveItemFactory {
             content: content,
             attention,
             task_metadata: { ...defaultTaskMetadata, ...taskMetadata },
-            subtasks: [],
             created_at: Date.now(),
             updated_at: Date.now(),
             stamp: {
@@ -171,9 +171,9 @@ export class CognitiveItemFactory {
             item.content = label;
             item.task_metadata = {
                 status: 'pending',
-                priority_level: 'medium'
+                priority_level: 'medium',
+                subtasks: []
             };
-            item.subtasks = [];
             item.created_at = Date.now();
             item.updated_at = Date.now();
         }

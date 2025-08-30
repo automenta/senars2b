@@ -10,7 +10,7 @@ function isTask(item: CognitiveItem): item is CognitiveItem & { type: 'TASK' } {
 }
 
 export interface TaskManager {
-    addTask(task: Omit<CognitiveItem, 'id' | 'atom_id' | 'created_at' | 'updated_at' | 'subtasks' | 'stamp' | 'type'> & { 
+    addTask(task: Omit<CognitiveItem, 'id' | 'atom_id' | 'created_at' | 'updated_at' | 'stamp' | 'type'> & {
         type?: 'TASK';
         task_metadata?: Partial<CognitiveItem['task_metadata']>;
     }): CognitiveItem;
@@ -23,7 +23,7 @@ export interface TaskManager {
     getTasksByGroupId(groupId: string): CognitiveItem[];
     assignTaskToGroup(taskId: string, groupId: string): CognitiveItem | null;
     updateTaskStatus(id: string, status: TaskStatus): CognitiveItem | null;
-    addSubtask(parentId: string, subtask: Omit<CognitiveItem, 'id' | 'atom_id' | 'created_at' | 'updated_at' | 'subtasks' | 'stamp' | 'parent_id' | 'type'> & { 
+    addSubtask(parentId: string, subtask: Omit<CognitiveItem, 'id' | 'atom_id' | 'created_at' | 'updated_at' | 'stamp' | 'type'> & {
         type?: 'TASK';
         task_metadata?: Partial<CognitiveItem['task_metadata']>;
     }): CognitiveItem;
@@ -168,14 +168,14 @@ export class UnifiedTaskManager implements TaskManager {
 
     failTask(id: string, reason?: string): CognitiveItem | null {
         const task = this.updateTaskStatus(id, 'failed');
-        if (!task) return null;
+        if (!task || !task.task_metadata) return null;
 
         this.agenda.remove(id);
         this.notifyListeners({ type: 'taskFailed', task });
 
         // Propagate failure to subtasks
-        if (task.subtasks) {
-            for (const subtaskId of task.subtasks) {
+        if (task.task_metadata.subtasks) {
+            for (const subtaskId of task.task_metadata.subtasks) {
                 const subtask = this.getTask(subtaskId);
                 if (subtask && isTask(subtask) && subtask.task_metadata?.status !== 'completed') {
                     this.failTask(subtaskId, "Parent task failed");
@@ -194,28 +194,28 @@ export class UnifiedTaskManager implements TaskManager {
         return task;
     }
 
-    addSubtask(parentId: string, subtaskData: Omit<CognitiveItem, 'id' | 'atom_id' | 'created_at' | 'updated_at' | 'subtasks' | 'stamp' | 'parent_id' | 'type'> & {
+    addSubtask(parentId: string, subtaskData: Omit<CognitiveItem, 'id' | 'atom_id' | 'created_at' | 'updated_at' | 'stamp' | 'type'> & {
         type?: 'TASK';
         task_metadata?: Partial<CognitiveItem['task_metadata']>;
     }): CognitiveItem {
         const parentTask = this.getTask(parentId);
-        if (!parentTask || !isTask(parentTask)) {
-            throw new Error(`Parent task with ID ${parentId} not found`);
+        if (!parentTask || !isTask(parentTask) || !parentTask.task_metadata) {
+            throw new Error(`Parent task with ID ${parentId} not found or is missing metadata`);
         }
 
         const subtask = this._createAndStoreTask(subtaskData, parentId);
 
-        if (!parentTask.subtasks) {
-            parentTask.subtasks = [];
+        if (!parentTask.task_metadata.subtasks) {
+            parentTask.task_metadata.subtasks = [];
         }
-        parentTask.subtasks.push(subtask.id);
+        parentTask.task_metadata.subtasks.push(subtask.id);
         this.worldModel.update_item(parentTask);
 
         return subtask;
     }
 
     private _createAndStoreTask(
-        taskData: Omit<CognitiveItem, 'id' | 'atom_id' | 'created_at' | 'updated_at' | 'subtasks' | 'stamp' | 'type'> & {
+        taskData: Omit<CognitiveItem, 'id' | 'atom_id' | 'created_at' | 'updated_at' | 'stamp' | 'type'> & {
             type?: 'TASK';
             task_metadata?: Partial<CognitiveItem['task_metadata']>;
         },
@@ -258,11 +258,11 @@ export class UnifiedTaskManager implements TaskManager {
 
     getSubtasks(parentId: string): CognitiveItem[] {
         const parentTask = this.getTask(parentId);
-        if (!parentTask || !isTask(parentTask) || !parentTask.subtasks) {
+        if (!parentTask || !isTask(parentTask) || !parentTask.task_metadata || !parentTask.task_metadata.subtasks) {
             return [];
         }
 
-        return parentTask.subtasks
+        return parentTask.task_metadata.subtasks
             .map(subtaskId => this.getTask(subtaskId))
             .filter((task): task is CognitiveItem => task !== null);
     }

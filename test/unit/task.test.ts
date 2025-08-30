@@ -49,7 +49,7 @@ describe('TaskFactory', () => {
         expect(task).toBeDefined();
         expect(task.type).toBe('TASK');
         expect(task.label).toBe(content);
-        expect(task.parent_id).toBe(parentId);
+        expect(task.task_metadata?.parent_id).toBe(parentId);
         expect(task.task_metadata?.priority_level).toBe('low');
     });
 });
@@ -75,9 +75,9 @@ describe('TaskValidator', () => {
                 confidence: 0.9,
                 tags: ['tag1'],
                 categories: ['category1'],
-                context: { projectId: 'project1' }
+                context: { projectId: 'project1' },
+                subtasks: []
             },
-            subtasks: [],
             created_at: Date.now(),
             updated_at: Date.now()
         };
@@ -135,6 +135,6 @@ describe('TaskValidator', () => {
         
         expect(normalizedTask.task_metadata?.status).toBe('pending');
         expect(normalizedTask.task_metadata?.priority_level).toBe('medium');
-        expect(normalizedTask.subtasks).toEqual([]);
+        expect(normalizedTask.task_metadata?.subtasks).toEqual([]);
     });
 });

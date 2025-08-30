@@ -449,9 +449,6 @@ export class DecentralizedCognitiveCore {
                         this.agenda.push(newItem);
                     }
                 }
-            } else {
-                // Original goal processing logic for non-task items
-                await this.processGoals(itemA);
             }
         } catch (error) {
             console.error("Worker failed processing item", itemA.id, error);
@@ -554,112 +551,6 @@ export class DecentralizedCognitiveCore {
         }
     }
 
-    /**
-     * Process goals in the cognitive item
-     * @param itemA The cognitive item to process as a goal
-     */
-    private async processGoals(itemA: CognitiveItem): Promise<void> {
-        if (itemA.type === "GOAL" && itemA.goal_status === "active") {
-            // Check if this is an action goal
-            if (this.isActionGoal(itemA)) {
-                await this.executeActionGoal(itemA);
-            } else {
-                await this.processCognitiveGoal(itemA);
-            }
-        }
-    }
-
-    /**
-     * Execute an action goal using the action subsystem
-     * @param goal The action goal to execute
-     */
-    private async executeActionGoal(goal: CognitiveItem): Promise<void> {
-        // Execute the action goal
-        const result = await this.actionSubsystem.executeGoal(goal);
-        if (result) {
-            // Add the result back to the agenda
-            this.agenda.push(result);
-            // Mark the goal as achieved
-            goal.goal_status = "achieved";
-            this.goalTreeManager.mark_achieved(goal.id);
-        }
-    }
-
-    /**
-     * Process a cognitive goal (non-action)
-     * @param goal The cognitive goal to process
-     */
-    private async processCognitiveGoal(goal: CognitiveItem): Promise<void> {
-        // Check if goal is achieved
-        if (this.isGoalAchieved(goal)) {
-            goal.goal_status = "achieved";
-            this.goalTreeManager.mark_achieved(goal.id);
-        } else {
-            // Decompose complex goals into subgoals
-            const subgoals = this.goalTreeManager.decompose(goal);
-            for (const subgoal of subgoals) {
-                this.agenda.push(subgoal);
-            }
-        }
-    }
-
-    /**
-     * Determine if a goal is an action goal based on its content
-     * @param goal The goal to check
-     * @returns True if the goal is an action goal, false otherwise
-     */
-    private isActionGoal(goal: CognitiveItem): boolean {
-        const goalLabel = (goal.label || '').toLowerCase();
-        if (!goalLabel) {
-            return false;
-        }
-
-        const actionVerbs = this.worldModel.query_atoms_by_meta('type', 'ActionVerb');
-
-        if (actionVerbs.length > 0) {
-            // New dynamic mechanism
-            return actionVerbs.some(verbAtom => {
-                const verb = (verbAtom.content as string).toLowerCase();
-                return goalLabel.includes(verb);
-            });
-        } else {
-            // Fallback to old hardcoded list if no action verbs are registered
-            const actionKeywords = ['search', 'find', 'lookup', 'diagnose', 'diagnostic', 'execute', 'run'];
-            return actionKeywords.some(keyword => goalLabel.includes(keyword));
-        }
-    }
-
-    /**
-     * Check if a goal is achieved by querying the world model for relevant beliefs.
-     * @param goal The goal to check
-     * @returns True if the goal is considered achieved, false otherwise
-     */
-    private isGoalAchieved(goal: CognitiveItem): boolean {
-        // For non-query goals, we'll keep the probabilistic check for now.
-        if (!goal.label || !goal.label.includes('?')) {
-            return Math.random() > GOAL_ACHIEVED_PROBABILITY;
-        }
-
-        // For query goals, find relevant context using the resonance module.
-        const contextItems = this.resonanceModule.find_context(goal, this.worldModel, 5);
-
-        // A query goal is achieved if we find a relevant belief with high confidence that is not a question itself.
-        for (const item of contextItems) {
-            if (
-                item.type === 'BELIEF' &&
-                item.label &&
-                !item.label.includes('?') &&
-                item.id !== goal.id &&
-                (item.truth?.confidence ?? 0) > GOAL_ACHIEVED_THRESHOLD
-            ) {
-                // A relevant, confident belief that is a statement has been found.
-                return true;
-            }
-        }
-
-        // No satisfactory belief was found.
-        return false;
-    }
 
     /**
      * Process a task item through its lifecycle

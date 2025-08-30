@@ -123,7 +123,7 @@ describe('UnifiedTaskManager', () => {
 
         it('failTask should update status and propagate to subtasks', () => {
             const subtask = createTaskItem({ id: 'sub1' });
-            const parentTask = createTaskItem({ id: 'parent1', subtasks: ['sub1'] });
+            const parentTask = createTaskItem({ id: 'parent1', task_metadata: { subtasks: ['sub1'], status: 'pending', priority_level: 'medium' } });
 
             mockWorldModel.get_item.mockImplementation(id => {
                 if (id === 'parent1') return parentTask;

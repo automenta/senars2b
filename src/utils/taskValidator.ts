@@ -28,6 +28,7 @@ const metadataValidationRules: { [K in keyof TaskMetadata]?: (value: any) => boo
     context: (value: any) => typeof value === 'object' && value !== null && !Array.isArray(value),
     completion_percentage: (value: any) => typeof value === 'number' && value >= 0 && value <= 100,
     group_id: (value: any) => typeof value === 'string',
+    subtasks: (value: any) => Array.isArray(value),
 };
 
 /**
@@ -88,9 +89,7 @@ export class TaskValidator {
         metadata.categories = normalizeArray(metadata.categories);
         metadata.outcomes = normalizeArray(metadata.outcomes);
         metadata.required_resources = normalizeArray(metadata.required_resources);
-
-        // Ensure subtasks array exists on the task itself
-        task.subtasks = task.subtasks ?? [];
+        metadata.subtasks = normalizeArray(metadata.subtasks);
 
         // Ensure timestamps exist
         task.created_at = task.created_at ?? Date.now();

@@ -154,13 +154,13 @@ export class PriorityAgenda implements Agenda {
                 this.resolveWaitingPop();
 
                 // Update parent task's completion percentage if applicable
-                if (item.parent_id) {
-                    const parentTask = this.itemMap.get(item.parent_id);
-                    if (parentTask && parentTask.type === 'TASK' && parentTask.task_metadata && parentTask.subtasks) {
-                        const totalSubtasks = parentTask.subtasks.length;
+                if (item.task_metadata.parent_id) {
+                    const parentTask = this.itemMap.get(item.task_metadata.parent_id);
+                    if (parentTask && parentTask.type === 'TASK' && parentTask.task_metadata && parentTask.task_metadata.subtasks) {
+                        const totalSubtasks = parentTask.task_metadata.subtasks.length;
                         if (totalSubtasks > 0) {
                             let completedCount = 0;
-                            for (const subtaskId of parentTask.subtasks) {
+                            for (const subtaskId of parentTask.task_metadata.subtasks) {
                                 // Use the injected getTaskStatus for a reliable status check
                                 if (this.getTaskStatus(subtaskId) === 'completed') {
                                     completedCount++;

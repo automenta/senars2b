@@ -50,9 +50,9 @@ export class TaskOrchestrator {
                 break;
 
             case 'awaiting_dependencies':
-                if (!this.hasUnresolvedDependencies(updatedTask)) {
-                    updatedTask.task_metadata.status = 'decomposing';
-                }
+                // The agenda is now responsible for blocking tasks with unresolved dependencies.
+                // If a task in this state is popped, it means its dependencies are met.
+                updatedTask.task_metadata.status = 'decomposing';
                 break;
 
             case 'decomposing':
@@ -80,9 +80,8 @@ export class TaskOrchestrator {
             case 'awaiting_subtasks':
                 if (this.areSubtasksComplete(updatedTask)) {
                     updatedTask.task_metadata.status = 'completed';
-                } else {
-                    updatedTask = this.updateCompletionPercentage(updatedTask);
                 }
+                // The agenda will now be responsible for updating the completion percentage.
                 break;
 
             case 'ready_for_execution':
@@ -111,61 +110,24 @@ export class TaskOrchestrator {
         return { updatedTask, newItems };
     }
 
-    private hasUnresolvedDependencies(task: CognitiveItem & { task_metadata: TaskMetadata }): boolean {
-        if (!task.task_metadata.dependencies || task.task_metadata.dependencies.length === 0) {
-            return false;
-        }
-
-        return task.task_metadata.dependencies.some(depId => {
-            const depTask = this.taskManager.getTask(depId);
-            return !depTask || depTask.task_metadata?.status !== 'completed';
-        });
-    }
-
     private shouldDecompose(task: CognitiveItem & { task_metadata: TaskMetadata }): boolean {
         // Decompose if it's a "complex" task and has no subtasks yet.
         // This is a placeholder for more sophisticated logic.
         const label = task.label.toLowerCase();
         const keywords = ['plan', 'develop', 'create', 'organize', 'manage', 'refactor'];
-        return keywords.some(kw => label.includes(kw)) && (!task.subtasks || task.subtasks.length === 0);
+        return keywords.some(kw => label.includes(kw)) && (!task.task_metadata.subtasks || task.task_metadata.subtasks.length === 0);
     }
 
 
     private areSubtasksComplete(task: CognitiveItem & { task_metadata: TaskMetadata }): boolean {
-        if (!task.subtasks || task.subtasks.length === 0) {
+        if (!task.task_metadata.subtasks || task.task_metadata.subtasks.length === 0) {
             return true; // No subtasks means this check passes.
         }
 
-        return task.subtasks.every(subId => {
+        return task.task_metadata.subtasks.every(subId => {
             const subTask = this.taskManager.getTask(subId);
             return subTask?.task_metadata?.status === 'completed';
         });
     }
 
-    private updateCompletionPercentage(task: CognitiveItem & { task_metadata: TaskMetadata }): CognitiveItem {
-        if (!task.subtasks || task.subtasks.length === 0) {
-            return task;
-        }
-
-        const completedSubtasksCount = task.subtasks.filter(subId => {
-            const subTask = this.taskManager.getTask(subId);
-            return subTask?.task_metadata?.status === 'completed';
-        }).length;
-
-        const percentage = Math.round((completedSubtasksCount / task.subtasks.length) * 100);
-
-        if (task.task_metadata.completion_percentage !== percentage) {
-            // Return a new object with the updated percentage and timestamp
-            return {
-                ...task,
-                updated_at: Date.now(),
-                task_metadata: {
-                    ...task.task_metadata,
-                    completion_percentage: percentage,
-                }
-            };
-        }
-
-        return task;
-    }
 }

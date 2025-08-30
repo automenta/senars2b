@@ -342,9 +342,9 @@ describe('PriorityAgenda', () => {
         });
 
         it('should update parent task completion percentage when a subtask is completed', () => {
-            const parentTask = createTaskItem({ id: 'parent1', subtasks: ['child1', 'child2'] });
-            const childTask1 = createTaskItem({ id: 'child1', parent_id: 'parent1' });
-            const childTask2 = createTaskItem({ id: 'child2', parent_id: 'parent1' });
+            const parentTask = createTaskItem({ id: 'parent1', task_metadata: { subtasks: ['child1', 'child2'], status: 'pending', priority_level: 'medium' } });
+            const childTask1 = createTaskItem({ id: 'child1', task_metadata: { parent_id: 'parent1', status: 'pending', priority_level: 'medium' } });
+            const childTask2 = createTaskItem({ id: 'child2', task_metadata: { parent_id: 'parent1', status: 'pending', priority_level: 'medium' } });
 
             agenda.push(parentTask);
             agenda.push(childTask1);
