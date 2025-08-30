@@ -1,7 +1,6 @@
-import { CognitiveItem } from '../interfaces/types';
+import { CognitiveItem, TaskMetadata } from '../interfaces/types';
 import { WorldModel } from '../core/worldModel';
 import { TaskManager } from './taskManager';
-import { Agenda } from '../core/agenda';
 import { CognitiveItemFactory } from './cognitiveItemFactory';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -10,85 +9,110 @@ function isTask(item: CognitiveItem): item is CognitiveItem & { type: 'TASK'; ta
     return item.type === 'TASK' && item.task_metadata != null;
 }
 
+/**
+ * The result of an orchestration step, containing the updated task and any new items to be added to the agenda.
+ */
+export interface OrchestrationResult {
+    updatedTask: CognitiveItem;
+    newItems: CognitiveItem[];
+}
+
+/**
+ * TaskOrchestrator is responsible for determining the next state of a task based on its current state and the world model.
+ * It is a pure logic module that does not perform side effects.
+ */
 export class TaskOrchestrator {
     private worldModel: WorldModel;
     private taskManager: TaskManager;
-    private agenda: Agenda;
 
-    constructor(worldModel: WorldModel, taskManager: TaskManager, agenda: Agenda) {
+    constructor(worldModel: WorldModel, taskManager: TaskManager) {
         this.worldModel = worldModel;
         this.taskManager = taskManager;
-        this.agenda = agenda;
     }
 
-    public orchestrate(task: CognitiveItem): void {
+    /**
+     * Determines the next state of a task and any resulting new cognitive items.
+     * @param task The task to orchestrate.
+     * @returns An OrchestrationResult, or null if the item is not a task.
+     */
+    public orchestrate(task: CognitiveItem): OrchestrationResult | null {
         if (!isTask(task)) {
-            return;
+            return null;
         }
 
-        console.log(`Orchestrating task ${task.id}: ${task.label} with status ${task.task_metadata.status}`);
+        // Deep copy to avoid direct mutation
+        let updatedTask = JSON.parse(JSON.stringify(task));
+        const newItems: CognitiveItem[] = [];
 
-        switch (task.task_metadata.status) {
+        switch (updatedTask.task_metadata.status) {
             case 'pending':
-                // A new task. Start by checking dependencies.
-                this.taskManager.updateTaskStatus(task.id, 'awaiting_dependencies');
+                updatedTask.task_metadata.status = 'awaiting_dependencies';
                 break;
 
             case 'awaiting_dependencies':
-                if (this.hasUnresolvedDependencies(task)) {
-                    console.log(`Task ${task.id} is blocked by dependencies.`);
-                    // The task remains in this state until dependencies are resolved.
-                    // Future enhancement: generate goals to resolve dependencies.
-                } else {
-                    // Dependencies are met, move to decomposition.
-                    this.taskManager.updateTaskStatus(task.id, 'decomposing');
+                if (!this.hasUnresolvedDependencies(updatedTask)) {
+                    updatedTask.task_metadata.status = 'decomposing';
                 }
                 break;
 
             case 'decomposing':
-                if (this.shouldDecompose(task)) {
-                    this.decomposeTask(task);
-                    this.taskManager.updateTaskStatus(task.id, 'awaiting_subtasks');
+                if (this.shouldDecompose(updatedTask)) {
+                    // Create a goal to trigger the new DecompositionSchema.
+                    const decompositionGoal = CognitiveItemFactory.createGoal(
+                        uuidv4(), // placeholder atomId
+                        { ...updatedTask.attention, priority: 0.95 } // Decomposition is high priority
+                    );
+                    decompositionGoal.label = `Decompose: ${updatedTask.label}`;
+                    decompositionGoal.meta = {
+                        isSystemGoal: true,
+                        targetTaskId: updatedTask.id
+                    };
+                    newItems.push(decompositionGoal);
+
+                    // The task now waits for the CognitiveCore to produce subtasks.
+                    updatedTask.task_metadata.status = 'awaiting_subtasks';
                 } else {
                     // Not a complex task, ready for execution.
-                    this.taskManager.updateTaskStatus(task.id, 'ready_for_execution');
+                    updatedTask.task_metadata.status = 'ready_for_execution';
                 }
                 break;
 
             case 'awaiting_subtasks':
-                if (this.areSubtasksComplete(task)) {
-                    this.taskManager.updateTaskStatus(task.id, 'completed');
+                if (this.areSubtasksComplete(updatedTask)) {
+                    updatedTask.task_metadata.status = 'completed';
                 } else {
-                    // Still waiting for subtasks. We can update the completion percentage.
-                    this.updateCompletionPercentage(task);
+                    updatedTask = this.updateCompletionPercentage(updatedTask);
                 }
                 break;
 
             case 'ready_for_execution':
-                // This task is ready to be executed by the action subsystem.
-                // We create a goal to trigger this.
-                console.log(`Generating execution goal for task ${task.id}`);
                 const goal = CognitiveItemFactory.createGoal(
                     uuidv4(), // Placeholder atomId
-                    task.attention
+                    updatedTask.attention
                 );
-                goal.label = `Execute atomic task: ${task.label}`;
-                goal.meta = { taskId: task.id, isAtomicExecution: true };
-                this.agenda.push(goal);
-                // The task remains in 'ready_for_execution' state.
-                // The ActionSubsystem will mark it as 'completed' once the goal is executed.
+                goal.label = `Execute atomic task: ${updatedTask.label}`;
+                goal.meta = { taskId: updatedTask.id, isAtomicExecution: true };
+                newItems.push(goal);
+                // Task remains in this state until an external actor (ActionSubsystem) marks it completed.
                 break;
 
             case 'completed':
             case 'failed':
             case 'deferred':
-                // These are terminal states, do nothing.
+                // Terminal states, no change.
                 break;
         }
+
+        // Ensure the timestamp is updated if the status changed
+        if (updatedTask.task_metadata.status !== task.task_metadata.status) {
+            updatedTask.updated_at = Date.now();
+        }
+
+        return { updatedTask, newItems };
     }
 
-    private hasUnresolvedDependencies(task: CognitiveItem): boolean {
-        if (!isTask(task) || !task.task_metadata.dependencies || task.task_metadata.dependencies.length === 0) {
+    private hasUnresolvedDependencies(task: CognitiveItem & { task_metadata: TaskMetadata }): boolean {
+        if (!task.task_metadata.dependencies || task.task_metadata.dependencies.length === 0) {
             return false;
         }
 
@@ -98,8 +122,7 @@ export class TaskOrchestrator {
         });
     }
 
-    private shouldDecompose(task: CognitiveItem): boolean {
-        if (!isTask(task)) return false;
+    private shouldDecompose(task: CognitiveItem & { task_metadata: TaskMetadata }): boolean {
         // Decompose if it's a "complex" task and has no subtasks yet.
         // This is a placeholder for more sophisticated logic.
         const label = task.label.toLowerCase();
@@ -107,55 +130,42 @@ export class TaskOrchestrator {
         return keywords.some(kw => label.includes(kw)) && (!task.subtasks || task.subtasks.length === 0);
     }
 
-    private decomposeTask(task: CognitiveItem): void {
-        if (!isTask(task)) return;
 
-        console.log(`Decomposing task ${task.id}: ${task.label}`);
-        // Placeholder decomposition logic.
-        const subtaskContents = [`Research for '${task.label}'`, `Outline for '${task.label}'`, `Draft for '${task.label}'`];
-        for (const content of subtaskContents) {
-            this.taskManager.addSubtask(task.id, {
-                label: content,
-                attention: task.attention,
-                task_metadata: {
-                    status: 'pending',
-                    priority_level: task.task_metadata.priority_level
-                }
-            });
-        }
-    }
-
-    private areSubtasksComplete(task: CognitiveItem): boolean {
-        if (!isTask(task) || !task.subtasks || task.subtasks.length === 0) {
+    private areSubtasksComplete(task: CognitiveItem & { task_metadata: TaskMetadata }): boolean {
+        if (!task.subtasks || task.subtasks.length === 0) {
             return true; // No subtasks means this check passes.
         }
 
-        const completedSubtasks = task.subtasks.filter(subId => {
+        return task.subtasks.every(subId => {
             const subTask = this.taskManager.getTask(subId);
-            return subTask && subTask.task_metadata?.status === 'completed';
+            return subTask?.task_metadata?.status === 'completed';
         });
-
-        return completedSubtasks.length === task.subtasks.length;
     }
 
-    private updateCompletionPercentage(task: CognitiveItem): void {
-        if (!isTask(task) || !task.subtasks || task.subtasks.length === 0) {
-            return;
+    private updateCompletionPercentage(task: CognitiveItem & { task_metadata: TaskMetadata }): CognitiveItem {
+        if (!task.subtasks || task.subtasks.length === 0) {
+            return task;
         }
 
-        const completedSubtasks = task.subtasks.filter(subId => {
+        const completedSubtasksCount = task.subtasks.filter(subId => {
             const subTask = this.taskManager.getTask(subId);
-            return subTask && subTask.task_metadata?.status === 'completed';
-        });
+            return subTask?.task_metadata?.status === 'completed';
+        }).length;
 
-        const percentage = Math.round((completedSubtasks.length / task.subtasks.length) * 100);
+        const percentage = Math.round((completedSubtasksCount / task.subtasks.length) * 100);
+
         if (task.task_metadata.completion_percentage !== percentage) {
-            this.taskManager.updateTask(task.id, {
+            // Return a new object with the updated percentage and timestamp
+            return {
+                ...task,
+                updated_at: Date.now(),
                 task_metadata: {
                     ...task.task_metadata,
-                    completion_percentage: percentage
+                    completion_percentage: percentage,
                 }
-            });
+            };
         }
+
+        return task;
     }
 }

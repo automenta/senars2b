@@ -9,6 +9,7 @@ import {ReflectionLoop} from './reflectionLoop';
 import {ActionSubsystem} from '../actions/actionSubsystem';
 import {SchemaLearningModule} from '../modules/schemaLearningModule';
 import {HistoryAnalysisSchema, HistoryRecordingSchema} from '../modules/systemSchemas';
+import {DecompositionSchema} from '../modules/decompositionSchema';
 import {
     AttentionValue,
     CognitiveItem,
@@ -350,6 +351,23 @@ export class DecentralizedCognitiveCore {
         };
         this.worldModel.add_atom(analysisSchemaAtom);
         this.schemaMatcher.register_schema(analysisSchemaAtom, this.worldModel);
+
+        const decompositionSchemaAtom: SemanticAtom = {
+            id: DecompositionSchema.atom_id,
+            content: {name: 'DecompositionSchema', apply: DecompositionSchema.apply},
+            embedding: [],
+            creationTime: Date.now(),
+            lastAccessTime: Date.now(),
+            meta: {
+                type: "CognitiveSchema",
+                source: "system",
+                timestamp: new Date().toISOString(),
+                trust_score: 1.0,
+                domain: "system_internals"
+            }
+        };
+        this.worldModel.add_atom(decompositionSchemaAtom);
+        this.schemaMatcher.register_schema(decompositionSchemaAtom, this.worldModel);
     }
 
     /**
@@ -416,13 +434,25 @@ export class DecentralizedCognitiveCore {
             // Reinforce: Update attention based on access
             this.attentionModule.update_on_access([itemA, ...contextItems]);
 
-            // Process tasks
+            // Process tasks using the new functional orchestrator
             if (itemA.type === 'TASK') {
-                this.taskOrchestrator.orchestrate(itemA);
-            }
+                const orchestrationResult = this.taskOrchestrator.orchestrate(itemA);
+                if (orchestrationResult) {
+                    const { updatedTask, newItems } = orchestrationResult;
 
-            // Update goal tree and handle action goals
-            await this.processGoals(itemA);
+                    // Persist the updated task state
+                    this.taskManager.updateTask(updatedTask.id, updatedTask);
+
+                    // Add the updated task and any new items back to the agenda for immediate processing
+                    this.agenda.push(updatedTask);
+                    for (const newItem of newItems) {
+                        this.agenda.push(newItem);
+                    }
+                }
+            } else {
+                // Original goal processing logic for non-task items
+                await this.processGoals(itemA);
+            }
         } catch (error) {
             console.error("Worker failed processing item", itemA.id, error);
             throw error;

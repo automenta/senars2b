@@ -57,7 +57,7 @@ export function createCoreWithRealDependencies(config: CognitiveCoreConfig = {})
         agenda: agenda,
         worldModel: worldModel,
         taskManager: taskManager,
-        taskOrchestrator: new TaskOrchestrator(worldModel, taskManager, agenda),
+        taskOrchestrator: new TaskOrchestrator(worldModel, taskManager),
         attentionModule: new DynamicAttentionModule(),
         beliefRevisionEngine: new SimpleBeliefRevisionEngine(),
         resonanceModule: new HybridResonanceModule(),
