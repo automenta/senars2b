@@ -1,8 +1,9 @@
-import React, {useRef, useState} from 'react';
-import {AnimatePresence} from 'framer-motion';
-import {Task} from '../types';
+import React, { useRef, useState, memo, useCallback } from 'react';
+import { AnimatePresence } from 'framer-motion';
+import { Task } from '../types';
 import TaskItem from './TaskItem';
 import styles from './TaskList.module.css';
+import { useKeyboardNavigation } from '../hooks/useKeyboardNavigation';
 
 interface TaskListProps {
     tasks: Task[];
@@ -11,10 +12,11 @@ interface TaskListProps {
     selectedTaskIndex?: number;
 }
 
-const TaskList: React.FC<TaskListProps> = ({tasks, sendMessage, isSublist = false, selectedTaskIndex = -1}) => {
+const TaskList: React.FC<TaskListProps> = memo(({ tasks, sendMessage, isSublist = false, selectedTaskIndex = -1 }) => {
     const [draggedItemId, setDraggedItemId] = useState<string | null>(null);
     const dropTargetId = useRef<string | null>(null);
-
+    const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);
+    
     const taskMap = new Map(tasks.map(t => [t.id, t]));
 
     const tasksToRender = isSublist
@@ -23,19 +25,49 @@ const TaskList: React.FC<TaskListProps> = ({tasks, sendMessage, isSublist = fals
 
     const listClassName = `${styles.taskList} ${isSublist ? styles.subTaskList : ''}`;
 
-    const handleDragStart = (e: React.DragEvent<HTMLDivElement>, id: string) => {
+    // Setup keyboard navigation
+    const { selectedIndex, selectItem, selectFirst, selectLast } = useKeyboardNavigation(
+        tasksToRender.map(t => t.id),
+        selectedTaskId,
+        {
+            enableArrowNavigation: !isSublist,
+            enableSelection: !isSublist,
+            enableExpansion: !isSublist,
+            onUp: () => {
+                // Handle up arrow navigation
+            },
+            onDown: () => {
+                // Handle down arrow navigation
+            },
+            onSelect: () => {
+                // Handle task selection
+                if (selectedIndex >= 0 && selectedIndex < tasksToRender.length) {
+                    const task = tasksToRender[selectedIndex];
+                    setSelectedTaskId(task.id);
+                }
+            },
+            onExpand: () => {
+                // Handle task expansion
+            },
+            onCollapse: () => {
+                // Handle task collapse
+            }
+        }
+    );
+
+    const handleDragStart = useCallback((e: React.DragEvent<HTMLDivElement>, id: string) => {
         setDraggedItemId(id);
         e.dataTransfer.effectAllowed = 'move';
-    };
+    }, []);
 
-    const handleDragOver = (e: React.DragEvent<HTMLDivElement>, id: string) => {
+    const handleDragOver = useCallback((e: React.DragEvent<HTMLDivElement>, id: string) => {
         e.preventDefault();
         if (id !== draggedItemId) {
             dropTargetId.current = id;
         }
-    };
+    }, [draggedItemId]);
 
-    const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
+    const handleDrop = useCallback((e: React.DragEvent<HTMLDivElement>) => {
         e.preventDefault();
         if (!draggedItemId || !dropTargetId.current) return;
 
@@ -62,32 +94,38 @@ const TaskList: React.FC<TaskListProps> = ({tasks, sendMessage, isSublist = fals
 
         setDraggedItemId(null);
         dropTargetId.current = null;
-    };
+    }, [draggedItemId, sendMessage, tasks]);
+
+    // Memoize task item rendering
+    const renderTaskItem = useCallback((task: Task, index: number) => (
+        <div
+            key={task.id}
+            className={`${styles.taskListItem} ${draggedItemId === task.id ? styles.dragging : ''}`}
+            draggable={isSublist}
+            onDragStart={isSublist ? (e) => handleDragStart(e, task.id) : undefined}
+            onDragOver={isSublist ? (e) => handleDragOver(e, task.id) : undefined}
+        >
+            <TaskItem
+                task={task}
+                allFilteredTasks={tasks}
+                sendMessage={sendMessage}
+                isDraggable={isSublist}
+                isSelected={!isSublist && index === selectedTaskIndex}
+            />
+        </div>
+    ), [draggedItemId, handleDragOver, handleDragStart, isSublist, selectedTaskIndex, sendMessage, tasks]);
 
     return (
-        <div className={listClassName} onDragOver={isSublist ? e => e.preventDefault() : undefined}
-             onDrop={isSublist ? handleDrop : undefined}>
+        <div 
+            className={listClassName} 
+            onDragOver={isSublist ? e => e.preventDefault() : undefined}
+            onDrop={isSublist ? handleDrop : undefined}
+        >
             <AnimatePresence>
-                {tasksToRender.map((task, index) => (
-                    <div
-                        key={task.id}
-                        className={`${styles.taskListItem} ${draggedItemId === task.id ? styles.dragging : ''}`}
-                        draggable={isSublist}
-                        onDragStart={isSublist ? (e) => handleDragStart(e, task.id) : undefined}
-                        onDragOver={isSublist ? (e) => handleDragOver(e, task.id) : undefined}
-                    >
-                        <TaskItem
-                            task={task}
-                            allFilteredTasks={tasks}
-                            sendMessage={sendMessage}
-                            isDraggable={isSublist}
-                            isSelected={!isSublist && index === selectedTaskIndex}
-                        />
-                    </div>
-                ))}
+                {tasksToRender.map((task, index) => renderTaskItem(task, index))}
             </AnimatePresence>
         </div>
     );
-};
+});
 
 export default TaskList;

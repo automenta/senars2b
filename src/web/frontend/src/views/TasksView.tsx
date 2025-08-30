@@ -1,18 +1,17 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, memo } from 'react';
 import TaskList from '../components/TaskList';
-import { useStore, priorityOrder } from '../store';
-import { TaskPriority } from '../types';
+import { useStore } from '../store';
 import styles from './TasksView.module.css';
 import { useHotkeys } from '../hooks/useHotkeys';
+import { useTasks } from '../hooks/useTasks';
 import { FaSearch, FaFilter, FaSort } from 'react-icons/fa';
 
 interface TasksViewProps {
     sendMessage: (message: any) => void;
 }
 
-const TasksView: React.FC<TasksViewProps> = ({ sendMessage }) => {
+const TasksView: React.FC<TasksViewProps> = memo(({ sendMessage }) => {
     const {
-        tasks,
         searchTerm,
         setSearchTerm,
         statusFilter,
@@ -27,41 +26,14 @@ const TasksView: React.FC<TasksViewProps> = ({ sendMessage }) => {
     const searchInput = useRef<HTMLInputElement>(null);
     const [selectedTaskIndex, setSelectedTaskIndex] = useState(-1);
     const [showFilters, setShowFilters] = useState(true);
+    
+    const { tasks: sortedAndFilteredTasks, taskStats, allTasks } = useTasks();
 
     useEffect(() => {
         if (searchInput.current) {
             setSearchInputRef(searchInput);
         }
     }, [setSearchInputRef]);
-
-    const sortedAndFilteredTasks = tasks
-        .filter(task =>
-            task.title.toLowerCase().includes(searchTerm.toLowerCase())
-        )
-        .filter(task =>
-            statusFilter === 'ALL' ? true : task.status.toUpperCase() === statusFilter
-        )
-        .filter(task =>
-            typeFilter === 'ALL' ? true : task.type.toUpperCase() === typeFilter
-        )
-        .sort((a, b) => {
-            switch (sortOption) {
-                case 'priority-desc':
-                    return priorityOrder[b.priority.toLowerCase() as TaskPriority] - priorityOrder[a.priority.toLowerCase() as TaskPriority];
-                case 'priority-asc':
-                    return priorityOrder[a.priority.toLowerCase() as TaskPriority] - priorityOrder[b.priority.toLowerCase() as TaskPriority];
-                case 'date-desc':
-                    return (b.creation_time || 0) - (a.creation_time || 0);
-                case 'date-asc':
-                    return (a.creation_time || 0) - (b.creation_time || 0);
-                case 'title-asc':
-                    return a.title.localeCompare(b.title);
-                case 'title-desc':
-                    return b.title.localeCompare(a.title);
-                default:
-                    return 0;
-            }
-        });
 
     useHotkeys({
         'j': () => {
@@ -82,13 +54,6 @@ const TasksView: React.FC<TasksViewProps> = ({ sendMessage }) => {
         },
         'f': () => setShowFilters(prev => !prev),
     }, [sortedAndFilteredTasks, selectedTaskIndex]);
-
-    const taskStats = {
-        total: tasks.length,
-        pending: tasks.filter(t => t.status === 'PENDING').length,
-        inProgress: tasks.filter(t => t.status === 'IN_PROGRESS').length,
-        completed: tasks.filter(t => t.status === 'COMPLETED').length,
-    };
 
     return (
         <div className={styles.tasksView}>
@@ -138,6 +103,7 @@ const TasksView: React.FC<TasksViewProps> = ({ sendMessage }) => {
                                         key={status}
                                         onClick={() => setStatusFilter(status)}
                                         className={`${styles.filterButton} ${statusFilter === status ? styles.active : ''}`}
+                                        aria-pressed={statusFilter === status}
                                     >
                                         {status.charAt(0) + status.slice(1).toLowerCase().replace('_', ' ')}
                                     </button>
@@ -152,6 +118,7 @@ const TasksView: React.FC<TasksViewProps> = ({ sendMessage }) => {
                                         key={type}
                                         onClick={() => setTypeFilter(type)}
                                         className={`${styles.filterButton} ${typeFilter === type ? styles.active : ''}`}
+                                        aria-pressed={typeFilter === type}
                                     >
                                         {type.charAt(0) + type.slice(1).toLowerCase()}
                                     </button>
@@ -170,6 +137,7 @@ const TasksView: React.FC<TasksViewProps> = ({ sendMessage }) => {
                                 value={sortOption} 
                                 onChange={(e) => setSortOption(e.target.value as any)}
                                 className={styles.sortSelect}
+                                aria-label="Sort tasks by"
                             >
                                 <option value="priority-desc">Priority: High to Low</option>
                                 <option value="priority-asc">Priority: Low to High</option>
@@ -186,6 +154,6 @@ const TasksView: React.FC<TasksViewProps> = ({ sendMessage }) => {
             <TaskList tasks={sortedAndFilteredTasks} sendMessage={sendMessage} selectedTaskIndex={selectedTaskIndex} />
         </div>
     );
-};
+});
 
 export default TasksView;

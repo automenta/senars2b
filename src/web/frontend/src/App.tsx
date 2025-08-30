@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect } from 'react';
+import React, { useCallback, useEffect, useMemo } from 'react';
 import Sidebar from './components/Sidebar';
 import Header from './components/Header';
 import DashboardView from './views/DashboardView';
@@ -29,11 +29,13 @@ function App() {
 
     const { addNotification } = useNotifier();
 
+    // Setup keyboard shortcuts
     useHotkeys({
         'n': () => setIsModalOpen(true),
         '/': () => searchInputRef?.current?.focus(),
     }, [searchInputRef]);
 
+    // Handle WebSocket messages
     const handleMessage = useCallback((message: any) => {
         if (message.type === 'TASK_LIST_UPDATE') {
             const newTasks = message.payload.tasks;
@@ -55,21 +57,26 @@ function App() {
             addNotification(`Task deleted.`, 'error');
         } else if (message.type === 'ERROR') {
             addNotification(`Error: ${message.payload.message}`, 'error');
+        } else if (message.type === 'WARNING') {
+            addNotification(`Warning: ${message.payload.message}`, 'warning');
         }
     }, [setTasks, tasks, addNotification]);
 
-    const { sendMessage, isConnected } = useWebSocket(handleMessage);
+    const { isConnected, connectionError, sendMessage } = useWebSocket(handleMessage);
 
     // Notify user about connection status
     useEffect(() => {
-        if (isConnected) {
+        if (connectionError) {
+            addNotification(`Connection error: ${connectionError}`, 'error');
+        } else if (isConnected) {
             addNotification('Connected to server', 'success');
         } else {
-            addNotification('Disconnected from server', 'error');
+            addNotification('Disconnected from server', 'warning');
         }
-    }, [isConnected, addNotification]);
+    }, [isConnected, connectionError, addNotification]);
 
-    const handleAddTask = (task: {
+    // Handle adding a new task
+    const handleAddTask = useCallback((task: {
         title: string;
         description?: string;
         priority: TaskPriority,
@@ -101,9 +108,10 @@ function App() {
                 tempId: tempId,
             }
         });
-    };
+    }, [addTask, setIsModalOpen, sendMessage]);
 
-    const renderView = () => {
+    // Memoize view rendering for performance
+    const renderView = useMemo(() => {
         switch (activeView) {
             case 'Dashboard':
                 return <DashboardView />;
@@ -118,7 +126,7 @@ function App() {
             default:
                 return <DashboardView />;
         }
-    };
+    }, [activeView, sendMessage]);
 
     return (
         <div className="app-container">
@@ -131,7 +139,7 @@ function App() {
                     toggleTheme={toggleTheme}
                     isConnected={isConnected}
                 />
-                {renderView()}
+                {renderView}
             </main>
             {isModalOpen && <AddTaskModal onAddTask={handleAddTask} />}
         </div>

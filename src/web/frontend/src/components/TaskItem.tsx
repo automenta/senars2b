@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { memo, useEffect, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
 import { Task } from '../types';
 import { FaChevronDown, FaChevronRight, FaGripVertical, FaSave, FaStream, FaEdit } from 'react-icons/fa';
@@ -17,7 +17,7 @@ interface TaskItemProps {
     isSelected?: boolean;
 }
 
-const TaskItem: React.FC<TaskItemProps> = ({
+const TaskItem: React.FC<TaskItemProps> = memo(({
     task,
     allFilteredTasks,
     sendMessage,
@@ -40,7 +40,12 @@ const TaskItem: React.FC<TaskItemProps> = ({
     const isDimmed = ['COMPLETED', 'FAILED'].includes(task.status.toUpperCase());
     const isProcessing = task.status === 'IN_PROGRESS';
 
-    const subtasks = allFilteredTasks.filter(t => t.parent_id === task.id);
+    // Memoize subtasks calculation
+    const subtasks = React.useMemo(
+        () => allFilteredTasks.filter(t => t.parent_id === task.id),
+        [allFilteredTasks, task.id]
+    );
+    
     const hasSubtasks = subtasks.length > 0;
 
     const handleToggleExpand = (e: React.MouseEvent) => {
@@ -70,6 +75,15 @@ const TaskItem: React.FC<TaskItemProps> = ({
         setEditedTitle(task.title);
         setEditedDescription(task.description || '');
         setIsEditing(false);
+    };
+
+    const handleKeyDown = (e: React.KeyboardEvent) => {
+        if (e.key === 'Enter' && (e.ctrlKey || e.metaKey) && isEditing) {
+            handleSave();
+        }
+        if (e.key === 'Escape' && isEditing) {
+            handleCancelEdit();
+        }
     };
 
     const itemClassName = `${styles.item} ${isDimmed ? styles.dimmed : ''} ${isEditing ? styles.editing : ''} ${isSelected ? styles.selected : ''} ${isProcessing ? styles.processing : ''}`;
@@ -110,15 +124,19 @@ const TaskItem: React.FC<TaskItemProps> = ({
                                     type="text"
                                     value={editedTitle}
                                     onChange={(e) => setEditedTitle(e.target.value)}
+                                    onKeyDown={handleKeyDown}
                                     className={styles.titleInput}
                                     placeholder="Task title"
+                                    aria-label="Edit task title"
                                 />
                                 <textarea
                                     value={editedDescription}
                                     onChange={(e) => setEditedDescription(e.target.value)}
+                                    onKeyDown={handleKeyDown}
                                     className={styles.descriptionInput}
                                     placeholder="Task description"
                                     rows={3}
+                                    aria-label="Edit task description"
                                 />
                                 <div className={styles.editActions}>
                                     <button
@@ -182,6 +200,6 @@ const TaskItem: React.FC<TaskItemProps> = ({
             )}
         </motion.div>
     );
-};
+});
 
 export default TaskItem;
