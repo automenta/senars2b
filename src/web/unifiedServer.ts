@@ -39,7 +39,7 @@ const app: express.Application = express();
 const server: http.Server = http.createServer(app);
 
 // Serve static files from the React frontend build directory
-const frontendPath = path.join(__dirname, 'frontend');
+const frontendPath = path.join(__dirname, 'frontend/dist/web/frontend');
 app.use(express.static(frontendPath));
 
 // Serve the main HTML file for all non-API routes

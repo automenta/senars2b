@@ -1,4 +1,4 @@
-import create from 'zustand';
+import {create} from 'zustand';
 import {Task} from './types';
 import React from 'react';
 

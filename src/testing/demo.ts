@@ -9,6 +9,7 @@
 
 import {DecentralizedCognitiveCore} from '../core/cognitiveCore';
 import {PerceptionSubsystem} from '../modules/perceptionSubsystem';
+import {createCoreWithRealDependencies} from './testUtils';
 
 async function runDemo() {
     console.log("===========================================");
@@ -17,7 +18,7 @@ async function runDemo() {
     console.log("");
 
     // Create a simplified version for demonstration
-    const core = new DecentralizedCognitiveCore(2);
+    const core = createCoreWithRealDependencies({workerCount: 2});
     const perception = new PerceptionSubsystem();
 
     console.log("Starting cognitive core...");

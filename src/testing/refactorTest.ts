@@ -1,4 +1,4 @@
-import {DecentralizedCognitiveCore} from '../core/cognitiveCore';
+import {DecentralizedCognitiveCore, CognitiveCoreDependencies} from '../core/cognitiveCore';
 import {PriorityAgenda} from '../core/agenda';
 import {PersistentWorldModel} from '../core/worldModel';
 import {SimpleBeliefRevisionEngine} from '../core/beliefRevisionEngine';
@@ -7,6 +7,10 @@ import {HybridResonanceModule} from '../core/resonanceModule';
 import {EfficientSchemaMatcher} from '../core/schemaMatcher';
 import {HierarchicalGoalTreeManager} from '../core/goalTreeManager';
 import {SchemaLearningModule} from '../modules/schemaLearningModule';
+import {UnifiedTaskManager} from '../modules/taskManager';
+import {TaskOrchestrator} from '../modules/taskOrchestrator';
+import {ReflectionLoop} from '../core/reflectionLoop';
+import {ActionSubsystem} from '../actions/actionSubsystem';
 import {v4 as uuidv4} from 'uuid';
 import {CognitiveItem, SemanticAtom} from '../interfaces/types';
 
@@ -39,12 +43,44 @@ async function runRefactorTests() {
 async function testCoreInitialization(): Promise<void> {
     console.log("\n1. Testing Core System Initialization...");
 
+    // Create dependencies manually for testing
+    const agenda = new PriorityAgenda((taskId: string) => {
+        // Simple mock implementation for testing
+        return 'pending';
+    });
+    const worldModel = new PersistentWorldModel();
+    const taskManager = new UnifiedTaskManager(agenda, worldModel);
+    const taskOrchestrator = new TaskOrchestrator(worldModel, taskManager);
+    const attentionModule = new DynamicAttentionModule();
+    const beliefRevisionEngine = new SimpleBeliefRevisionEngine();
+    const resonanceModule = new HybridResonanceModule();
+    const schemaMatcher = new EfficientSchemaMatcher();
+    const goalTreeManager = new HierarchicalGoalTreeManager();
+    const reflectionLoop = new ReflectionLoop(worldModel, agenda);
+    const actionSubsystem = new ActionSubsystem(taskManager);
+    const schemaLearningModule = new SchemaLearningModule(worldModel);
+
+    const dependencies = {
+        agenda,
+        worldModel,
+        taskManager,
+        taskOrchestrator,
+        attentionModule,
+        beliefRevisionEngine,
+        resonanceModule,
+        schemaMatcher,
+        goalTreeManager,
+        reflectionLoop,
+        actionSubsystem,
+        schemaLearningModule
+    };
+
     // Test standard initialization
-    const core = new DecentralizedCognitiveCore(2);
+    const core = new DecentralizedCognitiveCore(dependencies, {workerCount: 2});
     console.log("Standard core initialized successfully");
 
     // Test enhanced initialization (now the same as standard)
-    const enhancedCore = new DecentralizedCognitiveCore(2);
+    const enhancedCore = new DecentralizedCognitiveCore(dependencies, {workerCount: 2});
     console.log("Enhanced core initialized successfully");
 }
 

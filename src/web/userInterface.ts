@@ -1,5 +1,6 @@
 import {DecentralizedCognitiveCore} from '../core/cognitiveCore';
 import {PerceptionSubsystem} from '../modules/perceptionSubsystem';
+import {createCoreWithRealDependencies} from '../testing/testUtils';
 import * as readline from 'readline';
 
 export class UserInterface {
@@ -12,7 +13,7 @@ export class UserInterface {
     private historyIndex: number = 0;
 
     constructor(workerCount: number = 4) {
-        this.core = new DecentralizedCognitiveCore(workerCount);
+        this.core = createCoreWithRealDependencies({workerCount});
         this.perception = new PerceptionSubsystem();
         this.rl = readline.createInterface({
             input: process.stdin,

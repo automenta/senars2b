@@ -1,12 +1,13 @@
 import {DecentralizedCognitiveCore} from '../core/cognitiveCore';
 import {AttentionValue, TruthValue} from '../interfaces/types';
 import {PerceptionSubsystem} from '../modules/perceptionSubsystem';
+import {createCoreWithRealDependencies} from './testUtils';
 
 async function runFullSystemTest() {
     console.log("Starting full system test...");
 
     // Create the cognitive core with a small worker pool for testing
-    const core = new DecentralizedCognitiveCore(2);
+    const core = createCoreWithRealDependencies({workerCount: 2});
     const perception = new PerceptionSubsystem();
 
     try {

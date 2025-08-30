@@ -1,6 +1,7 @@
 import {WebSocketInterface} from '../web/webSocketInterface';
 import {RestApiInterface} from '../web/restApiInterface';
 import {DecentralizedCognitiveCore} from '../core/cognitiveCore';
+import {createCoreWithRealDependencies} from './testUtils';
 
 /**
  * Test suite for usability and integrity enhancements
@@ -10,7 +11,7 @@ async function runUsabilityIntegrityTests(): Promise<void> {
 
     // Test 1: Enhanced error handling in cognitive core
     console.log('1. Testing enhanced error handling in cognitive core...\n');
-    const core = new DecentralizedCognitiveCore(1);
+    const core = createCoreWithRealDependencies({workerCount: 1});
 
     try {
         // Test content length validation

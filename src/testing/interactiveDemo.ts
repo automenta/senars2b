@@ -1,6 +1,7 @@
 import {DecentralizedCognitiveCore} from '../core/cognitiveCore';
 import {PerceptionSubsystem} from '../modules/perceptionSubsystem';
 import {AttentionValue, TruthValue} from '../interfaces/types';
+import {createCoreWithRealDependencies} from './testUtils';
 
 async function runInteractiveDemo() {
     console.log("===========================================");
@@ -10,7 +11,7 @@ async function runInteractiveDemo() {
     console.log("");
 
     // Create cognitive core
-    const core = new DecentralizedCognitiveCore(4);
+    const core = createCoreWithRealDependencies({workerCount: 4});
     const perception = new PerceptionSubsystem();
 
     // Add schemas

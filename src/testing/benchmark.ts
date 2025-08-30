@@ -1,11 +1,12 @@
 import {DecentralizedCognitiveCore} from '../core/cognitiveCore';
 import {AttentionValue, TruthValue} from '../interfaces/types';
+import {createCoreWithRealDependencies} from './testUtils';
 
 async function runBenchmark() {
     console.log("Starting benchmark test...");
 
     // Create the cognitive core with a small worker pool for testing
-    const core = new DecentralizedCognitiveCore(4);
+    const core = createCoreWithRealDependencies({workerCount: 4});
 
     // Add enhanced schemas
     console.log("Adding schemas...");
