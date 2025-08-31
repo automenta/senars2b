@@ -10,6 +10,9 @@ function isTask(item: CognitiveItem): item is CognitiveItem & { type: 'TASK' } {
     return item.type === 'TASK';
 }
 
+// Define terminal task statuses for easy checking
+const TERMINAL_TASK_STATUSES: TaskStatus[] = ['completed', 'failed', 'deferred'];
+
 export interface TaskManager {
     addTask(task: Omit<CognitiveItem, 'id' | 'atom_id' | 'created_at' | 'updated_at' | 'stamp' | 'type'> & {
         type?: 'TASK';
@@ -33,6 +36,12 @@ export interface TaskManager {
     assignTaskToGroup(taskId: string, groupId: string): CognitiveItem | null;
 
     updateTaskStatus(id: string, status: TaskStatus): CognitiveItem | null;
+
+    completeTask(id: string): CognitiveItem | null;
+
+    failTask(id: string, reason?: string): CognitiveItem | null;
+
+    deferTask(id: string): CognitiveItem | null;
 
     addSubtask(parentId: string, subtask: Omit<CognitiveItem, 'id' | 'atom_id' | 'created_at' | 'updated_at' | 'stamp' | 'type'> & {
         type?: 'TASK';
@@ -127,7 +136,7 @@ export class UnifiedTaskManager implements TaskManager {
         if (task.task_metadata) {
             task.task_metadata.group_id = groupId;
         } else {
-            task.task_metadata = {
+          task.task_metadata = {
                 status: 'pending',
                 priority_level: 'medium',
                 group_id: groupId
@@ -142,9 +151,8 @@ export class UnifiedTaskManager implements TaskManager {
         if (!task || !isTask(task)) return null;
 
         // Special handling for terminal states that require agenda removal
-        const terminalStates: TaskStatus[] = ['completed', 'failed', 'deferred'];
-        const wasTerminal = task.task_metadata && terminalStates.includes(task.task_metadata.status);
-        const isTerminal = terminalStates.includes(status);
+        const wasTerminal = task.task_metadata && TERMINAL_TASK_STATUSES.includes(task.task_metadata.status);
+        const isTerminal = TERMINAL_TASK_STATUSES.includes(status);
 
         if (task.task_metadata) {
             task.task_metadata.status = status;
@@ -164,22 +172,7 @@ export class UnifiedTaskManager implements TaskManager {
     }
 
     completeTask(id: string): CognitiveItem | null {
-        const task = this.getTask(id);
-        if (!task || !isTask(task)) return null;
-
-        // Update task status and completion percentage
-        if (task.task_metadata) {
-            task.task_metadata.status = 'completed';
-            task.task_metadata.completion_percentage = 100;
-        }
-        task.updated_at = Date.now();
-
-        this.worldModel.update_item(task);
-        this.agenda.remove(id);
-        this.notifyListeners({type: 'taskCompleted', task});
-
-        // Future: Check for dependent tasks and unblock them.
-        return task;
+        return this.updateTaskStatus(id, 'completed');
     }
 
     failTask(id: string, reason?: string): CognitiveItem | null {
@@ -187,12 +180,8 @@ export class UnifiedTaskManager implements TaskManager {
         if (!task || !isTask(task) || !task.task_metadata) return null;
 
         // Update task status
-        task.task_metadata.status = 'failed';
-        task.updated_at = Date.now();
-
-        this.worldModel.update_item(task);
-        this.agenda.remove(id);
-        this.notifyListeners({type: 'taskFailed', task});
+        const updatedTask = this.updateTaskStatus(id, 'failed');
+        if (!updatedTask) return null;
 
         // Propagate failure to subtasks
         if (task.task_metadata.subtasks) {
@@ -203,23 +192,11 @@ export class UnifiedTaskManager implements TaskManager {
                 }
             }
         }
-        return task;
+        return updatedTask;
     }
 
     deferTask(id: string): CognitiveItem | null {
-        const task = this.getTask(id);
-        if (!task || !isTask(task)) return null;
-
-        // Update task status
-        if (task.task_metadata) {
-            task.task_metadata.status = 'deferred';
-        }
-        task.updated_at = Date.now();
-
-        this.worldModel.update_item(task);
-        this.agenda.remove(id);
-        this.notifyListeners({type: 'taskDeferred', task});
-        return task;
+        return this.updateTaskStatus(id, 'deferred');
     }
 
     addSubtask(parentId: string, subtaskData: Omit<CognitiveItem, 'id' | 'atom_id' | 'created_at' | 'updated_at' | 'stamp' | 'type'> & {
@@ -287,8 +264,7 @@ export class UnifiedTaskManager implements TaskManager {
         const tasks = allItems.filter(isTask);
         for (const task of tasks) {
             // If the task is not in a terminal state, it should be on the agenda.
-            const terminalStates: TaskStatus[] = ['completed', 'failed', 'deferred'];
-            if (task.task_metadata && !terminalStates.includes(task.task_metadata.status)) {
+            if (task.task_metadata && !TERMINAL_TASK_STATUSES.includes(task.task_metadata.status)) {
                 this.agenda.push(task);
             }
         }

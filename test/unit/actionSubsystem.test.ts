@@ -18,6 +18,9 @@ const mockTaskManager: jest.Mocked<TaskManager> = {
     getSubtasks: jest.fn(),
     addEventListener: jest.fn(),
     getTaskStatistics: jest.fn(),
+    completeTask: jest.fn(),
+    failTask: jest.fn(),
+    deferTask: jest.fn(),
 };
 
 
