@@ -1,110 +1,149 @@
-import {PerceptionSubsystem} from '../modules/perceptionSubsystem';
-import {AttentionValue, TruthValue} from '../interfaces/types';
-import {createCoreWithRealDependencies} from './testUtils';
+import { PerceptionSubsystem } from '../modules/perceptionSubsystem';
+import { AttentionValue, TruthValue } from '../interfaces/types';
+import { createCoreWithRealDependencies } from './testUtils';
 
 async function runInteractiveDemo() {
-    console.log("===========================================");
-    console.log("  Senars3 Cognitive System - Interactive Demo");
-    console.log("===========================================");
-    console.log("This demo will walk you through a scenario where a pet owner is concerned about their cat's health.");
-    console.log("");
+  console.log('===========================================');
+  console.log('  Senars3 Cognitive System - Interactive Demo');
+  console.log('===========================================');
+  console.log(
+    "This demo will walk you through a scenario where a pet owner is concerned about their cat's health."
+  );
+  console.log('');
 
-    // Create cognitive core
-    const core = createCoreWithRealDependencies({workerCount: 4});
-    const perception = new PerceptionSubsystem();
+  // Create cognitive core
+  const core = createCoreWithRealDependencies({ workerCount: 4 });
+  const perception = new PerceptionSubsystem();
 
-    // Add schemas
-    console.log("Adding cognitive schemas...");
-    // No schemas added in this demo
+  // Add schemas
+  console.log('Adding cognitive schemas...');
+  // No schemas added in this demo
 
-    // Add initial knowledge base
-    console.log("Populating knowledge base...");
-    const highTruth: TruthValue = {frequency: 0.9, confidence: 0.95};
-    const mediumTruth: TruthValue = {frequency: 0.7, confidence: 0.8};
-    const highAttention: AttentionValue = {priority: 0.9, durability: 0.8};
-    const mediumAttention: AttentionValue = {priority: 0.7, durability: 0.6};
+  // Add initial knowledge base
+  console.log('Populating knowledge base...');
+  const highTruth: TruthValue = { frequency: 0.9, confidence: 0.95 };
+  const mediumTruth: TruthValue = { frequency: 0.7, confidence: 0.8 };
+  const highAttention: AttentionValue = { priority: 0.9, durability: 0.8 };
+  const mediumAttention: AttentionValue = { priority: 0.7, durability: 0.6 };
 
-    // Veterinary facts
-    await core.addInitialBelief("Chocolate is toxic to dogs", highTruth, highAttention, {
-        domain: "veterinary",
-        source: "vetdb.org",
-        trust_score: 0.95,
-        author: "Veterinary Database"
-    });
+  // Veterinary facts
+  await core.addInitialBelief(
+    'Chocolate is toxic to dogs',
+    highTruth,
+    highAttention,
+    {
+      domain: 'veterinary',
+      source: 'vetdb.org',
+      trust_score: 0.95,
+      author: 'Veterinary Database',
+    }
+  );
 
-    await core.addInitialBelief("Theobromine is found in chocolate", highTruth, highAttention, {
-        domain: "chemistry",
-        source: "chemistry_db",
-        trust_score: 0.9,
-        author: "Chemical Composition Database"
-    });
+  await core.addInitialBelief(
+    'Theobromine is found in chocolate',
+    highTruth,
+    highAttention,
+    {
+      domain: 'chemistry',
+      source: 'chemistry_db',
+      trust_score: 0.9,
+      author: 'Chemical Composition Database',
+    }
+  );
 
-    await core.addInitialBelief("Theobromine poisoning causes vomiting and diarrhea in pets", highTruth, highAttention, {
-        domain: "veterinary",
-        source: "vetdb.org",
-        trust_score: 0.95,
-        author: "Veterinary Database"
-    });
+  await core.addInitialBelief(
+    'Theobromine poisoning causes vomiting and diarrhea in pets',
+    highTruth,
+    highAttention,
+    {
+      domain: 'veterinary',
+      source: 'vetdb.org',
+      trust_score: 0.95,
+      author: 'Veterinary Database',
+    }
+  );
 
-    await core.addInitialBelief("Cats are more sensitive to theobromine than dogs", mediumTruth, mediumAttention, {
-        domain: "veterinary",
-        source: "feline_health_study",
-        trust_score: 0.8,
-        author: "Feline Health Research Group"
-    });
+  await core.addInitialBelief(
+    'Cats are more sensitive to theobromine than dogs',
+    mediumTruth,
+    mediumAttention,
+    {
+      domain: 'veterinary',
+      source: 'feline_health_study',
+      trust_score: 0.8,
+      author: 'Feline Health Research Group',
+    }
+  );
 
-    console.log("Knowledge base populated with 4 facts.");
-    console.log("");
+  console.log('Knowledge base populated with 4 facts.');
+  console.log('');
 
-    // Simulate user interaction
-    console.log("User input: \"My cat seems sick after eating chocolate. What should I do?\"");
+  // Simulate user interaction
+  console.log(
+    'User input: "My cat seems sick after eating chocolate. What should I do?"'
+  );
 
-    // Process user input
-    const userInput = "My cat seems sick after eating chocolate. What should I do?";
-    const cognitiveItems = await perception.processInput(userInput);
+  // Process user input
+  const userInput =
+    'My cat seems sick after eating chocolate. What should I do?';
+  const cognitiveItems = await perception.processInput(userInput);
 
-    console.log(`Processed into ${cognitiveItems.length} cognitive items:`);
-    cognitiveItems.forEach((item, index) => {
-        console.log(`  ${index + 1}. ${item.type}: ${item.label}`);
-    });
+  console.log(`Processed into ${cognitiveItems.length} cognitive items:`);
+  cognitiveItems.forEach((item, index) => {
+    console.log(`  ${index + 1}. ${item.type}: ${item.label}`);
+  });
 
-    console.log("");
-    console.log("Adding items to agenda for processing...");
+  console.log('');
+  console.log('Adding items to agenda for processing...');
 
-    // Add items to agenda
-    cognitiveItems.forEach(item => {
-        // In a real implementation, we would add these to the agenda
-        console.log(`Added to agenda: ${item.type} - ${item.label}`);
-    });
+  // Add items to agenda
+  cognitiveItems.forEach((item) => {
+    // In a real implementation, we would add these to the agenda
+    console.log(`Added to agenda: ${item.type} - ${item.label}`);
+  });
 
-    console.log("");
-    console.log("The system would now process these items through its cognitive cycle:");
-    console.log("1. Contextualize: Find relevant facts in the knowledge base");
-    console.log("2. Reason: Apply schemas to generate hypotheses");
-    console.log("3. Act: Execute goals like searching for information or diagnosing");
-    console.log("4. Learn: Update beliefs based on new information");
-    console.log("");
+  console.log('');
+  console.log(
+    'The system would now process these items through its cognitive cycle:'
+  );
+  console.log('1. Contextualize: Find relevant facts in the knowledge base');
+  console.log('2. Reason: Apply schemas to generate hypotheses');
+  console.log(
+    '3. Act: Execute goals like searching for information or diagnosing'
+  );
+  console.log('4. Learn: Update beliefs based on new information');
+  console.log('');
 
-    console.log("Expected processing results:");
-    console.log("- The system would recognize that chocolate is toxic to pets");
-    console.log("- It would hypothesize that the cat's illness is due to chocolate poisoning");
-    console.log("- It would generate a goal to provide care advice");
-    console.log("- It might execute a search for veterinary recommendations");
-    console.log("");
+  console.log('Expected processing results:');
+  console.log('- The system would recognize that chocolate is toxic to pets');
+  console.log(
+    "- It would hypothesize that the cat's illness is due to chocolate poisoning"
+  );
+  console.log('- It would generate a goal to provide care advice');
+  console.log('- It might execute a search for veterinary recommendations');
+  console.log('');
 
-    console.log("System status:");
-    const status = core.getSystemStatus();
-    console.log(`- Agenda size: ${status.agendaSize}`);
-    console.log(`- World Model contains: ${status.worldModelStats.atomCount} atoms`);
-    console.log("");
+  console.log('System status:');
+  const status = core.getSystemStatus();
+  console.log(`- Agenda size: ${status.agendaSize}`);
+  console.log(
+    `- World Model contains: ${status.worldModelStats.atomCount} atoms`
+  );
+  console.log('');
 
-    console.log("Demo completed. In a full implementation, the system would continue processing");
-    console.log("and eventually provide a response like:");
-    console.log("");
-    console.log("\"Based on the symptoms and known facts, your cat is likely suffering from");
-    console.log("chocolate poisoning. Theobromine in chocolate is toxic to cats. Please contact");
-    console.log("your veterinarian immediately for treatment recommendations.\"");
-    console.log("");
+  console.log(
+    'Demo completed. In a full implementation, the system would continue processing'
+  );
+  console.log('and eventually provide a response like:');
+  console.log('');
+  console.log(
+    '"Based on the symptoms and known facts, your cat is likely suffering from'
+  );
+  console.log(
+    'chocolate poisoning. Theobromine in chocolate is toxic to cats. Please contact'
+  );
+  console.log('your veterinarian immediately for treatment recommendations."');
+  console.log('');
 }
 
 runInteractiveDemo().catch(console.error);

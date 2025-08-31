@@ -8,19 +8,19 @@ fusion of symbolic reasoning and Language Model technology.
 - [Overview](#overview)
 - [Current Development Status](#current-development-status)
 - [Core Concepts](#core-concepts)
-    - [Non-Axiomatic Logic Principles](#non-axiomatic-logic-principles)
-    - [Core Data Model](#core-data-model)
+  - [Non-Axiomatic Logic Principles](#non-axiomatic-logic-principles)
+  - [Core Data Model](#core-data-model)
 - [System Architecture](#system-architecture)
-    - [Cognitive Architecture](#cognitive-architecture)
-    - [Core Components](#core-components)
+  - [Cognitive Architecture](#cognitive-architecture)
+  - [Core Components](#core-components)
 - [Implemented Features](#implemented-features)
 - [Planned Features](#planned-features)
 - [Quick Start](#quick-start)
 - [Interfaces](#interfaces)
-    - [Unified Interface](#unified-interface)
-    - [CLI Usage](#cli-usage)
-    - [Web Interface](#web-interface)
-    - [API Access](#api-access)
+  - [Unified Interface](#unified-interface)
+  - [CLI Usage](#cli-usage)
+  - [Web Interface](#web-interface)
+  - [API Access](#api-access)
 - [Task Management System](#task-management-system)
 - [Community Simulator](#community-simulator)
 - [Development Guidelines](#development-guidelines)
@@ -122,12 +122,12 @@ The fundamental unit of knowledge representation that combines natural language 
 
 ```typescript
 interface SemanticAtom {
-    id: string;                // Unique identifier
-    content: any;              // Natural language content or object
-    embedding: number[];       // Semantic vector representation
-    creationTime: number;      // Timestamp of creation
-    lastAccessTime: number;    // Timestamp of last access
-    meta: Record<string, any>; // Metadata
+  id: string; // Unique identifier
+  content: any; // Natural language content or object
+  embedding: number[]; // Semantic vector representation
+  creationTime: number; // Timestamp of creation
+  lastAccessTime: number; // Timestamp of last access
+  meta: Record<string, any>; // Metadata
 }
 ```
 
@@ -140,55 +140,62 @@ Contextualized thoughts with associated values that drive the cognitive processe
 
 ```typescript
 interface CognitiveItem {
-    id: string;                // Unique identifier
-    atom_id: string;           // Reference to SemanticAtom
-    type: 'BELIEF' | 'GOAL' | 'QUERY' | 'EVENT' | 'TASK'; // Item category
-    label: string;             // Natural language representation
-    content?: any;             // Content of the item
-    truth?: TruthValue;        // Truth value for beliefs
-    attention: AttentionValue; // Attention value for goals
-    meta?: Record<string, any>; // Metadata (domain, source, etc.)
-    goal_parent_id?: string;   // Parent goal ID
-    goal_status?: "active" | "blocked" | "achieved" | "failed";
-    stamp: DerivationStamp;    // Derivation stamp
-    payload?: Record<string, any>; // Payload for events/actions
+  id: string; // Unique identifier
+  atom_id: string; // Reference to SemanticAtom
+  type: 'BELIEF' | 'GOAL' | 'QUERY' | 'EVENT' | 'TASK'; // Item category
+  label: string; // Natural language representation
+  content?: any; // Content of the item
+  truth?: TruthValue; // Truth value for beliefs
+  attention: AttentionValue; // Attention value for goals
+  meta?: Record<string, any>; // Metadata (domain, source, etc.)
+  goal_parent_id?: string; // Parent goal ID
+  goal_status?: 'active' | 'blocked' | 'achieved' | 'failed';
+  stamp: DerivationStamp; // Derivation stamp
+  payload?: Record<string, any>; // Payload for events/actions
 
-    // Task-specific properties (only used when type is 'TASK')
-    task_metadata?: TaskMetadata;
-    
-    // Task timestamps (only used when type is 'TASK')
-    created_at?: number;       // Creation timestamp
-    updated_at?: number;       // Last update timestamp
+  // Task-specific properties (only used when type is 'TASK')
+  task_metadata?: TaskMetadata;
+
+  // Task timestamps (only used when type is 'TASK')
+  created_at?: number; // Creation timestamp
+  updated_at?: number; // Last update timestamp
 }
 
 interface TruthValue {
-    frequency: number;         // Evidence frequency (0.0 to 1.0)
-    confidence: number;        // Evidence amount (0.0 to 1.0)
+  frequency: number; // Evidence frequency (0.0 to 1.0)
+  confidence: number; // Evidence amount (0.0 to 1.0)
 }
 
 interface AttentionValue {
-    priority: number;          // Current importance (0.0 to 1.0)
-    durability: number;        // Persistence of importance (0.0 to 1.0)
+  priority: number; // Current importance (0.0 to 1.0)
+  durability: number; // Persistence of importance (0.0 to 1.0)
 }
 
 // Task-specific metadata
 export interface TaskMetadata {
-    status: 'pending' | 'awaiting_dependencies' | 'decomposing' | 'awaiting_subtasks' | 
-            'ready_for_execution' | 'completed' | 'failed' | 'deferred';
-    priority_level: 'low' | 'medium' | 'high' | 'critical';
-    dependencies?: string[]; // Array of task IDs
-    deadline?: number; // Timestamp
-    estimated_effort?: number;
-    required_resources?: string[];
-    outcomes?: string[];
-    confidence?: number; // 0.0 to 1.0
-    tags?: string[];
-    categories?: string[];
-    context?: Record<string, any>;
-    completion_percentage?: number; // 0-100
-    group_id?: string; // Identifier for grouping related tasks
-    parent_id?: string; // Parent task ID
-    subtasks?: string[]; // Subtask IDs
+  status:
+    | 'pending'
+    | 'awaiting_dependencies'
+    | 'decomposing'
+    | 'awaiting_subtasks'
+    | 'ready_for_execution'
+    | 'completed'
+    | 'failed'
+    | 'deferred';
+  priority_level: 'low' | 'medium' | 'high' | 'critical';
+  dependencies?: string[]; // Array of task IDs
+  deadline?: number; // Timestamp
+  estimated_effort?: number;
+  required_resources?: string[];
+  outcomes?: string[];
+  confidence?: number; // 0.0 to 1.0
+  tags?: string[];
+  categories?: string[];
+  context?: Record<string, any>;
+  completion_percentage?: number; // 0-100
+  group_id?: string; // Identifier for grouping related tasks
+  parent_id?: string; // Parent task ID
+  subtasks?: string[]; // Subtask IDs
 }
 ```
 
@@ -485,7 +492,9 @@ All messages follow this structure:
   "type": "request",
   "target": "component-name",
   "method": "method-name",
-  "payload": { /* method-specific data */ }
+  "payload": {
+    /* method-specific data */
+  }
 }
 ```
 
@@ -518,27 +527,31 @@ Example:
 
 ```javascript
 // Start the cognitive core
-ws.send(JSON.stringify({
-  id: 'msg-1',
-  type: 'request',
-  target: 'core',
-  method: 'start',
-  payload: {}
-}));
+ws.send(
+  JSON.stringify({
+    id: 'msg-1',
+    type: 'request',
+    target: 'core',
+    method: 'start',
+    payload: {},
+  })
+);
 
 // Add an initial belief with uncertainty values
-ws.send(JSON.stringify({
-  id: 'msg-2',
-  type: 'request',
-  target: 'core',
-  method: 'addInitialBelief',
-  payload: {
-    content: 'Chocolate is toxic to pets with high probability',
-    truth: { frequency: 0.9, confidence: 0.85 },
-    attention: { priority: 0.8, durability: 0.7 },
-    meta: { domain: 'veterinary', author: 'vetdb.org', uncertainty: 'high' }
-  }
-}));
+ws.send(
+  JSON.stringify({
+    id: 'msg-2',
+    type: 'request',
+    target: 'core',
+    method: 'addInitialBelief',
+    payload: {
+      content: 'Chocolate is toxic to pets with high probability',
+      truth: { frequency: 0.9, confidence: 0.85 },
+      attention: { priority: 0.8, durability: 0.7 },
+      meta: { domain: 'veterinary', author: 'vetdb.org', uncertainty: 'high' },
+    },
+  })
+);
 ```
 
 ###### Perception Component
@@ -551,15 +564,18 @@ Example:
 
 ```javascript
 // Process natural language input with uncertainty consideration
-ws.send(JSON.stringify({
-  id: 'msg-3',
-  type: 'request',
-  target: 'perception',
-  method: 'processInput',
-  payload: {
-    input: 'My cat seems sick after eating chocolate. What should I do considering uncertainty?'
-  }
-}));
+ws.send(
+  JSON.stringify({
+    id: 'msg-3',
+    type: 'request',
+    target: 'perception',
+    method: 'processInput',
+    payload: {
+      input:
+        'My cat seems sick after eating chocolate. What should I do considering uncertainty?',
+    },
+  })
+);
 ```
 
 ###### Agenda Component
@@ -573,13 +589,15 @@ Example:
 
 ```javascript
 // Get agenda size
-ws.send(JSON.stringify({
-  id: 'msg-4',
-  type: 'request',
-  target: 'agenda',
-  method: 'size',
-  payload: {}
-}));
+ws.send(
+  JSON.stringify({
+    id: 'msg-4',
+    type: 'request',
+    target: 'agenda',
+    method: 'size',
+    payload: {},
+  })
+);
 ```
 
 ###### World Model Component
@@ -592,13 +610,15 @@ Example:
 
 ```javascript
 // Get world model statistics
-ws.send(JSON.stringify({
-  id: 'msg-5',
-  type: 'request',
-  target: 'worldModel',
-  method: 'getStatistics',
-  payload: {}
-}));
+ws.send(
+  JSON.stringify({
+    id: 'msg-5',
+    type: 'request',
+    target: 'worldModel',
+    method: 'getStatistics',
+    payload: {},
+  })
+);
 ```
 
 ##### Handling Responses
@@ -609,7 +629,9 @@ The system sends responses in the following format:
 {
   "id": "unique-message-id",
   "type": "response",
-  "payload": { /* response data */ }
+  "payload": {
+    /* response data */
+  }
 }
 ```
 
@@ -620,7 +642,9 @@ The system also sends events and errors:
   "id": "unique-message-id",
   "type": "event",
   "method": "event-name",
-  "payload": { /* event data */ }
+  "payload": {
+    /* event data */
+  }
 }
 ```
 
@@ -638,9 +662,9 @@ The system also sends events and errors:
 Example response handling:
 
 ```javascript
-ws.onmessage = function(event) {
+ws.onmessage = function (event) {
   const message = JSON.parse(event.data);
-  
+
   switch (message.type) {
     case 'response':
       console.log('Received response:', message.payload);
@@ -777,11 +801,11 @@ The Community Simulator allows you to:
 
 1. Navigate to the "Community" view in the unified interface
 2. Select a problem from the dropdown menu:
-    - Medical Diagnosis Challenge
-    - Environmental Impact Assessment
-    - Strategic Business Decision
-    - Cybersecurity Threat Analysis
-    - Scientific Hypothesis Testing
+   - Medical Diagnosis Challenge
+   - Environmental Impact Assessment
+   - Strategic Business Decision
+   - Cybersecurity Threat Analysis
+   - Scientific Hypothesis Testing
 3. Deploy agent participants by entering names and clicking "Add Participant"
 4. Click "Start Simulation" to begin the collaborative session
 
@@ -829,20 +853,20 @@ Each problem is designed to showcase different aspects of the cognitive system's
 ### Core Principles
 
 - **Elegance**
-    - Abstract and modularize complex functionality
-    - Use concise syntax (ternary operators, switch statements, etc.)
-    - Consolidate related functionality
-    - Eliminate code duplication (DRY principle)
+  - Abstract and modularize complex functionality
+  - Use concise syntax (ternary operators, switch statements, etc.)
+  - Consolidate related functionality
+  - Eliminate code duplication (DRY principle)
 
 - **Self-Documentation**
-    - Rely on meaningful identifiers rather than comments
-    - Write code that clearly expresses its intent
-    - Structure code to minimize the need for explanatory comments
+  - Rely on meaningful identifiers rather than comments
+  - Write code that clearly expresses its intent
+  - Structure code to minimize the need for explanatory comments
 
 - **Professional Quality**
-    - Maintain production-grade code quality
-    - Prioritize correctness and performance over educational explanations
-    - Follow established patterns and conventions
+  - Maintain production-grade code quality
+  - Prioritize correctness and performance over educational explanations
+  - Follow established patterns and conventions
 
 ### Implementation Standards
 

@@ -1,183 +1,212 @@
-import {AttentionValue, CognitiveItem, TruthValue} from '../interfaces/types';
-import {SensorStreamTransducer, TextTransducer, Transducer} from './transducers';
-import {CognitiveItemFactory} from './cognitiveItemFactory';
-import {v4 as uuidv4} from 'uuid';
+import { AttentionValue, CognitiveItem, TruthValue } from '../interfaces/types';
+import {
+  SensorStreamTransducer,
+  TextTransducer,
+  Transducer,
+} from './transducers';
+import { CognitiveItemFactory } from './cognitiveItemFactory';
+import { v4 as uuidv4 } from 'uuid';
 import logger from '../services/logger';
 
 export class PerceptionSubsystem {
-    private transducers: Transducer[] = [];
-    private processingHistory: { timestamp: number; inputType: string; itemCount: number }[] = [];
+  private transducers: Transducer[] = [];
+  private processingHistory: {
+    timestamp: number;
+    inputType: string;
+    itemCount: number;
+  }[] = [];
 
-    constructor() {
-        // Register default transducers
-        this.transducers.push(new TextTransducer());
-        this.transducers.push(new SensorStreamTransducer());
+  constructor() {
+    // Register default transducers
+    this.transducers.push(new TextTransducer());
+    this.transducers.push(new SensorStreamTransducer());
+  }
+
+  addTransducer(transducer: Transducer): void {
+    this.transducers.push(transducer);
+  }
+
+  async processInput(data: any): Promise<CognitiveItem[]> {
+    // Validate input
+    if (data === undefined || data === null) {
+      throw new Error('Input data is required');
     }
 
-    addTransducer(transducer: Transducer): void {
-        this.transducers.push(transducer);
+    if (typeof data === 'string') {
+      if (data.length < 1) {
+        throw new Error('Input string cannot be empty');
+      }
+      if (data.length > 10000) {
+        throw new Error('Input string is too long (maximum 10,000 characters)');
+      }
     }
 
-    async processInput(data: any): Promise<CognitiveItem[]> {
-        // Validate input
-        if (data === undefined || data === null) {
-            throw new Error('Input data is required');
-        }
+    // Log the input processing for debugging
+    logger.info({ inputType: typeof data }, 'Processing input');
+    if (typeof data === 'string') {
+      logger.debug({ length: data.length }, `Input length`);
+    }
 
-        if (typeof data === 'string') {
-            if (data.length < 1) {
-                throw new Error('Input string cannot be empty');
-            }
-            if (data.length > 10000) {
-                throw new Error('Input string is too long (maximum 10,000 characters)');
-            }
-        }
+    const inputType = this.determineInputType(data);
+    const startTime = Date.now();
 
-        // Log the input processing for debugging
-        logger.info({inputType: typeof data}, "Processing input");
-        if (typeof data === 'string') {
-            logger.debug({length: data.length}, `Input length`);
-        }
+    // Try each transducer
+    const allItems = [];
+    const errors = [];
 
-        const inputType = this.determineInputType(data);
-        const startTime = Date.now();
-
-        // Try each transducer
-        const allItems = [];
-        const errors = [];
-
-        for (const transducer of this.transducers) {
-            try {
-                const items = await transducer.process(data);
-                allItems.push(...items);
-            } catch (error) {
-                logger.error({error, transducer: transducer.constructor.name}, `Transducer failed`);
-                errors.push({
-                    transducer: transducer.constructor.name,
-                    error: error instanceof Error ? error.message : 'Unknown error'
-                });
-            }
-        }
-
-        // Record processing statistics
-        this.processingHistory.push({
-            timestamp: startTime,
-            inputType,
-            itemCount: allItems.length
+    for (const transducer of this.transducers) {
+      try {
+        const items = await transducer.process(data);
+        allItems.push(...items);
+      } catch (error) {
+        logger.error(
+          { error, transducer: transducer.constructor.name },
+          `Transducer failed`
+        );
+        errors.push({
+          transducer: transducer.constructor.name,
+          error: error instanceof Error ? error.message : 'Unknown error',
         });
-
-        // Keep only recent history (limit to 100 records)
-        this.processingHistory = this.processingHistory.slice(-100);
-
-        // If all transducers failed, throw an error
-        if (allItems.length === 0 && errors.length === this.transducers.length) {
-            throw new Error(`All transducers failed: ${errors.map(e => `${e.transducer}: ${e.error}`).join('; ')}`);
-        }
-
-        return allItems;
+      }
     }
 
-    // Process structured observations
-    processObservation(observation: any, source: string = "perception"): CognitiveItem[] {
-        const items: CognitiveItem[] = [];
-        const truth: TruthValue = {frequency: 1.0, confidence: 0.9};
-        const attention: AttentionValue = {priority: 0.7, durability: 0.6};
+    // Record processing statistics
+    this.processingHistory.push({
+      timestamp: startTime,
+      inputType,
+      itemCount: allItems.length,
+    });
 
-        const item = CognitiveItemFactory.createBelief(
-            `observation-${uuidv4()}`,
-            truth,
-            attention
-        );
-        item.label = typeof observation === 'string' ? observation : JSON.stringify(observation);
+    // Keep only recent history (limit to 100 records)
+    this.processingHistory = this.processingHistory.slice(-100);
 
-        // Add metadata
-        (item as any).source = source;
-        (item as any).observationType = this.determineObservationType(observation);
-
-        items.push(item);
-        return items;
+    // If all transducers failed, throw an error
+    if (allItems.length === 0 && errors.length === this.transducers.length) {
+      throw new Error(
+        `All transducers failed: ${errors.map((e) => `${e.transducer}: ${e.error}`).join('; ')}`
+      );
     }
 
-    // Process user commands
-    processCommand(command: string): CognitiveItem[] {
-        const items: CognitiveItem[] = [];
-        const attention: AttentionValue = {priority: 0.9, durability: 0.7};
+    return allItems;
+  }
 
-        const item = CognitiveItemFactory.createGoal(
-            `command-${uuidv4()}`,
-            attention
-        );
-        item.label = command;
+  // Process structured observations
+  processObservation(
+    observation: any,
+    source: string = 'perception'
+  ): CognitiveItem[] {
+    const items: CognitiveItem[] = [];
+    const truth: TruthValue = { frequency: 1.0, confidence: 0.9 };
+    const attention: AttentionValue = { priority: 0.7, durability: 0.6 };
 
-        // Add metadata
-        (item as any).source = "user_command";
-        (item as any).commandType = this.classifyCommand(command);
+    const item = CognitiveItemFactory.createBelief(
+      `observation-${uuidv4()}`,
+      truth,
+      attention
+    );
+    item.label =
+      typeof observation === 'string'
+        ? observation
+        : JSON.stringify(observation);
 
-        items.push(item);
-        return items;
+    // Add metadata
+    (item as any).source = source;
+    (item as any).observationType = this.determineObservationType(observation);
+
+    items.push(item);
+    return items;
+  }
+
+  // Process user commands
+  processCommand(command: string): CognitiveItem[] {
+    const items: CognitiveItem[] = [];
+    const attention: AttentionValue = { priority: 0.9, durability: 0.7 };
+
+    const item = CognitiveItemFactory.createGoal(
+      `command-${uuidv4()}`,
+      attention
+    );
+    item.label = command;
+
+    // Add metadata
+    (item as any).source = 'user_command';
+    (item as any).commandType = this.classifyCommand(command);
+
+    items.push(item);
+    return items;
+  }
+
+  // Get processing statistics
+  getStatistics(): {
+    totalProcessed: number;
+    averageItemsPerInput: number;
+    recentProcessingRate: number; // items per second
+  } {
+    if (this.processingHistory.length === 0) {
+      return {
+        totalProcessed: 0,
+        averageItemsPerInput: 0,
+        recentProcessingRate: 0,
+      };
     }
 
-    // Get processing statistics
-    getStatistics(): {
-        totalProcessed: number;
-        averageItemsPerInput: number;
-        recentProcessingRate: number; // items per second
-    } {
-        if (this.processingHistory.length === 0) {
-            return {totalProcessed: 0, averageItemsPerInput: 0, recentProcessingRate: 0};
-        }
+    const totalItems = this.processingHistory.reduce(
+      (sum, record) => sum + record.itemCount,
+      0
+    );
+    const averageItems = totalItems / this.processingHistory.length;
 
-        const totalItems = this.processingHistory.reduce((sum, record) => sum + record.itemCount, 0);
-        const averageItems = totalItems / this.processingHistory.length;
+    // Calculate recent processing rate (last 10 records)
+    const recentRecords = this.processingHistory.slice(-10);
+    const timeSpan = Date.now() - (recentRecords[0]?.timestamp || Date.now());
+    const recentItems = recentRecords.reduce(
+      (sum, record) => sum + record.itemCount,
+      0
+    );
+    const processingRate = timeSpan > 0 ? recentItems / (timeSpan / 1000) : 0; // items per second
 
-        // Calculate recent processing rate (last 10 records)
-        const recentRecords = this.processingHistory.slice(-10);
-        const timeSpan = Date.now() - (recentRecords[0]?.timestamp || Date.now());
-        const recentItems = recentRecords.reduce((sum, record) => sum + record.itemCount, 0);
-        const processingRate = timeSpan > 0 ? recentItems / (timeSpan / 1000) : 0; // items per second
+    return {
+      totalProcessed: this.processingHistory.length,
+      averageItemsPerInput: averageItems,
+      recentProcessingRate: processingRate,
+    };
+  }
 
-        return {
-            totalProcessed: this.processingHistory.length,
-            averageItemsPerInput: averageItems,
-            recentProcessingRate: processingRate
-        };
+  private determineInputType(data: any): string {
+    if (typeof data === 'string') return 'text';
+    if (Array.isArray(data)) return 'array';
+    if (data && typeof data === 'object') return 'object';
+    if (typeof data === 'number') return 'number';
+    if (typeof data === 'boolean') return 'boolean';
+    return 'unknown';
+  }
+
+  private determineObservationType(observation: any): string {
+    if (typeof observation === 'string') return 'textual';
+    if (typeof observation === 'number') return 'numerical';
+    if (Array.isArray(observation)) return 'sequence';
+    if (observation && typeof observation === 'object') {
+      if (observation.type) return observation.type;
+      if (observation.value !== undefined) return 'measurement';
+      return 'structured';
+    }
+    return 'unknown';
+  }
+
+  private classifyCommand(command: string): string {
+    const cmd = command.toLowerCase();
+    const commandTypes: [string[], string][] = [
+      [['search', 'find', 'look'], 'search'],
+      [['diagnose', 'analyze', 'check'], 'diagnostic'],
+      [['create', 'make', 'generate'], 'creation'],
+      [['delete', 'remove', 'cancel'], 'deletion'],
+      [['update', 'change', 'modify'], 'modification'],
+    ];
+
+    for (const [keywords, type] of commandTypes) {
+      if (keywords.some((keyword) => cmd.includes(keyword))) return type;
     }
 
-    private determineInputType(data: any): string {
-        if (typeof data === 'string') return 'text';
-        if (Array.isArray(data)) return 'array';
-        if (data && typeof data === 'object') return 'object';
-        if (typeof data === 'number') return 'number';
-        if (typeof data === 'boolean') return 'boolean';
-        return 'unknown';
-    }
-
-    private determineObservationType(observation: any): string {
-        if (typeof observation === 'string') return 'textual';
-        if (typeof observation === 'number') return 'numerical';
-        if (Array.isArray(observation)) return 'sequence';
-        if (observation && typeof observation === 'object') {
-            if (observation.type) return observation.type;
-            if (observation.value !== undefined) return 'measurement';
-            return 'structured';
-        }
-        return 'unknown';
-    }
-
-    private classifyCommand(command: string): string {
-        const cmd = command.toLowerCase();
-        const commandTypes: [string[], string][] = [
-            [['search', 'find', 'look'], 'search'],
-            [['diagnose', 'analyze', 'check'], 'diagnostic'],
-            [['create', 'make', 'generate'], 'creation'],
-            [['delete', 'remove', 'cancel'], 'deletion'],
-            [['update', 'change', 'modify'], 'modification']
-        ];
-
-        for (const [keywords, type] of commandTypes) {
-            if (keywords.some(keyword => cmd.includes(keyword))) return type;
-        }
-
-        return 'general';
-    }
+    return 'general';
+  }
 }

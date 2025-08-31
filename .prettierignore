@@ -1,0 +1,10 @@
+# Ignore build output
+dist
+# Ignore node modules
+node_modules
+# Ignore package-lock.json
+package-lock.json
+# Ignore vite cache
+.vite
+# Ignore jules scratch
+jules-scratch

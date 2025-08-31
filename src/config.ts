@@ -6,7 +6,9 @@ import { z } from 'zod';
 dotenv.config({ path: path.resolve(process.cwd(), '.env') });
 
 const configSchema = z.object({
-  NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
+  NODE_ENV: z
+    .enum(['development', 'production', 'test'])
+    .default('development'),
   PORT: z.coerce.number().int().positive().default(3000),
 });
 
@@ -15,9 +17,11 @@ const parsedConfig = configSchema.safeParse(process.env);
 if (!parsedConfig.success) {
   console.error(
     '❌ Invalid environment variables:',
-    parsedConfig.error.flatten().fieldErrors,
+    parsedConfig.error.flatten().fieldErrors
   );
-  throw new Error('Invalid environment variables. Please check your .env file.');
+  throw new Error(
+    'Invalid environment variables. Please check your .env file.'
+  );
 }
 
 // Freeze the config object to prevent runtime mutations

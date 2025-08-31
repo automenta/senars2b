@@ -1,155 +1,164 @@
-import {v4 as uuidv4} from 'uuid';
-import {CodeChangeProposal} from './enhancementProposalModule';
+import { v4 as uuidv4 } from 'uuid';
+import { CodeChangeProposal } from './enhancementProposalModule';
 import logger from '../services/logger';
 
 export interface CodeChange {
-    id: string;
-    filePath: string;
-    changeType: 'add' | 'modify' | 'remove';
-    originalContent?: string;
-    newContent: string;
-    lineNumber?: number;
-    description: string;
-    validationTests?: string[];
+  id: string;
+  filePath: string;
+  changeType: 'add' | 'modify' | 'remove';
+  originalContent?: string;
+  newContent: string;
+  lineNumber?: number;
+  description: string;
+  validationTests?: string[];
 }
 
 export interface TestChange {
-    id: string;
-    filePath: string;
-    testType: 'unit' | 'integration' | 'e2e';
-    content: string;
-    description: string;
-    relatedComponent: string;
+  id: string;
+  filePath: string;
+  testType: 'unit' | 'integration' | 'e2e';
+  content: string;
+  description: string;
+  relatedComponent: string;
 }
 
 export class ImplementationModule {
-    private codeChanges: CodeChange[] = [];
-    private testChanges: TestChange[] = [];
+  private codeChanges: CodeChange[] = [];
+  private testChanges: TestChange[] = [];
 
-    // Generate code changes based on proposals
-    generateCodeChange(proposal: CodeChangeProposal): CodeChange {
-        // In a real implementation, this would analyze the proposal and generate actual code
-        // For now, we'll create a placeholder change
+  // Generate code changes based on proposals
+  generateCodeChange(proposal: CodeChangeProposal): CodeChange {
+    // In a real implementation, this would analyze the proposal and generate actual code
+    // For now, we'll create a placeholder change
 
-        const change: CodeChange = {
-            id: `code-change-${uuidv4()}`,
-            filePath: proposal.filePath,
-            changeType: proposal.changeType,
-            newContent: this.generatePlaceholderContent(proposal),
-            description: proposal.description,
-            validationTests: this.generateValidationTests(proposal)
-        };
+    const change: CodeChange = {
+      id: `code-change-${uuidv4()}`,
+      filePath: proposal.filePath,
+      changeType: proposal.changeType,
+      newContent: this.generatePlaceholderContent(proposal),
+      description: proposal.description,
+      validationTests: this.generateValidationTests(proposal),
+    };
 
-        this.codeChanges.push(change);
-        return change;
+    this.codeChanges.push(change);
+    return change;
+  }
+
+  // Generate test changes to validate implementations
+  generateTestChange(component: string, change: CodeChange): TestChange {
+    const test: TestChange = {
+      id: `test-change-${uuidv4()}`,
+      filePath: change.filePath.replace('.ts', '.test.ts'),
+      testType: 'unit',
+      content: this.generateTestContent(component, change),
+      description: `Test for ${change.description}`,
+      relatedComponent: component,
+    };
+
+    this.testChanges.push(test);
+    return test;
+  }
+
+  // Note: This is a placeholder - actual implementation would need file system access
+  applyCodeChange(change: CodeChange): boolean {
+    logger.info({ change }, `Applying code change`);
+
+    // In a real implementation, this would actually modify the file system
+    // For now, we'll just log the change and return success
+    return true;
+  }
+
+  // Apply a test change to the file system
+  applyTestChange(change: TestChange): boolean {
+    logger.info({ change }, `Applying test change`);
+
+    // In a real implementation, this would actually create the test file
+    // For now, we'll just log the change and return success
+    return true;
+  }
+
+  // Validate that a change has been successfully applied
+  validateChange(change: CodeChange): boolean {
+    // In a real implementation, this would run validation tests
+    // For now, we'll just log and return success
+    logger.info({ changeDescription: change.description }, `Validating change`);
+
+    if (change.validationTests && change.validationTests.length > 0) {
+      logger.info('Running validation tests:');
+      for (const test of change.validationTests) {
+        logger.debug(`  - ${test}`);
+      }
     }
 
-    // Generate test changes to validate implementations
-    generateTestChange(component: string, change: CodeChange): TestChange {
-        const test: TestChange = {
-            id: `test-change-${uuidv4()}`,
-            filePath: change.filePath.replace('.ts', '.test.ts'),
-            testType: 'unit',
-            content: this.generateTestContent(component, change),
-            description: `Test for ${change.description}`,
-            relatedComponent: component
-        };
+    return true;
+  }
 
-        this.testChanges.push(test);
-        return test;
+  // Apply a code change to the file system
+
+  // Get all code changes
+  getAllCodeChanges(): CodeChange[] {
+    return [...this.codeChanges];
+  }
+
+  // Get all test changes
+  getAllTestChanges(): TestChange[] {
+    return [...this.testChanges];
+  }
+
+  // Get changes for a specific file
+  getChangesForFile(filePath: string): {
+    codeChanges: CodeChange[];
+    testChanges: TestChange[];
+  } {
+    const codeChanges = this.codeChanges.filter((c) => c.filePath === filePath);
+    const testChanges = this.testChanges.filter(
+      (t) =>
+        t.filePath === filePath ||
+        t.filePath === filePath.replace('.ts', '.test.ts')
+    );
+
+    return { codeChanges, testChanges };
+  }
+
+  // Clear all changes (for testing purposes)
+  clearChanges(): void {
+    this.codeChanges = [];
+    this.testChanges = [];
+  }
+
+  // Generate validation tests for a code change
+  private generateValidationTests(proposal: CodeChangeProposal): string[] {
+    const tests: string[] = [];
+
+    switch (proposal.priority) {
+      case 'critical':
+        tests.push(
+          'Should fix the critical issue without introducing regressions'
+        );
+        tests.push('Should pass all existing related tests');
+        tests.push('Should handle edge cases appropriately');
+        break;
+      case 'high':
+        tests.push('Should implement the required functionality correctly');
+        tests.push('Should maintain backward compatibility');
+        break;
+      case 'medium':
+        tests.push('Should provide the expected behavior');
+        tests.push('Should not degrade performance');
+        break;
+      case 'low':
+        tests.push('Should implement the feature as described');
+        break;
     }
 
-    // Note: This is a placeholder - actual implementation would need file system access
-    applyCodeChange(change: CodeChange): boolean {
-        logger.info({change}, `Applying code change`);
+    return tests;
+  }
 
-        // In a real implementation, this would actually modify the file system
-        // For now, we'll just log the change and return success
-        return true;
-    }
-
-    // Apply a test change to the file system
-    applyTestChange(change: TestChange): boolean {
-        logger.info({change}, `Applying test change`);
-
-        // In a real implementation, this would actually create the test file
-        // For now, we'll just log the change and return success
-        return true;
-    }
-
-    // Validate that a change has been successfully applied
-    validateChange(change: CodeChange): boolean {
-        // In a real implementation, this would run validation tests
-        // For now, we'll just log and return success
-        logger.info({changeDescription: change.description}, `Validating change`);
-
-        if (change.validationTests && change.validationTests.length > 0) {
-            logger.info('Running validation tests:');
-            for (const test of change.validationTests) {
-                logger.debug(`  - ${test}`);
-            }
-        }
-
-        return true;
-    }
-
-    // Apply a code change to the file system
-
-    // Get all code changes
-    getAllCodeChanges(): CodeChange[] {
-        return [...this.codeChanges];
-    }
-
-    // Get all test changes
-    getAllTestChanges(): TestChange[] {
-        return [...this.testChanges];
-    }
-
-    // Get changes for a specific file
-    getChangesForFile(filePath: string): { codeChanges: CodeChange[], testChanges: TestChange[] } {
-        const codeChanges = this.codeChanges.filter(c => c.filePath === filePath);
-        const testChanges = this.testChanges.filter(t => t.filePath === filePath || t.filePath === filePath.replace('.ts', '.test.ts'));
-
-        return {codeChanges, testChanges};
-    }
-
-    // Clear all changes (for testing purposes)
-    clearChanges(): void {
-        this.codeChanges = [];
-        this.testChanges = [];
-    }
-
-    // Generate validation tests for a code change
-    private generateValidationTests(proposal: CodeChangeProposal): string[] {
-        const tests: string[] = [];
-
-        switch (proposal.priority) {
-            case 'critical':
-                tests.push('Should fix the critical issue without introducing regressions');
-                tests.push('Should pass all existing related tests');
-                tests.push('Should handle edge cases appropriately');
-                break;
-            case 'high':
-                tests.push('Should implement the required functionality correctly');
-                tests.push('Should maintain backward compatibility');
-                break;
-            case 'medium':
-                tests.push('Should provide the expected behavior');
-                tests.push('Should not degrade performance');
-                break;
-            case 'low':
-                tests.push('Should implement the feature as described');
-                break;
-        }
-
-        return tests;
-    }
-
-    // Generate placeholder content for a code change
-    private generatePlaceholderContent(proposal: CodeChangeProposal): string {
-        // This would be a much more sophisticated implementation in a real system
-        // that could actually generate or modify code
-        return `
+  // Generate placeholder content for a code change
+  private generatePlaceholderContent(proposal: CodeChangeProposal): string {
+    // This would be a much more sophisticated implementation in a real system
+    // that could actually generate or modify code
+    return `
 /**
  * TODO: Implement ${proposal.description}
  *
@@ -162,11 +171,11 @@ export class ImplementationModule {
  */
 logger.warn(\`Placeholder implementation for: \${proposal.description}\`);
 `;
-    }
+  }
 
-    // Generate test content
-    private generateTestContent(component: string, change: CodeChange): string {
-        return `import { /* component imports */ } from './${component}';
+  // Generate test content
+  private generateTestContent(component: string, change: CodeChange): string {
+    return `import { /* component imports */ } from './${component}';
 
 describe('${component} - ${change.description}', () => {
   beforeEach(() => {
@@ -210,5 +219,5 @@ describe('${component} - ${change.description}', () => {
   // TODO: Add more test cases as needed for different scenarios.
 });
 `;
-    }
+  }
 }

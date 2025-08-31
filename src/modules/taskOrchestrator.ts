@@ -1,23 +1,23 @@
-import {CognitiveItem, TaskMetadata} from '../interfaces/types';
-import {WorldModel} from '../core/worldModel';
-import {TaskManager} from './taskManager';
-import {CognitiveItemFactory} from './cognitiveItemFactory';
-import {v4 as uuidv4} from 'uuid';
+import { CognitiveItem, TaskMetadata } from '../interfaces/types';
+import { WorldModel } from '../core/worldModel';
+import { TaskManager } from './taskManager';
+import { CognitiveItemFactory } from './cognitiveItemFactory';
+import { v4 as uuidv4 } from 'uuid';
 
 // A type guard to ensure we are dealing with a task.
 function isTask(item: CognitiveItem): item is CognitiveItem & {
-    type: 'TASK';
-    task_metadata: NonNullable<CognitiveItem['task_metadata']>
+  type: 'TASK';
+  task_metadata: NonNullable<CognitiveItem['task_metadata']>;
 } {
-    return item.type === 'TASK' && item.task_metadata != null;
+  return item.type === 'TASK' && item.task_metadata != null;
 }
 
 /**
  * The result of an orchestration step, containing the updated task and any new items to be added to the agenda.
  */
 export interface OrchestrationResult {
-    updatedTask: CognitiveItem;
-    newItems: CognitiveItem[];
+  updatedTask: CognitiveItem;
+  newItems: CognitiveItem[];
 }
 
 /**
@@ -25,112 +25,127 @@ export interface OrchestrationResult {
  * It is a pure logic module that does not perform side effects.
  */
 export class TaskOrchestrator {
-    private worldModel: WorldModel;
-    private taskManager: TaskManager;
+  private worldModel: WorldModel;
+  private taskManager: TaskManager;
 
-    constructor(worldModel: WorldModel, taskManager: TaskManager) {
-        this.worldModel = worldModel;
-        this.taskManager = taskManager;
+  constructor(worldModel: WorldModel, taskManager: TaskManager) {
+    this.worldModel = worldModel;
+    this.taskManager = taskManager;
+  }
+
+  /**
+   * Determines the next state of a task and any resulting new cognitive items.
+   * @param task The task to orchestrate.
+   * @returns An OrchestrationResult, or null if the item is not a task.
+   */
+  public orchestrate(task: CognitiveItem): OrchestrationResult | null {
+    if (!isTask(task)) {
+      return null;
     }
 
-    /**
-     * Determines the next state of a task and any resulting new cognitive items.
-     * @param task The task to orchestrate.
-     * @returns An OrchestrationResult, or null if the item is not a task.
-     */
-    public orchestrate(task: CognitiveItem): OrchestrationResult | null {
-        if (!isTask(task)) {
-            return null;
+    // Deep copy to avoid direct mutation
+    const updatedTask = JSON.parse(JSON.stringify(task));
+    const newItems: CognitiveItem[] = [];
+
+    switch (updatedTask.task_metadata.status) {
+      case 'pending':
+        updatedTask.task_metadata.status = 'awaiting_dependencies';
+        break;
+
+      case 'awaiting_dependencies':
+        // The agenda is now responsible for blocking tasks with unresolved dependencies.
+        // If a task in this state is popped, it means its dependencies are met.
+        updatedTask.task_metadata.status = 'decomposing';
+        break;
+
+      case 'decomposing':
+        if (this.shouldDecompose(updatedTask)) {
+          // Create a goal to trigger the new DecompositionSchema.
+          const decompositionGoal = CognitiveItemFactory.createGoal(
+            uuidv4(), // placeholder atomId
+            { ...updatedTask.attention, priority: 0.95 } // Decomposition is high priority
+          );
+          decompositionGoal.label = `Decompose: ${updatedTask.label}`;
+          decompositionGoal.meta = {
+            isSystemGoal: true,
+            targetTaskId: updatedTask.id,
+          };
+          newItems.push(decompositionGoal);
+
+          // The task now waits for the CognitiveCore to produce subtasks.
+          updatedTask.task_metadata.status = 'awaiting_subtasks';
+        } else {
+          // Not a complex task, ready for execution.
+          updatedTask.task_metadata.status = 'ready_for_execution';
         }
+        break;
 
-        // Deep copy to avoid direct mutation
-        let updatedTask = JSON.parse(JSON.stringify(task));
-        const newItems: CognitiveItem[] = [];
-
-        switch (updatedTask.task_metadata.status) {
-            case 'pending':
-                updatedTask.task_metadata.status = 'awaiting_dependencies';
-                break;
-
-            case 'awaiting_dependencies':
-                // The agenda is now responsible for blocking tasks with unresolved dependencies.
-                // If a task in this state is popped, it means its dependencies are met.
-                updatedTask.task_metadata.status = 'decomposing';
-                break;
-
-            case 'decomposing':
-                if (this.shouldDecompose(updatedTask)) {
-                    // Create a goal to trigger the new DecompositionSchema.
-                    const decompositionGoal = CognitiveItemFactory.createGoal(
-                        uuidv4(), // placeholder atomId
-                        {...updatedTask.attention, priority: 0.95} // Decomposition is high priority
-                    );
-                    decompositionGoal.label = `Decompose: ${updatedTask.label}`;
-                    decompositionGoal.meta = {
-                        isSystemGoal: true,
-                        targetTaskId: updatedTask.id
-                    };
-                    newItems.push(decompositionGoal);
-
-                    // The task now waits for the CognitiveCore to produce subtasks.
-                    updatedTask.task_metadata.status = 'awaiting_subtasks';
-                } else {
-                    // Not a complex task, ready for execution.
-                    updatedTask.task_metadata.status = 'ready_for_execution';
-                }
-                break;
-
-            case 'awaiting_subtasks':
-                if (this.areSubtasksComplete(updatedTask)) {
-                    updatedTask.task_metadata.status = 'completed';
-                }
-                // The agenda will now be responsible for updating the completion percentage.
-                break;
-
-            case 'ready_for_execution':
-                const goal = CognitiveItemFactory.createGoal(
-                    uuidv4(), // Placeholder atomId
-                    updatedTask.attention
-                );
-                goal.label = `Execute atomic task: ${updatedTask.label}`;
-                goal.meta = {taskId: updatedTask.id, isAtomicExecution: true};
-                newItems.push(goal);
-                // Task remains in this state until an external actor (ActionSubsystem) marks it completed.
-                break;
-
-            case 'completed':
-            case 'failed':
-            case 'deferred':
-                // Terminal states, no change.
-                break;
+      case 'awaiting_subtasks':
+        if (this.areSubtasksComplete(updatedTask)) {
+          updatedTask.task_metadata.status = 'completed';
         }
+        // The agenda will now be responsible for updating the completion percentage.
+        break;
 
-        // Ensure the timestamp is updated if the status changed
-        if (updatedTask.task_metadata.status !== task.task_metadata.status) {
-            updatedTask.updated_at = Date.now();
-        }
+      case 'ready_for_execution':
+        const goal = CognitiveItemFactory.createGoal(
+          uuidv4(), // Placeholder atomId
+          updatedTask.attention
+        );
+        goal.label = `Execute atomic task: ${updatedTask.label}`;
+        goal.meta = { taskId: updatedTask.id, isAtomicExecution: true };
+        newItems.push(goal);
+        // Task remains in this state until an external actor (ActionSubsystem) marks it completed.
+        break;
 
-        return {updatedTask, newItems};
+      case 'completed':
+      case 'failed':
+      case 'deferred':
+        // Terminal states, no change.
+        break;
     }
 
-    private shouldDecompose(task: CognitiveItem & { task_metadata: TaskMetadata }): boolean {
-        // Decompose if it's a "complex" task and has no subtasks yet.
-        // This is a placeholder for more sophisticated logic.
-        const label = task.label.toLowerCase();
-        const keywords = ['plan', 'develop', 'create', 'organize', 'manage', 'refactor'];
-        return keywords.some(kw => label.includes(kw)) && (!task.task_metadata.subtasks || task.task_metadata.subtasks.length === 0);
+    // Ensure the timestamp is updated if the status changed
+    if (updatedTask.task_metadata.status !== task.task_metadata.status) {
+      updatedTask.updated_at = Date.now();
     }
 
+    return { updatedTask, newItems };
+  }
 
-    private areSubtasksComplete(task: CognitiveItem & { task_metadata: TaskMetadata }): boolean {
-        if (!task.task_metadata.subtasks || task.task_metadata.subtasks.length === 0) {
-            return true; // No subtasks means this check passes.
-        }
+  private shouldDecompose(
+    task: CognitiveItem & { task_metadata: TaskMetadata }
+  ): boolean {
+    // Decompose if it's a "complex" task and has no subtasks yet.
+    // This is a placeholder for more sophisticated logic.
+    const label = task.label.toLowerCase();
+    const keywords = [
+      'plan',
+      'develop',
+      'create',
+      'organize',
+      'manage',
+      'refactor',
+    ];
+    return (
+      keywords.some((kw) => label.includes(kw)) &&
+      (!task.task_metadata.subtasks || task.task_metadata.subtasks.length === 0)
+    );
+  }
 
-        return task.task_metadata.subtasks.every(subId => {
-            const subTask = this.taskManager.getTask(subId);
-            return subTask?.task_metadata?.status === 'completed';
-        });
+  private areSubtasksComplete(
+    task: CognitiveItem & { task_metadata: TaskMetadata }
+  ): boolean {
+    if (
+      !task.task_metadata.subtasks ||
+      task.task_metadata.subtasks.length === 0
+    ) {
+      return true; // No subtasks means this check passes.
     }
 
+    return task.task_metadata.subtasks.every((subId) => {
+      const subTask = this.taskManager.getTask(subId);
+      return subTask?.task_metadata?.status === 'completed';
+    });
+  }
 }

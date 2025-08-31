@@ -1,191 +1,216 @@
-import {CognitiveItem} from '../interfaces/types';
-import {Executor} from './actionSubsystem';
-import {CognitiveItemFactory} from '../modules/cognitiveItemFactory';
-import {TaskManager} from '../modules/taskManager';
-import logger from "../services/logger";
+import { CognitiveItem } from '../interfaces/types';
+import { Executor } from './actionSubsystem';
+import { CognitiveItemFactory } from '../modules/cognitiveItemFactory';
+import { TaskManager } from '../modules/taskManager';
+import logger from '../services/logger';
 
 export class WebSearchExecutor implements Executor {
-    can_execute(goal: CognitiveItem): boolean {
-        // Check if this executor can handle the goal
-        if (goal.type !== 'GOAL') return false;
+  can_execute(goal: CognitiveItem): boolean {
+    // Check if this executor can handle the goal
+    if (goal.type !== 'GOAL') return false;
 
-        const label = goal.label || '';
+    const label = goal.label || '';
 
-        // Simple pattern matching for web search goals
-        return label.toLowerCase().includes('search') ||
-            label.toLowerCase().includes('find') ||
-            label.toLowerCase().includes('lookup');
-    }
+    // Simple pattern matching for web search goals
+    return (
+      label.toLowerCase().includes('search') ||
+      label.toLowerCase().includes('find') ||
+      label.toLowerCase().includes('lookup')
+    );
+  }
 
-    async execute(goal: CognitiveItem): Promise<CognitiveItem> {
-        // Execute a web search
-        // In a real implementation, this would actually perform the search
-        logger.info({goalId: goal.id, goalLabel: goal.label}, `Executing web search for goal`);
+  async execute(goal: CognitiveItem): Promise<CognitiveItem> {
+    // Execute a web search
+    // In a real implementation, this would actually perform the search
+    logger.info(
+      { goalId: goal.id, goalLabel: goal.label },
+      `Executing web search for goal`
+    );
 
-        // Simulate search result
-        const resultContent = `Search results for "${goal.label || goal.id}" - Chocolate is indeed toxic to cats, just as it is to dogs. The toxicity is due to theobromine, which cats cannot metabolize effectively.`;
+    // Simulate search result
+    const resultContent = `Search results for "${goal.label || goal.id}" - Chocolate is indeed toxic to cats, just as it is to dogs. The toxicity is due to theobromine, which cats cannot metabolize effectively.`;
 
-        // Create a belief from the search result
-        const result = CognitiveItemFactory.createBelief(
-            `search-result-${goal.id}`,
-            {
-                frequency: 1.0,
-                confidence: 0.95
-            },
-            {
-                priority: 0.9,
-                durability: 0.8
-            }
-        );
-        result.label = resultContent;
+    // Create a belief from the search result
+    const result = CognitiveItemFactory.createBelief(
+      `search-result-${goal.id}`,
+      {
+        frequency: 1.0,
+        confidence: 0.95,
+      },
+      {
+        priority: 0.9,
+        durability: 0.8,
+      }
+    );
+    result.label = resultContent;
 
-        return result;
-    }
+    return result;
+  }
 }
 
 export class AtomicTaskExecutor implements Executor {
-    private taskManager: TaskManager;
+  private taskManager: TaskManager;
 
-    constructor(taskManager: TaskManager) {
-        this.taskManager = taskManager;
+  constructor(taskManager: TaskManager) {
+    this.taskManager = taskManager;
+  }
+
+  can_execute(goal: CognitiveItem): boolean {
+    return goal.type === 'GOAL' && goal.meta?.isAtomicExecution === true;
+  }
+
+  async execute(goal: CognitiveItem): Promise<CognitiveItem> {
+    const taskId = goal.meta?.taskId;
+    if (!taskId || typeof taskId !== 'string') {
+      throw new Error(
+        'AtomicTaskExecutor: Goal is missing a valid taskId in its metadata.'
+      );
     }
 
-    can_execute(goal: CognitiveItem): boolean {
-        return goal.type === 'GOAL' && goal.meta?.isAtomicExecution === true;
-    }
+    logger.info(
+      { goalId: goal.id, goalLabel: goal.label, taskId },
+      `Executing atomic task via goal`
+    );
 
-    async execute(goal: CognitiveItem): Promise<CognitiveItem> {
-        const taskId = goal.meta?.taskId;
-        if (!taskId || typeof taskId !== 'string') {
-            throw new Error('AtomicTaskExecutor: Goal is missing a valid taskId in its metadata.');
-        }
+    // Mark the task as completed
+    this.taskManager.updateTaskStatus(taskId, 'completed');
 
-        logger.info({goalId: goal.id, goalLabel: goal.label, taskId}, `Executing atomic task via goal`);
+    // Create a belief that the task was completed
+    const result = CognitiveItemFactory.createBelief(
+      `atomic-task-execution-result-${goal.id}`,
+      {
+        frequency: 1.0,
+        confidence: 1.0,
+      },
+      {
+        priority: 0.7,
+        durability: 0.5,
+      }
+    );
+    result.label = `Successfully executed atomic task ${taskId}.`;
 
-        // Mark the task as completed
-        this.taskManager.updateTaskStatus(taskId, 'completed');
-
-        // Create a belief that the task was completed
-        const result = CognitiveItemFactory.createBelief(
-            `atomic-task-execution-result-${goal.id}`,
-            {
-                frequency: 1.0,
-                confidence: 1.0
-            },
-            {
-                priority: 0.7,
-                durability: 0.5
-            }
-        );
-        result.label = `Successfully executed atomic task ${taskId}.`;
-
-        return result;
-    }
+    return result;
+  }
 }
 
 export class DiagnosticExecutor implements Executor {
-    can_execute(goal: CognitiveItem): boolean {
-        // Check if this executor can handle diagnostic goals
-        if (goal.type !== 'GOAL') return false;
+  can_execute(goal: CognitiveItem): boolean {
+    // Check if this executor can handle diagnostic goals
+    if (goal.type !== 'GOAL') return false;
 
-        const label = goal.label || '';
-        return label.toLowerCase().includes('diagnose') ||
-            label.toLowerCase().includes('diagnostic');
-    }
+    const label = goal.label || '';
+    return (
+      label.toLowerCase().includes('diagnose') ||
+      label.toLowerCase().includes('diagnostic')
+    );
+  }
 
-    async execute(goal: CognitiveItem): Promise<CognitiveItem> {
-        // Execute a diagnostic process
-        logger.info({goalId: goal.id, goalLabel: goal.label}, `Executing diagnostic for goal`);
+  async execute(goal: CognitiveItem): Promise<CognitiveItem> {
+    // Execute a diagnostic process
+    logger.info(
+      { goalId: goal.id, goalLabel: goal.label },
+      `Executing diagnostic for goal`
+    );
 
-        // Simulate diagnostic result
-        const resultContent = `Diagnostic analysis complete. Based on symptoms and known facts, the most likely cause of illness is chocolate poisoning. Immediate veterinary attention is recommended.`;
+    // Simulate diagnostic result
+    const resultContent = `Diagnostic analysis complete. Based on symptoms and known facts, the most likely cause of illness is chocolate poisoning. Immediate veterinary attention is recommended.`;
 
-        // Create a belief from the diagnostic result
-        const result = CognitiveItemFactory.createBelief(
-            `diagnostic-result-${goal.id}`,
-            {
-                frequency: 0.9,
-                confidence: 0.85
-            },
-            {
-                priority: 0.95,
-                durability: 0.9
-            }
-        );
-        result.label = resultContent;
+    // Create a belief from the diagnostic result
+    const result = CognitiveItemFactory.createBelief(
+      `diagnostic-result-${goal.id}`,
+      {
+        frequency: 0.9,
+        confidence: 0.85,
+      },
+      {
+        priority: 0.95,
+        durability: 0.9,
+      }
+    );
+    result.label = resultContent;
 
-        return result;
-    }
+    return result;
+  }
 }
 
 export class KnowledgeBaseQueryExecutor implements Executor {
-    can_execute(goal: CognitiveItem): boolean {
-        // Check if this executor can handle knowledge base queries
-        if (goal.type !== 'GOAL') return false;
+  can_execute(goal: CognitiveItem): boolean {
+    // Check if this executor can handle knowledge base queries
+    if (goal.type !== 'GOAL') return false;
 
-        const label = goal.label || '';
-        return label.toLowerCase().includes('query') ||
-            label.toLowerCase().includes('retrieve') ||
-            label.toLowerCase().includes('get');
-    }
+    const label = goal.label || '';
+    return (
+      label.toLowerCase().includes('query') ||
+      label.toLowerCase().includes('retrieve') ||
+      label.toLowerCase().includes('get')
+    );
+  }
 
-    async execute(goal: CognitiveItem): Promise<CognitiveItem> {
-        // Execute a knowledge base query
-        logger.info({goalId: goal.id, goalLabel: goal.label}, `Executing knowledge base query for goal`);
+  async execute(goal: CognitiveItem): Promise<CognitiveItem> {
+    // Execute a knowledge base query
+    logger.info(
+      { goalId: goal.id, goalLabel: goal.label },
+      `Executing knowledge base query for goal`
+    );
 
-        // Simulate query result
-        const resultContent = `Knowledge base query result for "${goal.label || goal.id}" - Found 12 relevant facts about pet nutrition and toxicity.`;
+    // Simulate query result
+    const resultContent = `Knowledge base query result for "${goal.label || goal.id}" - Found 12 relevant facts about pet nutrition and toxicity.`;
 
-        // Create a belief from the query result
-        const result = CognitiveItemFactory.createBelief(
-            `kb-query-result-${goal.id}`,
-            {
-                frequency: 1.0,
-                confidence: 0.9
-            },
-            {
-                priority: 0.8,
-                durability: 0.85
-            }
-        );
-        result.label = resultContent;
+    // Create a belief from the query result
+    const result = CognitiveItemFactory.createBelief(
+      `kb-query-result-${goal.id}`,
+      {
+        frequency: 1.0,
+        confidence: 0.9,
+      },
+      {
+        priority: 0.8,
+        durability: 0.85,
+      }
+    );
+    result.label = resultContent;
 
-        return result;
-    }
+    return result;
+  }
 }
 
 export class PlanningExecutor implements Executor {
-    can_execute(goal: CognitiveItem): boolean {
-        // Check if this executor can handle planning goals
-        if (goal.type !== 'GOAL') return false;
+  can_execute(goal: CognitiveItem): boolean {
+    // Check if this executor can handle planning goals
+    if (goal.type !== 'GOAL') return false;
 
-        const label = goal.label || '';
-        return label.toLowerCase().includes('plan') ||
-            label.toLowerCase().includes('schedule') ||
-            label.toLowerCase().includes('organize');
-    }
+    const label = goal.label || '';
+    return (
+      label.toLowerCase().includes('plan') ||
+      label.toLowerCase().includes('schedule') ||
+      label.toLowerCase().includes('organize')
+    );
+  }
 
-    async execute(goal: CognitiveItem): Promise<CognitiveItem> {
-        // Execute a planning process
-        logger.info({goalId: goal.id, goalLabel: goal.label}, `Executing planning for goal`);
+  async execute(goal: CognitiveItem): Promise<CognitiveItem> {
+    // Execute a planning process
+    logger.info(
+      { goalId: goal.id, goalLabel: goal.label },
+      `Executing planning for goal`
+    );
 
-        // Simulate planning result
-        const resultContent = `Planning complete for "${goal.label || goal.id}". Created action sequence: 1. Assess situation, 2. Gather information, 3. Formulate solution, 4. Execute solution.`;
+    // Simulate planning result
+    const resultContent = `Planning complete for "${goal.label || goal.id}". Created action sequence: 1. Assess situation, 2. Gather information, 3. Formulate solution, 4. Execute solution.`;
 
-        // Create a belief from the planning result
-        const result = CognitiveItemFactory.createBelief(
-            `planning-result-${goal.id}`,
-            {
-                frequency: 1.0,
-                confidence: 0.8
-            },
-            {
-                priority: 0.85,
-                durability: 0.9
-            }
-        );
-        result.label = resultContent;
+    // Create a belief from the planning result
+    const result = CognitiveItemFactory.createBelief(
+      `planning-result-${goal.id}`,
+      {
+        frequency: 1.0,
+        confidence: 0.8,
+      },
+      {
+        priority: 0.85,
+        durability: 0.9,
+      }
+    );
+    result.label = resultContent;
 
-        return result;
-    }
+    return result;
+  }
 }

@@ -1,147 +1,161 @@
-import {ImplementationModule} from '@/modules/implementationModule';
-import {CodeChangeProposal} from '@/modules/enhancementProposalModule';
+import { ImplementationModule } from '@/modules/implementationModule';
+import { CodeChangeProposal } from '@/modules/enhancementProposalModule';
 import logger from '@/services/logger';
 
 describe('ImplementationModule', () => {
-    let implementationModule: ImplementationModule;
-    let loggerSpy: jest.SpyInstance;
+  let implementationModule: ImplementationModule;
+  let loggerSpy: jest.SpyInstance;
 
-    beforeEach(() => {
-        implementationModule = new ImplementationModule();
-        loggerSpy = jest.spyOn(logger, 'info').mockImplementation();
+  beforeEach(() => {
+    implementationModule = new ImplementationModule();
+    loggerSpy = jest.spyOn(logger, 'info').mockImplementation();
+  });
+
+  afterEach(() => {
+    loggerSpy.mockRestore();
+  });
+
+  describe('generateCodeChange', () => {
+    it('should generate a code change based on a proposal', () => {
+      const proposal: CodeChangeProposal = {
+        id: 'proposal-1',
+        filePath: 'src/testComponent.ts',
+        changeType: 'modify',
+        description: 'Fix a bug in testComponent',
+        reason: 'Component is not handling edge cases properly',
+        priority: 'high',
+      };
+
+      const change = implementationModule.generateCodeChange(proposal);
+
+      // Should generate a code change
+      expect(change).toBeDefined();
+      expect(change.id).toContain('code-change');
+      expect(change.filePath).toBe('src/testComponent.ts');
+      expect(change.changeType).toBe('modify');
+      expect(change.description).toBe('Fix a bug in testComponent');
+      expect(change.newContent).toContain('* TODO: Implement');
     });
+  });
 
-    afterEach(() => {
-        loggerSpy.mockRestore();
+  describe('generateTestChange', () => {
+    it('should generate a test change for a code change', () => {
+      const codeChange = {
+        id: 'code-change-1',
+        filePath: 'src/testComponent.ts',
+        changeType: 'modify' as const,
+        newContent: '// New content',
+        description: 'Fix a bug in testComponent',
+      };
+
+      const testChange = implementationModule.generateTestChange(
+        'testComponent',
+        codeChange
+      );
+
+      // Should generate a test change
+      expect(testChange).toBeDefined();
+      expect(testChange.id).toContain('test-change');
+      expect(testChange.filePath).toBe('src/testComponent.test.ts');
+      expect(testChange.testType).toBe('unit');
+      expect(testChange.description).toBe(
+        'Test for Fix a bug in testComponent'
+      );
+      expect(testChange.relatedComponent).toBe('testComponent');
     });
+  });
 
-    describe('generateCodeChange', () => {
-        it('should generate a code change based on a proposal', () => {
-            const proposal: CodeChangeProposal = {
-                id: 'proposal-1',
-                filePath: 'src/testComponent.ts',
-                changeType: 'modify',
-                description: 'Fix a bug in testComponent',
-                reason: 'Component is not handling edge cases properly',
-                priority: 'high'
-            };
+  describe('applyCodeChange', () => {
+    it('should apply a code change', () => {
+      const change = {
+        id: 'code-change-1',
+        filePath: 'src/testComponent.ts',
+        changeType: 'modify' as const,
+        newContent: '// New content',
+        description: 'Fix a bug in testComponent',
+      };
 
-            const change = implementationModule.generateCodeChange(proposal);
+      const result = implementationModule.applyCodeChange(change);
 
-            // Should generate a code change
-            expect(change).toBeDefined();
-            expect(change.id).toContain('code-change');
-            expect(change.filePath).toBe('src/testComponent.ts');
-            expect(change.changeType).toBe('modify');
-            expect(change.description).toBe('Fix a bug in testComponent');
-            expect(change.newContent).toContain('* TODO: Implement');
-        });
+      // Should apply the change successfully
+      expect(result).toBe(true);
+      expect(loggerSpy).toHaveBeenCalledWith(
+        { change },
+        'Applying code change'
+      );
     });
+  });
 
-    describe('generateTestChange', () => {
-        it('should generate a test change for a code change', () => {
-            const codeChange = {
-                id: 'code-change-1',
-                filePath: 'src/testComponent.ts',
-                changeType: 'modify' as const,
-                newContent: '// New content',
-                description: 'Fix a bug in testComponent'
-            };
+  describe('applyTestChange', () => {
+    it('should apply a test change', () => {
+      const testChange = {
+        id: 'test-change-1',
+        filePath: 'src/testComponent.test.ts',
+        testType: 'unit' as const,
+        content: '// Test content',
+        description: 'Test for a feature',
+        relatedComponent: 'testComponent',
+      };
 
-            const testChange = implementationModule.generateTestChange('testComponent', codeChange);
+      const result = implementationModule.applyTestChange(testChange);
 
-            // Should generate a test change
-            expect(testChange).toBeDefined();
-            expect(testChange.id).toContain('test-change');
-            expect(testChange.filePath).toBe('src/testComponent.test.ts');
-            expect(testChange.testType).toBe('unit');
-            expect(testChange.description).toBe('Test for Fix a bug in testComponent');
-            expect(testChange.relatedComponent).toBe('testComponent');
-        });
+      // Should apply the test change successfully
+      expect(result).toBe(true);
+      expect(loggerSpy).toHaveBeenCalledWith(
+        { change: testChange },
+        'Applying test change'
+      );
     });
+  });
 
-    describe('applyCodeChange', () => {
-        it('should apply a code change', () => {
-            const change = {
-                id: 'code-change-1',
-                filePath: 'src/testComponent.ts',
-                changeType: 'modify' as const,
-                newContent: '// New content',
-                description: 'Fix a bug in testComponent'
-            };
+  describe('validateChange', () => {
+    it('should validate a code change', () => {
+      const change = {
+        id: 'code-change-1',
+        filePath: 'src/testComponent.ts',
+        changeType: 'modify' as const,
+        newContent: '// New content',
+        description: 'Fix a bug in testComponent',
+        validationTests: [
+          'Should fix the bug without introducing regressions',
+          'Should handle edge cases appropriately',
+        ],
+      };
 
-            const result = implementationModule.applyCodeChange(change);
+      const result = implementationModule.validateChange(change);
 
-            // Should apply the change successfully
-            expect(result).toBe(true);
-            expect(loggerSpy).toHaveBeenCalledWith({change}, 'Applying code change');
-        });
+      // Should validate the change successfully
+      expect(result).toBe(true);
+      expect(loggerSpy).toHaveBeenCalledWith(
+        { changeDescription: change.description },
+        'Validating change'
+      );
+      expect(loggerSpy).toHaveBeenCalledWith('Running validation tests:');
     });
+  });
 
-    describe('applyTestChange', () => {
-        it('should apply a test change', () => {
-            const testChange = {
-                id: 'test-change-1',
-                filePath: 'src/testComponent.test.ts',
-                testType: 'unit' as const,
-                content: '// Test content',
-                description: 'Test for a feature',
-                relatedComponent: 'testComponent'
-            };
+  describe('getAllCodeChanges and getAllTestChanges', () => {
+    it('should return all code changes and test changes', () => {
+      // Generate some changes
+      const proposal: CodeChangeProposal = {
+        id: 'proposal-1',
+        filePath: 'src/testComponent.ts',
+        changeType: 'modify' as const,
+        description: 'Fix a bug in testComponent',
+        reason: 'Component is not handling edge cases properly',
+        priority: 'high' as const,
+      };
 
-            const result = implementationModule.applyTestChange(testChange);
+      implementationModule.generateCodeChange(proposal);
+      const codeChange = implementationModule.getAllCodeChanges()[0];
+      implementationModule.generateTestChange('testComponent', codeChange);
 
-            // Should apply the test change successfully
-            expect(result).toBe(true);
-            expect(loggerSpy).toHaveBeenCalledWith({change: testChange}, 'Applying test change');
-        });
+      // Should return all changes
+      const codeChanges = implementationModule.getAllCodeChanges();
+      const testChanges = implementationModule.getAllTestChanges();
+
+      expect(codeChanges.length).toBe(1);
+      expect(testChanges.length).toBe(1);
     });
-
-    describe('validateChange', () => {
-        it('should validate a code change', () => {
-            const change = {
-                id: 'code-change-1',
-                filePath: 'src/testComponent.ts',
-                changeType: 'modify' as const,
-                newContent: '// New content',
-                description: 'Fix a bug in testComponent',
-                validationTests: [
-                    'Should fix the bug without introducing regressions',
-                    'Should handle edge cases appropriately'
-                ]
-            };
-
-            const result = implementationModule.validateChange(change);
-
-            // Should validate the change successfully
-            expect(result).toBe(true);
-            expect(loggerSpy).toHaveBeenCalledWith({changeDescription: change.description}, 'Validating change');
-            expect(loggerSpy).toHaveBeenCalledWith('Running validation tests:');
-        });
-    });
-
-    describe('getAllCodeChanges and getAllTestChanges', () => {
-        it('should return all code changes and test changes', () => {
-            // Generate some changes
-            const proposal: CodeChangeProposal = {
-                id: 'proposal-1',
-                filePath: 'src/testComponent.ts',
-                changeType: 'modify' as const,
-                description: 'Fix a bug in testComponent',
-                reason: 'Component is not handling edge cases properly',
-                priority: 'high' as const
-            };
-
-            implementationModule.generateCodeChange(proposal);
-            const codeChange = implementationModule.getAllCodeChanges()[0];
-            implementationModule.generateTestChange('testComponent', codeChange);
-
-            // Should return all changes
-            const codeChanges = implementationModule.getAllCodeChanges();
-            const testChanges = implementationModule.getAllTestChanges();
-
-            expect(codeChanges.length).toBe(1);
-            expect(testChanges.length).toBe(1);
-        });
-    });
+  });
 });

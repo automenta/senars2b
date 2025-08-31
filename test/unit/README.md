@@ -19,7 +19,7 @@ const item = createCognitiveItem();
 // Create a cognitive item with specific overrides
 const item = createCognitiveItem({
   type: 'GOAL',
-  goal_status: 'active'
+  goal_status: 'active',
 });
 ```
 
@@ -29,7 +29,7 @@ Creates a CognitiveItem with truth values (for beliefs).
 
 ```typescript
 const belief = createBeliefItem({
-  truth: { frequency: 0.9, confidence: 0.8 }
+  truth: { frequency: 0.9, confidence: 0.8 },
 });
 ```
 
@@ -39,7 +39,7 @@ Creates a CognitiveItem with goal status (for goals).
 
 ```typescript
 const goal = createGoalItem({
-  label: 'My specific goal'
+  label: 'My specific goal',
 });
 ```
 
@@ -51,8 +51,8 @@ Creates a CognitiveItem with task metadata (for tasks).
 const task = createTaskItem({
   task_metadata: {
     status: 'pending',
-    priority_level: 'high'
-  }
+    priority_level: 'high',
+  },
 });
 ```
 
@@ -63,7 +63,7 @@ Creates a basic AttentionValue.
 ```typescript
 const attention = createAttentionValue({
   priority: 0.9,
-  durability: 0.8
+  durability: 0.8,
 });
 ```
 
@@ -74,7 +74,7 @@ Creates a basic TruthValue.
 ```typescript
 const truth = createTruthValue({
   frequency: 0.7,
-  confidence: 0.9
+  confidence: 0.9,
 });
 ```
 
@@ -92,7 +92,7 @@ Creates a SemanticAtom with default values.
 
 ```typescript
 const atom = createSemanticAtom({
-  content: 'Specific content for this atom'
+  content: 'Specific content for this atom',
 });
 ```
 
@@ -104,7 +104,7 @@ Creates basic CognitiveMetadata with default values.
 const metadata = createCognitiveMetadata({
   domain: 'medicine',
   source: 'medical_journal',
-  trust_score: 0.95
+  trust_score: 0.95,
 });
 ```
 
@@ -116,7 +116,7 @@ Creates TaskMetadata with default values.
 const taskMetadata = createTaskMetadata({
   status: 'completed',
   priority_level: 'critical',
-  completion_percentage: 100
+  completion_percentage: 100,
 });
 ```
 
@@ -125,9 +125,9 @@ const taskMetadata = createTaskMetadata({
 Import the utilities in your test files:
 
 ```typescript
-import { 
-  createCognitiveItem, 
-  createBeliefItem, 
+import {
+  createCognitiveItem,
+  createBeliefItem,
   createGoalItem,
   createTaskItem,
   createAttentionValue,
@@ -135,7 +135,7 @@ import {
   createMockSchema,
   createSemanticAtom,
   createCognitiveMetadata,
-  createTaskMetadata
+  createTaskMetadata,
 } from '../testUtils';
 ```
 
@@ -151,49 +151,55 @@ import {
 ## Example Test Structure
 
 ```typescript
-import { 
-  createBeliefItem, 
-  createGoalItem, 
-  createTaskItem, 
+import {
+  createBeliefItem,
+  createGoalItem,
+  createTaskItem,
   createAttentionValue,
-  createTruthValue
+  createTruthValue,
 } from '../testUtils';
 
 describe('CognitiveCore', () => {
   it('should process beliefs with high confidence', () => {
     const belief = createBeliefItem({
-      truth: { frequency: 0.9, confidence: 0.95 }
+      truth: { frequency: 0.9, confidence: 0.95 },
     });
-    
+
     // Test implementation
   });
-  
+
   it('should prioritize goals with high durability', () => {
     const goal = createGoalItem({
-      attention: { priority: 0.5, durability: 0.9 }
+      attention: { priority: 0.5, durability: 0.9 },
     });
-    
+
     // Test implementation
   });
-  
+
   it('should handle task items with proper metadata', () => {
     const task = createTaskItem({
       task_metadata: {
         status: 'pending',
         priority_level: 'high',
-        dependencies: ['task-1', 'task-2']
-      }
+        dependencies: ['task-1', 'task-2'],
+      },
     });
-    
+
     // Test implementation
   });
 });
 
 describe('AttentionModule', () => {
   it('should correctly calculate priority for different attention values', () => {
-    const lowAttention = createAttentionValue({ priority: 0.1, durability: 0.2 });
-    const highAttention = createAttentionValue({ priority: 0.9, durability: 0.8 });
-    
+    const lowAttention = createAttentionValue({
+      priority: 0.1,
+      durability: 0.2,
+    });
+    const highAttention = createAttentionValue({
+      priority: 0.9,
+      durability: 0.8,
+    });
+
     // Test implementation
   });
 });
@@ -202,7 +208,7 @@ describe('BeliefRevisionEngine', () => {
   it('should properly merge truth values', () => {
     const truth1 = createTruthValue({ frequency: 0.7, confidence: 0.6 });
     const truth2 = createTruthValue({ frequency: 0.8, confidence: 0.9 });
-    
+
     // Test implementation
   });
 });

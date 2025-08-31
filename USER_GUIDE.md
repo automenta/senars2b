@@ -170,7 +170,9 @@ All messages follow this structure:
   "type": "request",
   "target": "component-name",
   "method": "method-name",
-  "payload": { /* method-specific data */ }
+  "payload": {
+    /* method-specific data */
+  }
 }
 ```
 
@@ -203,27 +205,31 @@ Example:
 
 ```javascript
 // Start the cognitive core
-ws.send(JSON.stringify({
-  id: 'msg-1',
-  type: 'request',
-  target: 'core',
-  method: 'start',
-  payload: {}
-}));
+ws.send(
+  JSON.stringify({
+    id: 'msg-1',
+    type: 'request',
+    target: 'core',
+    method: 'start',
+    payload: {},
+  })
+);
 
 // Add an initial belief with uncertainty values
-ws.send(JSON.stringify({
-  id: 'msg-2',
-  type: 'request',
-  target: 'core',
-  method: 'addInitialBelief',
-  payload: {
-    content: 'Chocolate is toxic to pets',
-    truth: { frequency: 0.9, confidence: 0.85 },
-    attention: { priority: 0.8, durability: 0.7 },
-    meta: { domain: 'veterinary' }
-  }
-}));
+ws.send(
+  JSON.stringify({
+    id: 'msg-2',
+    type: 'request',
+    target: 'core',
+    method: 'addInitialBelief',
+    payload: {
+      content: 'Chocolate is toxic to pets',
+      truth: { frequency: 0.9, confidence: 0.85 },
+      attention: { priority: 0.8, durability: 0.7 },
+      meta: { domain: 'veterinary' },
+    },
+  })
+);
 ```
 
 ##### Perception Component
@@ -236,15 +242,17 @@ Example:
 
 ```javascript
 // Process natural language input
-ws.send(JSON.stringify({
-  id: 'msg-3',
-  type: 'request',
-  target: 'perception',
-  method: 'processInput',
-  payload: {
-    input: 'My cat seems sick after eating chocolate. What should I do?'
-  }
-}));
+ws.send(
+  JSON.stringify({
+    id: 'msg-3',
+    type: 'request',
+    target: 'perception',
+    method: 'processInput',
+    payload: {
+      input: 'My cat seems sick after eating chocolate. What should I do?',
+    },
+  })
+);
 ```
 
 ##### Agenda Component
@@ -258,13 +266,15 @@ Example:
 
 ```javascript
 // Get agenda size
-ws.send(JSON.stringify({
-  id: 'msg-4',
-  type: 'request',
-  target: 'agenda',
-  method: 'size',
-  payload: {}
-}));
+ws.send(
+  JSON.stringify({
+    id: 'msg-4',
+    type: 'request',
+    target: 'agenda',
+    method: 'size',
+    payload: {},
+  })
+);
 ```
 
 ##### World Model Component
@@ -277,13 +287,15 @@ Example:
 
 ```javascript
 // Get world model statistics
-ws.send(JSON.stringify({
-  id: 'msg-5',
-  type: 'request',
-  target: 'worldModel',
-  method: 'getStatistics',
-  payload: {}
-}));
+ws.send(
+  JSON.stringify({
+    id: 'msg-5',
+    type: 'request',
+    target: 'worldModel',
+    method: 'getStatistics',
+    payload: {},
+  })
+);
 ```
 
 #### Handling Responses
@@ -294,7 +306,9 @@ The system sends responses in the following format:
 {
   "id": "unique-message-id",
   "type": "response",
-  "payload": { /* response data */ }
+  "payload": {
+    /* response data */
+  }
 }
 ```
 
@@ -305,7 +319,9 @@ The system also sends events and errors:
   "id": "unique-message-id",
   "type": "event",
   "method": "event-name",
-  "payload": { /* event data */ }
+  "payload": {
+    /* event data */
+  }
 }
 ```
 
@@ -323,9 +339,9 @@ The system also sends events and errors:
 Example response handling:
 
 ```javascript
-ws.onmessage = function(event) {
+ws.onmessage = function (event) {
   const message = JSON.parse(event.data);
-  
+
   switch (message.type) {
     case 'response':
       console.log('Received response:', message.payload);
@@ -455,26 +471,26 @@ together to solve problems.
 ### Common Issues
 
 1. **Connection problems with WebSocket interface**
-    - Ensure the WebSocket server is running (`npm run start:ws` or `npm run start:web`)
-    - Check that the port (8080 by default) is not blocked by a firewall
-    - Verify the WebSocket URL is correct
-    - Check the web interface for connection status indicators
+   - Ensure the WebSocket server is running (`npm run start:ws` or `npm run start:web`)
+   - Check that the port (8080 by default) is not blocked by a firewall
+   - Verify the WebSocket URL is correct
+   - Check the web interface for connection status indicators
 
 2. **No results from input processing**
-    - Try rephrasing your input to be more explicit
-    - Make sure your input contains clear statements or questions
-    - Check that the system is properly started
-    - Use the `help` command in CLI or check the Help tab in the web interface
+   - Try rephrasing your input to be more explicit
+   - Make sure your input contains clear statements or questions
+   - Check that the system is properly started
+   - Use the `help` command in CLI or check the Help tab in the web interface
 
 3. **Performance issues**
-    - Monitor agenda size with the status command
-    - Check system status tab in web interface for real-time statistics
+   - Monitor agenda size with the status command
+   - Check system status tab in web interface for real-time statistics
 
 4. **Web interface not loading**
-    - Ensure the server is running with `npm run start:web`
-    - Check that port 3000 is not blocked
-    - Try refreshing the page
-    - Check the browser's developer console for errors
+   - Ensure the server is running with `npm run start:web`
+   - Check that port 3000 is not blocked
+   - Try refreshing the page
+   - Check the browser's developer console for errors
 
 ### Getting Help
 

@@ -1,132 +1,151 @@
-import {CognitiveItem} from '@/interfaces/types';
-import {DecentralizedCognitiveCore} from '@/core/cognitiveCore';
-import {createAttentionValue, createCoreWithRealDependencies, createTaskItem, createTruthValue} from './testUtils';
-import {embeddingService} from '@/services/embeddingService';
+import { CognitiveItem } from '@/interfaces/types';
+import { DecentralizedCognitiveCore } from '@/core/cognitiveCore';
+import {
+  createAttentionValue,
+  createCoreWithRealDependencies,
+  createTaskItem,
+  createTruthValue,
+} from './testUtils';
+import { embeddingService } from '@/services/embeddingService';
 
 jest.mock('@/services/embeddingService');
 
 describe('DecentralizedCognitiveCore', () => {
-    let core: DecentralizedCognitiveCore;
-    const mockEmbeddingService = embeddingService as jest.Mocked<typeof embeddingService>;
+  let core: DecentralizedCognitiveCore;
+  const mockEmbeddingService = embeddingService as jest.Mocked<
+    typeof embeddingService
+  >;
 
-    beforeEach(() => {
-        core = createCoreWithRealDependencies({workerCount: 2});
-        mockEmbeddingService.generateEmbedding.mockClear();
+  beforeEach(() => {
+    core = createCoreWithRealDependencies({ workerCount: 2 });
+    mockEmbeddingService.generateEmbedding.mockClear();
+  });
+
+  describe('constructor', () => {
+    it('should create a cognitive core with the specified number of workers', () => {
+      // The core should be created successfully
+      expect(core).toBeDefined();
+    });
+  });
+
+  describe('addSchema', () => {
+    it('should add a schema to the core', async () => {
+      mockEmbeddingService.generateEmbedding.mockResolvedValue(
+        Array(384).fill(0.1)
+      );
+      const schemaContent = {
+        name: 'TestSchema',
+        pattern: {
+          premise: '(?A is related to ?B)',
+          conclusion: '(?B is related to ?A)',
+        },
+      };
+
+      const schemaMeta = {
+        type: 'CognitiveSchema',
+        source: 'test',
+        timestamp: new Date().toISOString(),
+        trust_score: 0.8,
+      };
+
+      // This should not throw an error
+      await expect(
+        core.addSchema(schemaContent, schemaMeta)
+      ).resolves.not.toThrow();
+    });
+  });
+
+  describe('addInitialBelief', () => {
+    it('should add an initial belief to the core', async () => {
+      mockEmbeddingService.generateEmbedding.mockResolvedValue(
+        Array(384).fill(0.2)
+      );
+      // This should not throw an error
+      await expect(
+        core.addInitialBelief(
+          'Test belief content',
+          createTruthValue(),
+          createAttentionValue(),
+          { domain: 'test', source: 'test_source' }
+        )
+      ).resolves.not.toThrow();
+    });
+  });
+
+  describe('addInitialGoal', () => {
+    it('should add an initial goal to the core', async () => {
+      mockEmbeddingService.generateEmbedding.mockResolvedValue(
+        Array(384).fill(0.3)
+      );
+      // This should not throw an error
+      await expect(
+        core.addInitialGoal(
+          'Test goal content',
+          createAttentionValue({ priority: 0.9, durability: 0.8 }),
+          { domain: 'test', source: 'test_source' }
+        )
+      ).resolves.not.toThrow();
+    });
+  });
+
+  describe('getSystemStatus', () => {
+    it('should return the system status', () => {
+      const status = core.getSystemStatus();
+
+      // Should return an object with expected properties
+      expect(status).toHaveProperty('agendaSize');
+      expect(status).toHaveProperty('worldModelStats');
+      expect(status).toHaveProperty('workerStats');
+      expect(typeof status.agendaSize).toBe('number');
+    });
+  });
+
+  describe('Task Processing via TaskOrchestrator', () => {
+    it('should delegate task processing to the TaskOrchestrator', async () => {
+      // Get the internal TaskOrchestrator instance from the core
+      const taskOrchestrator = (core as any).taskOrchestrator;
+      // Spy on the orchestrate method
+      const orchestrateSpy = jest.spyOn(taskOrchestrator, 'orchestrate');
+
+      // Create a task item
+      const task = createTaskItem({
+        type: 'TASK',
+        task_metadata: { status: 'pending', priority_level: 'high' },
+      });
+
+      // Get the internal processItem method to test the core logic
+      const processItem = (item: CognitiveItem) =>
+        (core as any).processItem(item, 0);
+
+      // Process the task
+      await processItem(task);
+
+      // Expect that the TaskOrchestrator's orchestrate method was called with the task
+      expect(orchestrateSpy).toHaveBeenCalledWith(task);
     });
 
-    describe('constructor', () => {
-        it('should create a cognitive core with the specified number of workers', () => {
-            // The core should be created successfully
-            expect(core).toBeDefined();
-        });
+    it('should report task statistics in getSystemStatus', () => {
+      const taskManager = (core as any).taskManager;
+      // Spy on and mock getTaskStatistics to return our test stats
+      jest.spyOn(taskManager, 'getTaskStatistics').mockReturnValue({
+        total: 3,
+        pending: 1,
+        awaiting_dependencies: 0,
+        decomposing: 1,
+        awaiting_subtasks: 0,
+        ready_for_execution: 0,
+        completed: 1,
+        failed: 0,
+        deferred: 0,
+      });
+
+      const status = core.getSystemStatus();
+
+      expect(status.taskStats).toBeDefined();
+      expect(status.taskStats.pending).toBe(1);
+      expect(status.taskStats.decomposing).toBe(1);
+      expect(status.taskStats.completed).toBe(1);
+      expect(status.taskStats.total).toBe(3);
     });
-
-    describe('addSchema', () => {
-        it('should add a schema to the core', async () => {
-            mockEmbeddingService.generateEmbedding.mockResolvedValue(Array(384).fill(0.1));
-            const schemaContent = {
-                name: "TestSchema",
-                pattern: {
-                    premise: "(?A is related to ?B)",
-                    conclusion: "(?B is related to ?A)"
-                }
-            };
-
-            const schemaMeta = {
-                type: "CognitiveSchema",
-                source: "test",
-                timestamp: new Date().toISOString(),
-                trust_score: 0.8
-            };
-
-            // This should not throw an error
-            await expect(core.addSchema(schemaContent, schemaMeta)).resolves.not.toThrow();
-        });
-    });
-
-    describe('addInitialBelief', () => {
-        it('should add an initial belief to the core', async () => {
-            mockEmbeddingService.generateEmbedding.mockResolvedValue(Array(384).fill(0.2));
-            // This should not throw an error
-            await expect(core.addInitialBelief(
-                "Test belief content",
-                createTruthValue(),
-                createAttentionValue(),
-                {domain: "test", source: "test_source"}
-            )).resolves.not.toThrow();
-        });
-    });
-
-    describe('addInitialGoal', () => {
-        it('should add an initial goal to the core', async () => {
-            mockEmbeddingService.generateEmbedding.mockResolvedValue(Array(384).fill(0.3));
-            // This should not throw an error
-            await expect(core.addInitialGoal(
-                "Test goal content",
-                createAttentionValue({priority: 0.9, durability: 0.8}),
-                {domain: "test", source: "test_source"}
-            )).resolves.not.toThrow();
-        });
-    });
-
-    describe('getSystemStatus', () => {
-        it('should return the system status', () => {
-            const status = core.getSystemStatus();
-
-            // Should return an object with expected properties
-            expect(status).toHaveProperty('agendaSize');
-            expect(status).toHaveProperty('worldModelStats');
-            expect(status).toHaveProperty('workerStats');
-            expect(typeof status.agendaSize).toBe('number');
-        });
-    });
-
-
-    describe('Task Processing via TaskOrchestrator', () => {
-        it('should delegate task processing to the TaskOrchestrator', async () => {
-            // Get the internal TaskOrchestrator instance from the core
-            const taskOrchestrator = (core as any).taskOrchestrator;
-            // Spy on the orchestrate method
-            const orchestrateSpy = jest.spyOn(taskOrchestrator, 'orchestrate');
-
-            // Create a task item
-            const task = createTaskItem({
-                type: 'TASK',
-                task_metadata: {status: 'pending', priority_level: 'high'}
-            });
-
-            // Get the internal processItem method to test the core logic
-            const processItem = (item: CognitiveItem) => (core as any).processItem(item, 0);
-
-            // Process the task
-            await processItem(task);
-
-            // Expect that the TaskOrchestrator's orchestrate method was called with the task
-            expect(orchestrateSpy).toHaveBeenCalledWith(task);
-        });
-
-        it('should report task statistics in getSystemStatus', () => {
-            const taskManager = (core as any).taskManager;
-            // Spy on and mock getTaskStatistics to return our test stats
-            jest.spyOn(taskManager, 'getTaskStatistics').mockReturnValue({
-                total: 3,
-                pending: 1,
-                awaiting_dependencies: 0,
-                decomposing: 1,
-                awaiting_subtasks: 0,
-                ready_for_execution: 0,
-                completed: 1,
-                failed: 0,
-                deferred: 0,
-            });
-
-            const status = core.getSystemStatus();
-
-            expect(status.taskStats).toBeDefined();
-            expect(status.taskStats.pending).toBe(1);
-            expect(status.taskStats.decomposing).toBe(1);
-            expect(status.taskStats.completed).toBe(1);
-            expect(status.taskStats.total).toBe(3);
-        });
-    });
+  });
 });
