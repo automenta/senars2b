@@ -1,4 +1,4 @@
-import {CognitiveItem, TaskMetadata} from '../interfaces/types';
+import {CognitiveItem, TaskMetadata, TaskStatus} from '../interfaces/types';
 import {WorldModel} from '../core/worldModel';
 import {TaskManager} from './taskManager';
 import {CognitiveItemFactory} from './cognitiveItemFactory';
@@ -19,6 +19,12 @@ export interface OrchestrationResult {
     updatedTask: CognitiveItem;
     newItems: CognitiveItem[];
 }
+
+// Define terminal task statuses for easy checking
+const TERMINAL_TASK_STATUSES: TaskStatus[] = ['completed', 'failed', 'deferred'];
+
+// Define complex task keywords for decomposition logic
+const COMPLEX_TASK_KEYWORDS = ['plan', 'develop', 'create', 'organize', 'manage', 'refactor'];
 
 /**
  * TaskOrchestrator is responsible for determining the next state of a task based on its current state and the world model.
@@ -44,83 +50,114 @@ export class TaskOrchestrator {
         }
 
         // Deep copy to avoid direct mutation
-        let updatedTask = JSON.parse(JSON.stringify(task));
-        const newItems: CognitiveItem[] = [];
+        let updatedTask: CognitiveItem = JSON.parse(JSON.stringify(task));
+        let newItems: CognitiveItem[] = [];
 
-        switch (updatedTask.task_metadata.status) {
+        // Skip orchestration for terminal states
+        if (this.isTerminalStatus(updatedTask.task_metadata!.status)) {
+            return {updatedTask, newItems};
+        }
+
+        switch (updatedTask.task_metadata!.status) {
             case 'pending':
-                updatedTask.task_metadata.status = 'awaiting_dependencies';
+                updatedTask = this.transitionFromPending(updatedTask);
                 break;
 
             case 'awaiting_dependencies':
-                // The agenda is now responsible for blocking tasks with unresolved dependencies.
-                // If a task in this state is popped, it means its dependencies are met.
-                updatedTask.task_metadata.status = 'decomposing';
+                updatedTask = this.transitionFromAwaitingDependencies(updatedTask);
                 break;
 
             case 'decomposing':
-                if (this.shouldDecompose(updatedTask)) {
-                    // Create a goal to trigger the new DecompositionSchema.
-                    const decompositionGoal = CognitiveItemFactory.createGoal(
-                        uuidv4(), // placeholder atomId
-                        {...updatedTask.attention, priority: 0.95} // Decomposition is high priority
-                    );
-                    decompositionGoal.label = `Decompose: ${updatedTask.label}`;
-                    decompositionGoal.meta = {
-                        isSystemGoal: true,
-                        targetTaskId: updatedTask.id
-                    };
-                    newItems.push(decompositionGoal);
-
-                    // The task now waits for the CognitiveCore to produce subtasks.
-                    updatedTask.task_metadata.status = 'awaiting_subtasks';
-                } else {
-                    // Not a complex task, ready for execution.
-                    updatedTask.task_metadata.status = 'ready_for_execution';
-                }
+                const decompositionResult = this.transitionFromDecomposing(updatedTask);
+                updatedTask = decompositionResult.updatedTask;
+                newItems = decompositionResult.newItems;
                 break;
 
             case 'awaiting_subtasks':
-                if (this.areSubtasksComplete(updatedTask)) {
-                    updatedTask.task_metadata.status = 'completed';
-                }
-                // The agenda will now be responsible for updating the completion percentage.
+                updatedTask = this.transitionFromAwaitingSubtasks(updatedTask);
                 break;
 
             case 'ready_for_execution':
-                const goal = CognitiveItemFactory.createGoal(
-                    uuidv4(), // Placeholder atomId
-                    updatedTask.attention
-                );
-                goal.label = `Execute atomic task: ${updatedTask.label}`;
-                goal.meta = {taskId: updatedTask.id, isAtomicExecution: true};
-                newItems.push(goal);
-                // Task remains in this state until an external actor (ActionSubsystem) marks it completed.
-                break;
-
-            case 'completed':
-            case 'failed':
-            case 'deferred':
-                // Terminal states, no change.
+                newItems = this.transitionFromReadyForExecution(updatedTask);
                 break;
         }
 
         // Ensure the timestamp is updated if the status changed
-        if (updatedTask.task_metadata.status !== task.task_metadata.status) {
+        if (updatedTask.task_metadata!.status !== task.task_metadata!.status) {
             updatedTask.updated_at = Date.now();
         }
 
         return {updatedTask, newItems};
     }
 
+    private isTerminalStatus(status: TaskStatus): boolean {
+        return TERMINAL_TASK_STATUSES.includes(status);
+    }
+
+    private transitionFromPending(task: CognitiveItem): CognitiveItem {
+        task.task_metadata!.status = 'awaiting_dependencies';
+        return task;
+    }
+
+    private transitionFromAwaitingDependencies(task: CognitiveItem): CognitiveItem {
+        // The agenda is now responsible for blocking tasks with unresolved dependencies.
+        // If a task in this state is popped, it means its dependencies are met.
+        task.task_metadata!.status = 'decomposing';
+        return task;
+    }
+
+    private transitionFromDecomposing(task: CognitiveItem): { updatedTask: CognitiveItem, newItems: CognitiveItem[] } {
+        const newItems: CognitiveItem[] = [];
+        
+        if (this.shouldDecompose(task as CognitiveItem & { task_metadata: TaskMetadata })) {
+            // Create a goal to trigger the new DecompositionSchema.
+            const decompositionGoal = CognitiveItemFactory.createGoal(
+                uuidv4(), // placeholder atomId
+                {...task.attention, priority: 0.95} // Decomposition is high priority
+            );
+            decompositionGoal.label = `Decompose: ${task.label}`;
+            decompositionGoal.meta = {
+                isSystemGoal: true,
+                targetTaskId: task.id
+            };
+            newItems.push(decompositionGoal);
+
+            // The task now waits for the CognitiveCore to produce subtasks.
+            task.task_metadata!.status = 'awaiting_subtasks';
+        } else {
+            // Not a complex task, ready for execution.
+            task.task_metadata!.status = 'ready_for_execution';
+        }
+        
+        return {updatedTask: task, newItems};
+    }
+
+    private transitionFromAwaitingSubtasks(task: CognitiveItem): CognitiveItem {
+        if (this.areSubtasksComplete(task as CognitiveItem & { task_metadata: TaskMetadata })) {
+            task.task_metadata!.status = 'completed';
+        }
+        // The agenda will now be responsible for updating the completion percentage.
+        return task;
+    }
+
+    private transitionFromReadyForExecution(task: CognitiveItem): CognitiveItem[] {
+        const goal = CognitiveItemFactory.createGoal(
+            uuidv4(), // Placeholder atomId
+            task.attention
+        );
+        goal.label = `Execute atomic task: ${task.label}`;
+        goal.meta = {taskId: task.id, isAtomicExecution: true};
+        // Task remains in this state until an external actor (ActionSubsystem) marks it completed.
+        return [goal];
+    }
+
     private shouldDecompose(task: CognitiveItem & { task_metadata: TaskMetadata }): boolean {
         // Decompose if it's a "complex" task and has no subtasks yet.
         // This is a placeholder for more sophisticated logic.
         const label = task.label.toLowerCase();
-        const keywords = ['plan', 'develop', 'create', 'organize', 'manage', 'refactor'];
-        return keywords.some(kw => label.includes(kw)) && (!task.task_metadata.subtasks || task.task_metadata.subtasks.length === 0);
+        return COMPLEX_TASK_KEYWORDS.some(kw => label.includes(kw)) && 
+               (!task.task_metadata.subtasks || task.task_metadata.subtasks.length === 0);
     }
-
 
     private areSubtasksComplete(task: CognitiveItem & { task_metadata: TaskMetadata }): boolean {
         if (!task.task_metadata.subtasks || task.task_metadata.subtasks.length === 0) {
@@ -132,5 +169,4 @@ export class TaskOrchestrator {
             return subTask?.task_metadata?.status === 'completed';
         });
     }
-
 }

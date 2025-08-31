@@ -141,26 +141,40 @@ export class UnifiedTaskManager implements TaskManager {
         const task = this.getTask(id);
         if (!task || !isTask(task)) return null;
 
+        // Special handling for terminal states that require agenda removal
+        const terminalStates: TaskStatus[] = ['completed', 'failed', 'deferred'];
+        const wasTerminal = task.task_metadata && terminalStates.includes(task.task_metadata.status);
+        const isTerminal = terminalStates.includes(status);
+
         if (task.task_metadata) {
             task.task_metadata.status = status;
         }
         task.updated_at = Date.now();
 
         this.worldModel.update_item(task);
+        
+        // Remove from agenda if transitioning to a terminal state
+        if (!wasTerminal && isTerminal) {
+            this.agenda.remove(id);
+        }
+        
         this.notifyListeners({type: 'taskStatusChanged', task});
 
         return task;
     }
 
     completeTask(id: string): CognitiveItem | null {
-        const task = this.updateTaskStatus(id, 'completed');
+        const task = this.getTask(id);
         if (!task || !isTask(task)) return null;
 
+        // Update task status and completion percentage
         if (task.task_metadata) {
+            task.task_metadata.status = 'completed';
             task.task_metadata.completion_percentage = 100;
         }
-        this.worldModel.update_item(task);
+        task.updated_at = Date.now();
 
+        this.worldModel.update_item(task);
         this.agenda.remove(id);
         this.notifyListeners({type: 'taskCompleted', task});
 
@@ -169,9 +183,14 @@ export class UnifiedTaskManager implements TaskManager {
     }
 
     failTask(id: string, reason?: string): CognitiveItem | null {
-        const task = this.updateTaskStatus(id, 'failed');
-        if (!task || !task.task_metadata) return null;
+        const task = this.getTask(id);
+        if (!task || !isTask(task) || !task.task_metadata) return null;
 
+        // Update task status
+        task.task_metadata.status = 'failed';
+        task.updated_at = Date.now();
+
+        this.worldModel.update_item(task);
         this.agenda.remove(id);
         this.notifyListeners({type: 'taskFailed', task});
 
@@ -188,9 +207,16 @@ export class UnifiedTaskManager implements TaskManager {
     }
 
     deferTask(id: string): CognitiveItem | null {
-        const task = this.updateTaskStatus(id, 'deferred');
-        if (!task) return null;
+        const task = this.getTask(id);
+        if (!task || !isTask(task)) return null;
 
+        // Update task status
+        if (task.task_metadata) {
+            task.task_metadata.status = 'deferred';
+        }
+        task.updated_at = Date.now();
+
+        this.worldModel.update_item(task);
         this.agenda.remove(id);
         this.notifyListeners({type: 'taskDeferred', task});
         return task;
