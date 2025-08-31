@@ -17,7 +17,13 @@ import {embeddingService} from '../services/embeddingService';
 import {TaskManager} from '../modules/taskManager';
 import {TaskOrchestrator} from '../modules/taskOrchestrator';
 import {AddBeliefSchema, AddGoalSchema, AddSchemaSchema} from '../utils/validators';
-import {SYSTEM_VERSION} from '../utils/constants';
+import {
+    META_SOURCE_SYSTEM,
+    META_SOURCE_USER_INPUT,
+    META_TYPE_COGNITIVE_SCHEMA,
+    META_TYPE_FACT,
+    SYSTEM_VERSION
+} from '../utils/constants';
 import logger from '../services/logger';
 
 export interface CognitiveCoreConfig {
@@ -157,8 +163,8 @@ export class DecentralizedCognitiveCore {
         const {content: validatedContent} = validationResult.data;
 
         const atomMeta = {
-            type: "Fact",
-            source: "user_input",
+            type: META_TYPE_FACT,
+            source: META_SOURCE_USER_INPUT,
             timestamp: new Date().toISOString(),
             trust_score: truth.confidence,
             ...meta
@@ -185,8 +191,8 @@ export class DecentralizedCognitiveCore {
         const {content: validatedContent} = validationResult.data;
 
         const atomMeta = {
-            type: "Fact",
-            source: "user_input",
+            type: META_TYPE_FACT,
+            source: META_SOURCE_USER_INPUT,
             timestamp: new Date().toISOString(),
             trust_score: attention.priority,
             ...meta
@@ -212,8 +218,8 @@ export class DecentralizedCognitiveCore {
         const {content: validatedContent} = validationResult.data;
 
         const atomMeta = {
-            type: "CognitiveSchema",
-            source: "system",
+            type: META_TYPE_COGNITIVE_SCHEMA,
+            source: META_SOURCE_SYSTEM,
             timestamp: new Date().toISOString(),
             trust_score: 0.9, // Schemas from user are trusted by default
             ...meta
@@ -306,59 +312,36 @@ export class DecentralizedCognitiveCore {
     }
 
     /**
-     * Register built-in system schemas
+     * Register a built-in system schema
+     * @param schemaDef The schema definition object
+     * @param name The name of the schema
      */
-    private registerSystemSchemas(): void {
-        const historySchemaAtom: SemanticAtom = {
-            id: HistoryRecordingSchema.atom_id,
-            content: {type: 'schema', name: 'HistoryRecordingSchema', apply: HistoryRecordingSchema.apply},
+    private _registerSystemSchema(schemaDef: { atom_id: string; apply: Function }, name: string): void {
+        const schemaAtom: SemanticAtom = {
+            id: schemaDef.atom_id,
+            content: { type: 'schema', name, apply: schemaDef.apply },
             embedding: [], // System schema, no embedding needed
-            creationTime: Date.now(), // Added
-            lastAccessTime: Date.now(), // Added
-            meta: {
-                type: "CognitiveSchema",
-                source: "system",
-                timestamp: new Date().toISOString(),
-                trust_score: 1.0,
-                domain: "system_internals"
-            }
-        };
-        this.worldModel.add_atom(historySchemaAtom);
-        this.schemaMatcher.register_schema(historySchemaAtom, this.worldModel);
-
-        const analysisSchemaAtom: SemanticAtom = {
-            id: HistoryAnalysisSchema.atom_id,
-            content: {type: 'schema', name: 'HistoryAnalysisSchema', apply: HistoryAnalysisSchema.apply},
-            embedding: [],
-            creationTime: Date.now(), // Added
-            lastAccessTime: Date.now(), // Added
-            meta: {
-                type: "CognitiveSchema",
-                source: "system",
-                timestamp: new Date().toISOString(),
-                trust_score: 1.0,
-                domain: "system_internals"
-            }
-        };
-        this.worldModel.add_atom(analysisSchemaAtom);
-        this.schemaMatcher.register_schema(analysisSchemaAtom, this.worldModel);
-
-        const decompositionSchemaAtom: SemanticAtom = {
-            id: DecompositionSchema.atom_id,
-            content: {type: 'schema', name: 'DecompositionSchema', apply: DecompositionSchema.apply},
-            embedding: [],
             creationTime: Date.now(),
             lastAccessTime: Date.now(),
             meta: {
-                type: "CognitiveSchema",
-                source: "system",
+                type: META_TYPE_COGNITIVE_SCHEMA,
+                source: META_SOURCE_SYSTEM,
                 timestamp: new Date().toISOString(),
                 trust_score: 1.0,
                 domain: "system_internals"
             }
         };
-        this.worldModel.add_atom(decompositionSchemaAtom);
-        this.schemaMatcher.register_schema(decompositionSchemaAtom, this.worldModel);
+        this.worldModel.add_atom(schemaAtom);
+        this.schemaMatcher.register_schema(schemaAtom, this.worldModel);
+    }
+
+    /**
+     * Register built-in system schemas
+     */
+    private registerSystemSchemas(): void {
+        this._registerSystemSchema(HistoryRecordingSchema, 'HistoryRecordingSchema');
+        this._registerSystemSchema(HistoryAnalysisSchema, 'HistoryAnalysisSchema');
+        this._registerSystemSchema(DecompositionSchema, 'DecompositionSchema');
     }
 
     /**

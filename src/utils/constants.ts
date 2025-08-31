@@ -23,3 +23,10 @@ export const DEFAULT_TASK_DURABILITY = 0.5;
 
 // System Information
 export const SYSTEM_VERSION = '1.0.0';
+
+// Atom Metadata
+export const META_TYPE_FACT = "Fact";
+export const META_TYPE_COGNITIVE_SCHEMA = "CognitiveSchema";
+
+export const META_SOURCE_USER_INPUT = "user_input";
+export const META_SOURCE_SYSTEM = "system";
