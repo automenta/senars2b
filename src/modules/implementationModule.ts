@@ -160,7 +160,7 @@ export class ImplementationModule {
  * This is a placeholder for the actual implementation.
  * Please replace this with the actual code.
  */
-logger.warn(`Placeholder implementation for: ${proposal.description}`);
+logger.warn(\`Placeholder implementation for: \${proposal.description}\`);
 `;
     }
 

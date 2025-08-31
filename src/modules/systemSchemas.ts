@@ -33,6 +33,7 @@ export const HistoryRecordingSchema: CognitiveSchema = {
         // Create a new semantic atom for the historical record.
         // The content itself is structured metadata.
         const historyAtomContent = {
+            type: 'history' as const,
             historicalRecordFor: itemId,
             recordedTruth: oldTruth,
             timestamp: eventItem.stamp.timestamp,
@@ -104,7 +105,7 @@ export const HistoryAnalysisSchema: CognitiveSchema = {
         const createMetaBelief = (insightType: string, label: string): CognitiveItem => {
             const metaAtom = {
                 id: uuidv4(),
-                content: {insightType, label, analyzedBelief: belief.id},
+                content: {type: 'insight' as const, insightType, label, analyzedBelief: belief.id},
                 embedding: [],
                 creationTime: Date.now(), // Added
                 lastAccessTime: Date.now(), // Added

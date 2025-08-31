@@ -12,7 +12,7 @@ describe('HistoryAnalysisSchema', () => {
     const createHistoryItem = (beliefId: string, truth: TruthValue, timestamp: number): CognitiveItem => {
         const historyAtom: SemanticAtom = {
             id: uuidv4(),
-            content: {historicalRecordFor: beliefId, recordedTruth: truth, timestamp},
+            content: {type: 'history', historicalRecordFor: beliefId, recordedTruth: truth, timestamp},
             embedding: [],
             creationTime: timestamp,
             lastAccessTime: timestamp,

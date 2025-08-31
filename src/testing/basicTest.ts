@@ -153,6 +153,7 @@ async function testSchemaMatcher(): Promise<void> {
     const schemaAtom: SemanticAtom = {
         id: uuidv4(),
         content: {
+            type: 'test_schema',
             name: "TestSchema",
             pattern: {
                 premise: "(?A is related to ?B)",

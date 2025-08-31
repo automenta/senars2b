@@ -1,6 +1,8 @@
+import { CognitiveContent } from './contentTypes';
+
 export interface SemanticAtom {
     id: string;                // Unique identifier
-    content: any;              // Natural language content or object (changed from string)
+    content: CognitiveContent; // Natural language content or object
     embedding: number[];       // Semantic vector representation
     creationTime: number;      // Timestamp of creation (added)
     lastAccessTime: number;    // Timestamp of last access (added)
@@ -52,7 +54,7 @@ export interface CognitiveItem {
     atom_id: string;           // Reference to SemanticAtom (added)
     type: 'BELIEF' | 'GOAL' | 'QUERY' | 'EVENT' | 'TASK'; // Item category (added TASK)
     label: string;             // Natural language representation (made required)
-    content?: any;             // Content of the item (added for tasks)
+    content?: CognitiveContent; // Content of the item (added for tasks)
     truth?: TruthValue;        // Truth value for beliefs
     attention: AttentionValue; // Attention value for goals (made non-optional)
     meta?: Record<string, any>; // Metadata (domain, source, etc.)

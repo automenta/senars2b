@@ -311,7 +311,7 @@ export class DecentralizedCognitiveCore {
     private registerSystemSchemas(): void {
         const historySchemaAtom: SemanticAtom = {
             id: HistoryRecordingSchema.atom_id,
-            content: {name: 'HistoryRecordingSchema', apply: HistoryRecordingSchema.apply},
+            content: {type: 'schema', name: 'HistoryRecordingSchema', apply: HistoryRecordingSchema.apply},
             embedding: [], // System schema, no embedding needed
             creationTime: Date.now(), // Added
             lastAccessTime: Date.now(), // Added
@@ -328,7 +328,7 @@ export class DecentralizedCognitiveCore {
 
         const analysisSchemaAtom: SemanticAtom = {
             id: HistoryAnalysisSchema.atom_id,
-            content: {name: 'HistoryAnalysisSchema', apply: HistoryAnalysisSchema.apply},
+            content: {type: 'schema', name: 'HistoryAnalysisSchema', apply: HistoryAnalysisSchema.apply},
             embedding: [],
             creationTime: Date.now(), // Added
             lastAccessTime: Date.now(), // Added
@@ -345,7 +345,7 @@ export class DecentralizedCognitiveCore {
 
         const decompositionSchemaAtom: SemanticAtom = {
             id: DecompositionSchema.atom_id,
-            content: {name: 'DecompositionSchema', apply: DecompositionSchema.apply},
+            content: {type: 'schema', name: 'DecompositionSchema', apply: DecompositionSchema.apply},
             embedding: [],
             creationTime: Date.now(),
             lastAccessTime: Date.now(),

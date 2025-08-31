@@ -73,13 +73,29 @@ describe('ActionSubsystem', () => {
 
         it('should update statistics after a successful execution', async () => {
             const goal = createGoalItem({label: 'search for something'});
+
+            let currentTime = 1000000;
+            const dateNowSpy = jest.spyOn(Date, 'now').mockImplementation(() => {
+                currentTime += 100; // Increment time by 100ms on each call
+                return currentTime;
+            });
+
             await actionSubsystem.executeGoal(goal);
             const stats = actionSubsystem.getStatistics();
 
+            // There are multiple calls to Date.now() inside the execution path
+            // (logger, item factory), which affects the duration calculation.
+            // The mock increments by 100ms each time.
+            // 1. startTime = 1000100
+            // 2. logger = 1000200
+            // 3. createBelief = 1000300
+            // 4. duration = 1000400 - 1000100 = 300
             expect(stats.totalExecutions).toBe(1);
             expect(stats.successRate).toBe(1);
-            expect(stats.averageDuration).toBeGreaterThan(0);
+            expect(stats.averageDuration).toBe(300);
             expect(stats.executorStats['WebSearchExecutor'].count).toBe(1);
+
+            dateNowSpy.mockRestore();
         });
     });
 });

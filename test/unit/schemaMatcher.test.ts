@@ -15,6 +15,7 @@ describe('EfficientSchemaMatcher', () => {
         it('should register a schema atom and return a cognitive schema', () => {
             const schemaAtom = createSemanticAtom({
                 content: {
+                    type: 'test_schema',
                     name: "TestSchema",
                     pattern: {
                         premise: "(?A is related to ?B)",

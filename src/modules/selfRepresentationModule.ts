@@ -58,7 +58,7 @@ export class SelfRepresentationModule {
         const atom: SemanticAtom = {
             id: `component-${component.id}`,
             content: {
-                type: 'SystemComponent',
+                type: 'system_component',
                 name: component.name,
                 description: component.description,
                 responsibilities: component.responsibilities,
@@ -102,11 +102,10 @@ export class SelfRepresentationModule {
             // Update the semantic atom with new metrics
             const atom = this.componentKnowledge.get(componentId);
             if (atom) {
-                // Ensure atom.content is an object before spreading
-                atom.content = {
-                    ...(typeof atom.content === 'object' && atom.content !== null ? atom.content : {}),
-                    metrics: metrics
-                };
+                // Ensure atom.content is a ContentSystemComponent before spreading
+                if (atom.content && typeof atom.content === 'object' && atom.content.type === 'system_component') {
+                    atom.content.metrics = metrics;
+                }
             }
         }
     }

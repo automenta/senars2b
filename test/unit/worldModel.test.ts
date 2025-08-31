@@ -18,7 +18,7 @@ describe('PersistentWorldModel', () => {
         // Register the history schema for testing
         const historySchemaAtom: SemanticAtom = {
             id: HistoryRecordingSchema.atom_id,
-            content: {name: 'HistoryRecordingSchema', apply: HistoryRecordingSchema.apply},
+            content: {type: 'schema', name: 'HistoryRecordingSchema', apply: HistoryRecordingSchema.apply},
             embedding: [],
             creationTime: Date.now(), // Added
             lastAccessTime: Date.now(), // Added

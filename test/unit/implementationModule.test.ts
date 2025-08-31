@@ -1,11 +1,18 @@
 import {ImplementationModule} from '@/modules/implementationModule';
 import {CodeChangeProposal} from '@/modules/enhancementProposalModule';
+import logger from '@/services/logger';
 
 describe('ImplementationModule', () => {
     let implementationModule: ImplementationModule;
+    let loggerSpy: jest.SpyInstance;
 
     beforeEach(() => {
         implementationModule = new ImplementationModule();
+        loggerSpy = jest.spyOn(logger, 'info').mockImplementation();
+    });
+
+    afterEach(() => {
+        loggerSpy.mockRestore();
     });
 
     describe('generateCodeChange', () => {
@@ -55,8 +62,6 @@ describe('ImplementationModule', () => {
 
     describe('applyCodeChange', () => {
         it('should apply a code change', () => {
-            const consoleSpy = jest.spyOn(console, 'log').mockImplementation();
-
             const change = {
                 id: 'code-change-1',
                 filePath: 'src/testComponent.ts',
@@ -69,18 +74,12 @@ describe('ImplementationModule', () => {
 
             // Should apply the change successfully
             expect(result).toBe(true);
-            expect(consoleSpy).toHaveBeenCalledWith(
-                expect.stringContaining('Applying code change to src/testComponent.ts')
-            );
-
-            consoleSpy.mockRestore();
+            expect(loggerSpy).toHaveBeenCalledWith({change}, 'Applying code change');
         });
     });
 
     describe('applyTestChange', () => {
         it('should apply a test change', () => {
-            const consoleSpy = jest.spyOn(console, 'log').mockImplementation();
-
             const testChange = {
                 id: 'test-change-1',
                 filePath: 'src/testComponent.test.ts',
@@ -94,18 +93,12 @@ describe('ImplementationModule', () => {
 
             // Should apply the test change successfully
             expect(result).toBe(true);
-            expect(consoleSpy).toHaveBeenCalledWith(
-                expect.stringContaining('Applying test change to src/testComponent.test.ts')
-            );
-
-            consoleSpy.mockRestore();
+            expect(loggerSpy).toHaveBeenCalledWith({change: testChange}, 'Applying test change');
         });
     });
 
     describe('validateChange', () => {
         it('should validate a code change', () => {
-            const consoleSpy = jest.spyOn(console, 'log').mockImplementation();
-
             const change = {
                 id: 'code-change-1',
                 filePath: 'src/testComponent.ts',
@@ -122,14 +115,8 @@ describe('ImplementationModule', () => {
 
             // Should validate the change successfully
             expect(result).toBe(true);
-            expect(consoleSpy).toHaveBeenCalledWith(
-                expect.stringContaining('Validating change: Fix a bug in testComponent')
-            );
-            expect(consoleSpy).toHaveBeenCalledWith(
-                expect.stringContaining('Running validation tests')
-            );
-
-            consoleSpy.mockRestore();
+            expect(loggerSpy).toHaveBeenCalledWith({changeDescription: change.description}, 'Validating change');
+            expect(loggerSpy).toHaveBeenCalledWith('Running validation tests:');
         });
     });
 

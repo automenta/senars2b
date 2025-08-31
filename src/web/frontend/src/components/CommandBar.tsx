@@ -209,7 +209,7 @@ const CommandBar: React.FC = () => {
             <div className={styles.content}>
                 {activeTab === 'CLI' ? <CliPanel/> : <ProcessingPanel/>}
             </div>
-        </footer>
+        </motion.footer>
     );
 };
 

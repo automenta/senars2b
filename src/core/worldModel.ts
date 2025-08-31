@@ -294,83 +294,59 @@ export class PersistentWorldModel implements WorldModel {
     }
 
     register_schema_atom(atom: SemanticAtom): CognitiveSchema {
-        // Create a schema implementation that uses the schema's own apply function if available
         const schema: CognitiveSchema = {
             atom_id: atom.id,
             apply: (a: CognitiveItem, b: CognitiveItem, worldModel: WorldModel) => {
-                // Use the schema's own apply function if it exists
-                if (atom.content && typeof atom.content === 'object' && 'apply' in atom.content) {
-                    try {
-                        return (atom.content as any).apply(a, b, worldModel);
-                    } catch (error) {
-                        logger.warn({schemaId: atom.id, error}, `Schema apply function failed`);
-                        return [];
+                if (atom.content && typeof atom.content === 'object') {
+                    // Case 1: The content is a well-defined schema with its own apply function
+                    if (atom.content.type === 'schema' && 'apply' in atom.content && typeof atom.content.apply === 'function') {
+                        try {
+                            return atom.content.apply(a, b, worldModel);
+                        } catch (error) {
+                            logger.warn({schemaId: atom.id, error}, `Schema apply function failed`);
+                            return [];
+                        }
+                    }
+
+                    // Case 2: Fallback logic for other content types that might be schemas
+                    let schemaName = '';
+                    if ('name' in atom.content && typeof (atom.content as any).name === 'string') {
+                        schemaName = (atom.content as any).name;
+                    }
+
+                    if (schemaName === 'EnhancedAnalogyHypothesis') {
+                        const newItem = {
+                            id: uuidv4(),
+                            atom_id: atom.id,
+                            type: 'QUERY' as const,
+                            attention: {priority: 0.7, durability: 0.6},
+                            stamp: {timestamp: Date.now(), parent_ids: [a.id, b.id], schema_id: atom.id, module: 'analogy'},
+                            label: `Analogy-based query from items ${a.id} and ${b.id}`
+                        };
+                        return [newItem];
+                    } else if (schemaName === 'EnhancedCausalInference') {
+                        const newItem = {
+                            id: uuidv4(),
+                            atom_id: atom.id,
+                            type: 'BELIEF' as const,
+                            truth: {frequency: 0.8, confidence: 0.7},
+                            attention: {priority: 0.6, durability: 0.7},
+                            stamp: {timestamp: Date.now(), parent_ids: [a.id, b.id], schema_id: atom.id, module: 'causal'},
+                            label: `Causal inference from items ${a.id} and ${b.id}`
+                        };
+                        return [newItem];
                     }
                 }
 
-                // Fallback to default schema application based on schema type
-                const schemaName = atom.content?.name || '';
-
-                if (schemaName === 'EnhancedAnalogyHypothesis') {
-                    // Create a query based on analogy
-                    const newItem = {
-                        id: uuidv4(),
-                        atom_id: atom.id,
-                        type: 'QUERY' as const,
-                        attention: {
-                            priority: 0.7,
-                            durability: 0.6
-                        },
-                        stamp: {
-                            timestamp: Date.now(),
-                            parent_ids: [a.id, b.id],
-                            schema_id: atom.id,
-                            module: 'analogy'
-                        },
-                        label: `Analogy-based query from items ${a.id} and ${b.id}`
-                    };
-                    return [newItem];
-                } else if (schemaName === 'EnhancedCausalInference') {
-                    // Create a belief based on causal inference
-                    const newItem = {
-                        id: uuidv4(),
-                        atom_id: atom.id,
-                        type: 'BELIEF' as const,
-                        truth: {
-                            frequency: 0.8,
-                            confidence: 0.7
-                        },
-                        attention: {
-                            priority: 0.6,
-                            durability: 0.7
-                        },
-                        stamp: {
-                            timestamp: Date.now(),
-                            parent_ids: [a.id, b.id],
-                            schema_id: atom.id,
-                            module: 'causal'
-                        },
-                        label: `Causal inference from items ${a.id} and ${b.id}`
-                    };
-                    return [newItem];
-                } else {
-                    // Default schema application
-                    const newItem = {
-                        id: uuidv4(),
-                        atom_id: atom.id,
-                        type: 'QUERY' as const,
-                        attention: {
-                            priority: 0.7,
-                            durability: 0.6
-                        },
-                        stamp: {
-                            timestamp: Date.now(),
-                            parent_ids: [a.id, b.id],
-                            schema_id: atom.id
-                        }
-                    };
-                    return [newItem];
-                }
+                // Default behavior if content is not an object or no other logic matches
+                const newItem = {
+                    id: uuidv4(),
+                    atom_id: atom.id,
+                    type: 'QUERY' as const,
+                    attention: {priority: 0.7, durability: 0.6},
+                    stamp: {timestamp: Date.now(), parent_ids: [a.id, b.id], schema_id: atom.id}
+                };
+                return [newItem];
             }
         };
         this.schemas.set(atom.id, schema);

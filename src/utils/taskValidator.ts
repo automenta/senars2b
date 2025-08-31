@@ -1,5 +1,63 @@
+import { z } from 'zod';
 import {CognitiveItem, TaskMetadata, TaskStatus} from '../interfaces/types';
 import { TaskPriority } from '../interfaces/sharedTypes';
+
+const taskStatusSchema = z.enum(['pending', 'awaiting_dependencies', 'decomposing', 'awaiting_subtasks', 'ready_for_execution', 'completed', 'failed', 'deferred']);
+const taskPrioritySchema = z.enum(['low', 'medium', 'high', 'critical']);
+
+const taskMetadataSchema = z.object({
+    status: taskStatusSchema.default('pending'),
+    priority_level: taskPrioritySchema.default('medium'),
+    dependencies: z.array(z.string()).default([]),
+    deadline: z.number().min(0).optional(),
+    estimated_effort: z.number().min(0).optional(),
+    required_resources: z.array(z.string()).default([]),
+    outcomes: z.array(z.string()).default([]),
+    confidence: z.number().min(0).max(1).optional(),
+    tags: z.array(z.string()).default([]),
+    categories: z.array(z.string()).default([]),
+    context: z.record(z.any()).default({}),
+    completion_percentage: z.number().min(0).max(100).optional(),
+    group_id: z.string().optional(),
+    parent_id: z.string().optional(),
+    subtasks: z.array(z.string()).default([]),
+});
+
+const attentionValueSchema = z.object({
+    priority: z.number().min(0).max(1),
+    durability: z.number().min(0).max(1),
+});
+
+const truthValueSchema = z.object({
+    frequency: z.number().min(0).max(1),
+    confidence: z.number().min(0).max(1),
+});
+
+const derivationStampSchema = z.object({
+    timestamp: z.number(),
+    parent_ids: z.array(z.string()),
+    schema_id: z.string(),
+    module: z.string().optional(),
+});
+
+const cognitiveItemSchema = z.object({
+    id: z.string(),
+    atom_id: z.string(),
+    label: z.string(),
+    created_at: z.number().default(() => Date.now()),
+    updated_at: z.number().default(() => Date.now()),
+    type: z.literal('TASK'),
+    task_metadata: taskMetadataSchema,
+    attention: attentionValueSchema,
+    stamp: derivationStampSchema,
+    // Add other CognitiveItem fields to make the schema complete
+    content: z.any().optional(),
+    truth: truthValueSchema.optional(),
+    meta: z.record(z.any()).optional(),
+    goal_parent_id: z.string().optional(),
+    goal_status: z.enum(["active", "blocked", "achieved", "failed"]).optional(),
+    payload: z.record(z.any()).optional(),
+});
 
 /**
  * A type guard to check if a CognitiveItem is a well-formed Task.
@@ -9,9 +67,6 @@ import { TaskPriority } from '../interfaces/sharedTypes';
 function isTask(item: CognitiveItem): item is CognitiveItem & { type: 'TASK'; task_metadata: TaskMetadata } {
     return item.type === 'TASK' && item.task_metadata !== undefined;
 }
-
-const VALID_STATUSES: TaskStatus[] = ['pending', 'awaiting_dependencies', 'decomposing', 'awaiting_subtasks', 'ready_for_execution', 'completed', 'failed', 'deferred'];
-const VALID_PRIORITIES: TaskPriority[] = ['low', 'medium', 'high', 'critical'];
 
 /**
  * Provides utility methods for validating and normalizing Task cognitive items.
@@ -24,81 +79,8 @@ export class TaskValidator {
      * @returns True if the task is valid, false otherwise.
      */
     static validateTask(task: CognitiveItem): boolean {
-        // Check if the item is a task with required properties
-        if (!isTask(task) || !task.id || !task.atom_id || !task.label || typeof task.created_at !== 'number' || typeof task.updated_at !== 'number') {
-            return false;
-        }
-
-        // Validate task metadata
-        const metadata = task.task_metadata;
-        
-        // Validate status
-        if (!VALID_STATUSES.includes(metadata.status)) {
-            return false;
-        }
-        
-        // Validate priority level
-        if (!VALID_PRIORITIES.includes(metadata.priority_level)) {
-            return false;
-        }
-        
-        // Validate optional fields if present
-        if (metadata.deadline !== undefined && (typeof metadata.deadline !== 'number' || metadata.deadline < 0)) {
-            return false;
-        }
-        
-        if (metadata.estimated_effort !== undefined && (typeof metadata.estimated_effort !== 'number' || metadata.estimated_effort < 0)) {
-            return false;
-        }
-        
-        if (metadata.confidence !== undefined && (typeof metadata.confidence !== 'number' || metadata.confidence < 0 || metadata.confidence > 1)) {
-            return false;
-        }
-        
-        if (metadata.completion_percentage !== undefined && (typeof metadata.completion_percentage !== 'number' || metadata.completion_percentage < 0 || metadata.completion_percentage > 100)) {
-            return false;
-        }
-        
-        // Validate array fields
-        if (metadata.dependencies !== undefined && !Array.isArray(metadata.dependencies)) {
-            return false;
-        }
-        
-        if (metadata.tags !== undefined && !Array.isArray(metadata.tags)) {
-            return false;
-        }
-        
-        if (metadata.categories !== undefined && !Array.isArray(metadata.categories)) {
-            return false;
-        }
-        
-        if (metadata.outcomes !== undefined && !Array.isArray(metadata.outcomes)) {
-            return false;
-        }
-        
-        if (metadata.required_resources !== undefined && !Array.isArray(metadata.required_resources)) {
-            return false;
-        }
-        
-        if (metadata.subtasks !== undefined && !Array.isArray(metadata.subtasks)) {
-            return false;
-        }
-        
-        // Validate context if present
-        if (metadata.context !== undefined && (typeof metadata.context !== 'object' || metadata.context === null || Array.isArray(metadata.context))) {
-            return false;
-        }
-        
-        // Validate string fields
-        if (metadata.group_id !== undefined && typeof metadata.group_id !== 'string') {
-            return false;
-        }
-        
-        if (metadata.parent_id !== undefined && typeof metadata.parent_id !== 'string') {
-            return false;
-        }
-
-        return true;
+        const result = cognitiveItemSchema.safeParse(task);
+        return result.success;
     }
 
     /**
@@ -117,30 +99,8 @@ export class TaskValidator {
             };
         }
 
-        const metadata = task.task_metadata!;
-
-        // Set default values for core metadata
-        metadata.status = metadata.status ?? 'pending';
-        metadata.priority_level = metadata.priority_level ?? 'medium';
-
-        // Ensure array fields are arrays
-        metadata.dependencies = Array.isArray(metadata.dependencies) ? metadata.dependencies : [];
-        metadata.tags = Array.isArray(metadata.tags) ? metadata.tags : [];
-        metadata.categories = Array.isArray(metadata.categories) ? metadata.categories : [];
-        metadata.outcomes = Array.isArray(metadata.outcomes) ? metadata.outcomes : [];
-        metadata.required_resources = Array.isArray(metadata.required_resources) ? metadata.required_resources : [];
-        metadata.subtasks = Array.isArray(metadata.subtasks) ? metadata.subtasks : [];
-
-        // Ensure timestamps exist
-        const now = Date.now();
-        task.created_at = task.created_at ?? now;
-        task.updated_at = task.updated_at ?? task.created_at;
-
-        // Ensure context is an object
-        if (typeof metadata.context !== 'object' || metadata.context === null || Array.isArray(metadata.context)) {
-            metadata.context = {};
-        }
-
-        return task;
+        // Now, parse with Zod to apply all defaults and validate.
+        // This will throw an error if the basic structure is still wrong.
+        return cognitiveItemSchema.parse(task);
     }
 }

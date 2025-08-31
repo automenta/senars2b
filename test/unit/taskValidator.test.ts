@@ -125,16 +125,17 @@ describe('TaskValidator', () => {
             expect(normalized.task_metadata?.subtasks).toEqual(['subtask-1']);
         });
 
-        it('should ensure array fields are arrays', () => {
-            const task = createValidTask({}, {tags: 'not-an-array' as any});
-            const normalized = TaskValidator.normalizeTask(task);
-            expect(normalized.task_metadata?.tags).toEqual([]);
+        it('should throw an error for fields with wrong types during normalization', () => {
+            const taskWithInvalidTags = createValidTask({}, {tags: 'not-an-array' as any});
+            expect(() => TaskValidator.normalizeTask(taskWithInvalidTags)).toThrow();
+
+            const taskWithInvalidContext = createValidTask({}, {context: 'not-an-object' as any});
+            expect(() => TaskValidator.normalizeTask(taskWithInvalidContext)).toThrow();
         });
 
-        it('should ensure context is an object', () => {
-            const task = createValidTask({}, {context: 'not-an-object' as any});
-            const normalized = TaskValidator.normalizeTask(task);
-            expect(normalized.task_metadata?.context).toEqual({});
+        it('should throw an error if required fields are missing during normalization', () => {
+            const task = createValidTask({ id: undefined });
+            expect(() => TaskValidator.normalizeTask(task)).toThrow();
         });
 
         it('should add timestamps if they are missing', () => {
