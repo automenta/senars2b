@@ -1,23 +1,38 @@
 .badge {
     font-size: 0.75em;
-    padding: 0.25em 0.5em;
-    border-radius: var(--border-radius);
+    padding: 0.35em 0.75em;
+    border-radius: var(--border-radius-sm);
     color: #fff;
     text-transform: capitalize;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 80px;
+    text-align: center;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    transition: all var(--transition-fast);
+}
+
+.badge:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
 }
 
 .low {
-    background-color: #6c757d;
+    background: linear-gradient(135deg, #6c757d, #495057);
 }
 
 .medium {
-    background-color: #0d6efd;
+    background: linear-gradient(135deg, #0d6efd, #0b5ed7);
 }
 
 .high {
-    background-color: #ffc107;
+    background: linear-gradient(135deg, #ffc107, #ffca2c);
+    color: #212529;
 }
 
 .critical {
-    background-color: #dc3545;
+    background: linear-gradient(135deg, #dc3545, #bb2d3b);
 }

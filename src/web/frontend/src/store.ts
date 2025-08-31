@@ -107,7 +107,7 @@ export const useStore = create<AppState>((set, get) => ({
     })),
 
 
-    // Derived actions
+    // Derived actions (these should not be used directly in components)
     getTaskById: (id) => {
         return get().tasks.find(task => task.id === id);
     },
@@ -131,4 +131,10 @@ export const useTaskById = (id: string) => {
 
 export const useSubtasks = (parentId: string) => {
     return useStore(state => state.getSubtasks(parentId));
+};
+
+export const usePendingPrompts = () => {
+    return useStore(state => 
+        state.prompts.filter(p => p.status === 'pending')
+    );
 };

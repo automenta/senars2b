@@ -1,4 +1,4 @@
-import React, {useCallback, useEffect} from 'react';
+import React, {useCallback, useEffect, useRef} from 'react';
 import Header from './components/Header';
 import TasksView from './views/TasksView';
 import {useWebSocket} from './hooks/useWebSocket';
@@ -60,11 +60,11 @@ function App() {
                     const newTasks = message.payload.tasks;
                     const tempId = message.payload.tempId;
                     if (tempId) {
-                        setTasks(
-                            tasks.map(task =>
-                                task.id === tempId ? newTasks.find((t: Task) => t.title === task.title) || task : task
-                            )
-                        );
+                                                                                                setTasks(
+                                                    tasks.map(task =>
+                                                        task.id === tempId ? newTasks.find((t: Task) => t.title === task.title) || task : task
+                                                    )
+                                                );
                         addToastNotification('Task created successfully!', 'success');
                     } else {
                         setTasks(newTasks);
@@ -100,18 +100,31 @@ function App() {
             console.error('Error processing WebSocket message:', error);
             addToastNotification('Error processing message from server', 'error');
         }
-    }, [setTasks, tasks, addToastNotification, addPrompt, addNotification]);
+    }, [setTasks, addToastNotification, addPrompt, addNotification]);
 
     const {isConnected, connectionError, sendMessage} = useWebSocket(handleMessage);
 
     // Notify user about connection status
+    const prevConnectionStatus = useRef({isConnected: false, hasError: false});
+    
     useEffect(() => {
-        if (connectionError) {
-            addToastNotification(`Connection error: ${connectionError}`, 'error');
-        } else if (isConnected) {
-            addToastNotification('Connected to server', 'success');
-        } else {
-            addToastNotification('Disconnected from server', 'warning');
+        // Only show notifications when connection status actually changes
+        if (prevConnectionStatus.current.isConnected !== isConnected || 
+            prevConnectionStatus.current.hasError !== !!connectionError) {
+            
+            if (connectionError) {
+                addToastNotification(`Connection error: ${connectionError}`, 'error');
+            } else if (isConnected) {
+                addToastNotification('Connected to server', 'success');
+            } else {
+                addToastNotification('Disconnected from server', 'warning');
+            }
+            
+            // Update previous status
+            prevConnectionStatus.current = {
+                isConnected,
+                hasError: !!connectionError
+            };
         }
     }, [isConnected, connectionError, addToastNotification]);
 
@@ -131,7 +144,7 @@ function App() {
             type: task.type,
             status: 'pending', // Use consistent status format
             completion_percentage: 0,
-            parent_id: null,
+            parent_id: undefined,
             subtasks: [],
         };
 

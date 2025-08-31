@@ -4,11 +4,12 @@ import {useStore} from '../store';
 import styles from './TasksView.module.css';
 import {useHotkeys} from '../hooks/useHotkeys';
 import {useTasks} from '../hooks/useTasks';
-import {FaFilter, FaSearch, FaSort} from 'react-icons/fa';
+import {FaFilter, FaSearch, FaSort, FaChevronDown, FaChevronUp} from 'react-icons/fa';
 import InlineAddTaskForm from '../components/InlineAddTaskForm';
 import {TaskPriority} from '../types';
 import DashboardPanel from '../components/DashboardPanel';
 import {useDashboardStats} from '../hooks/useDashboardStats';
+import {motion, AnimatePresence} from 'framer-motion';
 
 interface TasksViewProps {
     sendMessage: (message: any) => void;
@@ -105,7 +106,12 @@ const TasksView: React.FC<TasksViewProps> = memo(({sendMessage, onAddTask}) => {
     ];
 
     return (
-        <div className={styles.tasksView}>
+        <motion.div 
+            className={styles.tasksView}
+            initial={{opacity: 0}}
+            animate={{opacity: 1}}
+            transition={{duration: 0.3}}
+        >
             <DashboardPanel
                 stats={stats}
                 systemStatus={systemStatus}
@@ -113,11 +119,19 @@ const TasksView: React.FC<TasksViewProps> = memo(({sendMessage, onAddTask}) => {
                 isLoading={isLoading}
             />
 
-            {error && (
-                <div className={styles.errorBanner}>
-                    {error}
-                </div>
-            )}
+            <AnimatePresence>
+                {error && (
+                    <motion.div 
+                        className={styles.errorBanner}
+                        initial={{opacity: 0, y: -20}}
+                        animate={{opacity: 1, y: 0}}
+                        exit={{opacity: 0, y: -20}}
+                        transition={{duration: 0.2}}
+                    >
+                        {error}
+                    </motion.div>
+                )}
+            </AnimatePresence>
 
             <InlineAddTaskForm onAddTask={onAddTask}/>
 
@@ -134,83 +148,100 @@ const TasksView: React.FC<TasksViewProps> = memo(({sendMessage, onAddTask}) => {
                     />
                 </div>
 
-                <button
+                <motion.button
                     onClick={() => setShowFilters(!showFilters)}
                     className={styles.toggleFiltersBtn}
+                    whileHover={{scale: 1.03}}
+                    whileTap={{scale: 0.98}}
                 >
                     <FaFilter/> Filters
-                </button>
+                    {showFilters ? <FaChevronUp /> : <FaChevronDown />}
+                </motion.button>
             </div>
 
-            {showFilters && (
-                <div className={styles.filters}>
-                    <div className={styles.filterSection}>
-                        <div className={styles.filterHeader}>
-                            <FaFilter className={styles.filterIcon}/>
-                            <span>Filters</span>
-                        </div>
-                        <div className={styles.filterGroup}>
-                            <label>Status:</label>
-                            <div className={styles.filterOptions}>
-                                {statusOptions.map(option => (
-                                    <button
-                                        key={option.value}
-                                        onClick={() => setStatusFilter(option.value as any)}
-                                        className={`${styles.filterButton} ${statusFilter === option.value ? styles.active : ''}`}
-                                        aria-pressed={statusFilter === option.value}
-                                    >
-                                        {option.label}
-                                    </button>
-                                ))}
+            <AnimatePresence>
+                {showFilters && (
+                    <motion.div 
+                        className={styles.filters}
+                        initial={{opacity: 0, height: 0}}
+                        animate={{opacity: 1, height: 'auto'}}
+                        exit={{opacity: 0, height: 0}}
+                        transition={{duration: 0.3}}
+                    >
+                        <div className={styles.filterSection}>
+                            <div className={styles.filterHeader}>
+                                <FaFilter className={styles.filterIcon}/>
+                                <span>Filters</span>
+                            </div>
+                            <div className={styles.filterGroup}>
+                                <label>Status:</label>
+                                <div className={styles.filterOptions}>
+                                    {statusOptions.map(option => (
+                                        <motion.button
+                                            key={option.value}
+                                            onClick={() => setStatusFilter(option.value as any)}
+                                            className={`${styles.filterButton} ${statusFilter === option.value ? styles.active : ''}`}
+                                            aria-pressed={statusFilter === option.value}
+                                            whileHover={{scale: 1.05}}
+                                            whileTap={{scale: 0.95}}
+                                            layout
+                                        >
+                                            {option.label}
+                                        </motion.button>
+                                    ))}
+                                </div>
+                            </div>
+                            <div className={styles.filterGroup}>
+                                <label>Type:</label>
+                                <div className={styles.filterOptions}>
+                                    {typeOptions.map(option => (
+                                        <motion.button
+                                            key={option.value}
+                                            onClick={() => setTypeFilter(option.value as any)}
+                                            className={`${styles.filterButton} ${typeFilter === option.value ? styles.active : ''}`}
+                                            aria-pressed={typeFilter === option.value}
+                                            whileHover={{scale: 1.05}}
+                                            whileTap={{scale: 0.95}}
+                                            layout
+                                        >
+                                            {option.label}
+                                        </motion.button>
+                                    ))}
+                                </div>
                             </div>
                         </div>
-                        <div className={styles.filterGroup}>
-                            <label>Type:</label>
-                            <div className={styles.filterOptions}>
-                                {typeOptions.map(option => (
-                                    <button
-                                        key={option.value}
-                                        onClick={() => setTypeFilter(option.value as any)}
-                                        className={`${styles.filterButton} ${typeFilter === option.value ? styles.active : ''}`}
-                                        aria-pressed={typeFilter === option.value}
-                                    >
-                                        {option.label}
-                                    </button>
-                                ))}
-                            </div>
-                        </div>
-                    </div>
 
-                    <div className={styles.sortSection}>
-                        <div className={styles.filterHeader}>
-                            <FaSort className={styles.filterIcon}/>
-                            <span>Sort By</span>
+                        <div className={styles.sortSection}>
+                            <div className={styles.filterHeader}>
+                                <FaSort className={styles.filterIcon}/>
+                                <span>Sort By</span>
+                            </div>
+                            <div className={styles.sortGroup}>
+                                <select
+                                    value={sortOption}
+                                    onChange={(e) => setSortOption(e.target.value as any)}
+                                    className={styles.sortSelect}
+                                    aria-label="Sort tasks by"
+                                >
+                                    <option value="priority-desc">Priority: High to Low</option>
+                                    <option value="priority-asc">Priority: Low to High</option>
+                                    <option value="date-desc">Date: Newest First</option>
+                                    <option value="date-asc">Date: Oldest First</option>
+                                    <option value="title-asc">Title: A-Z</option>
+                                    <option value="title-desc">Title: Z-A</option>
+                                </select>
+                            </div>
                         </div>
-                        <div className={styles.sortGroup}>
-                            <select
-                                value={sortOption}
-                                onChange={(e) => setSortOption(e.target.value as any)}
-                                className={styles.sortSelect}
-                                aria-label="Sort tasks by"
-                            >
-                                <option value="priority-desc">Priority: High to Low</option>
-                                <option value="priority-asc">Priority: Low to High</option>
-                                <option value="date-desc">Date: Newest First</option>
-                                <option value="date-asc">Date: Oldest First</option>
-                                <option value="title-asc">Title: A-Z</option>
-                                <option value="title-desc">Title: Z-A</option>
-                            </select>
-                        </div>
-                    </div>
-                </div>
-            )}
+                    </motion.div>
+                )}
+            </AnimatePresence>
 
             <TaskList
                 tasks={sortedAndFilteredTasks}
                 sendMessage={handleTaskAction}
                 selectedTaskIndex={selectedTaskIndex}
             />
-        </div>
+        </motion.div>
     );
 });
 

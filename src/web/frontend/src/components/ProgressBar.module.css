@@ -1,14 +1,40 @@
 .container {
     width: 100%;
-    height: 8px;
-    background-color: #e9ecef;
-    border-radius: var(--border-radius);
+    height: 12px;
+    background-color: var(--background-color-tertiary);
+    border-radius: var(--border-radius-lg);
     overflow: hidden;
-    margin-top: 1rem;
+    margin-top: var(--spacing-md);
+    position: relative;
+    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1);
 }
 
 .bar {
     height: 100%;
-    background-color: var(--color-primary);
-    transition: width 0.3s ease-in-out;
+    background: linear-gradient(90deg, var(--color-primary), var(--color-info));
+    transition: width var(--transition-normal) ease-in-out;
+    border-radius: var(--border-radius-lg);
+    position: relative;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.bar::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+    animation: progress-shine 2s infinite;
+    border-radius: var(--border-radius-lg);
+}
+
+@keyframes progress-shine {
+    0% {
+        transform: translateX(-100%);
+    }
+    100% {
+        transform: translateX(100%);
+    }
 }

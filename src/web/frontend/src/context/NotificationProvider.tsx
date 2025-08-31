@@ -42,7 +42,7 @@ const TYPE_LABELS: Record<NotificationType, string> = {
     warning: 'Warning',
 };
 
-export const NotificationProvider: React.FC = ({children}) => {
+export const NotificationProvider: React.FC<{children: React.ReactNode}> = ({children}) => {
     const [notifications, setNotifications] = useState<Notification[]>([]);
     const {notificationsEnabled} = useStore();
 
@@ -104,7 +104,7 @@ const NotificationItem: React.FC<NotificationItemProps> = ({notification, onRemo
         // Progress bar animation
         const progressTimer = setInterval(() => {
             setProgress(prev => {
-                const decrement = 100 / (notification.duration / 100);
+                const decrement = notification.duration ? 100 / (notification.duration / 100) : 1;
                 const newProgress = prev - decrement;
                 return newProgress > 0 ? newProgress : 0;
             });

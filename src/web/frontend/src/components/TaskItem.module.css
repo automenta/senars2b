@@ -1,74 +1,83 @@
 .container {
-    margin-bottom: 1rem;
-    transition: all 0.2s ease-in-out;
+    margin-bottom: var(--spacing-lg);
+    transition: all var(--transition-normal);
 }
 
 .item {
-    background: var(--background-color-secondary);
-    border: 1px solid var(--border-color);
-    border-radius: 8px;
-    padding: 1rem;
+    background: var(--color-card-background);
+    border: 1px solid var(--color-card-border);
+    border-radius: var(--border-radius-lg);
+    padding: var(--spacing-lg);
     display: grid;
     grid-template-areas:
     "main meta"
     "progress progress"
     "controls controls";
     grid-template-columns: 1fr auto;
-    gap: 0.75rem;
-    transition: all 0.2s ease-in-out;
+    gap: var(--spacing-md);
+    transition: all var(--transition-normal);
+    box-shadow: var(--box-shadow-sm);
 }
 
 .item:hover {
-    border-color: var(--primary-color);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    border-color: var(--color-primary);
+    box-shadow: var(--box-shadow-md);
 }
 
 .item.selected {
-    border-color: var(--primary-color);
-    box-shadow: 0 0 8px var(--primary-color-translucent);
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 2px var(--color-primary-translucent);
 }
 
 .item.dimmed {
-    opacity: 0.5;
+    opacity: 0.7;
     background: var(--background-color-tertiary);
 }
 
 .item.editing {
-    border-color: var(--primary-color);
-    box-shadow: 0 0 8px var(--primary-color-translucent);
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 2px var(--color-primary-translucent);
 }
 
 .mainInfo {
     grid-area: main;
     display: flex;
     align-items: flex-start;
-    gap: 0.5rem;
+    gap: var(--spacing-sm);
 }
 
 .dragHandle {
     cursor: grab;
     color: var(--text-color-tertiary);
-    padding: 0.25rem;
-    margin-top: 0.25rem;
+    padding: var(--spacing-sm);
+    margin-top: var(--spacing-xs);
+    border-radius: var(--border-radius-sm);
+    transition: all var(--transition-fast);
 }
 
 .dragHandle:hover {
     color: var(--text-color-secondary);
+    background-color: var(--color-hover-background);
 }
 
 .expandBtn {
     background: none;
     border: none;
     cursor: pointer;
-    padding: 0.25rem;
+    padding: var(--spacing-sm);
     font-size: 1rem;
     color: var(--text-color-secondary);
-    transition: color 0.2s;
-    margin-top: 0.25rem;
+    transition: all var(--transition-fast);
+    margin-top: var(--spacing-xs);
+    border-radius: var(--border-radius-sm);
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .expandBtn:not(:disabled):hover {
-    color: var(--primary-color);
+    color: var(--color-primary);
+    background-color: var(--color-hover-background);
 }
 
 .expandBtn:disabled {
@@ -79,14 +88,14 @@
 .expandPlaceholder {
     display: inline-block;
     width: calc(1rem + 0.5rem); /* icon size + padding */
-    margin-top: 0.25rem;
+    margin-top: var(--spacing-xs);
 }
 
 .titleAndDescription {
     display: flex;
     flex-direction: column;
     flex-grow: 1;
-    gap: 0.5rem;
+    gap: var(--spacing-sm);
 }
 
 .title {
@@ -97,10 +106,10 @@
 }
 
 .description {
-    font-size: 0.9rem;
+    font-size: 0.95rem;
     color: var(--text-color-secondary);
     margin: 0;
-    line-height: 1.4;
+    line-height: 1.5;
 }
 
 .noDescription {
@@ -110,12 +119,13 @@
 
 .titleInput, .descriptionInput {
     background: var(--background-color);
-    border: 1px solid var(--border-color-focus);
-    border-radius: 4px;
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius-md);
     color: var(--text-color-primary);
-    padding: 0.5rem;
+    padding: var(--spacing-sm);
     width: 100%;
     font-family: inherit;
+    transition: all var(--transition-fast);
 }
 
 .titleInput {
@@ -123,46 +133,53 @@
     font-weight: 600;
 }
 
+.titleInput:focus, .descriptionInput:focus {
+    outline: none;
+    border-color: var(--border-color-focus);
+    box-shadow: 0 0 0 3px var(--color-primary-translucent);
+}
+
 .descriptionInput {
-    font-size: 0.9rem;
+    font-size: 0.95rem;
     resize: vertical;
-    min-height: 60px;
+    min-height: 80px;
 }
 
 .editActions {
     display: flex;
-    gap: 0.5rem;
-    margin-top: 0.5rem;
+    gap: var(--spacing-sm);
+    margin-top: var(--spacing-sm);
 }
 
 .button {
     display: inline-flex;
     align-items: center;
-    gap: 0.5rem;
-    padding: 0.5rem 1rem;
+    gap: var(--spacing-sm);
+    padding: var(--spacing-sm) var(--spacing-md);
     border: 1px solid var(--border-color);
-    border-radius: 4px;
+    border-radius: var(--border-radius-md);
     background: var(--background-color);
     color: var(--text-color-primary);
     cursor: pointer;
     font-size: 0.9rem;
-    transition: all 0.2s ease;
+    transition: all var(--transition-fast);
+    font-weight: 500;
 }
 
 .button:hover {
-    background: var(--background-color-tertiary);
+    background: var(--color-hover-background);
     border-color: var(--border-color-focus);
 }
 
 .saveBtn {
-    background: var(--primary-color);
+    background: var(--color-primary);
     color: white;
-    border-color: var(--primary-color);
+    border-color: var(--color-primary);
 }
 
 .saveBtn:hover {
-    background: var(--primary-color-dark);
-    border-color: var(--primary-color-dark);
+    background: var(--color-primary-dark);
+    border-color: var(--color-primary-dark);
 }
 
 .cancelBtn {
@@ -178,22 +195,55 @@
     grid-area: meta;
     display: flex;
     align-items: center;
-    gap: 0.75rem;
+    gap: var(--spacing-md);
+}
+
+.indicators {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
 }
 
 .subtaskIndicator {
     display: flex;
     align-items: center;
+    gap: var(--spacing-xs);
+    font-size: 0.85rem;
+    color: var(--text-color-secondary);
+    background-color: var(--background-color-tertiary);
+    padding: 0.25rem 0.5rem;
+    border-radius: 12px;
 }
 
 .promptIndicator {
     display: flex;
     align-items: center;
-    color: var(--color-primary);
-    gap: 0.35rem;
+    gap: var(--spacing-xs);
     font-size: 0.85rem;
-    color: var(--text-color-secondary);
-    background-color: var(--background-color-tertiary);
+    color: var(--color-warning);
+    background-color: rgba(247, 37, 133, 0.1);
+    padding: 0.25rem 0.5rem;
+    border-radius: 12px;
+}
+
+.completionIndicator {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+    font-size: 0.85rem;
+    color: var(--color-success);
+    background-color: rgba(76, 201, 240, 0.1);
+    padding: 0.25rem 0.5rem;
+    border-radius: 12px;
+}
+
+.failureIndicator {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+    font-size: 0.85rem;
+    color: var(--color-danger);
+    background-color: rgba(230, 57, 70, 0.1);
     padding: 0.25rem 0.5rem;
     border-radius: 12px;
 }
@@ -204,12 +254,12 @@
 
 .controlsContainer {
     grid-area: controls;
-    border-top: 1px solid var(--border-color);
-    padding-top: 0.75rem;
-    margin-top: 0.25rem;
+    border-top: 1px solid var(--color-card-border);
+    padding-top: var(--spacing-md);
+    margin-top: var(--spacing-xs);
     display: flex;
     justify-content: flex-end;
-    gap: 0.5rem;
+    gap: var(--spacing-sm);
 }
 
 .button svg {
@@ -220,16 +270,23 @@
     background: none;
     border: none;
     color: var(--text-color-secondary);
-    padding: 0.25rem;
+    padding: var(--spacing-sm);
     cursor: pointer;
+    border-radius: var(--border-radius-sm);
+    transition: all var(--transition-fast);
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .editBtn:hover {
-    color: var(--primary-color);
+    color: var(--color-primary);
+    background-color: var(--color-hover-background);
 }
 
 .subTaskContainer {
     margin-left: 2rem;
     padding-left: 1rem;
-    border-left: 2px solid var(--border-color);
+    border-left: 2px solid var(--color-card-border);
+    margin-top: var(--spacing-md);
 }

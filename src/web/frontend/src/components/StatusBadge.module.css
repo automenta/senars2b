@@ -13,11 +13,23 @@
     }
 }
 
+@keyframes status-pulse {
+    0% {
+        box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.4);
+    }
+    70% {
+        box-shadow: 0 0 0 6px rgba(255, 255, 255, 0);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(255, 255, 255, 0);
+    }
+}
+
 .badge {
     display: inline-flex;
     align-items: center;
     gap: 0.5em;
-    padding: 0.35em 0.65em;
+    padding: 0.4em 0.8em;
     font-size: 0.8em;
     font-weight: 600;
     line-height: 1;
@@ -26,7 +38,31 @@
     white-space: nowrap;
     vertical-align: baseline;
     border-radius: 20px;
-    transition: all 0.2s ease-in-out;
+    transition: all var(--transition-fast);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    position: relative;
+    overflow: hidden;
+}
+
+.badge::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.3));
+    opacity: 0;
+    transition: opacity var(--transition-fast);
+}
+
+.badge:hover::before {
+    opacity: 1;
+}
+
+.badge:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
 }
 
 .icon {
@@ -35,20 +71,52 @@
 
 .text {
     font-weight: 500;
+    letter-spacing: 0.3px;
+}
+
+.processing {
+    animation: status-pulse 2s infinite;
 }
 
 .processing .icon {
     animation: pulse-icon 1.5s infinite ease-in-out;
-    color: var(--primary-color-light);
 }
 
-/* Base styles from taskUtils getStatusClass */
-.status-pending { background-color: #6c757d; }
-.status-awaiting-dependencies { background-color: #6c757d; }
-.status-decomposing { background-color: #0d6efd; }
-.status-awaiting-subtasks { background-color: #6c757d; }
-.status-ready-for-execution { background-color: #28a745; }
-.status-completed { background-color: #198754; }
-.status-failed { background-color: #dc3545; }
-.status-deferred { background-color: #ffc107; }
-.status-default { background-color: #6c757d; }
+/* Base styles from taskUtils getStatusClass with gradients */
+.status-pending { 
+    background: linear-gradient(135deg, #6c757d, #495057);
+}
+
+.status-awaiting-dependencies { 
+    background: linear-gradient(135deg, #6c757d, #495057);
+}
+
+.status-decomposing { 
+    background: linear-gradient(135deg, #0d6efd, #0b5ed7);
+    animation: status-pulse 2s infinite;
+}
+
+.status-awaiting-subtasks { 
+    background: linear-gradient(135deg, #6c757d, #495057);
+}
+
+.status-ready-for-execution { 
+    background: linear-gradient(135deg, #28a745, #1e7e34);
+}
+
+.status-completed { 
+    background: linear-gradient(135deg, #198754, #146c43);
+}
+
+.status-failed { 
+    background: linear-gradient(135deg, #dc3545, #bb2d3b);
+}
+
+.status-deferred { 
+    background: linear-gradient(135deg, #ffc107, #ffca2c);
+    color: #212529;
+}
+
+.status-default { 
+    background: linear-gradient(135deg, #6c757d, #495057);
+}

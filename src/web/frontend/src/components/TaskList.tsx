@@ -1,5 +1,5 @@
 import React, {memo, useCallback, useRef, useState} from 'react';
-import {AnimatePresence} from 'framer-motion';
+import {AnimatePresence, motion} from 'framer-motion';
 import {Task} from '../types';
 import TaskItem from './TaskItem';
 import styles from './TaskList.module.css';
@@ -98,12 +98,17 @@ const TaskList: React.FC<TaskListProps> = memo(({tasks, sendMessage, isSublist =
 
     // Memoize task item rendering
     const renderTaskItem = useCallback((task: Task, index: number) => (
-        <div
+        <motion.div
             key={task.id}
             className={`${styles.taskListItem} ${draggedItemId === task.id ? styles.dragging : ''}`}
             draggable={isSublist}
             onDragStart={isSublist ? (e) => handleDragStart(e, task.id) : undefined}
             onDragOver={isSublist ? (e) => handleDragOver(e, task.id) : undefined}
+            initial={{opacity: 0, y: 20}}
+            animate={{opacity: 1, y: 0}}
+            exit={{opacity: 0, y: -20}}
+            transition={{duration: 0.3, delay: index * 0.05}}
+            whileHover={!isSublist ? {y: -5} : {}}
         >
             <TaskItem
                 task={task}
@@ -112,20 +117,23 @@ const TaskList: React.FC<TaskListProps> = memo(({tasks, sendMessage, isSublist =
                 isDraggable={isSublist}
                 isSelected={!isSublist && index === selectedTaskIndex}
             />
-        </div>
+        </motion.div>
     ), [draggedItemId, handleDragOver, handleDragStart, isSublist, selectedTaskIndex, sendMessage, tasks]);
 
     return (
-        <div
+        <motion.div
             className={listClassName}
             onDragOver={isSublist ? e => e.preventDefault() : undefined}
             onDrop={isSublist ? handleDrop : undefined}
             data-testid="task-list"
+            initial={{opacity: 0}}
+            animate={{opacity: 1}}
+            transition={{duration: 0.3}}
         >
             <AnimatePresence>
                 {tasksToRender.map((task, index) => renderTaskItem(task, index))}
             </AnimatePresence>
-        </div>
+        </motion.div>
     );
 });
 

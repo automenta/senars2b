@@ -1,40 +1,51 @@
 .tasksView {
-    padding: 1rem;
+    padding: var(--spacing-lg);
 }
 
 .header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 1.5rem;
+    margin-bottom: var(--spacing-xl);
     flex-wrap: wrap;
-    gap: 1rem;
+    gap: var(--spacing-md);
 }
 
 .header h2 {
     margin: 0;
-    font-size: 1.5rem;
+    font-size: 1.75rem;
+    font-weight: 600;
+    color: var(--text-color-primary);
 }
 
 .stats {
     display: flex;
-    gap: 1rem;
+    gap: var(--spacing-md);
     flex-wrap: wrap;
 }
 
 .statItem {
-    background-color: var(--background-color-secondary);
-    padding: 0.5rem 1rem;
+    background-color: var(--color-card-background);
+    padding: var(--spacing-sm) var(--spacing-lg);
     border-radius: 20px;
     font-size: 0.875rem;
     font-weight: 500;
+    box-shadow: var(--box-shadow-sm);
+    border: 1px solid var(--color-card-border);
+    transition: all var(--transition-fast);
+}
+
+.statItem:hover {
+    box-shadow: var(--box-shadow-md);
+    transform: translateY(-2px);
 }
 
 .searchAndFilters {
     display: flex;
-    gap: 1rem;
-    margin-bottom: 1.5rem;
+    gap: var(--spacing-md);
+    margin-bottom: var(--spacing-xl);
     flex-wrap: wrap;
+    align-items: center;
 }
 
 .searchContainer {
@@ -45,82 +56,92 @@
 
 .searchIcon {
     position: absolute;
-    left: 1rem;
+    left: var(--spacing-lg);
     top: 50%;
     transform: translateY(-50%);
     color: var(--text-color-tertiary);
+    font-size: 1.1rem;
 }
 
 .searchInput {
     width: 100%;
-    padding: 0.75rem 1rem 0.75rem 3rem;
-    border-radius: 24px;
-    border: 1px solid var(--border-color);
-    background-color: var(--background-color);
+    padding: var(--spacing-sm) var(--spacing-md) var(--spacing-sm) calc(var(--spacing-md) * 3);
+    border-radius: var(--border-radius-lg);
+    border: 1px solid var(--color-card-border);
+    background-color: var(--color-card-background);
     color: var(--text-color-primary);
     font-size: 1rem;
-    transition: all 0.2s ease;
+    transition: all var(--transition-fast);
+    box-shadow: var(--box-shadow-sm);
 }
 
 .searchInput:focus {
     outline: none;
-    border-color: var(--primary-color);
-    box-shadow: 0 0 0 3px var(--primary-color-translucent);
+    border-color: var(--border-color-focus);
+    box-shadow: 0 0 0 3px var(--color-primary-translucent);
 }
 
 .toggleFiltersBtn {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
-    padding: 0.75rem 1.5rem;
-    border-radius: 24px;
-    border: 1px solid var(--border-color);
-    background-color: var(--background-color);
+    gap: var(--spacing-sm);
+    padding: var(--spacing-sm) var(--spacing-lg);
+    border-radius: var(--border-radius-lg);
+    border: 1px solid var(--color-card-border);
+    background-color: var(--color-card-background);
     color: var(--text-color-primary);
     cursor: pointer;
     font-size: 1rem;
-    transition: all 0.2s ease;
+    transition: all var(--transition-fast);
+    font-weight: 500;
+    box-shadow: var(--box-shadow-sm);
 }
 
 .toggleFiltersBtn:hover {
-    background-color: var(--background-color-secondary);
+    background-color: var(--color-hover-background);
     border-color: var(--border-color-focus);
+    transform: translateY(-2px);
+    box-shadow: var(--box-shadow-md);
 }
 
 .filters {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 1.5rem;
-    margin-bottom: 1.5rem;
-    padding: 1.5rem;
-    background-color: var(--background-color-secondary);
-    border-radius: 8px;
-    border: 1px solid var(--border-color);
+    gap: var(--spacing-lg);
+    margin-bottom: var(--spacing-xl);
+    padding: var(--spacing-lg);
+    background-color: var(--color-card-background);
+    border-radius: var(--border-radius-lg);
+    border: 1px solid var(--color-card-border);
+    box-shadow: var(--box-shadow-sm);
 }
 
 .filterSection, .sortSection {
     display: flex;
     flex-direction: column;
-    gap: 1rem;
+    gap: var(--spacing-md);
 }
 
 .filterHeader {
     display: flex;
     align-items: center;
-    gap: 0.75rem;
+    gap: var(--spacing-sm);
     font-weight: 600;
     color: var(--text-color-primary);
-    margin-bottom: 0.5rem;
+    margin-bottom: var(--spacing-sm);
+    padding-bottom: var(--spacing-sm);
+    border-bottom: 1px solid var(--color-card-border);
 }
 
 .filterIcon {
-    color: var(--primary-color);
+    color: var(--color-primary);
+    font-size: 1.1rem;
 }
 
 .filterGroup {
     display: flex;
     flex-direction: column;
-    gap: 0.75rem;
+    gap: var(--spacing-sm);
 }
 
 .filterGroup label {
@@ -131,54 +152,72 @@
 .filterOptions {
     display: flex;
     flex-wrap: wrap;
-    gap: 0.5rem;
+    gap: var(--spacing-sm);
 }
 
 .filterButton {
-    padding: 0.5rem 1rem;
-    border-radius: 20px;
-    border: 1px solid var(--border-color);
-    background-color: var(--background-color);
+    padding: var(--spacing-sm) var(--spacing-md);
+    border-radius: var(--border-radius-md);
+    border: 1px solid var(--color-card-border);
+    background-color: var(--background-color-light);
     color: var(--text-color-secondary);
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: all var(--transition-fast);
     font-size: 0.875rem;
+    font-weight: 500;
 }
 
 .filterButton:hover {
-    background-color: var(--background-color-tertiary);
+    background-color: var(--color-hover-background);
     border-color: var(--border-color-focus);
+    color: var(--text-color-primary);
+    transform: translateY(-1px);
 }
 
 .filterButton.active {
-    background-color: var(--primary-color);
+    background: linear-gradient(135deg, var(--color-primary), var(--color-primary-dark));
     color: white;
-    border-color: var(--primary-color);
+    border-color: var(--color-primary);
     font-weight: 600;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .sortGroup {
     display: flex;
     flex-direction: column;
-    gap: 0.75rem;
+    gap: var(--spacing-sm);
 }
 
 .sortSelect {
-    padding: 0.75rem 1rem;
-    border-radius: 8px;
-    border: 1px solid var(--border-color);
-    background-color: var(--background-color);
+    padding: var(--spacing-sm) var(--spacing-md);
+    border-radius: var(--border-radius-md);
+    border: 1px solid var(--color-card-border);
+    background-color: var(--background-color-light);
     color: var(--text-color-primary);
     font-size: 0.875rem;
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: all var(--transition-fast);
     width: 100%;
+    box-shadow: var(--box-shadow-sm);
 }
 
 .sortSelect:focus {
     outline: none;
-    border-color: var(--primary-color);
-    box-shadow: 0 0 0 3px var(--primary-color-translucent);
+    border-color: var(--border-color-focus);
+    box-shadow: 0 0 0 3px var(--color-primary-translucent);
+}
+
+.errorBanner {
+    background-color: rgba(230, 57, 70, 0.15);
+    border: 1px solid var(--color-danger);
+    border-radius: var(--border-radius-md);
+    padding: var(--spacing-md);
+    color: var(--color-danger);
+    margin-bottom: var(--spacing-lg);
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    box-shadow: var(--box-shadow-sm);
 }
 
 @media (max-width: 768px) {
@@ -187,11 +226,20 @@
     }
 
     .stats {
-        gap: 0.5rem;
+        gap: var(--spacing-sm);
     }
 
     .statItem {
-        padding: 0.25rem 0.75rem;
+        padding: var(--spacing-xs) var(--spacing-md);
         font-size: 0.75rem;
+    }
+    
+    .searchAndFilters {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .searchContainer {
+        max-width: 100%;
     }
 }

@@ -1,6 +1,7 @@
 import {useCallback, useEffect, useRef, useState} from 'react';
 
-const WS_URL = `ws://${window.location.host.replace(':3000', ':8080')}/ws`;
+// Use relative URL so it connects to the same server
+const WS_URL = '/ws';
 
 type MessageListener = (message: any) => void;
 

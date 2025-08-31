@@ -1,7 +1,7 @@
 import React, {memo, useEffect, useMemo, useRef, useState} from 'react';
-import {motion} from 'framer-motion';
+import {motion, AnimatePresence} from 'framer-motion';
 import {Task} from '../types';
-import {FaChevronDown, FaChevronRight, FaEdit, FaGripVertical, FaSave, FaStream, FaCommentAlt} from 'react-icons/fa';
+import {FaChevronDown, FaChevronRight, FaEdit, FaGripVertical, FaSave, FaStream, FaCommentAlt, FaCheckCircle, FaExclamationCircle} from 'react-icons/fa';
 import TaskList from './TaskList';
 import StatusBadge from './StatusBadge';
 import PriorityBadge from './PriorityBadge';
@@ -102,31 +102,40 @@ const TaskItem: React.FC<TaskItemProps> = memo(({
             initial={{opacity: 0, y: -20}}
             animate={{opacity: 1, y: 0}}
             exit={{opacity: 0, transition: {duration: 0.2}}}
+            whileHover={{y: -2}}
+            transition={{duration: 0.2}}
         >
             <div className={itemClassName}>
                 <div className={styles.mainInfo}>
                     {isDraggable && (
-                        <span className={styles.dragHandle} aria-label="Drag to reorder">
+                        <motion.span 
+                            className={styles.dragHandle} 
+                            aria-label="Drag to reorder"
+                            whileHover={{scale: 1.1}}
+                            whileTap={{scale: 0.9}}
+                        >
                             <FaGripVertical/>
-                        </span>
+                        </motion.span>
                     )}
-                    <button
+                    <motion.button
                         onClick={handleToggleExpand}
                         className={styles.expandBtn}
                         disabled={!hasSubtasks || isEditing}
                         aria-expanded={isExpanded}
                         aria-label={isExpanded ? 'Collapse subtasks' : 'Expand subtasks'}
+                        whileHover={{scale: 1.1}}
+                        whileTap={{scale: 0.9}}
                     >
                         {hasSubtasks ? (
                             isExpanded ? <FaChevronDown/> : <FaChevronRight/>
                         ) : (
                             <span className={styles.expandPlaceholder}/>
                         )}
-                    </button>
+                    </motion.button>
                     <div className={styles.titleAndDescription}>
                         {isEditing ? (
                             <>
-                                <input
+                                <motion.input
                                     ref={titleInputRef}
                                     type="text"
                                     value={editedTitle}
@@ -135,8 +144,11 @@ const TaskItem: React.FC<TaskItemProps> = memo(({
                                     className={styles.titleInput}
                                     placeholder="Task title"
                                     aria-label="Edit task title"
+                                    initial={{scale: 0.95}}
+                                    animate={{scale: 1}}
+                                    transition={{duration: 0.2}}
                                 />
-                                <textarea
+                                <motion.textarea
                                     value={editedDescription}
                                     onChange={(e) => setEditedDescription(e.target.value)}
                                     onKeyDown={handleKeyDown}
@@ -144,32 +156,50 @@ const TaskItem: React.FC<TaskItemProps> = memo(({
                                     placeholder="Task description"
                                     rows={3}
                                     aria-label="Edit task description"
+                                    initial={{scale: 0.95}}
+                                    animate={{scale: 1}}
+                                    transition={{duration: 0.2}}
                                 />
                                 <div className={styles.editActions}>
-                                    <button
+                                    <motion.button
                                         onClick={handleSave}
                                         className={`${styles.button} ${styles.saveBtn}`}
                                         title="Save"
                                         aria-label="Save changes"
+                                        whileHover={{scale: 1.05}}
+                                        whileTap={{scale: 0.95}}
                                     >
                                         <FaSave/> Save
-                                    </button>
-                                    <button
+                                    </motion.button>
+                                    <motion.button
                                         onClick={handleCancelEdit}
                                         className={`${styles.button} ${styles.cancelBtn}`}
                                         title="Cancel"
                                         aria-label="Cancel changes"
+                                        whileHover={{scale: 1.05}}
+                                        whileTap={{scale: 0.95}}
                                     >
                                         Cancel
-                                    </button>
+                                    </motion.button>
                                 </div>
                             </>
                         ) : (
                             <>
-                                <h3 className={styles.title}>{task.title}</h3>
-                                <p className={styles.description}>
+                                <motion.h3 
+                                    className={styles.title}
+                                    whileHover={{x: 5}}
+                                    transition={{duration: 0.2}}
+                                >
+                                    {task.title}
+                                </motion.h3>
+                                <motion.p 
+                                    className={styles.description}
+                                    initial={{opacity: 0}}
+                                    animate={{opacity: 1}}
+                                    transition={{duration: 0.3}}
+                                >
                                     {task.description || <span className={styles.noDescription}>No description</span>}
-                                </p>
+                                </motion.p>
                             </>
                         )}
                     </div>
@@ -177,39 +207,83 @@ const TaskItem: React.FC<TaskItemProps> = memo(({
                 <div className={styles.metaInfo}>
                     <StatusBadge status={task.status} isProcessing={isProcessing} />
                     <PriorityBadge priority={task.priority}/>
-                    {hasPendingPrompt && (
-                        <div className={styles.promptIndicator} title="Action required">
-                            <FaCommentAlt />
-                        </div>
-                    )}
-                    {hasSubtasks && (
-                        <div className={styles.subtaskIndicator} title={`${subtasks.length} subtasks`}>
-                            <FaStream/> {subtasks.length}
-                        </div>
-                    )}
+                    <div className={styles.indicators}>
+                        {hasPendingPrompt && (
+                            <motion.div 
+                                className={styles.promptIndicator} 
+                                title="Action required"
+                                initial={{scale: 0}}
+                                animate={{scale: 1}}
+                                whileHover={{scale: 1.2}}
+                            >
+                                <FaCommentAlt />
+                            </motion.div>
+                        )}
+                        {taskUtils.isCompleted(task) && (
+                            <motion.div 
+                                className={styles.completionIndicator} 
+                                title="Task completed"
+                                initial={{scale: 0}}
+                                animate={{scale: 1}}
+                                whileHover={{scale: 1.2}}
+                            >
+                                <FaCheckCircle />
+                            </motion.div>
+                        )}
+                        {taskUtils.isFailed(task) && (
+                            <motion.div 
+                                className={styles.failureIndicator} 
+                                title="Task failed"
+                                initial={{scale: 0}}
+                                animate={{scale: 1}}
+                                whileHover={{scale: 1.2}}
+                            >
+                                <FaExclamationCircle />
+                            </motion.div>
+                        )}
+                        {hasSubtasks && (
+                            <motion.div 
+                                className={styles.subtaskIndicator} 
+                                title={`${subtasks.length} subtasks`}
+                                whileHover={{scale: 1.1}}
+                            >
+                                <FaStream/> {subtasks.length}
+                            </motion.div>
+                        )}
+                    </div>
                 </div>
                 <div className={styles.progressContainer}>
                     <ProgressBar percentage={task.completion_percentage}/>
                 </div>
                 {!isEditing && (
                     <div className={styles.controlsContainer}>
-                        <button
+                        <motion.button
                             onClick={handleEdit}
                             className={`${styles.button} ${styles.editBtn}`}
                             title="Edit task"
                             aria-label="Edit task"
+                            whileHover={{scale: 1.1}}
+                            whileTap={{scale: 0.9}}
                         >
                             <FaEdit/>
-                        </button>
+                        </motion.button>
                         <TaskControls task={task} sendMessage={sendMessage}/>
                     </div>
                 )}
             </div>
-            {isExpanded && hasSubtasks && (
-                <div className={styles.subTaskContainer}>
-                    <TaskList tasks={subtasks} sendMessage={sendMessage} isSublist={true}/>
-                </div>
-            )}
+            <AnimatePresence>
+                {isExpanded && hasSubtasks && (
+                    <motion.div 
+                        className={styles.subTaskContainer}
+                        initial={{opacity: 0, height: 0}}
+                        animate={{opacity: 1, height: 'auto'}}
+                        exit={{opacity: 0, height: 0}}
+                        transition={{duration: 0.3}}
+                    >
+                        <TaskList tasks={subtasks} sendMessage={sendMessage} isSublist={true}/>
+                    </motion.div>
+                )}
+            </AnimatePresence>
         </motion.div>
     );
 });
