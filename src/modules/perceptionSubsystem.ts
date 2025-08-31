@@ -2,6 +2,7 @@ import {AttentionValue, CognitiveItem, TruthValue} from '../interfaces/types';
 import {SensorStreamTransducer, TextTransducer, Transducer} from './transducers';
 import {CognitiveItemFactory} from './cognitiveItemFactory';
 import {v4 as uuidv4} from 'uuid';
+import logger from '../services/logger';
 
 export class PerceptionSubsystem {
     private transducers: Transducer[] = [];
@@ -33,9 +34,9 @@ export class PerceptionSubsystem {
         }
 
         // Log the input processing for debugging
-        console.log(`Processing input of type: ${typeof data}`);
+        logger.info({inputType: typeof data}, "Processing input");
         if (typeof data === 'string') {
-            console.log(`Input length: ${data.length} characters`);
+            logger.debug({length: data.length}, `Input length`);
         }
 
         const inputType = this.determineInputType(data);
@@ -50,7 +51,7 @@ export class PerceptionSubsystem {
                 const items = await transducer.process(data);
                 allItems.push(...items);
             } catch (error) {
-                console.error(`Transducer ${transducer.constructor.name} failed:`, error);
+                logger.error({error, transducer: transducer.constructor.name}, `Transducer failed`);
                 errors.push({
                     transducer: transducer.constructor.name,
                     error: error instanceof Error ? error.message : 'Unknown error'

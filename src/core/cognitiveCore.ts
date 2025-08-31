@@ -18,6 +18,7 @@ import {TaskManager} from '../modules/taskManager';
 import {TaskOrchestrator} from '../modules/taskOrchestrator';
 import {AddBeliefSchema, AddGoalSchema, AddSchemaSchema} from '../utils/validators';
 import {SYSTEM_VERSION} from '../utils/constants';
+import logger from '../services/logger';
 
 export interface CognitiveCoreConfig {
     workerCount?: number;
@@ -105,13 +106,13 @@ export class DecentralizedCognitiveCore {
      */
     async start(): Promise<void> {
         if (this.isRunning) {
-            console.warn("Cognitive core is already running");
+            logger.warn("Cognitive core is already running");
             return;
         }
 
         this.isRunning = true;
         this.startTime = Date.now();
-        console.log(`Starting cognitive core with ${this.config.workerCount} workers`);
+        logger.info({workerCount: this.config.workerCount}, `Starting cognitive core`);
 
         // Start reflection loop
         this.reflectionInterval = this.reflectionLoop.start();
@@ -126,7 +127,7 @@ export class DecentralizedCognitiveCore {
      */
     stop(): void {
         if (!this.isRunning) {
-            console.warn("Cognitive core is not running");
+            logger.warn("Cognitive core is not running");
             return;
         }
 
@@ -135,7 +136,7 @@ export class DecentralizedCognitiveCore {
             clearInterval(this.reflectionInterval);
             this.reflectionInterval = null;
         }
-        console.log("Cognitive core stopped");
+        logger.info("Cognitive core stopped");
         this.printWorkerStatistics();
     }
 
@@ -374,7 +375,7 @@ export class DecentralizedCognitiveCore {
      * @param workerId The ID of the worker to create
      */
     private async createWorker(workerId: number): Promise<void> {
-        console.log(`Worker ${workerId} started`);
+        logger.info({workerId}, `Worker started`);
         let itemCounter = 0;
 
         while (this.isRunning) {
@@ -387,7 +388,7 @@ export class DecentralizedCognitiveCore {
                     this.attentionModule.run_decay_cycle(this.worldModel, this.agenda);
                 }
             } catch (error) {
-                console.error(`Worker ${workerId} encountered an error:`, error);
+                logger.error({workerId, error}, `Worker encountered an error`);
                 const stats = this.workerStatistics.get(workerId) || {
                     itemsProcessed: 0,
                     errors: 0,
@@ -397,7 +398,7 @@ export class DecentralizedCognitiveCore {
                 this.workerStatistics.set(workerId, stats);
             }
         }
-        console.log(`Worker ${workerId} stopped`);
+        logger.info({workerId}, `Worker stopped`);
     }
 
     /**
@@ -441,7 +442,7 @@ export class DecentralizedCognitiveCore {
                 }
             }
         } catch (error) {
-            console.error("Worker failed processing item", itemA.id, error);
+            logger.error({itemId: itemA.id, error}, "Worker failed processing item");
             throw error;
         } finally {
             const duration = Date.now() - startTime;
@@ -513,7 +514,7 @@ export class DecentralizedCognitiveCore {
             // Record successful schema usage for learning
             this.schemaLearningModule.recordSchemaUsage(schema.atom_id, true, [itemA, itemB]);
         } catch (error) {
-            console.warn(`Schema ${schema.atom_id} failed:`, error);
+            logger.warn({schemaId: schema.atom_id, error}, `Schema failed`);
             // Record failed schema usage for learning
             this.schemaLearningModule.recordSchemaUsage(schema.atom_id, false, [itemA, itemB]);
         }
@@ -545,9 +546,9 @@ export class DecentralizedCognitiveCore {
      * Print worker statistics to the console
      */
     private printWorkerStatistics(): void {
-        console.log("Worker Statistics:");
+        logger.info("Worker Statistics:");
         for (const [workerId, stats] of this.workerStatistics.entries()) {
-            console.log(`  Worker ${workerId}: ${stats.itemsProcessed} items processed, ${stats.errors} errors`);
+            logger.info({workerId, ...stats}, `  Worker ${workerId}`);
         }
     }
 

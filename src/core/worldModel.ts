@@ -2,6 +2,7 @@ import {CognitiveItem, SemanticAtom} from '../interfaces/types';
 import {v4 as uuidv4} from 'uuid';
 import {BeliefRevisionEngine, SimpleBeliefRevisionEngine} from './beliefRevisionEngine';
 import {CognitiveItemFactory} from '../modules/cognitiveItemFactory';
+import logger from '../services/logger';
 
 export type CognitiveSchema = {
     atom_id: string;
@@ -259,7 +260,7 @@ export class PersistentWorldModel implements WorldModel {
 
             // Check for conflict
             if (this.beliefRevisionEngine.detect_conflict(existing.truth, new_item.truth)) {
-                console.warn(`Conflict detected between beliefs for item ${new_item.id}`);
+                logger.warn({itemId: new_item.id}, `Conflict detected between beliefs`);
                 revisedItem = this.beliefRevisionEngine.resolve_conflict(existing, new_item);
             } else {
                 // Merge the beliefs
@@ -302,7 +303,7 @@ export class PersistentWorldModel implements WorldModel {
                     try {
                         return (atom.content as any).apply(a, b, worldModel);
                     } catch (error) {
-                        console.warn(`Schema ${atom.id} apply function failed:`, error);
+                        logger.warn({schemaId: atom.id, error}, `Schema apply function failed`);
                         return [];
                     }
                 }

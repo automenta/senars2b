@@ -1,6 +1,7 @@
 import {CognitiveItem, SemanticAtom} from '../interfaces/types';
 import {CognitiveSchema, WorldModel} from '../core/worldModel';
 import {v4 as uuidv4} from 'uuid';
+import logger from '../services/logger';
 
 // Define the structure for schema usage records
 interface SchemaUsageRecord {
@@ -203,7 +204,7 @@ export class SchemaLearningModule {
 
             return {atom};
         } catch (error) {
-            console.error('Error generalizing pattern:', error);
+            logger.error({error, pattern}, 'Error generalizing pattern');
             return null;
         }
     }

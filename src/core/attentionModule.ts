@@ -1,6 +1,7 @@
 import {Agenda} from './agenda';
 import {CognitiveSchema, WorldModel} from './worldModel';
 import {AttentionValue, CognitiveItem} from '../interfaces/types';
+import logger from '../services/logger';
 
 export interface AttentionModule {
     calculate_initial(item: CognitiveItem): AttentionValue;
@@ -152,7 +153,7 @@ export class DynamicAttentionModule implements AttentionModule {
                 }
             }
         } catch (error) {
-            console.warn("Error during attention decay cycle:", error);
+            logger.warn({error}, "Error during attention decay cycle");
         }
     }
 

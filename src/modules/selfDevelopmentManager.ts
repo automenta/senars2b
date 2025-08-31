@@ -5,6 +5,7 @@ import {SelfRepresentationModule} from './selfRepresentationModule';
 import {EnhancementProposal, EnhancementProposalModule} from './enhancementProposalModule';
 import {ImplementationModule} from './implementationModule';
 import {CognitiveItem} from '../interfaces/types';
+import logger from '../services/logger';
 
 export class SelfDevelopmentManager {
     private core: DecentralizedCognitiveCore;
@@ -29,12 +30,12 @@ export class SelfDevelopmentManager {
     // Start the self-development process
     start(): void {
         if (this.isRunning) {
-            console.log('Self-development manager is already running');
+            logger.warn('Self-development manager is already running');
             return;
         }
 
         this.isRunning = true;
-        console.log('Starting self-development manager');
+        logger.info('Starting self-development manager');
 
         // Start periodic analysis
         this.analysisInterval = setInterval(() => {
@@ -51,7 +52,7 @@ export class SelfDevelopmentManager {
         if (this.analysisInterval) {
             clearInterval(this.analysisInterval);
         }
-        console.log('Self-development manager stopped');
+        logger.info('Self-development manager stopped');
     }
 
     // Process a test result file
@@ -63,7 +64,7 @@ export class SelfDevelopmentManager {
             // Add items to agenda
             items.forEach(item => {
                 // In a real implementation, we would add to the core's agenda
-                console.log(`Processed test result item: ${item.label}`);
+                logger.debug({itemLabel: item.label}, `Processed test result item`);
             });
 
             // Generate and add enhancement proposals
@@ -73,11 +74,11 @@ export class SelfDevelopmentManager {
 
             const proposalItems = this.enhancementProposal.convertToCognitiveItems(proposals);
             proposalItems.forEach(item => {
-                console.log(`Generated enhancement proposal: ${item.label}`);
+                logger.info({itemLabel: item.label}, `Generated enhancement proposal`);
             });
 
         } catch (error) {
-            console.error('Error processing test results file:', error);
+            logger.error({error}, 'Error processing test results file:');
         }
     }
 
@@ -89,41 +90,41 @@ export class SelfDevelopmentManager {
 
             // Add items to agenda
             items.forEach(item => {
-                console.log(`Processed coverage item: ${item.label}`);
+                logger.debug({itemLabel: item.label}, `Processed coverage item`);
             });
 
             // Generate and add enhancement proposals
             const proposals = this.enhancementProposal.generateFromCoverageGaps(coverageData);
             const proposalItems = this.enhancementProposal.convertToCognitiveItems(proposals);
             proposalItems.forEach(item => {
-                console.log(`Generated coverage enhancement proposal: ${item.label}`);
+                logger.info({itemLabel: item.label}, `Generated coverage enhancement proposal`);
             });
 
         } catch (error) {
-            console.error('Error processing coverage report file:', error);
+            logger.error({error}, 'Error processing coverage report file:');
         }
     }
 
     // Implement an enhancement proposal
     async implementProposal(proposalId: string): Promise<boolean> {
-        console.log(`Implementing proposal: ${proposalId}`);
+        logger.info({proposalId}, `Implementing proposal`);
 
         // Find the proposal
         const allProposals = this.enhancementProposal.getAllProposals();
         const proposal = allProposals.find(p => p.id === proposalId);
 
         if (!proposal) {
-            console.error(`Proposal not found: ${proposalId}`);
+            logger.error({proposalId}, `Proposal not found`);
             return false;
         }
 
         // Generate code changes
         // In a real implementation, this would be more sophisticated
-        console.log(`Generating code changes for: ${proposal.title}`);
+        logger.info({proposalTitle: proposal.title}, `Generating code changes for proposal`);
 
         // For now, we'll just log that we would implement the proposal
-        console.log(`Would implement proposal: ${proposal.title}`);
-        console.log(`Implementation plan: ${proposal.implementationPlan?.join(', ')}`);
+        logger.info({proposalTitle: proposal.title}, `Would implement proposal`);
+        logger.info({implementationPlan: proposal.implementationPlan}, `Implementation plan`);
 
         // In a real implementation, we would:
         // 1. Generate specific code changes
@@ -153,7 +154,7 @@ export class SelfDevelopmentManager {
     private async performPeriodicAnalysis(): Promise<void> {
         if (!this.isRunning) return;
 
-        console.log('Performing periodic self-development analysis');
+        logger.info('Performing periodic self-development analysis');
 
         // Analyze test results (in a real implementation, this would fetch actual test results)
         const testResults = this.fetchTestResults();
@@ -166,7 +167,7 @@ export class SelfDevelopmentManager {
         // Add analysis results to the agenda
         [...testItems, ...coverageItems].forEach(item => {
             // In a real implementation, we would properly add items to the core's agenda
-            console.log(`Adding analysis item to agenda: ${item.label}`);
+            logger.debug({itemLabel: item.label}, `Adding analysis item to agenda`);
         });
 
         // Generate enhancement proposals based on analysis
@@ -176,7 +177,7 @@ export class SelfDevelopmentManager {
         const proposalItems = this.enhancementProposal.convertToCognitiveItems(proposals);
         proposalItems.forEach(item => {
             // In a real implementation, we would properly add items to the core's agenda
-            console.log(`Adding enhancement proposal to agenda: ${item.label}`);
+            logger.info({itemLabel: item.label}, `Adding enhancement proposal to agenda`);
         });
 
         // Update self-representation with new information
@@ -185,7 +186,7 @@ export class SelfDevelopmentManager {
 
     // Initialize self-development goals
     private initializeSelfDevelopmentGoals(): void {
-        console.log('Initializing self-development goals');
+        logger.info('Initializing self-development goals');
 
         // Add a goal to improve system reliability
         const reliabilityGoal = this.createCognitiveItem(
@@ -212,7 +213,7 @@ export class SelfDevelopmentManager {
         );
 
         // In a real implementation, we would add these to the core's agenda
-        console.log('Added initial self-development goals to agenda');
+        logger.info('Added initial self-development goals to agenda');
     }
 
     // Generate enhancement proposals based on analysis
@@ -260,7 +261,7 @@ export class SelfDevelopmentManager {
         testResults: TestResult[],
         coverageData: Map<string, CoverageData>
     ): void {
-        console.log('Updating self-representation with analysis data');
+        logger.info('Updating self-representation with analysis data');
 
         // Update component metrics based on test results
         const componentFailures = new Map<string, { count: number, total: number }>();
@@ -297,7 +298,7 @@ export class SelfDevelopmentManager {
 
         [...overviewItems, ...capabilityItems, ...gapItems].forEach(item => {
             // In a real implementation, we would add these to the core's agenda
-            console.log(`Adding self-representation item to agenda: ${item.label}`);
+            logger.debug({itemLabel: item.label}, `Adding self-representation item to agenda`);
         });
     }
 

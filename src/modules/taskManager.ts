@@ -1,6 +1,7 @@
 import {AttentionValue, CognitiveItem, TaskStatus} from '../interfaces/types';
 import {TaskFactory} from './taskFactory';
 import {Agenda} from '../core/agenda';
+import logger from '../services/logger';
 import {WorldModel} from '../core/worldModel';
 import {DEFAULT_TASK_DURABILITY, TASK_PRIORITY_LEVELS, TASK_PRIORITY_VALUES} from '../utils/constants';
 
@@ -314,7 +315,7 @@ export class UnifiedTaskManager implements TaskManager {
             try {
                 listener(event);
             } catch (error) {
-                console.error('Error in task event listener:', error);
+                logger.error({error, event}, 'Error in task event listener:');
             }
         }
     }

@@ -1,6 +1,7 @@
 import {CognitiveItem} from '../interfaces/types';
 import {CognitiveSchema, WorldModel} from '../core/worldModel';
 import {TaskFactory} from './taskFactory';
+import logger from '../services/logger';
 
 /**
  * A system-level schema to decompose a complex task into a series of subtasks
@@ -22,18 +23,18 @@ export const DecompositionSchema: CognitiveSchema = {
 
         const taskAtom = worldModel.get_atom(task.atom_id);
         if (!taskAtom || !taskAtom.embedding) {
-            console.warn(`DecompositionSchema: Could not find atom or embedding for task "${task.label}".`);
+            logger.warn({taskId: task.id, taskLabel: task.label}, `DecompositionSchema: Could not find atom or embedding for task.`);
             return [];
         }
 
-        console.log(`DecompositionSchema: Attempting to decompose task "${task.label}"`);
+        logger.info({taskId: task.id, taskLabel: task.label}, `DecompositionSchema: Attempting to decompose task`);
 
         // 1. Query the World Model for knowledge related to the task's embedding.
         const allRelated = worldModel.query_by_semantic(taskAtom.embedding, 3);
         const relatedKnowledge = allRelated.filter(item => item.type === 'BELIEF');
 
         if (relatedKnowledge.length === 0) {
-            console.log(`DecompositionSchema: No relevant knowledge found for "${task.label}".`);
+            logger.info({taskId: task.id, taskLabel: task.label}, `DecompositionSchema: No relevant knowledge found.`);
             return [];
         }
 
@@ -49,11 +50,11 @@ export const DecompositionSchema: CognitiveSchema = {
             .map(line => line.replace(/^(\d+\.|-|\*)\s/, ''));
 
         if (steps.length === 0) {
-            console.log(`DecompositionSchema: Found knowledge, but could not extract steps from: "${planText}"`);
+            logger.warn({planText}, `DecompositionSchema: Found knowledge, but could not extract steps.`);
             return [];
         }
 
-        console.log(`DecompositionSchema: Found ${steps.length} steps. Creating subtasks.`);
+        logger.info({stepCount: steps.length}, `DecompositionSchema: Found steps. Creating subtasks.`);
 
         // 3. Create a subtask for each step in the plan.
         const subtasks = steps.map((stepContent) => {

@@ -2,6 +2,7 @@ import {CognitiveItem} from '../interfaces/types';
 import {Executor} from './actionSubsystem';
 import {CognitiveItemFactory} from '../modules/cognitiveItemFactory';
 import {TaskManager} from '../modules/taskManager';
+import logger from "../services/logger";
 
 export class WebSearchExecutor implements Executor {
     can_execute(goal: CognitiveItem): boolean {
@@ -19,7 +20,7 @@ export class WebSearchExecutor implements Executor {
     async execute(goal: CognitiveItem): Promise<CognitiveItem> {
         // Execute a web search
         // In a real implementation, this would actually perform the search
-        console.log(`Executing web search for goal: ${goal.label || goal.id}`);
+        logger.info({goalId: goal.id, goalLabel: goal.label}, `Executing web search for goal`);
 
         // Simulate search result
         const resultContent = `Search results for "${goal.label || goal.id}" - Chocolate is indeed toxic to cats, just as it is to dogs. The toxicity is due to theobromine, which cats cannot metabolize effectively.`;
@@ -59,7 +60,7 @@ export class AtomicTaskExecutor implements Executor {
             throw new Error('AtomicTaskExecutor: Goal is missing a valid taskId in its metadata.');
         }
 
-        console.log(`Executing atomic task via goal: ${goal.label || goal.id}`);
+        logger.info({goalId: goal.id, goalLabel: goal.label, taskId}, `Executing atomic task via goal`);
 
         // Mark the task as completed
         this.taskManager.updateTaskStatus(taskId, 'completed');
@@ -94,7 +95,7 @@ export class DiagnosticExecutor implements Executor {
 
     async execute(goal: CognitiveItem): Promise<CognitiveItem> {
         // Execute a diagnostic process
-        console.log(`Executing diagnostic for goal: ${goal.label || goal.id}`);
+        logger.info({goalId: goal.id, goalLabel: goal.label}, `Executing diagnostic for goal`);
 
         // Simulate diagnostic result
         const resultContent = `Diagnostic analysis complete. Based on symptoms and known facts, the most likely cause of illness is chocolate poisoning. Immediate veterinary attention is recommended.`;
@@ -130,7 +131,7 @@ export class KnowledgeBaseQueryExecutor implements Executor {
 
     async execute(goal: CognitiveItem): Promise<CognitiveItem> {
         // Execute a knowledge base query
-        console.log(`Executing knowledge base query for goal: ${goal.label || goal.id}`);
+        logger.info({goalId: goal.id, goalLabel: goal.label}, `Executing knowledge base query for goal`);
 
         // Simulate query result
         const resultContent = `Knowledge base query result for "${goal.label || goal.id}" - Found 12 relevant facts about pet nutrition and toxicity.`;
@@ -166,7 +167,7 @@ export class PlanningExecutor implements Executor {
 
     async execute(goal: CognitiveItem): Promise<CognitiveItem> {
         // Execute a planning process
-        console.log(`Executing planning for goal: ${goal.label || goal.id}`);
+        logger.info({goalId: goal.id, goalLabel: goal.label}, `Executing planning for goal`);
 
         // Simulate planning result
         const resultContent = `Planning complete for "${goal.label || goal.id}". Created action sequence: 1. Assess situation, 2. Gather information, 3. Formulate solution, 4. Execute solution.`;

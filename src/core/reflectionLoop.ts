@@ -1,6 +1,7 @@
 import {Agenda} from './agenda';
 import {WorldModel} from './worldModel';
 import {CognitiveItemFactory} from '../modules/cognitiveItemFactory';
+import logger from '../services/logger';
 
 export class ReflectionLoop {
     private worldModel: WorldModel;
@@ -126,7 +127,7 @@ export class ReflectionLoop {
             this.performanceMetrics.cyclesRun++;
             this.performanceMetrics.averageCycleTime = this.cycleTimes.reduce((a, b) => a + b, 0) / this.cycleTimes.length;
         } catch (error) {
-            console.error("Reflection loop error:", error);
+            logger.error({error}, "Reflection loop error");
             this.performanceMetrics.errorsEncountered++;
             this.performanceMetrics.lastError = error instanceof Error ? error.message : String(error);
 
@@ -257,6 +258,6 @@ export class ReflectionLoop {
     private triggerSchemaLearning(): void {
         // In a full implementation, this would call the schema learning module
         // For now, we'll just log that schema learning was triggered
-        console.log("Schema learning cycle triggered");
+        logger.info("Schema learning cycle triggered");
     }
 }

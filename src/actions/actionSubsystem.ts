@@ -8,6 +8,7 @@ import {
 } from './action';
 import {CognitiveItemFactory} from '../modules/cognitiveItemFactory';
 import {TaskManager} from '../modules/taskManager';
+import logger from "../services/logger";
 
 export interface Executor {
     can_execute(goal: CognitiveItem): boolean;
@@ -55,7 +56,7 @@ export class ActionSubsystem {
 
                 return result;
             } catch (error) {
-                console.error(`Executor failed for goal ${goal.id}:`, error);
+                logger.error({error, goalId: goal.id, executor: executor.constructor.name}, `Executor failed for goal`);
 
                 // Record failed execution
                 this.recordExecution(goal.id, executor.constructor.name, false, Date.now() - startTime);

@@ -6,6 +6,8 @@ import {PersistentWorldModel} from '../core/worldModel';
 import {PriorityAgenda} from '../core/agenda';
 import {UnifiedTaskManager} from '../modules/taskManager';
 import {AttentionValue, CognitiveItem} from '../interfaces/types';
+import {config} from '../config';
+import logger from '../services/logger';
 
 // --- Backend Core Initialization ---
 const worldModel = new PersistentWorldModel();
@@ -90,7 +92,7 @@ const broadcastTaskList = () => {
 
 // Listen for backend task changes and broadcast them
 taskManager.addEventListener((event) => {
-    console.log(`Task event received: ${event.type}. Broadcasting update.`);
+    logger.info(`Task event received: ${event.type}. Broadcasting update.`);
     broadcastTaskList();
 });
 
@@ -113,7 +115,7 @@ setInterval(broadcastStats, 5000);
 
 
 wss.on('connection', (ws: WebSocket) => {
-    console.log('New WebSocket connection established');
+    logger.info('New WebSocket connection established');
 
     // Send the current task list to the newly connected client
     broadcastTaskList();
@@ -123,7 +125,7 @@ wss.on('connection', (ws: WebSocket) => {
             const message = JSON.parse(data.toString());
             const {type, payload} = message;
 
-            console.log(`Received message of type: ${type}`);
+            logger.info({messageType: type, payload}, `Received message of type: ${type}`);
 
             switch (type) {
                 case 'ADD_TASK':
@@ -151,24 +153,23 @@ wss.on('connection', (ws: WebSocket) => {
                     taskManager.failTask(payload.id);
                     break;
                 default:
-                    console.warn(`Unknown message type: ${type}`);
+                    logger.warn(`Unknown message type: ${type}`);
             }
         } catch (error) {
-            console.error('Failed to process message:', error);
+            logger.error({error}, 'Failed to process message:');
         }
     });
 
     ws.on('close', () => {
-        console.log('WebSocket connection closed');
+        logger.info('WebSocket connection closed');
     });
 
     ws.on('error', (error: Error) => {
-        console.error('WebSocket error:', error);
+        logger.error({error}, 'WebSocket error:');
     });
 });
 
 // --- Server Start ---
-const PORT: number = parseInt(process.env.PORT || '3000', 10);
-server.listen(PORT, () => {
-    console.log(`Senars3 Unified Server running on http://localhost:${PORT}`);
+server.listen(config.PORT, () => {
+    logger.info(`Senars3 Unified Server running on http://localhost:${config.PORT}`);
 });

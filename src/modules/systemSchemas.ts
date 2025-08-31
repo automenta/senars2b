@@ -2,6 +2,7 @@ import {CognitiveItem, TruthValue} from '../interfaces/types';
 import {CognitiveSchema, WorldModel} from '../core/worldModel';
 import {CognitiveItemFactory} from './cognitiveItemFactory';
 import {v4 as uuidv4} from 'uuid';
+import logger from '../services/logger';
 
 /**
  * A system-level schema to record the history of belief changes.
@@ -25,7 +26,7 @@ export const HistoryRecordingSchema: CognitiveSchema = {
         const {itemId, oldTruth, newTruth} = eventItem.payload;
 
         if (!itemId || !oldTruth || !newTruth) {
-            console.warn('HistoryRecordingSchema: Invalid payload for BeliefUpdated event.', eventItem.payload);
+            logger.warn({payload: eventItem.payload}, 'HistoryRecordingSchema: Invalid payload for BeliefUpdated event.');
             return [];
         }
 

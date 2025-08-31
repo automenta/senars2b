@@ -1,5 +1,6 @@
 import {v4 as uuidv4} from 'uuid';
 import {CodeChangeProposal} from './enhancementProposalModule';
+import logger from '../services/logger';
 
 export interface CodeChange {
     id: string;
@@ -60,10 +61,7 @@ export class ImplementationModule {
 
     // Note: This is a placeholder - actual implementation would need file system access
     applyCodeChange(change: CodeChange): boolean {
-        console.log(`Applying code change to ${change.filePath}:`);
-        console.log(`Change type: ${change.changeType}`);
-        console.log(`Description: ${change.description}`);
-        console.log(`New content:\n${change.newContent}`);
+        logger.info({change}, `Applying code change`);
 
         // In a real implementation, this would actually modify the file system
         // For now, we'll just log the change and return success
@@ -72,10 +70,7 @@ export class ImplementationModule {
 
     // Apply a test change to the file system
     applyTestChange(change: TestChange): boolean {
-        console.log(`Applying test change to ${change.filePath}:`);
-        console.log(`Test type: ${change.testType}`);
-        console.log(`Description: ${change.description}`);
-        console.log(`Content:\n${change.content}`);
+        logger.info({change}, `Applying test change`);
 
         // In a real implementation, this would actually create the test file
         // For now, we'll just log the change and return success
@@ -86,12 +81,12 @@ export class ImplementationModule {
     validateChange(change: CodeChange): boolean {
         // In a real implementation, this would run validation tests
         // For now, we'll just log and return success
-        console.log(`Validating change: ${change.description}`);
+        logger.info({changeDescription: change.description}, `Validating change`);
 
         if (change.validationTests && change.validationTests.length > 0) {
-            console.log('Running validation tests:');
+            logger.info('Running validation tests:');
             for (const test of change.validationTests) {
-                console.log(`  - ${test}`);
+                logger.debug(`  - ${test}`);
             }
         }
 
@@ -165,7 +160,7 @@ export class ImplementationModule {
  * This is a placeholder for the actual implementation.
  * Please replace this with the actual code.
  */
-console.warn('Placeholder implementation for: ${proposal.description}');
+logger.warn(`Placeholder implementation for: ${proposal.description}`);
 `;
     }
 
