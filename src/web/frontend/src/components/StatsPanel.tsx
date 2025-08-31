@@ -19,13 +19,14 @@ interface StatsPanelProps {
     stats: TaskStatistics | null;
 }
 
-const StatItem: React.FC<{ icon: React.ReactNode; label: string; value: number | undefined; color?: string }> = ({
+const StatItem: React.FC<{ icon: React.ReactNode; label: string; value: number | undefined; color?: string, 'data-testid'?: string }> = ({
                                                                                                                      icon,
                                                                                                                      label,
                                                                                                                      value,
-                                                                                                                     color
+                                                                                                                     color,
+                                                                                                                     'data-testid': dataTestId
                                                                                                                  }) => (
-    <div className={styles.statItem} style={{borderColor: color}}>
+    <div className={styles.statItem} style={{borderColor: color}} data-testid={dataTestId}>
         <div className={styles.statIcon} style={{color}}>
             {icon}
         </div>
@@ -94,6 +95,7 @@ const StatsPanel: React.FC<StatsPanelProps> = ({stats}) => {
                                     label={stat.label}
                                     value={stat.value}
                                     color={stat.color}
+                                    data-testid={`stat-item-${stat.label.replace(/\s+/g, '-')}`}
                                 />
                             ))}
                         </div>
@@ -108,6 +110,7 @@ const StatsPanel: React.FC<StatsPanelProps> = ({stats}) => {
                                     label={stat.label}
                                     value={stat.value}
                                     color={stat.color}
+                                    data-testid={`stat-item-${stat.label.replace(/\s+/g, '-')}`}
                                 />
                             ))}
                         </div>

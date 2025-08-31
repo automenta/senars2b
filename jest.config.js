@@ -1,6 +1,6 @@
 module.exports = {
     preset: 'ts-jest',
-    testEnvironment: 'node',
+    testEnvironment: 'jsdom',
     transform: {
         '^.+\\.[tj]sx?$': [
             'ts-jest',
@@ -10,12 +10,13 @@ module.exports = {
         ],
     },
     moduleNameMapper: {
+        '\\.module\\.css$': '<rootDir>/test/__mocks__/styleMock.js',
         '^@/(.*)$': '<rootDir>/src/$1'
     },
     transformIgnorePatterns: [
         "/node_modules/(?!(@xenova/transformers|langchain|@langchain/community))"
     ],
-    testMatch: ['**/test/unit/**/*.test.ts'],
+    testMatch: ['**/test/unit/**/*.test.ts', '**/test/unit/**/*.test.tsx'],
     moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json', 'node'],
     collectCoverageFrom: [
         'src/**/*.ts',

@@ -20,36 +20,31 @@ export const taskUtils = {
 
     // Check if task is completed
     isCompleted: (task: Task): boolean => {
-        return task.status === 'COMPLETED' || task.status === 'completed';
+        return task.status === 'completed';
     },
 
     // Check if task is failed
     isFailed: (task: Task): boolean => {
-        return task.status === 'FAILED' || task.status === 'failed';
+        return task.status === 'failed';
     },
 
     // Check if task is in progress
     isInProgress: (task: Task): boolean => {
-        return task.status === 'IN_PROGRESS';
+        // A task is "in progress" if it's in an active, non-terminal state.
+        return ['decomposing', 'awaiting_subtasks', 'ready_for_execution'].includes(task.status);
     },
 
     // Get status display text
     getStatusText: (status: TaskStatus): string => {
         const statusMap: Record<TaskStatus, string> = {
-            'PENDING': 'Pending',
-            'IN_PROGRESS': 'In Progress',
-            'COMPLETED': 'Completed',
-            'PAUSED': 'Paused',
-            'FAILED': 'Failed',
-            'AWAITING_DEPENDENCIES': 'Awaiting Dependencies',
-            'DECOMPOSING': 'Decomposing',
-            'AWAITING_SUBTASKS': 'Awaiting Subtasks',
-            'READY_FOR_EXECUTION': 'Ready for Execution',
-            'DEFERRED': 'Deferred',
+            'pending': 'Pending',
+            'awaiting_dependencies': 'Awaiting Dependencies',
+            'decomposing': 'Decomposing',
+            'awaiting_subtasks': 'Awaiting Subtasks',
+            'ready_for_execution': 'Ready for Execution',
             'completed': 'Completed',
             'failed': 'Failed',
             'deferred': 'Deferred',
-            'pending': 'Pending'
         };
 
         return statusMap[status] || status;
@@ -75,20 +70,14 @@ export const taskUtils = {
     // Get status color class
     getStatusClass: (status: TaskStatus): string => {
         const statusClassMap: Record<TaskStatus, string> = {
-            'PENDING': 'status-pending',
-            'IN_PROGRESS': 'status-in-progress',
-            'COMPLETED': 'status-completed',
-            'PAUSED': 'status-paused',
-            'FAILED': 'status-failed',
-            'AWAITING_DEPENDENCIES': 'status-awaiting-dependencies',
-            'DECOMPOSING': 'status-decomposing',
-            'AWAITING_SUBTASKS': 'status-awaiting-subtasks',
-            'READY_FOR_EXECUTION': 'status-ready-for-execution',
-            'DEFERRED': 'status-deferred',
+            'pending': 'status-pending',
+            'awaiting_dependencies': 'status-awaiting-dependencies',
+            'decomposing': 'status-decomposing',
+            'awaiting_subtasks': 'status-awaiting-subtasks',
+            'ready_for_execution': 'status-ready-for-execution',
             'completed': 'status-completed',
             'failed': 'status-failed',
             'deferred': 'status-deferred',
-            'pending': 'status-pending'
         };
 
         return statusClassMap[status] || `status-${status.toLowerCase()}`;
@@ -114,20 +103,14 @@ export const taskUtils = {
     // Sort tasks by status
     sortByStatus: (tasks: Task[]): Task[] => {
         const statusOrder: Record<TaskStatus, number> = {
-            'PENDING': 1,
             'pending': 1,
-            'AWAITING_DEPENDENCIES': 2,
-            'DECOMPOSING': 3,
-            'AWAITING_SUBTASKS': 4,
-            'READY_FOR_EXECUTION': 5,
-            'IN_PROGRESS': 6,
-            'PAUSED': 7,
-            'DEFERRED': 8,
-            'deferred': 8,
-            'COMPLETED': 9,
-            'completed': 9,
-            'FAILED': 10,
-            'failed': 10
+            'awaiting_dependencies': 2,
+            'decomposing': 3,
+            'awaiting_subtasks': 4,
+            'ready_for_execution': 5,
+            'deferred': 6,
+            'completed': 7,
+            'failed': 8,
         };
 
         return [...tasks].sort((a, b) => {

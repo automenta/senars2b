@@ -1,38 +1,46 @@
 import React from 'react';
-import {TaskStatus} from '../types';
-import {FaBolt, FaCheck, FaExclamationTriangle, FaHourglassHalf, FaInfoCircle, FaPause} from 'react-icons/fa';
+import { TaskStatus } from '../types';
+import {
+    FaBolt,
+    FaCheck,
+    FaExclamationTriangle,
+    FaHourglassHalf,
+    FaInfoCircle,
+    FaPause,
+    FaSpinner,
+    FaPlay
+} from 'react-icons/fa';
 import styles from './StatusBadge.module.css';
+import { taskUtils } from '../utils/taskUtils';
 
-const statusConfig: Record<TaskStatus, { icon: React.ElementType; color: string; className: string }> = {
-    PENDING: {icon: FaHourglassHalf, color: '#6c757d', className: styles.pending},
-    IN_PROGRESS: {icon: FaBolt, color: '#0d6efd', className: styles.inProgress},
-    COMPLETED: {icon: FaCheck, color: '#198754', className: styles.completed},
-    PAUSED: {icon: FaPause, color: '#ffc107', className: styles.paused},
-    FAILED: {icon: FaExclamationTriangle, color: '#dc3545', className: styles.failed},
-    DEFERRED: {icon: FaPause, color: '#ffc107', className: styles.deferred},
-    AWAITING_DEPENDENCIES: {icon: FaHourglassHalf, color: '#6c757d', className: styles.awaiting},
-    DECOMPOSING: {icon: FaBolt, color: '#0d6efd', className: styles.decomposing},
-    AWAITING_SUBTASKS: {icon: FaHourglassHalf, color: '#6c757d', className: styles.awaiting},
-    READY_FOR_EXECUTION: {icon: FaBolt, color: '#0d6efd', className: styles.ready},
-    completed: {icon: FaCheck, color: '#198754', className: styles.completed},
-    failed: {icon: FaExclamationTriangle, color: '#dc3545', className: styles.failed},
-    deferred: {icon: FaPause, color: '#ffc107', className: styles.deferred},
-    pending: {icon: FaHourglassHalf, color: '#6c757d', className: styles.pending},
+const statusIconMap: Record<TaskStatus, React.ElementType> = {
+    'pending': FaHourglassHalf,
+    'awaiting_dependencies': FaPause,
+    'decomposing': FaSpinner,
+    'awaiting_subtasks': FaHourglassHalf,
+    'ready_for_execution': FaPlay,
+    'completed': FaCheck,
+    'failed': FaExclamationTriangle,
+    'deferred': FaPause,
 };
 
 interface StatusBadgeProps {
     status: TaskStatus;
+    isProcessing?: boolean;
 }
 
-const StatusBadge: React.FC<StatusBadgeProps> = ({status}) => {
-    const config = statusConfig[status] || {icon: FaInfoCircle, color: '#6c757d', className: styles.default};
-    const Icon = config.icon;
+const StatusBadge: React.FC<StatusBadgeProps> = ({ status, isProcessing = false }) => {
+    const Icon = statusIconMap[status] || FaInfoCircle;
+    const statusText = taskUtils.getStatusText(status);
+    const statusClass = taskUtils.getStatusClass(status);
+
+    const badgeClassName = `${styles.badge} ${statusClass} ${isProcessing ? styles.processing : ''}`;
 
     return (
-        <span className={`${styles.badge} ${config.className}`}>
-      <Icon/>
-            {status}
-    </span>
+        <span className={badgeClassName} title={statusText}>
+            <Icon className={styles.icon} />
+            <span className={styles.text}>{statusText}</span>
+        </span>
     );
 };
 

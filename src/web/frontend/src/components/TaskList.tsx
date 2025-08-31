@@ -120,6 +120,7 @@ const TaskList: React.FC<TaskListProps> = memo(({tasks, sendMessage, isSublist =
             className={listClassName}
             onDragOver={isSublist ? e => e.preventDefault() : undefined}
             onDrop={isSublist ? handleDrop : undefined}
+            data-testid="task-list"
         >
             <AnimatePresence>
                 {tasksToRender.map((task, index) => renderTaskItem(task, index))}

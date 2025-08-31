@@ -1,18 +1,3 @@
-@keyframes pulse {
-    0% {
-        border-color: var(--primary-color);
-        box-shadow: 0 0 8px var(--primary-color-translucent);
-    }
-    50% {
-        border-color: var(--primary-color-translucent);
-        box-shadow: 0 0 12px var(--primary-color-translucent);
-    }
-    100% {
-        border-color: var(--primary-color);
-        box-shadow: 0 0 8px var(--primary-color-translucent);
-    }
-}
-
 .container {
     margin-bottom: 1rem;
     transition: all 0.2s ease-in-out;
@@ -51,10 +36,6 @@
 .item.editing {
     border-color: var(--primary-color);
     box-shadow: 0 0 8px var(--primary-color-translucent);
-}
-
-.item.processing {
-    animation: pulse 2s infinite;
 }
 
 .mainInfo {

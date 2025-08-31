@@ -30,9 +30,9 @@ describe('SystemStatusPanel', () => {
         render(<SystemStatusPanel systemStatus={mockSystemStatus}/>);
 
         expect(screen.getByText('System Status')).toBeInTheDocument();
-        expect(screen.getByText('Agenda Size:')).toBeInTheDocument();
+        expect(screen.getByText('Agenda Size')).toBeInTheDocument();
         expect(screen.getByText('5')).toBeInTheDocument();
-        expect(screen.getByText('Workers Running:')).toBeInTheDocument();
+        expect(screen.getByText('Workers Running')).toBeInTheDocument();
         expect(screen.getByText('2')).toBeInTheDocument();
     });
 
@@ -41,15 +41,16 @@ describe('SystemStatusPanel', () => {
         const headerButton = screen.getByRole('button', {name: /System Status/i});
 
         // Content should be visible initially
-        expect(screen.getByText('Agenda Size:')).toBeVisible();
+        expect(screen.getByText('Agenda Size')).toBeVisible();
 
         // Click to hide
         fireEvent.click(headerButton);
-        expect(screen.queryByText('Agenda Size:')).not.toBeVisible();
+        // Use queryByText for non-existence check
+        expect(screen.queryByText('Agenda Size')).not.toBeInTheDocument();
 
         // Click to show again
         fireEvent.click(headerButton);
-        expect(screen.getByText('Agenda Size:')).toBeVisible();
+        expect(screen.getByText('Agenda Size')).toBeVisible();
     });
 
     it('should have correct aria attributes for accessibility', () => {

@@ -9,6 +9,7 @@ import ProgressBar from './ProgressBar';
 import TaskControls from './TaskControls';
 import styles from './TaskItem.module.css';
 import {useStore} from "../store";
+import { taskUtils } from '../utils/taskUtils';
 
 interface TaskItemProps {
     task: Task;
@@ -39,8 +40,8 @@ const TaskItem: React.FC<TaskItemProps> = memo(({
         }
     }, [isEditing]);
 
-    const isDimmed = ['COMPLETED', 'FAILED'].includes(task.status.toUpperCase());
-    const isProcessing = task.status === 'IN_PROGRESS';
+    const isDimmed = taskUtils.isCompleted(task) || taskUtils.isFailed(task);
+    const isProcessing = taskUtils.isInProgress(task);
 
     const subtasks = useMemo(
         () => allFilteredTasks.filter(t => t.parent_id === task.id),
@@ -174,7 +175,7 @@ const TaskItem: React.FC<TaskItemProps> = memo(({
                     </div>
                 </div>
                 <div className={styles.metaInfo}>
-                    <StatusBadge status={task.status}/>
+                    <StatusBadge status={task.status} isProcessing={isProcessing} />
                     <PriorityBadge priority={task.priority}/>
                     {hasPendingPrompt && (
                         <div className={styles.promptIndicator} title="Action required">

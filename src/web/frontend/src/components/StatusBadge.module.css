@@ -1,54 +1,54 @@
+@keyframes pulse-icon {
+    0% {
+        transform: scale(1);
+        opacity: 0.7;
+    }
+    50% {
+        transform: scale(1.2);
+        opacity: 1;
+    }
+    100% {
+        transform: scale(1);
+        opacity: 0.7;
+    }
+}
+
 .badge {
     display: inline-flex;
     align-items: center;
     gap: 0.5em;
     padding: 0.35em 0.65em;
     font-size: 0.8em;
-    font-weight: 700;
+    font-weight: 600;
     line-height: 1;
     color: #fff;
     text-align: center;
     white-space: nowrap;
     vertical-align: baseline;
-    border-radius: var(--border-radius);
+    border-radius: 20px;
+    transition: all 0.2s ease-in-out;
 }
 
-.pending {
-    background-color: #6c757d;
+.icon {
+    font-size: 0.9em;
 }
 
-.inProgress {
-    background-color: #0d6efd;
+.text {
+    font-weight: 500;
 }
 
-.completed {
-    background-color: #198754;
+.processing .icon {
+    animation: pulse-icon 1.5s infinite ease-in-out;
+    color: var(--primary-color-light);
 }
 
-.paused {
-    background-color: #ffc107;
-}
-
-.failed {
-    background-color: #dc3545;
-}
-
-.deferred {
-    background-color: #ffc107;
-}
-
-.awaiting {
-    background-color: #6c757d;
-}
-
-.decomposing {
-    background-color: #0d6efd;
-}
-
-.ready {
-    background-color: #0d6efd;
-}
-
-.default {
-    background-color: #6c757d;
-}
+/* Base styles from taskUtils getStatusClass */
+.status-pending { background-color: #6c757d; }
+.status-awaiting-dependencies { background-color: #6c757d; }
+.status-decomposing { background-color: #0d6efd; }
+.status-awaiting-subtasks { background-color: #6c757d; }
+.status-ready-for-execution { background-color: #28a745; }
+.status-completed { background-color: #198754; }
+.status-failed { background-color: #dc3545; }
+.status-deferred { background-color: #ffc107; }
+.status-default { background-color: #6c757d; }
