@@ -1,43 +1,52 @@
 import { CognitiveItem, SemanticAtom } from '@/interfaces/types';
-import { CognitiveSchema, WorldModel } from './worldModel';
-import { SchemaMatcher } from './schemaMatcher';
-import { BaseComponent } from './BaseComponent';
+import { UnifiedBaseComponent, BaseConfig } from './UnifiedBaseComponent';
 import { Logger } from '@/utils/standardLogger';
+
+interface SchemaManagerConfig extends BaseConfig {
+  enableSchemaValidation?: boolean;
+  maxSchemaCount?: number;
+  schemaUsageTracking?: boolean;
+}
 
 interface SchemaManagerEvents {
   schemaRegistered: { schemaId: string };
   schemaApplied: { schemaId: string; itemA: string; itemB: string; resultCount: number };
   schemaError: { schemaId: string; itemA: string; itemB: string; error: Error };
+  schemaValidationFailed?: { schemaId: string; reason: string };
 }
 
+export type CognitiveSchema = {
+  atom_id: string;
+  apply: (a: CognitiveItem, b: CognitiveItem, worldModel: any) => CognitiveItem[];
+};
+
 /**
- * Abstract base class for schema management
- * Provides common functionality for registering, applying, and managing schemas
+ * Abstract base class for schema management with unified base component functionality
  */
-export abstract class BaseSchemaManager extends BaseComponent<SchemaManagerEvents> implements SchemaMatcher {
+export abstract class UnifiedSchemaManager extends UnifiedBaseComponent<SchemaManagerConfig, SchemaManagerEvents> {
   protected schemas: Map<string, CognitiveSchema> = new Map();
   protected schemaAtoms: Map<string, SemanticAtom> = new Map();
   
-  constructor() {
-    super('SchemaManager');
+  constructor(defaultConfig: SchemaManagerConfig, userConfig: Partial<SchemaManagerConfig> = {}) {
+    super('SchemaManager', defaultConfig, userConfig);
   }
   
   /**
    * Register a schema with the system
    */
-  abstract register_schema(schema: SemanticAtom, world_model: WorldModel): CognitiveSchema;
+  abstract register_schema(schema: SemanticAtom, world_model: any): CognitiveSchema;
   
   /**
    * Find applicable schemas for two cognitive items
    */
-  abstract find_applicable(a: CognitiveItem, b: CognitiveItem, world_model: WorldModel): CognitiveSchema[];
+  abstract find_applicable(a: CognitiveItem, b: CognitiveItem, world_model: any): CognitiveSchema[];
   
   /**
    * Apply a schema to two cognitive items
    */
-  applySchema(schema: CognitiveSchema, a: CognitiveItem, b: CognitiveItem, worldModel: WorldModel): CognitiveItem[] {
+  applySchema(schema: CognitiveSchema, a: CognitiveItem, b: CognitiveItem, worldModel: any): CognitiveItem[] {
     try {
-      const result = schema.apply(a, b, worldModel as any);
+      const result = schema.apply(a, b, worldModel);
       this.notifyEvent('schemaApplied', { 
         schemaId: schema.atom_id, 
         itemA: a.id, 

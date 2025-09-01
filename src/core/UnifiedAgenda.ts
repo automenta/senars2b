@@ -1,40 +1,34 @@
 import { AttentionValue, CognitiveItem, TaskMetadata } from '@/interfaces/types';
-import { BaseComponent } from './BaseComponent';
+import { UnifiedBaseComponent, BaseConfig } from './UnifiedBaseComponent';
 
-export interface Agenda {
-  push(item: CognitiveItem): void;
-  pop(): Promise<CognitiveItem>;
-  peek(): CognitiveItem | null;
-  size(): number;
-  updateAttention(id: string, newVal: AttentionValue): void;
-  remove(id: string): boolean;
-  get(id: string): CognitiveItem | null;
-  updateTaskStatus(taskId: string, status: TaskMetadata['status']): boolean;
-  getTasksBy(filter: { 
-    tag?: string; 
-    category?: string; 
-    status?: TaskMetadata['status'] 
-  }): CognitiveItem[];
-  getTasksByGroup(groupId: string): CognitiveItem[];
+interface AgendaConfig extends BaseConfig {
+  maxWaitTime?: number;
+  enableDependencyTracking?: boolean;
+  priorityWeighting?: PriorityWeighting;
 }
 
-/**
- * Events emitted by the agenda
- */
+export interface PriorityWeighting {
+  taskPriority: number;
+  deadlineFactor: number;
+  attentionPriority: number;
+  completionFactor: number;
+}
+
 interface AgendaEvents {
   itemAdded: { item: CognitiveItem };
   itemRemoved: { itemId: string };
   itemUpdated: { item: CognitiveItem };
   taskStatusUpdated: { taskId: string; status: TaskMetadata['status'] };
+  itemBlocked?: { itemId: string; reason: string };
+  itemUnblocked?: { itemId: string };
 }
 
 /**
- * Abstract base class for agenda implementations
- * Provides common functionality for managing and prioritizing cognitive items
+ * Abstract base class for agenda implementations with unified base component functionality
  */
-export abstract class BaseAgenda extends BaseComponent<AgendaEvents> {
-  constructor() {
-    super('Agenda');
+export abstract class UnifiedAgenda extends UnifiedBaseComponent<AgendaConfig, AgendaEvents> {
+  constructor(defaultConfig: AgendaConfig, userConfig: Partial<AgendaConfig> = {}) {
+    super('Agenda', defaultConfig, userConfig);
   }
   
   /**
@@ -90,53 +84,6 @@ export abstract class BaseAgenda extends BaseComponent<AgendaEvents> {
    * Retrieves all tasks belonging to a specific group
    */
   abstract getTasksByGroup(groupId: string): CognitiveItem[];
-  
-  /**
-   * Notify listeners that an item was added
-   */
-  protected notifyItemAdded(item: CognitiveItem): void {
-    this.notifyEvent('itemAdded', { item }, { 
-      component: 'Agenda',
-      operation: 'addItem', 
-      itemId: item.id, 
-      itemType: item.type 
-    });
-  }
-  
-  /**
-   * Notify listeners that an item was removed
-   */
-  protected notifyItemRemoved(itemId: string): void {
-    this.notifyEvent('itemRemoved', { itemId }, { 
-      component: 'Agenda',
-      operation: 'removeItem', 
-      itemId 
-    });
-  }
-  
-  /**
-   * Notify listeners that an item was updated
-   */
-  protected notifyItemUpdated(item: CognitiveItem): void {
-    this.notifyEvent('itemUpdated', { item }, { 
-      component: 'Agenda',
-      operation: 'updateItem', 
-      itemId: item.id, 
-      itemType: item.type 
-    });
-  }
-  
-  /**
-   * Notify listeners that a task status was updated
-   */
-  protected notifyTaskStatusUpdated(taskId: string, status: TaskMetadata['status']): void {
-    this.notifyEvent('taskStatusUpdated', { taskId, status }, { 
-      component: 'Agenda',
-      operation: 'updateTaskStatus', 
-      taskId, 
-      status 
-    });
-  }
   
   /**
    * Get agenda statistics

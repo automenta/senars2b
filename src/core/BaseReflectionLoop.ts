@@ -1,7 +1,6 @@
 import { Agenda } from './agenda';
 import { BaseWorldModel } from './BaseWorldModel';
-import { EventEmitter } from '@/utils/EventEmitter';
-import { StatisticsTracker } from '@/utils/StatisticsTracker';
+import { BaseComponent } from './BaseComponent';
 import { Logger } from '@/utils/standardLogger';
 
 /**
@@ -18,12 +17,11 @@ interface ReflectionLoopEvents {
  * Abstract base class for reflection loop implementations
  * Provides common functionality for monitoring and optimizing cognitive processes
  */
-export abstract class BaseReflectionLoop extends EventEmitter<ReflectionLoopEvents> {
+export abstract class BaseReflectionLoop extends BaseComponent<ReflectionLoopEvents> {
   protected agenda: Agenda;
   protected worldModel: BaseWorldModel;
   protected readonly interval: number;
   protected lastRun: number = 0;
-  protected statisticsTracker: StatisticsTracker = new StatisticsTracker();
   
   protected performanceMetrics: {
     cyclesRun: number;
@@ -40,7 +38,7 @@ export abstract class BaseReflectionLoop extends EventEmitter<ReflectionLoopEven
   protected cycleTimes: number[] = [];
 
   constructor(worldModel: BaseWorldModel, agenda: Agenda, interval: number = 60000) {
-    super();
+    super('ReflectionLoop');
     this.worldModel = worldModel;
     this.agenda = agenda;
     this.interval = interval;
@@ -80,8 +78,7 @@ export abstract class BaseReflectionLoop extends EventEmitter<ReflectionLoopEven
    */
   protected notifyCycleStarted(): void {
     const timestamp = Date.now();
-    this.emit('cycleStarted', { timestamp });
-    Logger.info('Reflection cycle started', {
+    this.notifyEvent('cycleStarted', { timestamp }, {
       component: 'ReflectionLoop',
       operation: 'runCycle',
       timestamp
@@ -93,8 +90,7 @@ export abstract class BaseReflectionLoop extends EventEmitter<ReflectionLoopEven
    */
   protected notifyCycleCompleted(duration: number): void {
     const timestamp = Date.now();
-    this.emit('cycleCompleted', { timestamp, duration });
-    Logger.info('Reflection cycle completed', {
+    this.notifyEvent('cycleCompleted', { timestamp, duration }, {
       component: 'ReflectionLoop',
       operation: 'runCycle',
       timestamp,
@@ -117,12 +113,11 @@ export abstract class BaseReflectionLoop extends EventEmitter<ReflectionLoopEven
    */
   protected notifyCycleError(error: Error): void {
     const timestamp = Date.now();
-    this.emit('cycleError', { timestamp, error });
-    Logger.error('Reflection loop error', {
+    this.notifyEvent('cycleError', { timestamp, error }, {
       component: 'ReflectionLoop',
       operation: 'runCycle',
       timestamp
-    }, error);
+    });
     
     this.performanceMetrics.errorsEncountered++;
     this.performanceMetrics.lastError = error.message;
@@ -132,19 +127,11 @@ export abstract class BaseReflectionLoop extends EventEmitter<ReflectionLoopEven
    * Notify listeners that a KPI was updated
    */
   protected notifyKpiUpdated(kpiName: string, value: number): void {
-    this.emit('kpiUpdated', { kpiName, value });
-    Logger.debug('KPI updated', {
+    this.notifyEvent('kpiUpdated', { kpiName, value }, {
       component: 'ReflectionLoop',
       operation: 'updateKPIs',
       kpiName,
       value
     });
-  }
-
-  /**
-   * Get statistics tracker
-   */
-  getStatisticsTracker(): StatisticsTracker {
-    return this.statisticsTracker;
   }
 }

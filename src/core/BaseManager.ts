@@ -1,67 +1,61 @@
 import { CognitiveItem } from '@/interfaces/types';
 import { WorldModel } from '@/core/worldModel';
 import { Agenda } from '@/core/agenda';
-import logger from '../services/logger';
+import { BaseComponent } from './BaseComponent';
+
+interface ManagerEvents {
+  itemAdded: { item: CognitiveItem };
+  itemUpdated: { item: CognitiveItem };
+  itemRemoved: { itemId: string };
+}
 
 /**
  * Abstract base class for manager components
  * Captures common patterns like event handling, statistics tracking, and world model interaction
  */
-export abstract class BaseManager {
+export abstract class BaseManager extends BaseComponent<ManagerEvents> {
   protected worldModel: WorldModel;
   protected agenda: Agenda;
-  protected eventListeners: Array<(event: any) => void> = [];
-  protected statistics: Map<string, number> = new Map();
 
   constructor(worldModel: WorldModel, agenda: Agenda) {
+    super('Manager');
     this.worldModel = worldModel;
     this.agenda = agenda;
   }
 
   /**
-   * Add an event listener
+   * Notify listeners that an item was added
    */
-  addEventListener(listener: (event: any) => void): void {
-    this.eventListeners.push(listener);
+  protected notifyItemAdded(item: CognitiveItem): void {
+    this.notifyEvent('itemAdded', { item }, { 
+      component: 'Manager',
+      operation: 'addItem', 
+      itemId: item.id, 
+      itemType: item.type 
+    });
   }
 
   /**
-   * Notify all event listeners of an event
+   * Notify listeners that an item was updated
    */
-  protected notifyListeners(event: any): void {
-    for (const listener of this.eventListeners) {
-      try {
-        listener(event);
-      } catch (error) {
-        logger.error({ error, event }, 'Error in event listener');
-      }
-    }
+  protected notifyItemUpdated(item: CognitiveItem): void {
+    this.notifyEvent('itemUpdated', { item }, { 
+      component: 'Manager',
+      operation: 'updateItem', 
+      itemId: item.id, 
+      itemType: item.type 
+    });
   }
 
   /**
-   * Update a statistic counter
+   * Notify listeners that an item was removed
    */
-  protected updateStatistic(key: string, value: number): void {
-    this.statistics.set(key, value);
-  }
-
-  /**
-   * Increment a statistic counter
-   */
-  protected incrementStatistic(key: string, amount: number = 1): void {
-    const current = this.statistics.get(key) || 0;
-    this.statistics.set(key, current + amount);
-  }
-
-  /**
-   * Get all statistics
-   */
-  getStatistics(): Record<string, number> {
-    const stats: Record<string, number> = {};
-    for (const [key, value] of this.statistics.entries()) {
-      stats[key] = value;
-    }
-    return stats;
+  protected notifyItemRemoved(itemId: string): void {
+    this.notifyEvent('itemRemoved', { itemId }, { 
+      component: 'Manager',
+      operation: 'removeItem', 
+      itemId 
+    });
   }
 
   /**

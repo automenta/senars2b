@@ -1,7 +1,6 @@
 import { CognitiveItem, SemanticAtom } from '@/interfaces/types';
 import { CognitiveSchema } from './worldModel';
-import { EventEmitter } from '@/utils/EventEmitter';
-import { StatisticsTracker } from '@/utils/StatisticsTracker';
+import { BaseComponent } from './BaseComponent';
 import { Logger } from '@/utils/standardLogger';
 
 /**
@@ -18,8 +17,10 @@ interface WorldModelEvents {
  * Abstract base class for world model implementations
  * Provides common functionality for managing cognitive items and schemas
  */
-export abstract class BaseWorldModel extends EventEmitter<WorldModelEvents> {
-  protected statisticsTracker: StatisticsTracker = new StatisticsTracker();
+export abstract class BaseWorldModel extends BaseComponent<WorldModelEvents> {
+  constructor() {
+    super('WorldModel');
+  }
   
   /**
    * Add a semantic atom to the world model
@@ -115,10 +116,8 @@ export abstract class BaseWorldModel extends EventEmitter<WorldModelEvents> {
    * Notify listeners that an item was added
    */
   protected notifyItemAdded(item: CognitiveItem): void {
-    this.emit('itemAdded', { item });
-    this.statisticsTracker.increment('itemsAdded');
-    Logger.info('Item added to world model', { 
-      component: 'WorldModel', 
+    this.notifyEvent('itemAdded', { item }, { 
+      component: 'WorldModel',
       operation: 'addItem', 
       itemId: item.id, 
       itemType: item.type 
@@ -129,10 +128,8 @@ export abstract class BaseWorldModel extends EventEmitter<WorldModelEvents> {
    * Notify listeners that an item was updated
    */
   protected notifyItemUpdated(item: CognitiveItem): void {
-    this.emit('itemUpdated', { item });
-    this.statisticsTracker.increment('itemsUpdated');
-    Logger.info('Item updated in world model', { 
-      component: 'WorldModel', 
+    this.notifyEvent('itemUpdated', { item }, { 
+      component: 'WorldModel',
       operation: 'updateItem', 
       itemId: item.id, 
       itemType: item.type 
@@ -143,10 +140,8 @@ export abstract class BaseWorldModel extends EventEmitter<WorldModelEvents> {
    * Notify listeners that an item was removed
    */
   protected notifyItemRemoved(itemId: string): void {
-    this.emit('itemRemoved', { itemId });
-    this.statisticsTracker.increment('itemsRemoved');
-    Logger.info('Item removed from world model', { 
-      component: 'WorldModel', 
+    this.notifyEvent('itemRemoved', { itemId }, { 
+      component: 'WorldModel',
       operation: 'removeItem', 
       itemId 
     });
@@ -156,20 +151,11 @@ export abstract class BaseWorldModel extends EventEmitter<WorldModelEvents> {
    * Notify listeners that a schema was registered
    */
   protected notifySchemaRegistered(schemaId: string): void {
-    this.emit('schemaRegistered', { schemaId });
-    this.statisticsTracker.increment('schemasRegistered');
-    Logger.info('Schema registered in world model', { 
-      component: 'WorldModel', 
+    this.notifyEvent('schemaRegistered', { schemaId }, { 
+      component: 'WorldModel',
       operation: 'registerSchema', 
       schemaId 
     });
-  }
-  
-  /**
-   * Get statistics tracker
-   */
-  getStatisticsTracker(): StatisticsTracker {
-    return this.statisticsTracker;
   }
   
   /**

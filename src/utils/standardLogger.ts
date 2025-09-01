@@ -69,3 +69,5 @@ export class Logger {
     logger.trace({ ...context, ...data }, message);
   }
 }
+
+export default Logger;
