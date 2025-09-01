@@ -14,6 +14,7 @@
     "test:community": "ts-node src/testing/communitySimulatorTest.ts",
     "test:community-integration": "ts-node src/testing/communitySimulatorIntegrationTest.ts",
     "test:usability": "ts-node src/testing/usabilityIntegrityTest.ts",
+    "test:simple": "ts-node src/testing/simpleComponentTest.ts",
     "docs:usability": "cat USABILITY_ENHANCEMENTS.md",
     "docs:enhanced": "cat ENHANCED_USABILITY_FEATURES.md"
   },
