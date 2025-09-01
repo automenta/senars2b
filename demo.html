@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Senars3 Task Management UI Demo</title>
+    <style>
+        :root {
+            --font-family-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            --color-background: #f8f9fa;
+            --color-foreground: #212529;
+            --color-card-background: #ffffff;
+            --color-card-border: #e9ecef;
+            --color-primary: #4361ee;
+            --color-primary-dark: #3a56d4;
+            --color-primary-light: #edf2ff;
+            --color-primary-translucent: rgba(67, 97, 238, 0.2);
+            --color-secondary: #6c757d;
+            --color-success: #4cc9f0;
+            --color-success-translucent: rgba(76, 201, 240, 0.1);
+            --color-warning: #f72585;
+            --color-warning-translucent: rgba(247, 37, 133, 0.1);
+            --color-danger: #e63946;
+            --color-danger-dark: #d9001b;
+            --color-danger-translucent: rgba(230, 57, 70, 0.1);
+            --color-info: #4895ef;
+            --color-info-translucent: rgba(72, 149, 239, 0.1);
+            --color-pending: #f7b500;
+            --color-awaiting: #ff9500;
+            --color-decomposing: #af52de;
+            --color-ready: #30b0c7;
+            --color-completed: #4cc9f0;
+            --color-failed: #e63946;
+            --color-deferred: #6c757d;
+            --color-critical: #e63946;
+            --color-high: #ff9500;
+            --color-medium: #f7b500;
+            --color-low: #4895ef;
+            --color-critical-translucent: rgba(230, 57, 70, 0.1);
+            --color-high-translucent: rgba(255, 149, 0, 0.1);
+            --color-medium-translucent: rgba(247, 181, 0, 0.1);
+            --color-low-translucent: rgba(72, 149, 239, 0.1);
+            --border-radius-sm: 0.25rem;
+            --border-radius-md: 0.5rem;
+            --border-radius-lg: 0.75rem;
+            --border-radius-xl: 1rem;
+            --box-shadow-sm: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+            --box-shadow-md: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+            --box-shadow-lg: 0 1rem 3rem rgba(0, 0, 0, 0.175);
+            --color-hover-background: #f1f3f9;
+            --background-color: #ffffff;
+            --background-color-secondary: #f8f9fa;
+            --background-color-tertiary: #e9ecef;
+            --background-color-light: #f8f9fa;
+            --border-color: #e9ecef;
+            --border-color-focus: #4361ee;
+            --text-color-primary: #212529;
+            --text-color-secondary: #6c757d;
+            --text-color-tertiary: #adb5bd;
+            --transition-fast: 0.15s ease-in-out;
+            --transition-normal: 0.3s ease-in-out;
+            --transition-slow: 0.5s ease-in-out;
+            --spacing-xs: 0.25rem;
+            --spacing-sm: 0.5rem;
+            --spacing-md: 1rem;
+            --spacing-lg: 1.5rem;
+            --spacing-xl: 2rem;
+            --spacing-xxl: 3rem;
+        }
+
+        body {
+            margin: 0;
+            font-family: var(--font-family-sans);
+            background-color: var(--color-background);
+            color: var(--color-foreground);
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: var(--spacing-xl);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: var(--spacing-xl);
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: var(--spacing-md);
+            color: var(--color-primary);
+        }
+
+        .demo-section {
+            background: var(--color-card-background);
+            border: 1px solid var(--color-card-border);
+            border-radius: var(--border-radius-lg);
+            padding: var(--spacing-lg);
+            margin-bottom: var(--spacing-lg);
+            box-shadow: var(--box-shadow-sm);
+        }
+
+        .demo-section h2 {
+            margin-top: 0;
+            color: var(--color-primary);
+            border-bottom: 1px solid var(--color-card-border);
+            padding-bottom: var(--spacing-sm);
+        }
+
+        .component-demo {
+            margin: var(--spacing-lg) 0;
+        }
+
+        button {
+            background: var(--color-primary);
+            color: white;
+            border: none;
+            padding: var(--spacing-sm) var(--spacing-md);
+            border-radius: var(--border-radius-md);
+            cursor: pointer;
+            font-weight: 500;
+            transition: all var(--transition-fast);
+        }
+
+        button:hover {
+            background: var(--color-primary-dark);
+        }
+
+        .task-card {
+            background: var(--color-card-background);
+            border: 1px solid var(--color-card-border);
+            border-radius: var(--border-radius-lg);
+            padding: var(--spacing-md);
+            transition: all var(--transition-normal);
+            box-shadow: var(--box-shadow-sm);
+            position: relative;
+            margin-bottom: var(--spacing-md);
+        }
+
+        .task-card:hover {
+            border-color: var(--color-primary);
+            box-shadow: var(--box-shadow-md);
+        }
+
+        .task-header {
+            display: flex;
+            align-items: flex-start;
+            gap: var(--spacing-md);
+        }
+
+        .task-content {
+            flex: 1;
+        }
+
+        .task-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin: 0 0 var(--spacing-xs) 0;
+            color: var(--text-color-primary);
+        }
+
+        .task-description {
+            color: var(--text-color-secondary);
+            line-height: 1.6;
+            margin: 0 0 var(--spacing-md) 0;
+        }
+
+        .badges {
+            display: flex;
+            gap: var(--spacing-sm);
+            flex-wrap: wrap;
+            margin-bottom: var(--spacing-md);
+        }
+
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5em;
+            padding: 0.35em 0.65em;
+            font-size: 0.8em;
+            font-weight: 700;
+            line-height: 1;
+            color: #fff;
+            text-align: center;
+            white-space: nowrap;
+            vertical-align: baseline;
+            border-radius: var(--border-radius-sm);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .priority-badge {
+            font-size: 0.75em;
+            padding: 0.25em 0.5em;
+            border-radius: var(--border-radius-sm);
+            color: #fff;
+            text-transform: capitalize;
+            font-weight: 600;
+        }
+
+        .progress-bar-container {
+            width: 100%;
+            height: 8px;
+            background-color: var(--background-color-tertiary);
+            border-radius: var(--border-radius-sm);
+            overflow: hidden;
+            margin-bottom: var(--spacing-md);
+            position: relative;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, var(--color-primary), var(--color-info));
+            transition: width var(--transition-normal) ease-in-out;
+            border-radius: var(--border-radius-sm);
+        }
+
+        .task-actions {
+            display: flex;
+            gap: var(--spacing-sm);
+            justify-content: flex-end;
+        }
+
+        .action-button {
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: var(--spacing-sm);
+            border-radius: var(--border-radius-sm);
+            transition: all var(--transition-fast);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-color-secondary);
+        }
+
+        .action-button:hover {
+            background-color: var(--color-hover-background);
+        }
+
+        .complete-button:hover {
+            color: var(--color-success);
+            background-color: var(--color-success-translucent);
+        }
+
+        .edit-button:hover {
+            color: var(--color-primary);
+            background-color: var(--color-primary-translucent);
+        }
+
+        .delete-button:hover {
+            color: var(--color-danger);
+            background-color: var(--color-danger-translucent);
+        }
+
+        .task-details {
+            border-top: 1px solid var(--color-card-border);
+            padding-top: var(--spacing-md);
+            margin-top: var(--spacing-md);
+        }
+
+        .task-board {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: var(--spacing-lg);
+        }
+
+        .board-column {
+            background: var(--background-color-secondary);
+            border-radius: var(--border-radius-lg);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .column-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: var(--spacing-md);
+            border-bottom: 3px solid var(--color-card-border);
+            background: var(--color-card-background);
+            border-top-left-radius: var(--border-radius-lg);
+            border-top-right-radius: var(--border-radius-lg);
+        }
+
+        .column-title {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-sm);
+        }
+
+        .column-title h3 {
+            margin: 0;
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--text-color-primary);
+        }
+
+        .task-count {
+            background: var(--background-color-tertiary);
+            color: var(--text-color-secondary);
+            font-size: 0.8rem;
+            font-weight: 600;
+            padding: 0.25rem 0.5rem;
+            border-radius: 12px;
+        }
+
+        .column-tasks {
+            padding: var(--spacing-md);
+            display: flex;
+            flex-direction: column;
+            gap: var(--spacing-md);
+            overflow-y: auto;
+            max-height: 500px;
+        }
+
+        .priority-legend {
+            display: flex;
+            justify-content: center;
+            gap: var(--spacing-lg);
+            padding: var(--spacing-md) 0;
+            background: var(--background-color-secondary);
+            border-radius: var(--border-radius-md);
+            margin: var(--spacing-md) 0;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-sm);
+        }
+
+        .legend-color {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+        }
+
+        .legend-color.critical {
+            background: var(--color-critical);
+        }
+
+        .legend-color.high {
+            background: var(--color-high);
+        }
+
+        .legend-color.medium {
+            background: var(--color-medium);
+        }
+
+        .legend-color.low {
+            background: var(--color-low);
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: var(--spacing-md);
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .task-board {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Senars3 Task Management UI</h1>
+            <p>Demonstration of the enhanced task management interface with progressive disclosure</p>
+        </div>
+
+        <div class="demo-section">
+            <h2>Task Card Component</h2>
+            <p>This component displays individual tasks with progressive disclosure of details.</p>
+            
+            <div class="component-demo">
+                <div class="task-card">
+                    <div class="task-header">
+                        <div class="task-content">
+                            <h3 class="task-title">Review new UI design</h3>
+                            <div class="badges">
+                                <span class="status-badge" style="background-color: var(--color-pending);">Pending</span>
+                                <span class="priority-badge" style="background-color: var(--color-medium);">Medium</span>
+                            </div>
+                        </div>
+                        <div class="task-actions">
+                            <button class="action-button edit-button" title="Edit task">✏️</button>
+                            <button class="action-button delete-button" title="Delete task">🗑️</button>
+                        </div>
+                    </div>
+                    <div class="task-description">
+                        Review the new user interface design and provide feedback on usability improvements.
+                    </div>
+                    <div class="progress-bar-container">
+                        <div class="progress-bar" style="width: 45%"></div>
+                    </div>
+                    <div class="task-actions">
+                        <button class="action-button complete-button" title="Mark as complete">✅ Complete</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="demo-section">
+            <h2>Task Board Component</h2>
+            <p>This component displays tasks organized by status in a Kanban-style board.</p>
+            
+            <div class="component-demo">
+                <div class="task-board">
+                    <div class="board-column">
+                        <div class="column-header">
+                            <div class="column-title">
+                                <h3>Pending</h3>
+                                <span class="task-count">2</span>
+                            </div>
+                        </div>
+                        <div class="column-tasks">
+                            <div class="task-card">
+                                <div class="task-header">
+                                    <div class="task-content">
+                                        <h3 class="task-title">Implement WebSocket connection</h3>
+                                        <div class="badges">
+                                            <span class="status-badge" style="background-color: var(--color-pending);">Pending</span>
+                                            <span class="priority-badge" style="background-color: var(--color-low);">Low</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="task-description">
+                                    Set up WebSocket connection for real-time task updates.
+                                </div>
+                                <div class="progress-bar-container">
+                                    <div class="progress-bar" style="width: 20%"></div>
+                                </div>
+                            </div>
+                            
+                            <div class="task-card">
+                                <div class="task-header">
+                                    <div class="task-content">
+                                        <h3 class="task-title">Update documentation</h3>
+                                        <div class="badges">
+                                            <span class="status-badge" style="background-color: var(--color-pending);">Pending</span>
+                                            <span class="priority-badge" style="background-color: var(--color-medium);">Medium</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="task-description">
+                                    Update user documentation with new features.
+                                </div>
+                                <div class="progress-bar-container">
+                                    <div class="progress-bar" style="width: 0%"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="board-column">
+                        <div class="column-header">
+                            <div class="column-title">
+                                <h3>In Progress</h3>
+                                <span class="task-count">1</span>
+                            </div>
+                        </div>
+                        <div class="column-tasks">
+                            <div class="task-card">
+                                <div class="task-header">
+                                    <div class="task-content">
+                                        <h3 class="task-title">Review new UI design</h3>
+                                        <div class="badges">
+                                            <span class="status-badge" style="background-color: var(--color-ready);">Ready</span>
+                                            <span class="priority-badge" style="background-color: var(--color-medium);">Medium</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="task-description">
+                                    Review the new user interface design and provide feedback.
+                                </div>
+                                <div class="progress-bar-container">
+                                    <div class="progress-bar" style="width: 45%"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="board-column">
+                        <div class="column-header">
+                            <div class="column-title">
+                                <h3>Completed</h3>
+                                <span class="task-count">1</span>
+                            </div>
+                        </div>
+                        <div class="column-tasks">
+                            <div class="task-card" style="opacity: 0.8;">
+                                <div class="task-header">
+                                    <div class="task-content">
+                                        <h3 class="task-title">Set up project structure</h3>
+                                        <div class="badges">
+                                            <span class="status-badge" style="background-color: var(--color-completed);">Completed</span>
+                                            <span class="priority-badge" style="background-color: var(--color-high);">High</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="task-description">
+                                    Initialize the project with the required folder structure and dependencies.
+                                </div>
+                                <div class="progress-bar-container">
+                                    <div class="progress-bar" style="width: 100%"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="demo-section">
+            <h2>Task Prioritization Component</h2>
+            <p>This component allows users to prioritize tasks through drag-and-drop reordering.</p>
+            
+            <div class="component-demo">
+                <div class="priority-legend">
+                    <div class="legend-item">
+                        <div class="legend-color critical"></div>
+                        <span>Critical</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color high"></div>
+                        <span>High</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color medium"></div>
+                        <span>Medium</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color low"></div>
+                        <span>Low</span>
+                    </div>
+                </div>
+                
+                <div style="background: var(--color-card-background); border: 1px solid var(--color-card-border); border-radius: var(--border-radius-lg); padding: var(--spacing-lg);">
+                    <div style="display: flex; align-items: center; gap: var(--spacing-md); padding: var(--spacing-md); border: 1px solid var(--border-color); border-radius: var(--border-radius-md); margin-bottom: var(--spacing-md);">
+                        <div style="cursor: grab; padding: var(--spacing-sm); color: var(--text-color-tertiary);">⋮⋮</div>
+                        <div style="flex: 1;">
+                            <h4 style="margin: 0 0 var(--spacing-xs) 0;">Fix critical bug in authentication system</h4>
+                            <p style="margin: 0; color: var(--text-color-secondary); font-size: 0.95rem;">Users are unable to log in due to a security issue</p>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: var(--spacing-sm); padding: var(--spacing-sm) var(--spacing-md); border-radius: var(--border-radius-md); background: var(--color-critical-translucent); color: var(--color-critical); font-weight: 600; font-size: 0.9rem;">
+                            ⚠️ Critical
+                        </div>
+                    </div>
+                    
+                    <div style="display: flex; align-items: center; gap: var(--spacing-md); padding: var(--spacing-md); border: 1px solid var(--border-color); border-radius: var(--border-radius-md); margin-bottom: var(--spacing-md);">
+                        <div style="cursor: grab; padding: var(--spacing-sm); color: var(--text-color-tertiary);">⋮⋮</div>
+                        <div style="flex: 1;">
+                            <h4 style="margin: 0 0 var(--spacing-xs) 0;">Implement new payment processing feature</h4>
+                            <p style="margin: 0; color: var(--text-color-secondary); font-size: 0.95rem;">Add support for cryptocurrency payments</p>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: var(--spacing-sm); padding: var(--spacing-sm) var(--spacing-md); border-radius: var(--border-radius-md); background: var(--color-high-translucent); color: var(--color-high); font-weight: 600; font-size: 0.9rem;">
+                            ⚠️ High
+                        </div>
+                    </div>
+                    
+                    <div style="display: flex; align-items: center; gap: var(--spacing-md); padding: var(--spacing-md); border: 1px solid var(--border-color); border-radius: var(--border-radius-md); margin-bottom: var(--spacing-md);">
+                        <div style="cursor: grab; padding: var(--spacing-sm); color: var(--text-color-tertiary);">⋮⋮</div>
+                        <div style="flex: 1;">
+                            <h4 style="margin: 0 0 var(--spacing-xs) 0;">Optimize database queries</h4>
+                            <p style="margin: 0; color: var(--text-color-secondary); font-size: 0.95rem;">Improve performance of slow database queries</p>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: var(--spacing-sm); padding: var(--spacing-sm) var(--spacing-md); border-radius: var(--border-radius-md); background: var(--color-medium-translucent); color: var(--color-medium); font-weight: 600; font-size: 0.9rem;">
+                            ⚠️ Medium
+                        </div>
+                    </div>
+                    
+                    <div style="display: flex; justify-content: space-between; margin-top: var(--spacing-lg);">
+                        <button style="background: var(--background-color); color: var(--text-color-primary); border: 1px solid var(--border-color);">Cancel</button>
+                        <button>Save Priorities</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

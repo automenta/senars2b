@@ -1,0 +1,199 @@
+.taskDependenciesContainer {
+  background: var(--color-card-background);
+  border: 1px solid var(--color-card-border);
+  border-radius: var(--border-radius-lg);
+  padding: var(--spacing-lg);
+  box-shadow: var(--box-shadow-sm);
+  margin-top: var(--spacing-lg);
+}
+
+.dependenciesHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-lg);
+  padding-bottom: var(--spacing-md);
+  border-bottom: 1px solid var(--color-card-border);
+}
+
+.dependenciesHeader h2 {
+  margin: 0;
+  color: var(--text-color-primary);
+  font-weight: 600;
+}
+
+.dependenciesVisualization {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-lg);
+  padding: var(--spacing-lg);
+  background: var(--background-color-light);
+  border-radius: var(--border-radius-md);
+  border: 1px solid var(--color-card-border);
+  min-height: 300px;
+}
+
+.node {
+  padding: var(--spacing-md);
+  border-radius: var(--border-radius-md);
+  background: var(--color-card-background);
+  border: 2px solid var(--color-primary);
+  box-shadow: var(--box-shadow-sm);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  position: relative;
+  min-width: 150px;
+  text-align: center;
+}
+
+.node:hover {
+  transform: translateY(-5px);
+  box-shadow: var(--box-shadow-md);
+}
+
+.node.completed {
+  border-color: var(--color-success);
+  background: var(--color-success-translucent);
+}
+
+.node.failed {
+  border-color: var(--color-danger);
+  background: var(--color-danger-translucent);
+}
+
+.nodeTitle {
+  font-weight: 600;
+  margin: 0 0 var(--spacing-sm) 0;
+  color: var(--text-color-primary);
+}
+
+.nodeStatus {
+  font-size: 0.85rem;
+  color: var(--text-color-secondary);
+}
+
+.edge {
+  stroke: var(--color-primary);
+  stroke-width: 2;
+  marker-end: url(#arrowhead);
+}
+
+.edge.completed {
+  stroke: var(--color-success);
+}
+
+.edge.failed {
+  stroke: var(--color-danger);
+}
+
+.legend {
+  display: flex;
+  gap: var(--spacing-lg);
+  margin-top: var(--spacing-lg);
+  padding-top: var(--spacing-md);
+  border-top: 1px solid var(--color-card-border);
+  width: 100%;
+  justify-content: center;
+}
+
+.legendItem {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+.legendColor {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 2px solid var(--color-primary);
+}
+
+.legendColor.completed {
+  border-color: var(--color-success);
+  background: var(--color-success-translucent);
+}
+
+.legendColor.failed {
+  border-color: var(--color-danger);
+  background: var(--color-danger-translucent);
+}
+
+.legendColor.pending {
+  border-color: var(--color-primary);
+  background: var(--color-primary-translucent);
+}
+
+.emptyState {
+  text-align: center;
+  padding: var(--spacing-xl);
+  color: var(--text-color-secondary);
+  width: 100%;
+}
+
+.emptyStateIcon {
+  font-size: 3rem;
+  margin-bottom: var(--spacing-md);
+  color: var(--color-secondary);
+}
+
+.emptyState h3 {
+  margin: 0 0 var(--spacing-sm) 0;
+  color: var(--text-color-primary);
+}
+
+.emptyState p {
+  margin: 0 0 var(--spacing-lg) 0;
+}
+
+.taskDetail {
+  background: var(--color-card-background);
+  border: 1px solid var(--color-card-border);
+  border-radius: var(--border-radius-md);
+  padding: var(--spacing-lg);
+  margin-top: var(--spacing-lg);
+  box-shadow: var(--box-shadow-sm);
+}
+
+.taskDetailHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-md);
+  padding-bottom: var(--spacing-md);
+  border-bottom: 1px solid var(--color-card-border);
+}
+
+.taskDetailHeader h3 {
+  margin: 0;
+  color: var(--text-color-primary);
+}
+
+.taskDetailContent {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--spacing-md);
+}
+
+.detailItem {
+  display: flex;
+  flex-direction: column;
+}
+
+.detailLabel {
+  font-size: 0.85rem;
+  color: var(--text-color-secondary);
+  margin-bottom: var(--spacing-xs);
+}
+
+.detailValue {
+  font-weight: 500;
+  color: var(--text-color-primary);
+}
+
+@media (max-width: 768px) {
+  .taskDetailContent {
+    grid-template-columns: 1fr;
+  }
+}

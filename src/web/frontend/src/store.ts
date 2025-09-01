@@ -6,6 +6,7 @@ import {crdtTaskManager} from './crdtTaskManager';
 export type SortOption = 'priority-desc' | 'priority-asc' | 'date-desc' | 'date-asc' | 'title-asc' | 'title-desc';
 export type StatusFilter = 'ALL' | TaskStatus;
 export type TypeFilter = 'ALL' | 'REGULAR' | 'AGENT';
+export type PriorityFilter = 'ALL' | TaskPriority;
 export type ThemeType = 'light' | 'dark';
 
 interface AppState {
@@ -15,6 +16,7 @@ interface AppState {
     searchTerm: string;
     statusFilter: StatusFilter;
     typeFilter: TypeFilter;
+    priorityFilter: PriorityFilter;
     sortOption: SortOption;
     theme: ThemeType;
     notificationsEnabled: boolean;
@@ -34,6 +36,7 @@ interface AppState {
     setSearchTerm: (term: string) => void;
     setStatusFilter: (filter: StatusFilter) => void;
     setTypeFilter: (filter: TypeFilter) => void;
+    setPriorityFilter: (filter: PriorityFilter) => void;
     setSortOption: (option: SortOption) => void;
     toggleTheme: () => void;
     toggleNotifications: () => void;
@@ -68,6 +71,7 @@ export const useStore = create<AppState>((set, get) => ({
     searchTerm: '',
     statusFilter: 'ALL',
     typeFilter: 'ALL',
+    priorityFilter: 'ALL',
     sortOption: 'priority-desc',
     theme: 'light',
     notificationsEnabled: true,
@@ -105,6 +109,7 @@ export const useStore = create<AppState>((set, get) => ({
     setSearchTerm: (term) => set({searchTerm: term}),
     setStatusFilter: (filter) => set({statusFilter: filter}),
     setTypeFilter: (filter) => set({typeFilter: filter}),
+    setPriorityFilter: (filter) => set({priorityFilter: filter}),
     setSortOption: (option) => set({sortOption: option}),
     toggleTheme: () => {
         const newTheme = get().theme === 'light' ? 'dark' : 'light';
@@ -146,7 +151,8 @@ export const useStore = create<AppState>((set, get) => ({
     clearFilters: () => set({
         searchTerm: '',
         statusFilter: 'ALL',
-        typeFilter: 'ALL'
+        typeFilter: 'ALL',
+        priorityFilter: 'ALL'
     }),
 }));
 

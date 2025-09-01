@@ -1,0 +1,260 @@
+.card {
+  background: var(--color-card-background);
+  border: 1px solid var(--color-card-border);
+  border-radius: var(--border-radius-lg);
+  padding: var(--spacing-md);
+  transition: all var(--transition-normal);
+  box-shadow: var(--box-shadow-sm);
+  position: relative;
+}
+
+.card:hover {
+  border-color: var(--color-primary);
+  box-shadow: var(--box-shadow-md);
+}
+
+.card.selected {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 2px var(--color-primary-translucent);
+}
+
+.card.completed {
+  opacity: 0.8;
+}
+
+.card.failed {
+  border-color: var(--color-danger-translucent);
+}
+
+.cardHeader {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--spacing-md);
+}
+
+.selectionArea {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+.checkbox {
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+}
+
+.expandButton {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: var(--spacing-sm);
+  color: var(--text-color-secondary);
+  border-radius: var(--border-radius-sm);
+  transition: all var(--transition-fast);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.expandButton:hover {
+  background-color: var(--color-hover-background);
+  color: var(--text-color-primary);
+}
+
+.titleArea {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin: 0;
+  color: var(--text-color-primary);
+}
+
+.badges {
+  display: flex;
+  gap: var(--spacing-sm);
+  flex-wrap: wrap;
+}
+
+.actionsArea {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+.quickActions {
+  display: flex;
+  gap: var(--spacing-sm);
+}
+
+.actionButton {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: var(--spacing-sm);
+  border-radius: var(--border-radius-sm);
+  transition: all var(--transition-fast);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-color-secondary);
+}
+
+.actionButton:hover {
+  background-color: var(--color-hover-background);
+}
+
+.completeButton:hover {
+  color: var(--color-success);
+  background-color: var(--color-success-translucent);
+}
+
+.pauseButton:hover {
+  color: var(--color-warning);
+  background-color: var(--color-warning-translucent);
+}
+
+.resumeButton:hover {
+  color: var(--color-info);
+  background-color: var(--color-info-translucent);
+}
+
+.stopButton:hover {
+  color: var(--color-danger);
+  background-color: var(--color-danger-translucent);
+}
+
+.editButton:hover {
+  color: var(--color-primary);
+  background-color: var(--color-primary-translucent);
+}
+
+.deleteButton:hover {
+  color: var(--color-danger);
+  background-color: var(--color-danger-translucent);
+}
+
+.menuButton {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: var(--spacing-sm);
+  border-radius: var(--border-radius-sm);
+  transition: all var(--transition-fast);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-color-secondary);
+}
+
+.menuButton:hover {
+  background-color: var(--color-hover-background);
+  color: var(--text-color-primary);
+}
+
+.progressBar {
+  margin: var(--spacing-md) 0;
+}
+
+.details {
+  border-top: 1px solid var(--color-card-border);
+  padding-top: var(--spacing-md);
+  overflow: hidden;
+}
+
+.description {
+  color: var(--text-color-secondary);
+  line-height: 1.6;
+  margin-bottom: var(--spacing-md);
+}
+
+.noDescription {
+  color: var(--text-color-tertiary);
+  font-style: italic;
+}
+
+.metadata {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: var(--spacing-md);
+  margin-bottom: var(--spacing-md);
+}
+
+.metadataItem {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+.metadataLabel {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-color-secondary);
+}
+
+.metadataValue {
+  font-size: 0.95rem;
+  color: var(--text-color-primary);
+}
+
+.subtasks h4 {
+  margin: 0 0 var(--spacing-sm) 0;
+  color: var(--text-color-primary);
+  font-size: 1rem;
+}
+
+.subtaskItem {
+  display: flex;
+  justify-content: space-between;
+  padding: var(--spacing-sm) 0;
+  border-bottom: 1px solid var(--color-card-border);
+}
+
+.subtaskItem:last-child {
+  border-bottom: none;
+}
+
+.subtaskTitle {
+  color: var(--text-color-primary);
+}
+
+.subtaskStatus {
+  color: var(--text-color-secondary);
+  font-size: 0.9rem;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .cardHeader {
+    flex-direction: column;
+    gap: var(--spacing-sm);
+  }
+  
+  .selectionArea {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+  }
+  
+  .titleArea {
+    order: 3;
+    width: 100%;
+  }
+  
+  .actionsArea {
+    order: 2;
+    align-self: flex-end;
+  }
+  
+  .metadata {
+    grid-template-columns: 1fr;
+  }
+}

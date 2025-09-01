@@ -340,6 +340,24 @@
     background-color: var(--color-danger-translucent);
 }
 
+.reorderBtn {
+    background: none;
+    border: none;
+    color: var(--text-color-secondary);
+    padding: var(--spacing-sm);
+    cursor: pointer;
+    border-radius: var(--border-radius-sm);
+    transition: all var(--transition-fast);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.reorderBtn:hover {
+    color: var(--color-primary);
+    background-color: var(--color-hover-background);
+}
+
 /* Touch device optimizations */
 @media (hover: none) and (pointer: coarse) {
     .controlsContainer {

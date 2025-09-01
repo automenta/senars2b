@@ -1,40 +1,50 @@
-.container {
-    width: 100%;
-    height: 12px;
-    background-color: var(--background-color-tertiary);
-    border-radius: var(--border-radius-lg);
-    overflow: hidden;
-    margin-top: var(--spacing-md);
-    position: relative;
-    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1);
+.progressBarContainer {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  width: 100%;
 }
 
-.bar {
-    height: 100%;
-    background: linear-gradient(90deg, var(--color-primary), var(--color-info));
-    transition: width var(--transition-normal) ease-in-out;
-    border-radius: var(--border-radius-lg);
-    position: relative;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+.progressBar {
+  flex: 1;
+  height: 8px;
+  background-color: var(--background-color-tertiary);
+  border-radius: var(--border-radius-sm);
+  overflow: hidden;
+  position: relative;
 }
 
-.bar::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
-    animation: progress-shine 2s infinite;
-    border-radius: var(--border-radius-lg);
+.progressBarFill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--color-primary), var(--color-info));
+  transition: width var(--transition-normal) ease-in-out;
+  border-radius: var(--border-radius-sm);
 }
 
-@keyframes progress-shine {
-    0% {
-        transform: translateX(-100%);
-    }
-    100% {
-        transform: translateX(100%);
-    }
+.progressBarFill::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  animation: progressShine 2s infinite;
+}
+
+@keyframes progressShine {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+.percentage {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-color-secondary);
+  min-width: 40px;
+  text-align: right;
 }

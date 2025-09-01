@@ -1,76 +1,54 @@
 import React from 'react';
-import {TaskStatus} from '../types';
-import {
-    FaCheck,
-    FaExclamationTriangle,
-    FaHourglassHalf,
-    FaInfoCircle,
-    FaPause,
-    FaSpinner,
-    FaPlay
-} from 'react-icons/fa';
+import { TaskStatus } from '../types';
 import styles from './StatusBadge.module.css';
 
-// Local utility functions for status operations
-const getStatusText = (status: TaskStatus): string => {
-    const statusMap: Record<TaskStatus, string> = {
-        'pending': 'Pending',
-        'awaiting_dependencies': 'Awaiting Dependencies',
-        'decomposing': 'Decomposing',
-        'awaiting_subtasks': 'Awaiting Subtasks',
-        'ready_for_execution': 'Ready for Execution',
-        'completed': 'Completed',
-        'failed': 'Failed',
-        'deferred': 'Deferred',
-    };
-
-    return statusMap[status] || status;
-};
-
-const getStatusClass = (status: TaskStatus): string => {
-    const statusClassMap: Record<TaskStatus, string> = {
-        'pending': 'status-pending',
-        'awaiting_dependencies': 'status-awaiting-dependencies',
-        'decomposing': 'status-decomposing',
-        'awaiting_subtasks': 'status-awaiting-subtasks',
-        'ready_for_execution': 'status-ready-for-execution',
-        'completed': 'status-completed',
-        'failed': 'status-failed',
-        'deferred': 'status-deferred',
-    };
-
-    return statusClassMap[status] || `status-${status}`;
-};
-
-const statusIconMap: Record<TaskStatus, React.ElementType> = {
-    'pending': FaHourglassHalf,
-    'awaiting_dependencies': FaPause,
-    'decomposing': FaSpinner,
-    'awaiting_subtasks': FaHourglassHalf,
-    'ready_for_execution': FaPlay,
-    'completed': FaCheck,
-    'failed': FaExclamationTriangle,
-    'deferred': FaPause,
-};
-
 interface StatusBadgeProps {
-    status: TaskStatus;
-    isProcessing?: boolean;
+  status: TaskStatus;
 }
 
-const StatusBadge: React.FC<StatusBadgeProps> = ({status, isProcessing = false}) => {
-    const Icon = statusIconMap[status] || FaInfoCircle;
-    const statusText = getStatusText(status);
-    const statusClass = getStatusClass(status);
+const StatusBadge: React.FC<StatusBadgeProps> = ({ status }) => {
+  const statusConfig: Record<TaskStatus, { label: string; className: string }> = {
+    pending: { 
+      label: 'Pending', 
+      className: styles.pending 
+    },
+    awaiting_dependencies: { 
+      label: 'Awaiting Dependencies', 
+      className: styles.awaitingDependencies 
+    },
+    decomposing: { 
+      label: 'Decomposing', 
+      className: styles.decomposing 
+    },
+    awaiting_subtasks: { 
+      label: 'Awaiting Subtasks', 
+      className: styles.awaitingSubtasks 
+    },
+    ready_for_execution: { 
+      label: 'Ready for Execution', 
+      className: styles.readyForExecution 
+    },
+    completed: { 
+      label: 'Completed', 
+      className: styles.completed 
+    },
+    failed: { 
+      label: 'Failed', 
+      className: styles.failed 
+    },
+    deferred: { 
+      label: 'Deferred', 
+      className: styles.deferred 
+    }
+  };
 
-    const badgeClassName = `${styles.badge} ${statusClass} ${isProcessing ? styles.processing : ''}`;
+  const config = statusConfig[status] || statusConfig.pending;
 
-    return (
-        <span className={badgeClassName} title={statusText}>
-            <Icon className={styles.icon}/>
-            <span className={styles.text}>{statusText}</span>
-        </span>
-    );
+  return (
+    <span className={`${styles.statusBadge} ${config.className}`}>
+      {config.label}
+    </span>
+  );
 };
 
 export default StatusBadge;

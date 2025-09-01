@@ -2,11 +2,11 @@ import express from 'express';
 import http from 'http';
 import WebSocket from 'ws';
 import path from 'path';
-import {PersistentWorldModel} from '@/core/worldModel';
-import {PriorityAgenda} from '@/core/agenda';
-import {UnifiedTaskManager} from '@/modules/taskManager';
-import {AttentionValue, CognitiveItem} from '@/interfaces/types';
-import {config} from '@/config';
+import {PersistentWorldModel} from '../core/worldModel';
+import {UnifiedPriorityAgenda} from '../core/UnifiedPriorityAgenda';
+import {UnifiedTaskManager} from '../modules/taskManager';
+import {AttentionValue, CognitiveItem} from '../interfaces/types';
+import {config} from '../config';
 import logger from '../services/logger';
 import {createServer} from 'vite';
 import react from '@vitejs/plugin-react';
@@ -15,7 +15,7 @@ const {setupWSConnection} = require('y-websocket/bin/utils');
 
 // --- Backend Core Initialization ---
 const worldModel = new PersistentWorldModel();
-const agenda = new PriorityAgenda((taskId) => worldModel.get_item(taskId)?.task_metadata?.status || null);
+const agenda = new UnifiedPriorityAgenda((taskId: string) => worldModel.get_item(taskId)?.task_metadata?.status || null);
 const taskManager = new UnifiedTaskManager(agenda, worldModel);
 
 const defaultAttention: AttentionValue = {priority: 0.5, durability: 0.5};
@@ -129,6 +129,9 @@ function setupWebSocketServer(server: http.Server, wss: WebSocket.Server, yjsWss
                         break;
                     case 'FAIL_TASK':
                         taskManager.failTask(payload.id);
+                        break;
+                    case 'REORDER_TASKS':
+                        taskManager.reorderTasks(payload.orderedTaskIds);
                         break;
                     default:
                         logger.warn(`Unknown message type: ${type}`);

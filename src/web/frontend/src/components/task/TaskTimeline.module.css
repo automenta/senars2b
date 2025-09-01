@@ -1,0 +1,227 @@
+.timelineContainer {
+  background: var(--color-card-background);
+  border: 1px solid var(--color-card-border);
+  border-radius: var(--border-radius-lg);
+  padding: var(--spacing-lg);
+  box-shadow: var(--box-shadow-sm);
+  margin-top: var(--spacing-lg);
+}
+
+.timelineHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-lg);
+  padding-bottom: var(--spacing-md);
+  border-bottom: 1px solid var(--color-card-border);
+}
+
+.timelineHeader h2 {
+  margin: 0;
+  color: var(--text-color-primary);
+  font-weight: 600;
+}
+
+.timeline {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xl);
+}
+
+.timelineSection {
+  display: flex;
+  gap: var(--spacing-lg);
+}
+
+.timelineDate {
+  min-width: 150px;
+  padding: var(--spacing-md);
+  background: var(--background-color-secondary);
+  border-radius: var(--border-radius-md);
+  text-align: center;
+  border: 1px solid var(--color-card-border);
+}
+
+.timelineDate h3 {
+  margin: 0 0 var(--spacing-sm) 0;
+  color: var(--text-color-primary);
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.taskCount {
+  background: var(--background-color-tertiary);
+  color: var(--text-color-secondary);
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 0.25rem 0.5rem;
+  border-radius: 12px;
+}
+
+.timelineEvents {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-lg);
+}
+
+.timelineEvent {
+  display: flex;
+  gap: var(--spacing-md);
+  padding: var(--spacing-md);
+  border: 1px solid var(--color-card-border);
+  border-radius: var(--border-radius-md);
+  background: var(--color-card-background);
+  box-shadow: var(--box-shadow-sm);
+  transition: all var(--transition-fast);
+}
+
+.timelineEvent:hover {
+  box-shadow: var(--box-shadow-md);
+  border-color: var(--border-color-focus);
+}
+
+.eventIndicator {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+.indicator {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 3px solid var(--color-primary);
+  background: var(--color-card-background);
+  z-index: 1;
+}
+
+.indicator.pending {
+  border-color: var(--color-pending);
+}
+
+.indicator.awaiting_dependencies {
+  border-color: var(--color-awaiting);
+}
+
+.indicator.decomposing {
+  border-color: var(--color-decomposing);
+}
+
+.indicator.awaiting_subtasks {
+  border-color: var(--color-awaiting);
+}
+
+.indicator.ready_for_execution {
+  border-color: var(--color-ready);
+}
+
+.indicator.completed {
+  border-color: var(--color-completed);
+  background: var(--color-completed);
+}
+
+.indicator.failed {
+  border-color: var(--color-failed);
+  background: var(--color-failed);
+}
+
+.indicator.deferred {
+  border-color: var(--color-deferred);
+}
+
+.connector {
+  width: 2px;
+  flex: 1;
+  background: var(--color-card-border);
+}
+
+.eventContent {
+  flex: 1;
+}
+
+.eventHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: var(--spacing-sm);
+  gap: var(--spacing-md);
+}
+
+.eventTitle {
+  margin: 0;
+  color: var(--text-color-primary);
+  font-size: 1.1rem;
+  font-weight: 600;
+  flex: 1;
+}
+
+.eventBadges {
+  display: flex;
+  gap: var(--spacing-sm);
+  flex-shrink: 0;
+}
+
+.eventDescription {
+  margin: 0 0 var(--spacing-md) 0;
+  color: var(--text-color-secondary);
+  line-height: 1.5;
+}
+
+.eventActions {
+  display: flex;
+  gap: var(--spacing-sm);
+  flex-wrap: wrap;
+}
+
+.completedText {
+  color: var(--color-success);
+  font-weight: 500;
+}
+
+.failedText {
+  color: var(--color-danger);
+  font-weight: 500;
+}
+
+.emptyState {
+  text-align: center;
+  padding: var(--spacing-xl);
+  color: var(--text-color-secondary);
+}
+
+.emptyStateIcon {
+  font-size: 3rem;
+  margin-bottom: var(--spacing-md);
+  color: var(--color-secondary);
+}
+
+.emptyState h3 {
+  margin: 0 0 var(--spacing-sm) 0;
+  color: var(--text-color-primary);
+}
+
+.emptyState p {
+  margin: 0 0 var(--spacing-lg) 0;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .timelineSection {
+    flex-direction: column;
+  }
+  
+  .timelineDate {
+    min-width: auto;
+  }
+  
+  .eventHeader {
+    flex-direction: column;
+    gap: var(--spacing-sm);
+  }
+  
+  .eventBadges {
+    align-self: flex-start;
+  }
+}

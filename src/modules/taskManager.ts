@@ -52,6 +52,8 @@ export interface TaskManager {
 
     addEventListener(listener: (event: { type: string; task: CognitiveItem }) => void): void;
 
+    reorderTasks(orderedTaskIds: string[]): void;
+
     getTaskStatistics(): {
         total: number;
         pending: number;
@@ -257,6 +259,17 @@ export class UnifiedTaskManager implements TaskManager {
 
     addEventListener(listener: (event: { type: string; task: CognitiveItem }) => void): void {
         this.eventListeners.push(listener);
+    }
+
+    reorderTasks(orderedTaskIds: string[]): void {
+        // This is a placeholder implementation. In a real system, you would need to:
+        // 1. Update the task order in the world model
+        // 2. Update the agenda with the new order
+        // 3. Notify listeners about the reordering
+        console.log('Reordering tasks:', orderedTaskIds);
+        
+        // For now, we'll just notify listeners that tasks have been reordered
+        this.notifyListeners({type: 'tasksReordered', task: this.getAllTasks()[0] || {} as CognitiveItem});
     }
 
     private loadTasksFromWorldModel(): void {

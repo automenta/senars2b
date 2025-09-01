@@ -1,26 +1,38 @@
 import React from 'react';
-import {TaskPriority} from '../types';
+import { TaskPriority } from '../types';
 import styles from './PriorityBadge.module.css';
 
-const priorityConfig: Record<TaskPriority, { className: string }> = {
-    low: {className: styles.low},
-    medium: {className: styles.medium},
-    high: {className: styles.high},
-    critical: {className: styles.critical},
-};
-
 interface PriorityBadgeProps {
-    priority: TaskPriority;
+  priority: TaskPriority;
 }
 
-const PriorityBadge: React.FC<PriorityBadgeProps> = ({priority}) => {
-    const config = priorityConfig[priority] || {className: styles.low};
+const PriorityBadge: React.FC<PriorityBadgeProps> = ({ priority }) => {
+  const priorityConfig: Record<TaskPriority, { label: string; className: string }> = {
+    critical: { 
+      label: 'Critical', 
+      className: styles.critical 
+    },
+    high: { 
+      label: 'High', 
+      className: styles.high 
+    },
+    medium: { 
+      label: 'Medium', 
+      className: styles.medium 
+    },
+    low: { 
+      label: 'Low', 
+      className: styles.low 
+    }
+  };
 
-    return (
-        <span className={`${styles.badge} ${config.className}`}>
-      {priority}
+  const config = priorityConfig[priority] || priorityConfig.medium;
+
+  return (
+    <span className={`${styles.priorityBadge} ${config.className}`}>
+      {config.label}
     </span>
-    );
+  );
 };
 
 export default PriorityBadge;

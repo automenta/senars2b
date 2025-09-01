@@ -1,122 +1,48 @@
-@keyframes pulse-icon {
-    0% {
-        transform: scale(1);
-        opacity: 0.7;
-    }
-    50% {
-        transform: scale(1.2);
-        opacity: 1;
-    }
-    100% {
-        transform: scale(1);
-        opacity: 0.7;
-    }
+.statusBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5em;
+  padding: 0.35em 0.65em;
+  font-size: 0.8em;
+  font-weight: 700;
+  line-height: 1;
+  color: #fff;
+  text-align: center;
+  white-space: nowrap;
+  vertical-align: baseline;
+  border-radius: var(--border-radius-sm);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
-@keyframes status-pulse {
-    0% {
-        box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.4);
-    }
-    70% {
-        box-shadow: 0 0 0 6px rgba(255, 255, 255, 0);
-    }
-    100% {
-        box-shadow: 0 0 0 0 rgba(255, 255, 255, 0);
-    }
+.pending {
+  background-color: var(--color-pending);
 }
 
-.badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5em;
-    padding: 0.4em 0.8em;
-    font-size: 0.8em;
-    font-weight: 600;
-    line-height: 1;
-    color: #fff;
-    text-align: center;
-    white-space: nowrap;
-    vertical-align: baseline;
-    border-radius: 20px;
-    transition: all var(--transition-fast);
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    position: relative;
-    overflow: hidden;
+.awaitingDependencies {
+  background-color: var(--color-awaiting);
 }
 
-.badge::before {
-    content: "";
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.3));
-    opacity: 0;
-    transition: opacity var(--transition-fast);
+.decomposing {
+  background-color: var(--color-decomposing);
 }
 
-.badge:hover::before {
-    opacity: 1;
+.awaitingSubtasks {
+  background-color: var(--color-awaiting);
 }
 
-.badge:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+.readyForExecution {
+  background-color: var(--color-ready);
 }
 
-.icon {
-    font-size: 0.9em;
+.completed {
+  background-color: var(--color-completed);
 }
 
-.text {
-    font-weight: 500;
-    letter-spacing: 0.3px;
+.failed {
+  background-color: var(--color-failed);
 }
 
-.processing {
-    animation: status-pulse 2s infinite;
-}
-
-.processing .icon {
-    animation: pulse-icon 1.5s infinite ease-in-out;
-}
-
-/* Base styles from taskUtils getStatusClass with gradients */
-.status-pending {
-    background: linear-gradient(135deg, #6c757d, #495057);
-}
-
-.status-awaiting-dependencies {
-    background: linear-gradient(135deg, #6c757d, #495057);
-}
-
-.status-decomposing {
-    background: linear-gradient(135deg, #0d6efd, #0b5ed7);
-    animation: status-pulse 2s infinite;
-}
-
-.status-awaiting-subtasks {
-    background: linear-gradient(135deg, #6c757d, #495057);
-}
-
-.status-ready-for-execution {
-    background: linear-gradient(135deg, #28a745, #1e7e34);
-}
-
-.status-completed {
-    background: linear-gradient(135deg, #198754, #146c43);
-}
-
-.status-failed {
-    background: linear-gradient(135deg, #dc3545, #bb2d3b);
-}
-
-.status-deferred {
-    background: linear-gradient(135deg, #ffc107, #ffca2c);
-    color: #212529;
-}
-
-.status-default {
-    background: linear-gradient(135deg, #6c757d, #495057);
+.deferred {
+  background-color: var(--color-deferred);
 }

@@ -91,6 +91,20 @@
     box-shadow: 0 0 0 2px rgba(74, 108, 247, 0.2);
 }
 
+.input.error,
+.textarea.error,
+.select.error {
+    border-color: var(--error-color, #ea4335);
+    box-shadow: 0 0 0 2px rgba(234, 67, 53, 0.2);
+}
+
+.input.error:focus,
+.textarea.error:focus,
+.select.error:focus {
+    border-color: var(--error-color, #ea4335);
+    box-shadow: 0 0 0 2px rgba(234, 67, 53, 0.2);
+}
+
 .textarea {
     min-height: 100px;
     resize: vertical;
@@ -103,6 +117,12 @@
 
 .formRow .formGroup {
     flex: 1;
+}
+
+.errorMessage {
+    color: var(--error-color, #ea4335);
+    font-size: 12px;
+    margin-top: 4px;
 }
 
 .actions {

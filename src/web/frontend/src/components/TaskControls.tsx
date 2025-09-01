@@ -1,15 +1,18 @@
 import React from 'react';
 import {Task} from '../types';
-import {FaCheck, FaPause, FaPlay, FaStop, FaTrash, FaEdit} from 'react-icons/fa';
+import {FaCheck, FaPause, FaPlay, FaStop, FaTrash, FaEdit, FaArrowUp, FaArrowDown} from 'react-icons/fa';
 import styles from './TaskControls.module.css';
 
 interface TaskControlsProps {
     task: Task;
     sendMessage: (msg: any) => void;
     onEditDetailed?: () => void;
+    onMoveUp?: () => void;
+    onMoveDown?: () => void;
+    showReorderControls?: boolean;
 }
 
-const TaskControls: React.FC<TaskControlsProps> = ({task, sendMessage, onEditDetailed}) => {
+const TaskControls: React.FC<TaskControlsProps> = ({task, sendMessage, onEditDetailed, onMoveUp, onMoveDown, showReorderControls = false}) => {
     const handleComplete = () => sendMessage({type: 'COMPLETE_TASK', payload: {id: task.id}});
     const handlePause = () => sendMessage({type: 'PAUSE_AGENT', payload: {id: task.id}});
     const handleResume = () => sendMessage({type: 'RESUME_AGENT', payload: {id: task.id}});
@@ -64,6 +67,26 @@ const TaskControls: React.FC<TaskControlsProps> = ({task, sendMessage, onEditDet
 
     return (
         <div className={styles.controls}>
+            {showReorderControls && onMoveUp && (
+                <button
+                    onClick={onMoveUp}
+                    title="Move Up"
+                    aria-label={`Move task ${task.title} up`}
+                    className={`${styles.button} ${styles.reorderBtn}`}
+                >
+                    <FaArrowUp/>
+                </button>
+            )}
+            {showReorderControls && onMoveDown && (
+                <button
+                    onClick={onMoveDown}
+                    title="Move Down"
+                    aria-label={`Move task ${task.title} down`}
+                    className={`${styles.button} ${styles.reorderBtn}`}
+                >
+                    <FaArrowDown/>
+                </button>
+            )}
             {onEditDetailed && (
                 <button
                     onClick={onEditDetailed}

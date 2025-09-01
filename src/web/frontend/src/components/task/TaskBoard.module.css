@@ -1,84 +1,146 @@
-.taskBoard {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 20px;
-    padding: 20px;
-    overflow-x: auto;
+.board {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  gap: var(--spacing-lg);
+}
+
+.draggableTask {
+  cursor: grab;
+}
+
+.draggableTask:active {
+  cursor: grabbing;
 }
 
 .column {
-    background: var(--column-bg, #f5f5f5);
-    border-radius: 8px;
-    min-width: 300px;
-    display: flex;
-    flex-direction: column;
-    height: fit-content;
-    max-height: calc(100vh - 200px);
+  background: var(--background-color-secondary);
+  border-radius: var(--border-radius-lg);
+  display: flex;
+  flex-direction: column;
+  height: fit-content;
+  max-height: 80vh;
+  overflow: hidden;
+  transition: box-shadow 0.2s ease;
+}
+
+.column.dragOver {
+  box-shadow: 0 0 0 2px var(--color-primary);
+  background: var(--color-card-background);
 }
 
 .columnHeader {
-    padding: 16px;
-    border-bottom: 1px solid var(--border-color, #e0e0e0);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--spacing-md);
+  border-bottom: 3px solid var(--color-card-border);
+  background: var(--color-card-background);
+  border-top-left-radius: var(--border-radius-lg);
+  border-top-right-radius: var(--border-radius-lg);
 }
 
 .columnTitle {
-    margin: 0;
-    font-size: 18px;
-    color: var(--text-primary, #333333);
-    display: flex;
-    align-items: center;
-    gap: 8px;
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+.columnTitle h3 {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--text-color-primary);
 }
 
 .taskCount {
-    background: var(--task-count-bg, #e0e0e0);
-    color: var(--task-count-color, #666666);
-    padding: 2px 8px;
-    border-radius: 12px;
-    font-size: 14px;
+  background: var(--background-color-tertiary);
+  color: var(--text-color-secondary);
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 0.25rem 0.5rem;
+  border-radius: 12px;
 }
 
-.columnContent {
-    flex: 1;
-    padding: 12px;
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    overflow-y: auto;
+.addColumnButton {
+  background: none;
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius-md);
+  padding: 0.5rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-color-secondary);
+  transition: all var(--transition-fast);
+}
+
+.addColumnButton:hover {
+  background-color: var(--color-hover-background);
+  color: var(--text-color-primary);
+  border-color: var(--border-color-focus);
+}
+
+.taskList {
+  padding: var(--spacing-md);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+  overflow-y: auto;
+  max-height: calc(80vh - 60px);
 }
 
 .emptyColumn {
-    text-align: center;
-    padding: 24px;
-    color: var(--text-secondary, #9e9e9e);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-xl);
+  text-align: center;
+  color: var(--text-color-secondary);
+  min-height: 200px;
+}
+
+.emptyIcon {
+  font-size: 2rem;
+  margin-bottom: var(--spacing-md);
+  color: var(--text-color-tertiary);
 }
 
 .emptyColumn p {
-    margin: 0;
-    font-style: italic;
+  margin: 0 0 var(--spacing-md) 0;
+}
+
+.addTaskButton {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-sm) var(--spacing-md);
+  border: 1px solid var(--color-primary);
+  border-radius: var(--border-radius-md);
+  background: var(--color-primary);
+  color: white;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: all var(--transition-fast);
+  font-weight: 500;
+}
+
+.addTaskButton:hover {
+  background: var(--color-primary-dark);
+  border-color: var(--color-primary-dark);
 }
 
 /* Responsive design */
 @media (max-width: 768px) {
-    .taskBoard {
-        grid-template-columns: 1fr;
-        gap: 16px;
-        padding: 16px;
-    }
-
-    .column {
-        min-width: 100%;
-    }
-
-    .columnHeader {
-        padding: 12px;
-    }
-
-    .columnTitle {
-        font-size: 16px;
-    }
-
-    .columnContent {
-        padding: 8px;
-    }
+  .board {
+    grid-template-columns: 1fr;
+  }
+  
+  .column {
+    max-height: none;
+  }
+  
+  .taskList {
+    max-height: none;
+  }
 }

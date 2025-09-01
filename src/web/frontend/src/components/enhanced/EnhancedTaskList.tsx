@@ -123,15 +123,13 @@ const EnhancedTaskList: React.FC<EnhancedTaskListProps> = memo(({
             const [draggedItem] = newOrder.splice(draggedIndex, 1);
             newOrder.splice(targetIndex, 0, draggedItem);
 
-            // TODO: Implement reordering for main task list
-            // This would require a new message type like 'REORDER_TASKS'
-            console.log('Reordering main task list:', newOrder.map(t => t.id));
-            // sendMessage({
-            //     type: 'REORDER_TASKS',
-            //     payload: {
-            //         orderedTaskIds: newOrder.map(t => t.id),
-            //     },
-            // });
+            // Send message to reorder tasks
+            sendMessage({
+                type: 'REORDER_TASKS',
+                payload: {
+                    orderedTaskIds: newOrder.map(t => t.id),
+                },
+            });
         }
 
         setDraggedItemId(null);
@@ -232,6 +230,37 @@ const EnhancedTaskList: React.FC<EnhancedTaskListProps> = memo(({
         });
     }, [sendMessage]);
 
+    // Handle moving tasks up/down in the list
+    const handleMoveUp = useCallback((index: number) => {
+        if (index <= 0 || isSublist) return;
+        
+        const newOrder = [...tasksToRender];
+        const [movedItem] = newOrder.splice(index, 1);
+        newOrder.splice(index - 1, 0, movedItem);
+        
+        sendMessage({
+            type: 'REORDER_TASKS',
+            payload: {
+                orderedTaskIds: newOrder.map(t => t.id),
+            },
+        });
+    }, [isSublist, sendMessage, tasksToRender]);
+
+    const handleMoveDown = useCallback((index: number) => {
+        if (index >= tasksToRender.length - 1 || isSublist) return;
+        
+        const newOrder = [...tasksToRender];
+        const [movedItem] = newOrder.splice(index, 1);
+        newOrder.splice(index + 1, 0, movedItem);
+        
+        sendMessage({
+            type: 'REORDER_TASKS',
+            payload: {
+                orderedTaskIds: newOrder.map(t => t.id),
+            },
+        });
+    }, [isSublist, sendMessage, tasksToRender]);
+
     // Memoize task item rendering
     const renderTaskItem = useCallback((task: Task, index: number) => (
         <motion.div
@@ -266,6 +295,9 @@ const EnhancedTaskList: React.FC<EnhancedTaskListProps> = memo(({
                 editedTitle={editedTitles[task.id] || task.title}
                 editedDescription={editedDescriptions[task.id] || task.description || ''}
                 isEditing={editingTaskId === task.id}
+                onMoveUp={() => handleMoveUp(index)}
+                onMoveDown={() => handleMoveDown(index)}
+                showReorderControls={!isSublist}
             />
         </motion.div>
     ), [
@@ -288,7 +320,9 @@ const EnhancedTaskList: React.FC<EnhancedTaskListProps> = memo(({
         handleDescriptionChange,
         editedTitles,
         editedDescriptions,
-        editingTaskId
+        editingTaskId,
+        handleMoveUp,
+        handleMoveDown
     ]);
 
     return (

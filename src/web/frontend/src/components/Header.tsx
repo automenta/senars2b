@@ -1,13 +1,13 @@
 import React from 'react';
-import {FaMoon, FaSun, FaBrain, FaChartLine, FaTasks, FaCog} from 'react-icons/fa';
+import {FaMoon, FaSun, FaBrain, FaChartLine, FaTasks, FaCog, FaProjectDiagram} from 'react-icons/fa';
 import styles from './Header.module.css';
 
 interface HeaderProps {
     theme: 'light' | 'dark';
     toggleTheme: () => void;
     isConnected: boolean;
-    onNavigate: (view: 'dashboard' | 'tasks' | 'configuration') => void;
-    currentView?: 'dashboard' | 'tasks' | 'configuration';
+    onNavigate: (view: 'dashboard' | 'tasks' | 'dependencies' | 'configuration') => void;
+    currentView?: 'dashboard' | 'tasks' | 'dependencies' | 'configuration';
 }
 
 const Header: React.FC<HeaderProps> = ({theme, toggleTheme, isConnected, onNavigate, currentView = 'dashboard'}) => {
@@ -38,6 +38,16 @@ const Header: React.FC<HeaderProps> = ({theme, toggleTheme, isConnected, onNavig
                     }}
                 >
                     <FaTasks/> Tasks
+                </a>
+                <a 
+                    href="#" 
+                    className={`${styles.navItem} ${currentView === 'dependencies' ? styles.active : ''}`} 
+                    onClick={(e) => {
+                        e.preventDefault();
+                        onNavigate('dependencies');
+                    }}
+                >
+                    <FaProjectDiagram/> Dependencies
                 </a>
                 <a 
                     href="#" 

@@ -8,6 +8,7 @@ export const useTasks = () => {
         searchTerm,
         statusFilter,
         typeFilter,
+        priorityFilter,
         sortOption,
     } = useStore();
 
@@ -27,6 +28,11 @@ export const useTasks = () => {
 
                     // Type filter
                     if (typeFilter !== 'ALL' && task.type !== typeFilter) {
+                        return false;
+                    }
+
+                    // Priority filter
+                    if (priorityFilter !== 'ALL' && task.priority !== priorityFilter) {
                         return false;
                     }
 
@@ -54,7 +60,7 @@ export const useTasks = () => {
             console.error('Error filtering/sorting tasks:', error);
             return tasks; // Return unfiltered tasks on error
         }
-    }, [tasks, searchTerm, statusFilter, typeFilter, sortOption]);
+    }, [tasks, searchTerm, statusFilter, typeFilter, priorityFilter, sortOption]);
 
     const taskStats = useMemo(() => {
         try {

@@ -1,0 +1,128 @@
+.analyticsContainer {
+  background: var(--color-card-background);
+  border: 1px solid var(--color-card-border);
+  border-radius: var(--border-radius-lg);
+  padding: var(--spacing-lg);
+  box-shadow: var(--box-shadow-sm);
+  margin-top: var(--spacing-lg);
+}
+
+.analyticsHeader {
+  margin-bottom: var(--spacing-lg);
+  padding-bottom: var(--spacing-md);
+  border-bottom: 1px solid var(--color-card-border);
+}
+
+.analyticsHeader h2 {
+  margin: 0 0 var(--spacing-sm) 0;
+  color: var(--text-color-primary);
+  font-weight: 600;
+}
+
+.analyticsHeader p {
+  margin: 0;
+  color: var(--text-color-secondary);
+}
+
+.summaryCards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: var(--spacing-md);
+  margin-bottom: var(--spacing-xl);
+}
+
+.card {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  padding: var(--spacing-lg);
+  border-radius: var(--border-radius-md);
+  background: var(--background-color-secondary);
+  border: 1px solid var(--color-card-border);
+  box-shadow: var(--box-shadow-sm);
+  transition: all var(--transition-fast);
+}
+
+.card:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--box-shadow-md);
+}
+
+.cardIcon {
+  font-size: 2rem;
+  padding: var(--spacing-sm);
+  border-radius: var(--border-radius-md);
+}
+
+.totalCard .cardIcon {
+  background: var(--color-primary-translucent);
+  color: var(--color-primary);
+}
+
+.completedCard .cardIcon {
+  background: var(--color-success-translucent);
+  color: var(--color-success);
+}
+
+.pendingCard .cardIcon {
+  background: var(--color-warning-translucent);
+  color: var(--color-warning);
+}
+
+.progressCard .cardIcon {
+  background: var(--color-info-translucent);
+  color: var(--color-info);
+}
+
+.cardContent h3 {
+  margin: 0 0 var(--spacing-xs) 0;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--text-color-primary);
+}
+
+.cardContent p {
+  margin: 0;
+  color: var(--text-color-secondary);
+  font-size: 0.9rem;
+}
+
+.chartsContainer {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: var(--spacing-lg);
+}
+
+.chartCard {
+  background: var(--color-card-background);
+  border: 1px solid var(--color-card-border);
+  border-radius: var(--border-radius-md);
+  padding: var(--spacing-lg);
+  box-shadow: var(--box-shadow-sm);
+}
+
+.chartCard h3 {
+  margin: 0 0 var(--spacing-md) 0;
+  color: var(--text-color-primary);
+  font-weight: 600;
+  text-align: center;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .summaryCards {
+    grid-template-columns: 1fr 1fr;
+  }
+  
+  .chartsContainer {
+    grid-template-columns: 1fr;
+  }
+  
+  .card {
+    padding: var(--spacing-md);
+  }
+  
+  .cardContent h3 {
+    font-size: 1.2rem;
+  }
+}

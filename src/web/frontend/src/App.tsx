@@ -9,6 +9,7 @@ import {useNotifier} from './context/NotificationProvider';
 import DashboardView from './views/DashboardView';
 import EnhancedTasksView from './views/EnhancedTasksView';
 import ConfigurationView from './views/ConfigurationView';
+import TaskDependenciesView from './views/TaskDependenciesView';
 
 // Error Boundary Component
 class ErrorBoundary extends React.Component<{ children: React.ReactNode }, { hasError: boolean }> {
@@ -47,7 +48,7 @@ function App() {
     } = useStore();
 
     const {addNotification: addToastNotification} = useNotifier();
-    const [currentView, setCurrentView] = useState<'dashboard' | 'tasks' | 'configuration'>('dashboard');
+    const [currentView, setCurrentView] = useState<'dashboard' | 'tasks' | 'dependencies' | 'configuration'>('dashboard');
 
     // Setup keyboard shortcuts
     useHotkeys({
@@ -55,6 +56,7 @@ function App() {
         '/': () => searchInputRef?.current?.focus(),
         'd': () => setCurrentView('dashboard'),
         't': () => setCurrentView('tasks'),
+        'p': () => setCurrentView('dependencies'),
         'c': () => setCurrentView('configuration'),
     }, [searchInputRef]);
 
@@ -177,6 +179,13 @@ function App() {
             case 'tasks':
                 return (
                     <EnhancedTasksView
+                        sendMessage={sendMessage}
+                        onAddTask={handleAddTask}
+                    />
+                );
+            case 'dependencies':
+                return (
+                    <TaskDependenciesView
                         sendMessage={sendMessage}
                         onAddTask={handleAddTask}
                     />

@@ -1,109 +1,118 @@
 import React from 'react';
-import {motion, AnimatePresence} from 'framer-motion';
 import styles from './DashboardPanel.module.css';
-import {FaChartBar, FaChartPie, FaChevronDown, FaServer, FaTachometerAlt} from 'react-icons/fa';
-import StatsPanel from './StatsPanel';
-import TasksByStatusPieChart from './TasksByStatusPieChart';
-import TasksByPriorityBarChart from './TasksByPriorityBarChart';
-import PerformanceChart from './PerformanceChart';
-import SystemStatusPanel from './SystemStatusPanel';
-import {TaskStatistics} from '../types';
+import { FaTasks, FaCheck, FaExclamationTriangle, FaPause, FaCog } from 'react-icons/fa';
 
 interface DashboardPanelProps {
-    stats: TaskStatistics | null;
-    systemStatus: any;
-    statsHistory: { time: Date; stats: TaskStatistics }[];
-    isLoading: boolean;
+  stats: {
+    totalTasks: number;
+    pendingTasks: number;
+    completedTasks: number;
+    failedTasks: number;
+    deferredTasks: number;
+  };
+  systemStatus: {
+    isRunning: boolean;
+    uptime?: number;
+    version?: string;
+  };
+  statsHistory: {
+    timestamp: number;
+    totalTasks: number;
+    completedTasks: number;
+  }[];
+  isLoading: boolean;
 }
 
-const DashboardPanel: React.FC<DashboardPanelProps> = ({stats, systemStatus, statsHistory, isLoading}) => {
-    const [isExpanded, setIsExpanded] = React.useState(false);
-
-    if (isLoading) {
-        return (
-            <div className={styles.loading}>
-                <div className={styles.spinner}></div>
-                <p>Loading dashboard data...</p>
-            </div>
-        );
-    }
-
+const DashboardPanel: React.FC<DashboardPanelProps> = ({ 
+  stats, 
+  systemStatus, 
+  statsHistory, 
+  isLoading 
+}) => {
+  if (isLoading) {
     return (
-        <div className={styles.container}>
-            <button className={styles.header} onClick={() => setIsExpanded(!isExpanded)}>
-                <h2>Dashboard</h2>
-                <motion.div
-                    animate={{rotate: isExpanded ? 180 : 0}}
-                    transition={{duration: 0.2}}
-                >
-                    <FaChevronDown className={styles.chevron}/>
-                </motion.div>
-            </button>
-            <AnimatePresence>
-                {isExpanded && (
-                    <motion.div
-                        key="content"
-                        initial="collapsed"
-                        animate="open"
-                        exit="collapsed"
-                        variants={{
-                            open: {opacity: 1, height: 'auto'},
-                            collapsed: {opacity: 0, height: 0}
-                        }}
-                        transition={{duration: 0.3, ease: [0.04, 0.62, 0.23, 0.98]}}
-                        className={styles.contentWrapper}
-                    >
-                        <div className={styles.content}>
-                            <div className={styles.section}>
-                                <div className={styles.sectionHeader}>
-                                    <FaTachometerAlt className={styles.sectionIcon}/>
-                                    <h3>Task Statistics</h3>
-                                </div>
-                                <StatsPanel stats={stats}/>
-                            </div>
-
-                            <div className={styles.section}>
-                                <div className={styles.sectionHeader}>
-                                    <FaChartPie className={styles.sectionIcon}/>
-                                    <h3>Task Distribution</h3>
-                                </div>
-                                <div className={styles.chartGrid}>
-                                    <div className={styles.chartContainer}>
-                                        <h4>Tasks by Status</h4>
-                                        <TasksByStatusPieChart/>
-                                    </div>
-                                    <div className={styles.chartContainer}>
-                                        <h4>Tasks by Priority</h4>
-                                        <TasksByPriorityBarChart/>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div className={styles.section}>
-                                <div className={styles.sectionHeader}>
-                                    <FaChartBar className={styles.sectionIcon}/>
-                                    <h3>Performance Overview</h3>
-                                </div>
-                                <div className={styles.chartContainer}>
-                                    <PerformanceChart statsHistory={statsHistory}/>
-                                </div>
-                            </div>
-
-                            <div className={styles.section}>
-                                <div className={styles.sectionHeader}>
-                                    <FaServer className={styles.sectionIcon}/>
-                                    <h3>System Status</h3>
-                                </div>
-                                <div className={styles.panelContainer}>
-                                    <SystemStatusPanel systemStatus={systemStatus}/>
-                                </div>
-                            </div>
-                        </div>
-                    </motion.div>
-                )}
-            </AnimatePresence>
-        </div>
+      <div className={styles.dashboardPanel}>
+        <div className={styles.loading}>Loading dashboard data...</div>
+      </div>
     );
+  }
+
+  const uptimeHours = systemStatus.uptime ? Math.floor(systemStatus.uptime / 3600000) : 0;
+  const uptimeMinutes = systemStatus.uptime ? Math.floor((systemStatus.uptime % 3600000) / 60000) : 0;
+
+  return (
+    <div className={styles.dashboardPanel}>
+      <div className={styles.statsGrid}>
+        <div className={`${styles.statCard} ${styles.totalCard}`}>
+          <div className={styles.statIcon}>
+            <FaTasks />
+          </div>
+          <div className={styles.statContent}>
+            <h3>{stats.totalTasks}</h3>
+            <p>Total Tasks</p>
+          </div>
+        </div>
+        
+        <div className={`${styles.statCard} ${styles.pendingCard}`}>
+          <div className={styles.statIcon}>
+            <FaCog />
+          </div>
+          <div className={styles.statContent}>
+            <h3>{stats.pendingTasks}</h3>
+            <p>Pending</p>
+          </div>
+        </div>
+        
+        <div className={`${styles.statCard} ${styles.completedCard}`}>
+          <div className={styles.statIcon}>
+            <FaCheck />
+          </div>
+          <div className={styles.statContent}>
+            <h3>{stats.completedTasks}</h3>
+            <p>Completed</p>
+          </div>
+        </div>
+        
+        <div className={`${styles.statCard} ${styles.failedCard}`}>
+          <div className={styles.statIcon}>
+            <FaExclamationTriangle />
+          </div>
+          <div className={styles.statContent}>
+            <h3>{stats.failedTasks}</h3>
+            <p>Failed</p>
+          </div>
+        </div>
+        
+        <div className={`${styles.statCard} ${styles.deferredCard}`}>
+          <div className={styles.statIcon}>
+            <FaPause />
+          </div>
+          <div className={styles.statContent}>
+            <h3>{stats.deferredTasks}</h3>
+            <p>Deferred</p>
+          </div>
+        </div>
+        
+        <div className={`${styles.statCard} ${styles.systemCard}`}>
+          <div className={styles.statIcon}>
+            {systemStatus.isRunning ? (
+              <div className={styles.runningIndicator}></div>
+            ) : (
+              <div className={styles.stoppedIndicator}></div>
+            )}
+          </div>
+          <div className={styles.statContent}>
+            <h3>{systemStatus.isRunning ? 'Running' : 'Stopped'}</h3>
+            <p>
+              {systemStatus.isRunning 
+                ? `Uptime: ${uptimeHours}h ${uptimeMinutes}m` 
+                : 'System Offline'}
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
 };
 
 export default DashboardPanel;

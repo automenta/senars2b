@@ -77,3 +77,13 @@
     color: var(--color-danger);
     background-color: rgba(230, 57, 70, 0.15);
 }
+
+.reorderBtn:hover {
+    color: var(--color-primary);
+    background-color: rgba(67, 97, 238, 0.15);
+}
+
+.editBtn:hover {
+    color: var(--color-primary);
+    background-color: rgba(67, 97, 238, 0.15);
+}

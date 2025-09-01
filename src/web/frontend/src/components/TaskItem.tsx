@@ -13,6 +13,9 @@ interface TaskItemProps {
     sendMessage: (message: any) => void;
     isDraggable?: boolean;
     isSelected?: boolean;
+    onMoveUp?: () => void;
+    onMoveDown?: () => void;
+    showReorderControls?: boolean;
 }
 
 const TaskItem: React.FC<TaskItemProps> = memo(({
@@ -20,7 +23,10 @@ const TaskItem: React.FC<TaskItemProps> = memo(({
                                                     allFilteredTasks,
                                                     sendMessage,
                                                     isDraggable = false,
-                                                    isSelected = false
+                                                    isSelected = false,
+                                                    onMoveUp,
+                                                    onMoveDown,
+                                                    showReorderControls = false
                                                 }) => {
     const [isExpanded, setIsExpanded] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
@@ -62,18 +68,15 @@ const TaskItem: React.FC<TaskItemProps> = memo(({
         setIsEditing(false);
     };
 
-    const handleSaveDetailed = (updatedTask: Task) => {
+    const handleSaveDetailed = (updatedTask: Partial<Task>) => {
         sendMessage({
             type: 'UPDATE_TASK',
             payload: {
-                id: updatedTask.id,
-                title: updatedTask.title,
-                description: updatedTask.description,
-                priority: updatedTask.priority,
-                status: updatedTask.status,
-                type: updatedTask.type
+                id: task.id,
+                ...updatedTask
             },
         });
+        setIsEditorOpen(false);
     };
 
     const handleDelete = (taskId: string) => {
@@ -124,6 +127,9 @@ const TaskItem: React.FC<TaskItemProps> = memo(({
                                 task={task}
                                 sendMessage={sendMessage}
                                 onEditDetailed={handleEditDetailed}
+                                onMoveUp={onMoveUp}
+                                onMoveDown={onMoveDown}
+                                showReorderControls={showReorderControls}
                             />
                         </div>
                     )}
@@ -147,7 +153,7 @@ const TaskItem: React.FC<TaskItemProps> = memo(({
                 isOpen={isEditorOpen}
                 onClose={() => setIsEditorOpen(false)}
                 onSave={handleSaveDetailed}
-                onDelete={handleDelete}
+                allTasks={allFilteredTasks}
             />
         </>
     );

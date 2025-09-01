@@ -1,0 +1,134 @@
+.priorityGroupsContainer {
+  background: var(--color-card-background);
+  border: 1px solid var(--color-card-border);
+  border-radius: var(--border-radius-lg);
+  padding: var(--spacing-lg);
+  box-shadow: var(--box-shadow-sm);
+  margin-top: var(--spacing-lg);
+}
+
+.priorityGroupsHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-lg);
+  padding-bottom: var(--spacing-md);
+  border-bottom: 1px solid var(--color-card-border);
+}
+
+.priorityGroupsHeader h2 {
+  margin: 0;
+  color: var(--text-color-primary);
+  font-weight: 600;
+}
+
+.priorityGroups {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-lg);
+}
+
+.priorityGroup {
+  border: 1px solid var(--color-card-border);
+  border-radius: var(--border-radius-md);
+  overflow: hidden;
+}
+
+.priorityHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--spacing-md) var(--spacing-lg);
+  background: var(--background-color-secondary);
+  border-bottom: 1px solid var(--color-card-border);
+}
+
+.priorityHeader.critical {
+  border-left: 4px solid var(--color-critical);
+}
+
+.priorityHeader.high {
+  border-left: 4px solid var(--color-high);
+}
+
+.priorityHeader.medium {
+  border-left: 4px solid var(--color-medium);
+}
+
+.priorityHeader.low {
+  border-left: 4px solid var(--color-low);
+}
+
+.priorityTitle {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+.priorityIcon {
+  font-size: 1.2rem;
+}
+
+.priorityHeader h3 {
+  margin: 0;
+  color: var(--text-color-primary);
+  font-size: 1.2rem;
+  font-weight: 600;
+}
+
+.taskCount {
+  background: var(--background-color-tertiary);
+  color: var(--text-color-secondary);
+  font-size: 0.9rem;
+  font-weight: 600;
+  padding: 0.25rem 0.75rem;
+  border-radius: 12px;
+}
+
+.priorityTasks {
+  padding: var(--spacing-md);
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: var(--spacing-md);
+}
+
+.emptyGroup {
+  text-align: center;
+  padding: var(--spacing-xl);
+  color: var(--text-color-secondary);
+  grid-column: 1 / -1;
+}
+
+.emptyState {
+  text-align: center;
+  padding: var(--spacing-xl);
+  color: var(--text-color-secondary);
+}
+
+.emptyStateIcon {
+  font-size: 3rem;
+  margin-bottom: var(--spacing-md);
+  color: var(--color-secondary);
+}
+
+.emptyState h3 {
+  margin: 0 0 var(--spacing-sm) 0;
+  color: var(--text-color-primary);
+}
+
+.emptyState p {
+  margin: 0 0 var(--spacing-lg) 0;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .priorityTasks {
+    grid-template-columns: 1fr;
+  }
+  
+  .priorityGroupsHeader {
+    flex-direction: column;
+    gap: var(--spacing-md);
+    align-items: stretch;
+  }
+}

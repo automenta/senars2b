@@ -1,0 +1,120 @@
+.taskTemplatesContainer {
+  background: var(--color-card-background);
+  border: 1px solid var(--color-card-border);
+  border-radius: var(--border-radius-lg);
+  padding: var(--spacing-lg);
+  box-shadow: var(--box-shadow-sm);
+  margin-top: var(--spacing-lg);
+}
+
+.templatesHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-lg);
+  padding-bottom: var(--spacing-md);
+  border-bottom: 1px solid var(--color-card-border);
+}
+
+.templatesHeader h2 {
+  margin: 0;
+  color: var(--text-color-primary);
+  font-weight: 600;
+}
+
+.templatesGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: var(--spacing-lg);
+}
+
+.templateCard {
+  background: var(--background-color-light);
+  border-radius: var(--border-radius-md);
+  padding: var(--spacing-md);
+  border: 1px solid var(--color-card-border);
+  transition: all var(--transition-fast);
+  cursor: pointer;
+}
+
+.templateCard:hover {
+  transform: translateY(-5px);
+  box-shadow: var(--box-shadow-md);
+  border-color: var(--color-primary);
+}
+
+.templateIcon {
+  font-size: 2rem;
+  margin-bottom: var(--spacing-md);
+  color: var(--color-primary);
+}
+
+.templateTitle {
+  font-weight: 600;
+  margin: 0 0 var(--spacing-sm) 0;
+  color: var(--text-color-primary);
+}
+
+.templateDescription {
+  font-size: 0.9rem;
+  color: var(--text-color-secondary);
+  margin: 0 0 var(--spacing-md) 0;
+}
+
+.templateTags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-xs);
+}
+
+.templateTag {
+  background: var(--color-primary-light);
+  color: var(--color-primary);
+  padding: 0.25rem 0.5rem;
+  border-radius: var(--border-radius-sm);
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.createButton {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-sm) var(--spacing-md);
+  border: 1px solid var(--color-primary);
+  border-radius: var(--border-radius-md);
+  background: var(--color-primary);
+  color: white;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: all var(--transition-fast);
+  font-weight: 500;
+  margin-top: var(--spacing-sm);
+}
+
+.createButton:hover {
+  background: var(--color-primary-dark);
+  border-color: var(--color-primary-dark);
+}
+
+.emptyState {
+  text-align: center;
+  padding: var(--spacing-xl);
+  color: var(--text-color-secondary);
+  grid-column: 1 / -1;
+}
+
+.emptyStateIcon {
+  font-size: 3rem;
+  margin-bottom: var(--spacing-md);
+  color: var(--color-secondary);
+}
+
+.emptyState h3 {
+  margin: 0 0 var(--spacing-sm) 0;
+  color: var(--text-color-primary);
+}
+
+.emptyState p {
+  margin: 0 0 var(--spacing-lg) 0;
+}

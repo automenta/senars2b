@@ -14,7 +14,9 @@ import {
     FaTrash,
     FaPlay,
     FaPause,
-    FaStop
+    FaStop,
+    FaArrowUp,
+    FaArrowDown
 } from 'react-icons/fa';
 import StatusBadge from '../StatusBadge';
 import PriorityBadge from '../PriorityBadge';
@@ -43,6 +45,9 @@ interface EnhancedTaskCardProps {
     editedTitle?: string;
     editedDescription?: string;
     isEditing?: boolean;
+    onMoveUp?: () => void;
+    onMoveDown?: () => void;
+    showReorderControls?: boolean;
 }
 
 const EnhancedTaskCard: React.FC<EnhancedTaskCardProps> = memo(({
@@ -64,7 +69,10 @@ const EnhancedTaskCard: React.FC<EnhancedTaskCardProps> = memo(({
                                                                     onDescriptionChange,
                                                                     editedTitle = task.title,
                                                                     editedDescription = task.description || '',
-                                                                    isEditing = false
+                                                                    isEditing = false,
+                                                                    onMoveUp,
+                                                                    onMoveDown,
+                                                                    showReorderControls = false
                                                                 }) => {
     const getPendingPrompts = useStore(state => state.getPendingPrompts);
     const titleInputRef = useRef<HTMLInputElement>(null);
@@ -315,6 +323,30 @@ const EnhancedTaskCard: React.FC<EnhancedTaskCardProps> = memo(({
                             exit={{opacity: 0, y: 10}}
                             transition={{duration: 0.2}}
                         >
+                            {showReorderControls && onMoveUp && (
+                                <motion.button
+                                    onClick={onMoveUp}
+                                    className={`${styles.button} ${styles.reorderBtn}`}
+                                    title="Move up"
+                                    aria-label="Move task up"
+                                    whileHover={{scale: 1.1}}
+                                    whileTap={{scale: 0.9}}
+                                >
+                                    <FaArrowUp/>
+                                </motion.button>
+                            )}
+                            {showReorderControls && onMoveDown && (
+                                <motion.button
+                                    onClick={onMoveDown}
+                                    className={`${styles.button} ${styles.reorderBtn}`}
+                                    title="Move down"
+                                    aria-label="Move task down"
+                                    whileHover={{scale: 1.1}}
+                                    whileTap={{scale: 0.9}}
+                                >
+                                    <FaArrowDown/>
+                                </motion.button>
+                            )}
                             <motion.button
                                 onClick={onEdit}
                                 className={`${styles.button} ${styles.editBtn}`}
