@@ -4,7 +4,12 @@ import styles from './InlineAddTaskForm.module.css';
 import {TaskPriority} from '../types';
 
 interface InlineAddTaskFormProps {
-    onAddTask: (task: { title: string; description?: string; priority: TaskPriority, type: 'REGULAR' | 'AGENT' }) => void;
+    onAddTask: (task: {
+        title: string;
+        description?: string;
+        priority: TaskPriority,
+        type: 'REGULAR' | 'AGENT'
+    }) => void;
 }
 
 const InlineAddTaskForm: React.FC<InlineAddTaskFormProps> = ({onAddTask}) => {

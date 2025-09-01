@@ -1,63 +1,158 @@
 import React from 'react';
-import { render, screen } from '@testing-library/react';
-import TaskList from '../../src/web/frontend/src/components/TaskList';
-import { Task, TaskStatus, TaskPriority } from '../../src/interfaces/sharedTypes';
+import {render, screen, fireEvent} from '@testing-library/react';
 import '@testing-library/jest-dom';
+import TaskList from '../src/web/frontend/src/components/TaskList';
+import {Task} from '../src/interfaces/task';
 
-// Mock the TaskItem component to simplify the test
-jest.mock('../../src/web/frontend/src/components/TaskItem', () => {
-    return {
-        __esModule: true,
-        default: jest.fn(({ task }) => <div data-testid="task-item">{task.title}</div>),
-    };
-});
+const mockSendMessage = jest.fn();
 
-// Helper to create a mock task
-const createTask = (id: string, title: string, status: TaskStatus, priority: TaskPriority): Task => ({
-    id,
-    type: 'REGULAR',
-    title,
-    status,
-    priority,
-    subtasks: [],
-    completion_percentage: 0,
-});
+const mockTasks: Task[] = [
+    {
+        id: '1',
+        atom_id: 'atom-1',
+        type: 'TASK',
+        label: 'Parent Task',
+        attention: {priority: 0.5, durability: 0.5},
+        stamp: {timestamp: Date.now(), parent_ids: [], schema_id: 'test-schema'},
+        task_metadata: {
+            status: 'pending',
+            priority_level: 'medium',
+            completion_percentage: 0
+        }
+    },
+    {
+        id: '2',
+        atom_id: 'atom-2',
+        type: 'TASK',
+        label: 'Child Task',
+        attention: {priority: 0.5, durability: 0.5},
+        stamp: {timestamp: Date.now(), parent_ids: [], schema_id: 'test-schema'},
+        task_metadata: {
+            status: 'pending',
+            priority_level: 'medium',
+            completion_percentage: 0,
+            parent_id: '1'
+        }
+    }
+];
 
 describe('TaskList', () => {
-    const mockSendMessage = jest.fn();
-
     beforeEach(() => {
-        // Clear mock calls before each test
         mockSendMessage.mockClear();
-        (require('../../src/web/frontend/src/components/TaskItem').default as jest.Mock).mockClear();
     });
 
-    it('should render a list of tasks without crashing', () => {
-        const tasks: Task[] = [
-            createTask('1', 'Task 1', 'pending', 'high'),
-            createTask('2', 'Task 2', 'completed', 'medium'),
-            createTask('3', 'Task 3', 'failed', 'low'),
-        ];
+    it('renders tasks correctly', () => {
+        render(<TaskList tasks={mockTasks} sendMessage={mockSendMessage}/>);
 
-        render(<TaskList tasks={tasks} sendMessage={mockSendMessage} />);
-
-        // Check if the task titles are present in the document
-        expect(screen.getByText('Task 1')).toBeInTheDocument();
-        expect(screen.getByText('Task 2')).toBeInTheDocument();
-        expect(screen.getByText('Task 3')).toBeInTheDocument();
-
-        // Check if TaskItem was called for each task
-        expect(require('../../src/web/frontend/src/components/TaskItem').default).toHaveBeenCalledTimes(3);
+        expect(screen.getByText('Parent Task')).toBeInTheDocument();
+        expect(screen.getByText('Child Task')).toBeInTheDocument();
     });
 
-    it('should render an empty container when the task list is empty', () => {
-        render(<TaskList tasks={[]} sendMessage={mockSendMessage} />);
+    it('should handle task editing', () => {
+        render(<TaskList tasks={mockTasks} sendMessage={mockSendMessage}/>);
 
-        // The list container should be in the document but have no direct task item children
-        const taskList = screen.getByTestId('task-list');
-        const taskItems = screen.queryAllByTestId('task-item');
+        const editButton = screen.getByRole('button', {name: /edit/i});
+        fireEvent.click(editButton);
 
-        expect(taskList).toBeInTheDocument();
-        expect(taskItems.length).toBe(0);
+        // Should open edit form
+        expect(screen.getByPlaceholderText('Task title')).toBeInTheDocument();
+    });
+
+    it('should handle task deletion', () => {
+        render(<TaskList tasks={mockTasks} sendMessage={mockSendMessage}/>);
+
+        const deleteButton = screen.getByRole('button', {name: /delete/i});
+        fireEvent.click(deleteButton);
+
+        // Should send delete message
+        expect(mockSendMessage).toHaveBeenCalledWith({
+            type: 'DELETE_TASK',
+            payload: {id: mockTasks[0].id}
+        });
+    });
+
+    it('should handle task completion', () => {
+        render(<TaskList tasks={mockTasks} sendMessage={mockSendMessage}/>);
+
+        const completeButton = screen.getByRole('button', {name: /complete/i});
+        fireEvent.click(completeButton);
+
+        // Should send complete message
+        expect(mockSendMessage).toHaveBeenCalledWith({
+            type: 'COMPLETE_TASK',
+            payload: {id: mockTasks[0].id}
+        });
+    });
+
+    it('should handle task pausing', () => {
+        render(<TaskList tasks={mockTasks} sendMessage={mockSendMessage}/>);
+
+        const pauseButton = screen.getByRole('button', {name: /pause/i});
+        fireEvent.click(pauseButton);
+
+        // Should send pause message
+        expect(mockSendMessage).toHaveBeenCalledWith({
+            type: 'PAUSE_AGENT',
+            payload: {id: mockTasks[0].id}
+        });
+    });
+
+    it('should handle task resuming', () => {
+        const pausedTask: Task = {
+            ...mockTasks[0],
+            task_metadata: {
+                ...mockTasks[0].task_metadata!,
+                status: 'deferred'
+            }
+        };
+
+        render(<TaskList tasks={[pausedTask]} sendMessage={mockSendMessage}/>);
+
+        const resumeButton = screen.getByRole('button', {name: /resume/i});
+        fireEvent.click(resumeButton);
+
+        // Should send resume message
+        expect(mockSendMessage).toHaveBeenCalledWith({
+            type: 'RESUME_AGENT',
+            payload: {id: pausedTask.id}
+        });
+    });
+
+    it('should handle task stopping', () => {
+        render(<TaskList tasks={mockTasks} sendMessage={mockSendMessage}/>);
+
+        const stopButton = screen.getByRole('button', {name: /stop/i});
+        fireEvent.click(stopButton);
+
+        // Should send stop message
+        expect(mockSendMessage).toHaveBeenCalledWith({
+            type: 'FAIL_TASK',
+            payload: {id: mockTasks[0].id}
+        });
+    });
+
+    it('should handle drag and drop reordering', () => {
+        render(<TaskList tasks={mockTasks} sendMessage={mockSendMessage} isSublist={true}/>);
+
+        const taskItem = screen.getByText('Child Task').closest('.taskListItem');
+        if (taskItem) {
+            fireEvent.dragStart(taskItem, {dataTransfer: {effectAllowed: 'move'}});
+            fireEvent.dragOver(taskItem, {dataTransfer: {dropEffect: 'move'}});
+            fireEvent.drop(taskItem);
+        }
+
+        // Should handle drag events without error
+        expect(taskItem).toBeInTheDocument();
+    });
+
+    it('should handle keyboard navigation', () => {
+        render(<TaskList tasks={mockTasks} sendMessage={mockSendMessage}/>);
+
+        const taskItem = screen.getByText('Parent Task');
+        fireEvent.keyDown(taskItem, {key: 'ArrowDown'});
+        fireEvent.keyDown(taskItem, {key: 'Enter'});
+
+        // Should handle keyboard events without error
+        expect(taskItem).toBeInTheDocument();
     });
 });

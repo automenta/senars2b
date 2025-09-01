@@ -1,0 +1,250 @@
+.overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    padding: 20px;
+}
+
+.prioritizationView {
+    background: var(--panel-bg, #ffffff);
+    border-radius: 12px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+    width: 90%;
+    max-width: 800px;
+    max-height: 90vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.header {
+    padding: 24px;
+    border-bottom: 1px solid var(--border-color, #e0e0e0);
+    background: var(--header-bg, #f5f5f5);
+}
+
+.header h2 {
+    margin: 0 0 8px 0;
+    font-size: 24px;
+    color: var(--text-primary, #333333);
+}
+
+.header p {
+    margin: 0;
+    color: var(--text-secondary, #666666);
+    font-size: 16px;
+}
+
+.priorityLegend {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    padding: 16px;
+    background: var(--legend-bg, #fafafa);
+    border-bottom: 1px solid var(--border-color, #e0e0e0);
+    flex-wrap: wrap;
+}
+
+.legendItem {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.legendColor {
+    width: 20px;
+    height: 20px;
+    border-radius: 4px;
+}
+
+.legendColor.critical {
+    background: var(--critical, #ff6b6b);
+}
+
+.legendColor.high {
+    background: var(--high, #ff9e6d);
+}
+
+.legendColor.medium {
+    background: var(--medium, #6d9eff);
+}
+
+.legendColor.low {
+    background: var(--low, #9e9e9e);
+}
+
+.taskList {
+    flex: 1;
+    overflow-y: auto;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.taskItem {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: var(--task-bg, #ffffff);
+    border: 1px solid var(--task-border, #e0e0e0);
+    border-radius: 8px;
+    padding: 12px;
+    transition: all 0.2s ease;
+}
+
+.taskItem:hover {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    border-color: var(--task-border-hover, #bdbdbd);
+}
+
+.dragHandle {
+    cursor: grab;
+    padding: 8px;
+    color: var(--text-secondary, #9e9e9e);
+    transition: color 0.2s;
+}
+
+.dragHandle:hover {
+    color: var(--text-primary, #333333);
+}
+
+.dragIcon {
+    width: 16px;
+    height: 16px;
+}
+
+.taskContent {
+    flex: 1;
+    min-width: 0;
+}
+
+.taskActions {
+    display: flex;
+    gap: 8px;
+}
+
+.actionButton {
+    width: 36px;
+    height: 36px;
+    border-radius: 6px;
+    border: none;
+    background: var(--action-button-bg, #f5f5f5);
+    color: var(--action-button-color, #666666);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+}
+
+.actionButton:hover:not(:disabled) {
+    background: var(--action-button-hover-bg, #e0e0e0);
+    color: var(--action-button-hover-color, #333333);
+    transform: scale(1.05);
+}
+
+.actionButton:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.footer {
+    display: flex;
+    justify-content: space-between;
+    padding: 20px;
+    border-top: 1px solid var(--border-color, #e0e0e0);
+    background: var(--footer-bg, #f5f5f5);
+}
+
+.cancelButton,
+.saveButton {
+    padding: 12px 24px;
+    border-radius: 6px;
+    font-size: 16px;
+    font-weight: 500;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.2s;
+}
+
+.cancelButton {
+    background: var(--cancel-bg, #f5f5f5);
+    color: var(--text-primary, #333333);
+    border: 1px solid var(--border-color, #bdbdbd);
+}
+
+.cancelButton:hover {
+    background: var(--cancel-hover-bg, #e0e0e0);
+}
+
+.saveButton {
+    background: var(--primary, #1976d2);
+    color: white;
+    border: none;
+}
+
+.saveButton:hover:not(:disabled) {
+    background: var(--primary-dark, #1565c0);
+}
+
+.saveButton:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    .overlay {
+        padding: 10px;
+    }
+
+    .prioritizationView {
+        width: 95%;
+    }
+
+    .header {
+        padding: 16px;
+    }
+
+    .header h2 {
+        font-size: 20px;
+    }
+
+    .priorityLegend {
+        gap: 12px;
+        padding: 12px;
+    }
+
+    .legendItem {
+        gap: 4px;
+    }
+
+    .legendColor {
+        width: 16px;
+        height: 16px;
+    }
+
+    .taskItem {
+        padding: 8px;
+    }
+
+    .footer {
+        padding: 16px;
+    }
+
+    .cancelButton,
+    .saveButton {
+        padding: 10px 16px;
+        font-size: 14px;
+    }
+}

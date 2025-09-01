@@ -3,7 +3,7 @@ import {v4 as uuidv4} from 'uuid';
 
 /**
  * Factory for creating cognitive items with consistent structure
- * 
+ *
  * This factory ensures that all cognitive items are created with proper UUIDs,
  * timestamps, and consistent structure according to the cognitive architecture.
  */

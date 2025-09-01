@@ -1,14 +1,14 @@
 import React from 'react';
-import { Prompt } from '../types';
+import {Prompt} from '../types';
 import styles from './PromptCard.module.css';
-import { FaQuestionCircle } from 'react-icons/fa';
+import {FaQuestionCircle} from 'react-icons/fa';
 
 interface PromptCardProps {
     prompt: Prompt;
     onAnswer: (promptId: string, answer: any) => void;
 }
 
-const PromptCard: React.FC<PromptCardProps> = ({ prompt, onAnswer }) => {
+const PromptCard: React.FC<PromptCardProps> = ({prompt, onAnswer}) => {
     // Basic form state for user input
     const [inputValue, setInputValue] = React.useState('');
 
@@ -28,7 +28,9 @@ const PromptCard: React.FC<PromptCardProps> = ({ prompt, onAnswer }) => {
                 return (
                     <div className={styles.buttonGroup}>
                         <button onClick={() => onAnswer(prompt.id, true)} className={styles.button}>Confirm</button>
-                        <button onClick={() => onAnswer(prompt.id, false)} className={`${styles.button} ${styles.secondary}`}>Cancel</button>
+                        <button onClick={() => onAnswer(prompt.id, false)}
+                                className={`${styles.button} ${styles.secondary}`}>Cancel
+                        </button>
                     </div>
                 );
             case 'multiple_choice':
@@ -49,7 +51,7 @@ const PromptCard: React.FC<PromptCardProps> = ({ prompt, onAnswer }) => {
     return (
         <div className={styles.card}>
             <div className={styles.header}>
-                <FaQuestionCircle className={styles.icon} />
+                <FaQuestionCircle className={styles.icon}/>
                 <h4>Action Required</h4>
             </div>
             <div className={styles.content}>

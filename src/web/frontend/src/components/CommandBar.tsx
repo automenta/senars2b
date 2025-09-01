@@ -128,7 +128,8 @@ const CommandBar: React.FC = () => {
                             {item.truth &&
                                 <div><strong>Truth:</strong> F={item.truth.frequency}, C={item.truth.confidence}</div>}
                             {item.attention &&
-                                <div><strong>Attention:</strong> P={item.attention.priority}, D={item.attention.durability}
+                                <div><strong>Attention:</strong> P={item.attention.priority},
+                                    D={item.attention.durability}
                                 </div>}
                         </div>
                     ))}

@@ -134,7 +134,7 @@ describe('TaskValidator', () => {
         });
 
         it('should throw an error if required fields are missing during normalization', () => {
-            const task = createValidTask({ id: undefined });
+            const task = createValidTask({id: undefined});
             expect(() => TaskValidator.normalizeTask(task)).toThrow();
         });
 

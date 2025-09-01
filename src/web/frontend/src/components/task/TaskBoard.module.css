@@ -1,0 +1,84 @@
+.taskBoard {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+    padding: 20px;
+    overflow-x: auto;
+}
+
+.column {
+    background: var(--column-bg, #f5f5f5);
+    border-radius: 8px;
+    min-width: 300px;
+    display: flex;
+    flex-direction: column;
+    height: fit-content;
+    max-height: calc(100vh - 200px);
+}
+
+.columnHeader {
+    padding: 16px;
+    border-bottom: 1px solid var(--border-color, #e0e0e0);
+}
+
+.columnTitle {
+    margin: 0;
+    font-size: 18px;
+    color: var(--text-primary, #333333);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.taskCount {
+    background: var(--task-count-bg, #e0e0e0);
+    color: var(--task-count-color, #666666);
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 14px;
+}
+
+.columnContent {
+    flex: 1;
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    overflow-y: auto;
+}
+
+.emptyColumn {
+    text-align: center;
+    padding: 24px;
+    color: var(--text-secondary, #9e9e9e);
+}
+
+.emptyColumn p {
+    margin: 0;
+    font-style: italic;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    .taskBoard {
+        grid-template-columns: 1fr;
+        gap: 16px;
+        padding: 16px;
+    }
+
+    .column {
+        min-width: 100%;
+    }
+
+    .columnHeader {
+        padding: 12px;
+    }
+
+    .columnTitle {
+        font-size: 16px;
+    }
+
+    .columnContent {
+        padding: 8px;
+    }
+}

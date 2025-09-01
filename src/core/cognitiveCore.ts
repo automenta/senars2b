@@ -319,7 +319,7 @@ export class DecentralizedCognitiveCore {
     private _registerSystemSchema(schemaDef: { atom_id: string; apply: Function }, name: string): void {
         const schemaAtom: SemanticAtom = {
             id: schemaDef.atom_id,
-            content: { type: 'schema', name, apply: schemaDef.apply },
+            content: {type: 'schema', name, apply: schemaDef.apply},
             embedding: [], // System schema, no embedding needed
             creationTime: Date.now(),
             lastAccessTime: Date.now(),

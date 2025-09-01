@@ -1,14 +1,15 @@
 import React from 'react';
 import {Task} from '../types';
-import {FaCheck, FaPause, FaPlay, FaStop, FaTrash} from 'react-icons/fa';
+import {FaCheck, FaPause, FaPlay, FaStop, FaTrash, FaEdit} from 'react-icons/fa';
 import styles from './TaskControls.module.css';
 
 interface TaskControlsProps {
     task: Task;
     sendMessage: (msg: any) => void;
+    onEditDetailed?: () => void;
 }
 
-const TaskControls: React.FC<TaskControlsProps> = ({task, sendMessage}) => {
+const TaskControls: React.FC<TaskControlsProps> = ({task, sendMessage, onEditDetailed}) => {
     const handleComplete = () => sendMessage({type: 'COMPLETE_TASK', payload: {id: task.id}});
     const handlePause = () => sendMessage({type: 'PAUSE_AGENT', payload: {id: task.id}});
     const handleResume = () => sendMessage({type: 'RESUME_AGENT', payload: {id: task.id}});
@@ -63,6 +64,16 @@ const TaskControls: React.FC<TaskControlsProps> = ({task, sendMessage}) => {
 
     return (
         <div className={styles.controls}>
+            {onEditDetailed && (
+                <button
+                    onClick={onEditDetailed}
+                    title="Edit Detailed"
+                    aria-label={`Edit task ${task.title} in detail`}
+                    className={`${styles.button} ${styles.editBtn}`}
+                >
+                    <FaEdit/>
+                </button>
+            )}
             {task.type === 'AGENT' ? renderAgentControls() : renderRegularControls()}
             <button
                 onClick={handleDelete}

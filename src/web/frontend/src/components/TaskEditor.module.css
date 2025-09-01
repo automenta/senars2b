@@ -1,0 +1,247 @@
+.overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.7);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    backdrop-filter: blur(5px);
+}
+
+.editor {
+    background: var(--background-color);
+    padding: 0;
+    border-radius: var(--border-radius-lg);
+    box-shadow: var(--box-shadow-lg);
+    width: 100%;
+    max-width: 600px;
+    max-height: 90vh;
+    display: flex;
+    flex-direction: column;
+    border: 1px solid var(--border-color);
+    animation: modal-pop 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@keyframes modal-pop {
+    0% {
+        opacity: 0;
+        transform: scale(0.8);
+    }
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid var(--color-card-border);
+    padding: var(--spacing-lg);
+}
+
+.header h2 {
+    margin: 0;
+    color: var(--text-color-primary);
+    font-weight: 600;
+}
+
+.closeButton {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: var(--text-color-secondary);
+    border-radius: var(--border-radius-sm);
+    padding: 0.25rem;
+    transition: all var(--transition-fast);
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.closeButton:hover {
+    background-color: var(--background-color-tertiary);
+    color: var(--text-color-primary);
+}
+
+.content {
+    padding: var(--spacing-lg);
+    overflow-y: auto;
+    flex-grow: 1;
+}
+
+.field {
+    margin-bottom: var(--spacing-lg);
+}
+
+.field:last-child {
+    margin-bottom: 0;
+}
+
+.fieldRow {
+    display: flex;
+    gap: var(--spacing-lg);
+}
+
+.fieldRow > .field {
+    flex: 1;
+    margin-bottom: 0;
+}
+
+.field label {
+    display: block;
+    margin-bottom: var(--spacing-sm);
+    font-weight: 500;
+    color: var(--text-color-secondary);
+}
+
+.input, .textarea, .select {
+    background: var(--color-card-background);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius-md);
+    color: var(--text-color-primary);
+    padding: var(--spacing-sm);
+    width: 100%;
+    font-family: inherit;
+    font-size: 1rem;
+    transition: all var(--transition-fast);
+}
+
+.input:focus, .textarea:focus, .select:focus {
+    outline: none;
+    border-color: var(--border-color-focus);
+    box-shadow: 0 0 0 3px var(--color-primary-translucent);
+}
+
+.textarea {
+    resize: vertical;
+    min-height: 100px;
+}
+
+.prioritySelector, .statusSelector {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--spacing-sm);
+}
+
+.priorityButton, .statusButton {
+    background: none;
+    border: none;
+    padding: var(--spacing-xs);
+    border-radius: var(--border-radius-sm);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.priorityButton:hover, .statusButton:hover {
+    background-color: var(--color-hover-background);
+}
+
+.priorityButton.selected, .statusButton.selected {
+    background-color: var(--color-primary-translucent);
+    box-shadow: 0 0 0 2px var(--color-primary);
+}
+
+.footer {
+    border-top: 1px solid var(--color-card-border);
+    padding: var(--spacing-lg);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.deleteSection {
+    flex: 1;
+}
+
+.deleteButton, .confirmDeleteButton, .cancelDeleteButton {
+    background: none;
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius-md);
+    padding: var(--spacing-sm) var(--spacing-md);
+    color: var(--text-color-primary);
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    font-size: 0.9rem;
+    transition: all var(--transition-fast);
+    font-weight: 500;
+}
+
+.deleteButton:hover, .confirmDeleteButton:hover {
+    background-color: rgba(230, 57, 70, 0.1);
+    border-color: var(--color-danger);
+    color: var(--color-danger);
+}
+
+.confirmDeleteButton {
+    background-color: var(--color-danger);
+    color: white;
+    border-color: var(--color-danger);
+}
+
+.confirmDeleteButton:hover {
+    background-color: #d32f2f;
+    border-color: #d32f2f;
+}
+
+.cancelDeleteButton {
+    background: var(--background-color-secondary);
+    border-color: var(--border-color);
+}
+
+.cancelDeleteButton:hover {
+    background: var(--background-color-tertiary);
+}
+
+.saveSection {
+    flex: 0 0 auto;
+}
+
+.saveButton {
+    background: var(--color-primary);
+    border: 1px solid var(--color-primary);
+    border-radius: var(--border-radius-md);
+    padding: var(--spacing-sm) var(--spacing-md);
+    color: white;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    font-size: 0.9rem;
+    transition: all var(--transition-fast);
+    font-weight: 500;
+}
+
+.saveButton:hover {
+    background: var(--color-primary-dark);
+    border-color: var(--color-primary-dark);
+}
+
+.deleteConfirmation {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-sm);
+}
+
+.deleteConfirmation p {
+    margin: 0;
+    color: var(--text-color-primary);
+}
+
+.deleteActions {
+    display: flex;
+    gap: var(--spacing-sm);
+}

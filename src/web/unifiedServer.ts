@@ -2,14 +2,16 @@ import express from 'express';
 import http from 'http';
 import WebSocket from 'ws';
 import path from 'path';
-import { PersistentWorldModel } from '../core/worldModel';
-import { PriorityAgenda } from '../core/agenda';
-import { UnifiedTaskManager } from '../modules/taskManager';
-import { AttentionValue, CognitiveItem } from '../interfaces/types';
-import { config } from '../config';
+import {PersistentWorldModel} from '../core/worldModel';
+import {PriorityAgenda} from '../core/agenda';
+import {UnifiedTaskManager} from '../modules/taskManager';
+import {AttentionValue, CognitiveItem} from '../interfaces/types';
+import {config} from '../config';
 import logger from '../services/logger';
-import { createServer } from 'vite';
+import {createServer} from 'vite';
 import react from '@vitejs/plugin-react';
+
+const {setupWSConnection} = require('y-websocket/bin/utils');
 
 // --- Backend Core Initialization ---
 const worldModel = new PersistentWorldModel();
@@ -39,7 +41,7 @@ taskManager.addTask({
 
 
 // --- WebSocket Server Setup ---
-function setupWebSocketServer(server: http.Server, wss: WebSocket.Server) {
+function setupWebSocketServer(server: http.Server, wss: WebSocket.Server, yjsWss: WebSocket.Server) {
     const mapTaskToClient = (task: CognitiveItem) => ({
         id: task.id,
         title: task.label,
@@ -89,6 +91,7 @@ function setupWebSocketServer(server: http.Server, wss: WebSocket.Server) {
     // Also broadcast stats periodically
     setInterval(broadcastStats, 5000);
 
+    // Handle regular WebSocket connections (existing functionality)
     wss.on('connection', (ws: WebSocket) => {
         logger.info('New WebSocket connection established');
 
@@ -143,6 +146,14 @@ function setupWebSocketServer(server: http.Server, wss: WebSocket.Server) {
             logger.error({error}, 'WebSocket error:');
         });
     });
+
+    // Handle Yjs WebSocket connections (new functionality)
+    yjsWss.on('connection', (ws: WebSocket, req) => {
+        logger.info('New Yjs WebSocket connection established');
+
+        // Setup Yjs connection
+        setupWSConnection(ws, req);
+    });
 }
 
 // --- Express Server Setup ---
@@ -159,11 +170,32 @@ createServer({
 }).then((vite) => {
     // Use vite's connect instance as middleware
     app.use(vite.middlewares);
-    
+
     // Continue with WebSocket setup
     const wss: WebSocket.Server = new WebSocket.Server({noServer: true});
-    setupWebSocketServer(server, wss);
-    
+    const yjsWss: WebSocket.Server = new WebSocket.Server({noServer: true});
+
+    setupWebSocketServer(server, wss, yjsWss);
+
+    // Handle upgrade requests - regular WebSocket or Yjs WebSocket
+    server.on('upgrade', (request, socket, head) => {
+        const {pathname} = new URL(request.url!, `http://${request.headers.host}`);
+
+        if (pathname === '/ws') {
+            // Regular WebSocket connection
+            wss.handleUpgrade(request, socket, head, (ws) => {
+                wss.emit('connection', ws, request);
+            });
+        } else if (pathname === '/yjs') {
+            // Yjs WebSocket connection
+            yjsWss.handleUpgrade(request, socket, head, (ws) => {
+                yjsWss.emit('connection', ws, request);
+            });
+        } else {
+            socket.destroy();
+        }
+    });
+
     // Start server
     server.listen(config.PORT, () => {
         logger.info(`Senars3 Unified Server running on http://localhost:${config.PORT}`);

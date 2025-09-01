@@ -19,13 +19,19 @@ interface StatsPanelProps {
     stats: TaskStatistics | null;
 }
 
-const StatItem: React.FC<{ icon: React.ReactNode; label: string; value: number | undefined; color?: string, 'data-testid'?: string }> = ({
-                                                                                                                     icon,
-                                                                                                                     label,
-                                                                                                                     value,
-                                                                                                                     color,
-                                                                                                                     'data-testid': dataTestId
-                                                                                                                 }) => (
+const StatItem: React.FC<{
+    icon: React.ReactNode;
+    label: string;
+    value: number | undefined;
+    color?: string,
+    'data-testid'?: string
+}> = ({
+          icon,
+          label,
+          value,
+          color,
+          'data-testid': dataTestId
+      }) => (
     <div className={styles.statItem} style={{borderColor: color}} data-testid={dataTestId}>
         <div className={styles.statIcon} style={{color}}>
             {icon}

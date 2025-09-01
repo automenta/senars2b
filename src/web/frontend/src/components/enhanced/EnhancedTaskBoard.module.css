@@ -1,0 +1,122 @@
+.board {
+    display: flex;
+    gap: var(--spacing-md);
+    padding: var(--spacing-md);
+    overflow-x: auto;
+    min-height: 500px;
+}
+
+.column {
+    display: flex;
+    flex-direction: column;
+    width: 300px;
+    flex-shrink: 0;
+    background: var(--background-color-secondary);
+    border-radius: var(--border-radius-lg);
+    border: 1px solid var(--color-card-border);
+}
+
+.columnHeader {
+    padding: var(--spacing-md);
+    border-bottom: 3px solid var(--color-primary);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: var(--background-color);
+    border-radius: var(--border-radius-lg) var(--border-radius-lg) 0 0;
+}
+
+.columnTitle {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+}
+
+.columnTitle h3 {
+    margin: 0;
+    font-size: 1.1rem;
+    color: var(--text-color-primary);
+}
+
+.taskCount {
+    background: var(--color-primary-translucent);
+    color: var(--color-primary);
+    padding: 0.25rem 0.5rem;
+    border-radius: 12px;
+    font-size: 0.85rem;
+    font-weight: 500;
+}
+
+.addColumnButton {
+    background: none;
+    border: none;
+    color: var(--text-color-secondary);
+    cursor: pointer;
+    font-size: 1rem;
+    padding: var(--spacing-sm);
+    border-radius: var(--border-radius-sm);
+    transition: all var(--transition-fast);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.addColumnButton:hover {
+    color: var(--color-primary);
+    background-color: var(--color-hover-background);
+}
+
+.taskList {
+    flex: 1;
+    padding: var(--spacing-md);
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-md);
+    overflow-y: auto;
+    min-height: 200px;
+}
+
+.emptyColumn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: var(--spacing-md);
+    padding: var(--spacing-xl);
+    text-align: center;
+    color: var(--text-color-tertiary);
+    flex: 1;
+}
+
+.emptyIcon {
+    font-size: 2rem;
+    opacity: 0.5;
+}
+
+.addTaskButton {
+    background: var(--color-primary);
+    border: 1px solid var(--color-primary);
+    color: white;
+    padding: var(--spacing-sm) var(--spacing-md);
+    border-radius: var(--border-radius-md);
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: 500;
+    transition: all var(--transition-fast);
+}
+
+.addTaskButton:hover {
+    background: var(--color-primary-dark);
+    border-color: var(--color-primary-dark);
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    .board {
+        flex-direction: column;
+    }
+
+    .column {
+        width: 100%;
+    }
+}

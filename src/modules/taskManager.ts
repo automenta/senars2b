@@ -136,7 +136,7 @@ export class UnifiedTaskManager implements TaskManager {
         if (task.task_metadata) {
             task.task_metadata.group_id = groupId;
         } else {
-          task.task_metadata = {
+            task.task_metadata = {
                 status: 'pending',
                 priority_level: 'medium',
                 group_id: groupId
@@ -160,12 +160,12 @@ export class UnifiedTaskManager implements TaskManager {
         task.updated_at = Date.now();
 
         this.worldModel.update_item(task);
-        
+
         // Remove from agenda if transitioning to a terminal state
         if (!wasTerminal && isTerminal) {
             this.agenda.remove(id);
         }
-        
+
         this.notifyListeners({type: 'taskStatusChanged', task});
 
         return task;

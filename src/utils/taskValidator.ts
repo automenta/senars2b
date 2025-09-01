@@ -1,6 +1,6 @@
-import { z } from 'zod';
+import {z} from 'zod';
 import {CognitiveItem, TaskMetadata, TaskStatus} from '../interfaces/types';
-import { TaskPriority } from '../interfaces/sharedTypes';
+import {TaskPriority} from '../interfaces/sharedTypes';
 
 const taskStatusSchema = z.enum(['pending', 'awaiting_dependencies', 'decomposing', 'awaiting_subtasks', 'ready_for_execution', 'completed', 'failed', 'deferred']);
 const taskPrioritySchema = z.enum(['low', 'medium', 'high', 'critical']);

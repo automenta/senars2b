@@ -108,7 +108,7 @@ export class TaskOrchestrator {
 
     private transitionFromDecomposing(task: CognitiveItem): { updatedTask: CognitiveItem, newItems: CognitiveItem[] } {
         const newItems: CognitiveItem[] = [];
-        
+
         if (this.shouldDecompose(task as CognitiveItem & { task_metadata: TaskMetadata })) {
             // Create a goal to trigger the new DecompositionSchema.
             const decompositionGoal = CognitiveItemFactory.createGoal(
@@ -128,7 +128,7 @@ export class TaskOrchestrator {
             // Not a complex task, ready for execution.
             task.task_metadata!.status = 'ready_for_execution';
         }
-        
+
         return {updatedTask: task, newItems};
     }
 
@@ -155,8 +155,8 @@ export class TaskOrchestrator {
         // Decompose if it's a "complex" task and has no subtasks yet.
         // This is a placeholder for more sophisticated logic.
         const label = task.label.toLowerCase();
-        return COMPLEX_TASK_KEYWORDS.some(kw => label.includes(kw)) && 
-               (!task.task_metadata.subtasks || task.task_metadata.subtasks.length === 0);
+        return COMPLEX_TASK_KEYWORDS.some(kw => label.includes(kw)) &&
+            (!task.task_metadata.subtasks || task.task_metadata.subtasks.length === 0);
     }
 
     private areSubtasksComplete(task: CognitiveItem & { task_metadata: TaskMetadata }): boolean {

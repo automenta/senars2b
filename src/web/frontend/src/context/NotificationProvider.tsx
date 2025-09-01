@@ -42,7 +42,7 @@ const TYPE_LABELS: Record<NotificationType, string> = {
     warning: 'Warning',
 };
 
-export const NotificationProvider: React.FC<{children: React.ReactNode}> = ({children}) => {
+export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({children}) => {
     const [notifications, setNotifications] = useState<Notification[]>([]);
     const {notificationsEnabled} = useStore();
 

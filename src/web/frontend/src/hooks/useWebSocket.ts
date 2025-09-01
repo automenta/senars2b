@@ -51,7 +51,7 @@ class WebSocketManager {
             if (this.ws) {
                 this.ws.close();
             }
-            
+
             this.ws = new WebSocket(WS_URL);
 
             this.ws.onopen = () => {

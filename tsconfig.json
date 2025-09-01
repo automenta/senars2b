@@ -24,7 +24,8 @@
     }
   },
   "include": [
-    "src/**/*"
+    "src/**/*",
+    "y-websocket-utils.d.ts"
   ],
   "exclude": [
     "node_modules",

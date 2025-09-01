@@ -1,0 +1,69 @@
+.controls {
+    display: flex;
+    gap: var(--spacing-sm);
+    align-items: center;
+}
+
+.button {
+    background: none;
+    border: none;
+    color: var(--text-color-secondary);
+    cursor: pointer;
+    padding: var(--spacing-sm);
+    border-radius: var(--border-radius-sm);
+    transition: all var(--transition-fast);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.875rem;
+}
+
+.button:hover {
+    color: var(--text-color-primary);
+    background-color: var(--color-hover-background);
+}
+
+.editBtn:hover {
+    color: var(--color-primary);
+}
+
+.completeBtn:hover {
+    color: var(--color-success);
+    background-color: var(--color-success-translucent);
+}
+
+.pauseBtn:hover {
+    color: var(--color-warning);
+    background-color: var(--color-warning-translucent);
+}
+
+.resumeBtn:hover {
+    color: var(--color-info);
+    background-color: var(--color-info-translucent);
+}
+
+.stopBtn:hover {
+    color: var(--color-danger);
+    background-color: var(--color-danger-translucent);
+}
+
+.deleteBtn:hover {
+    color: var(--color-danger);
+    background-color: var(--color-danger-translucent);
+}
+
+.priorityBtn:hover {
+    color: var(--color-primary);
+    background-color: var(--color-primary-translucent);
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    .controls {
+        gap: var(--spacing-xs);
+    }
+
+    .button {
+        padding: var(--spacing-xs);
+    }
+}

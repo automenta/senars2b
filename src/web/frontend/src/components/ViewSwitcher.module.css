@@ -1,0 +1,33 @@
+.viewSwitcher {
+    display: flex;
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius-md);
+    overflow: hidden;
+}
+
+.viewButton {
+    background: var(--background-color);
+    border: none;
+    padding: var(--spacing-sm) var(--spacing-md);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+    color: var(--text-color-secondary);
+    transition: all var(--transition-fast);
+}
+
+.viewButton:hover {
+    background-color: var(--color-hover-background);
+    color: var(--text-color-primary);
+}
+
+.viewButton.active {
+    background-color: var(--color-primary);
+    color: white;
+}
+
+.viewButton:first-child {
+    border-right: 1px solid var(--border-color);
+}

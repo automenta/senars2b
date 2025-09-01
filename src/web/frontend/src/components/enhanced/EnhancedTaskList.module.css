@@ -1,0 +1,34 @@
+.taskList {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-md);
+    padding: var(--spacing-md);
+    min-height: 400px;
+}
+
+.subTaskList {
+    padding: var(--spacing-sm) 0;
+    margin-left: var(--spacing-xl);
+    border-left: 2px solid var(--color-primary-translucent);
+}
+
+.taskListItem {
+    transition: all var(--transition-normal);
+    position: relative;
+}
+
+.taskListItem.dragging {
+    opacity: 0.5;
+    transform: rotate(5deg);
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    .taskList {
+        padding: var(--spacing-sm);
+    }
+
+    .subTaskList {
+        margin-left: var(--spacing-lg);
+    }
+}

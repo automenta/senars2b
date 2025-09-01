@@ -97,7 +97,7 @@ const DEFAULT_WEIGHTING: PriorityWeighting = {
  */
 export class PriorityAgenda implements Agenda {
     private static readonly DEADLINE_WINDOW_MS = 24 * 60 * 60 * 1000; // 1 day
-    
+
     // Priority Calculation Configuration
     private readonly weighting: PriorityWeighting;
     private items: CognitiveItem[] = [];
@@ -120,7 +120,7 @@ export class PriorityAgenda implements Agenda {
      * @param weighting Optional custom weights for priority calculation.
      */
     constructor(
-        getTaskStatus: (taskId: string) => TaskMetadata['status'] | null, 
+        getTaskStatus: (taskId: string) => TaskMetadata['status'] | null,
         weighting: Partial<PriorityWeighting> = {}
     ) {
         if (!getTaskStatus) {

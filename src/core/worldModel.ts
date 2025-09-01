@@ -11,26 +11,42 @@ export type CognitiveSchema = {
 
 export interface WorldModel {
     add_atom(atom: SemanticAtom): string;
+
     add_item(item: CognitiveItem): void;
+
     update_item(item: CognitiveItem): void;
+
     remove_item(id: string): boolean;
+
     get_atom(id: string): SemanticAtom | null;
+
     get_item(id: string): CognitiveItem | null;
+
     query_by_semantic(embedding: number[], k: number): CognitiveItem[];
+
     query_by_symbolic(pattern: any, k?: number): CognitiveItem[];
+
     query_by_structure(pattern: any, k?: number): CognitiveItem[];
+
     query_by_meta(key: string, value: any): CognitiveItem[];
+
     query_atoms_by_meta(key: string, value: any): SemanticAtom[];
+
     revise_belief(new_item: CognitiveItem): [CognitiveItem | null, CognitiveItem | null];
+
     register_schema_atom(atom: SemanticAtom): CognitiveSchema;
+
     getStatistics(): {
         atomCount: number;
         itemCount: number;
         schemaCount: number;
         averageItemDurability: number;
     };
+
     getItemHistory(itemId: string): CognitiveItem[];
+
     getConfidenceDistribution(): { bins: string[], counts: number[] };
+
     getAllItems(): CognitiveItem[];
 }
 
@@ -320,7 +336,12 @@ export class PersistentWorldModel implements WorldModel {
                             atom_id: atom.id,
                             type: 'QUERY' as const,
                             attention: {priority: 0.7, durability: 0.6},
-                            stamp: {timestamp: Date.now(), parent_ids: [a.id, b.id], schema_id: atom.id, module: 'analogy'},
+                            stamp: {
+                                timestamp: Date.now(),
+                                parent_ids: [a.id, b.id],
+                                schema_id: atom.id,
+                                module: 'analogy'
+                            },
                             label: `Analogy-based query from items ${a.id} and ${b.id}`
                         };
                         return [newItem];
@@ -331,7 +352,12 @@ export class PersistentWorldModel implements WorldModel {
                             type: 'BELIEF' as const,
                             truth: {frequency: 0.8, confidence: 0.7},
                             attention: {priority: 0.6, durability: 0.7},
-                            stamp: {timestamp: Date.now(), parent_ids: [a.id, b.id], schema_id: atom.id, module: 'causal'},
+                            stamp: {
+                                timestamp: Date.now(),
+                                parent_ids: [a.id, b.id],
+                                schema_id: atom.id,
+                                module: 'causal'
+                            },
                             label: `Causal inference from items ${a.id} and ${b.id}`
                         };
                         return [newItem];

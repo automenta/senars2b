@@ -48,6 +48,12 @@
     align-items: center;
 }
 
+.viewAndFilterControls {
+    display: flex;
+    gap: var(--spacing-md);
+    align-items: center;
+}
+
 .searchContainer {
     position: relative;
     flex-grow: 1;
@@ -233,12 +239,16 @@
         padding: var(--spacing-xs) var(--spacing-md);
         font-size: 0.75rem;
     }
-    
+
     .searchAndFilters {
         flex-direction: column;
         align-items: stretch;
     }
-    
+
+    .viewAndFilterControls {
+        justify-content: space-between;
+    }
+
     .searchContainer {
         max-width: 100%;
     }

@@ -23,7 +23,10 @@ export const DecompositionSchema: CognitiveSchema = {
 
         const taskAtom = worldModel.get_atom(task.atom_id);
         if (!taskAtom || !taskAtom.embedding) {
-            logger.warn({taskId: task.id, taskLabel: task.label}, `DecompositionSchema: Could not find atom or embedding for task.`);
+            logger.warn({
+                taskId: task.id,
+                taskLabel: task.label
+            }, `DecompositionSchema: Could not find atom or embedding for task.`);
             return [];
         }
 

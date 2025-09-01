@@ -1,13 +1,13 @@
 import React from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import {motion, AnimatePresence} from 'framer-motion';
 import styles from './DashboardPanel.module.css';
-import { FaChartBar, FaChartPie, FaChevronDown, FaServer, FaTachometerAlt } from 'react-icons/fa';
+import {FaChartBar, FaChartPie, FaChevronDown, FaServer, FaTachometerAlt} from 'react-icons/fa';
 import StatsPanel from './StatsPanel';
 import TasksByStatusPieChart from './TasksByStatusPieChart';
 import TasksByPriorityBarChart from './TasksByPriorityBarChart';
 import PerformanceChart from './PerformanceChart';
 import SystemStatusPanel from './SystemStatusPanel';
-import { TaskStatistics } from '../types';
+import {TaskStatistics} from '../types';
 
 interface DashboardPanelProps {
     stats: TaskStatistics | null;
@@ -16,7 +16,7 @@ interface DashboardPanelProps {
     isLoading: boolean;
 }
 
-const DashboardPanel: React.FC<DashboardPanelProps> = ({ stats, systemStatus, statsHistory, isLoading }) => {
+const DashboardPanel: React.FC<DashboardPanelProps> = ({stats, systemStatus, statsHistory, isLoading}) => {
     const [isExpanded, setIsExpanded] = React.useState(false);
 
     if (isLoading) {
@@ -33,10 +33,10 @@ const DashboardPanel: React.FC<DashboardPanelProps> = ({ stats, systemStatus, st
             <button className={styles.header} onClick={() => setIsExpanded(!isExpanded)}>
                 <h2>Dashboard</h2>
                 <motion.div
-                    animate={{ rotate: isExpanded ? 180 : 0 }}
-                    transition={{ duration: 0.2 }}
+                    animate={{rotate: isExpanded ? 180 : 0}}
+                    transition={{duration: 0.2}}
                 >
-                    <FaChevronDown className={styles.chevron} />
+                    <FaChevronDown className={styles.chevron}/>
                 </motion.div>
             </button>
             <AnimatePresence>
@@ -47,57 +47,57 @@ const DashboardPanel: React.FC<DashboardPanelProps> = ({ stats, systemStatus, st
                         animate="open"
                         exit="collapsed"
                         variants={{
-                            open: { opacity: 1, height: 'auto' },
-                            collapsed: { opacity: 0, height: 0 }
+                            open: {opacity: 1, height: 'auto'},
+                            collapsed: {opacity: 0, height: 0}
                         }}
-                        transition={{ duration: 0.3, ease: [0.04, 0.62, 0.23, 0.98] }}
+                        transition={{duration: 0.3, ease: [0.04, 0.62, 0.23, 0.98]}}
                         className={styles.contentWrapper}
                     >
                         <div className={styles.content}>
                             <div className={styles.section}>
                                 <div className={styles.sectionHeader}>
-                            <FaTachometerAlt className={styles.sectionIcon}/>
-                            <h3>Task Statistics</h3>
-                        </div>
-                        <StatsPanel stats={stats}/>
-                    </div>
-
-                    <div className={styles.section}>
-                        <div className={styles.sectionHeader}>
-                            <FaChartPie className={styles.sectionIcon}/>
-                            <h3>Task Distribution</h3>
-                        </div>
-                        <div className={styles.chartGrid}>
-                            <div className={styles.chartContainer}>
-                                <h4>Tasks by Status</h4>
-                                <TasksByStatusPieChart/>
+                                    <FaTachometerAlt className={styles.sectionIcon}/>
+                                    <h3>Task Statistics</h3>
+                                </div>
+                                <StatsPanel stats={stats}/>
                             </div>
-                            <div className={styles.chartContainer}>
-                                <h4>Tasks by Priority</h4>
-                                <TasksByPriorityBarChart/>
+
+                            <div className={styles.section}>
+                                <div className={styles.sectionHeader}>
+                                    <FaChartPie className={styles.sectionIcon}/>
+                                    <h3>Task Distribution</h3>
+                                </div>
+                                <div className={styles.chartGrid}>
+                                    <div className={styles.chartContainer}>
+                                        <h4>Tasks by Status</h4>
+                                        <TasksByStatusPieChart/>
+                                    </div>
+                                    <div className={styles.chartContainer}>
+                                        <h4>Tasks by Priority</h4>
+                                        <TasksByPriorityBarChart/>
+                                    </div>
+                                </div>
                             </div>
-                        </div>
-                    </div>
 
-                    <div className={styles.section}>
-                        <div className={styles.sectionHeader}>
-                            <FaChartBar className={styles.sectionIcon}/>
-                            <h3>Performance Overview</h3>
-                        </div>
-                        <div className={styles.chartContainer}>
-                            <PerformanceChart statsHistory={statsHistory}/>
-                        </div>
-                    </div>
+                            <div className={styles.section}>
+                                <div className={styles.sectionHeader}>
+                                    <FaChartBar className={styles.sectionIcon}/>
+                                    <h3>Performance Overview</h3>
+                                </div>
+                                <div className={styles.chartContainer}>
+                                    <PerformanceChart statsHistory={statsHistory}/>
+                                </div>
+                            </div>
 
-                    <div className={styles.section}>
-                        <div className={styles.sectionHeader}>
-                            <FaServer className={styles.sectionIcon}/>
-                            <h3>System Status</h3>
-                        </div>
-                        <div className={styles.panelContainer}>
-                            <SystemStatusPanel systemStatus={systemStatus}/>
-                        </div>
-                    </div>
+                            <div className={styles.section}>
+                                <div className={styles.sectionHeader}>
+                                    <FaServer className={styles.sectionIcon}/>
+                                    <h3>System Status</h3>
+                                </div>
+                                <div className={styles.panelContainer}>
+                                    <SystemStatusPanel systemStatus={systemStatus}/>
+                                </div>
+                            </div>
                         </div>
                     </motion.div>
                 )}

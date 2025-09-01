@@ -1,13 +1,11 @@
-import { TaskStatus, TaskPriority, Task as SharedTask } from '../../../interfaces/sharedTypes';
+// Task is now simply a type alias for CognitiveItem with type 'TASK'
+export type {Task} from '../../../interfaces/task';
+export type {TaskStatus, TaskPriority} from '../../../interfaces/sharedTypes';
 
-// Export shared types
-export type { TaskStatus, TaskPriority };
+// Re-export the base interfaces to avoid circular dependencies
+export type {AttentionValue, TruthValue, DerivationStamp} from '../../../interfaces/types';
 
-// Extend shared task type for frontend-specific properties if needed
-export interface Task extends SharedTask {
-    // Add any frontend-specific properties here if needed
-}
-
+// Stats panel types
 export interface TaskStatistics {
     total: number;
     pending: number;

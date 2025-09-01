@@ -1,4 +1,4 @@
-import { CognitiveContent } from './contentTypes';
+import {CognitiveContent} from './contentTypes';
 
 export interface SemanticAtom {
     id: string;                // Unique identifier
@@ -26,10 +26,10 @@ export interface DerivationStamp {
     module?: string;
 }
 
-import { TaskStatus, TaskPriority } from './sharedTypes';
+import {TaskStatus, TaskPriority} from './sharedTypes';
 
 // Task-specific metadata that extends CognitiveItem
-export type { TaskStatus };
+export type {TaskStatus};
 
 export interface TaskMetadata {
     status: TaskStatus;

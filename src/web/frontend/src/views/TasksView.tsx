@@ -1,5 +1,6 @@
 import React, {memo, useEffect, useRef, useState, useCallback} from 'react';
-import TaskList from '../components/TaskList';
+import EnhancedTaskList from '../components/EnhancedTaskList';
+import BoardView from '../components/BoardView';
 import {useStore} from '../store';
 import styles from './TasksView.module.css';
 import {useHotkeys} from '../hooks/useHotkeys';
@@ -10,10 +11,20 @@ import {TaskPriority} from '../types';
 import DashboardPanel from '../components/DashboardPanel';
 import {useDashboardStats} from '../hooks/useDashboardStats';
 import {motion, AnimatePresence} from 'framer-motion';
+import TaskCollection from '../components/task/TaskCollection';
+import TaskBoard from '../components/task/TaskBoard';
+import TaskPrioritizationView from '../components/task/TaskPrioritization';
+import TaskViewSwitcher from '../components/task/TaskViewSwitcher';
+import {crdtTaskManager} from '../crdtTaskManager';
 
 interface TasksViewProps {
     sendMessage: (message: any) => void;
-    onAddTask: (task: { title: string; description?: string; priority: TaskPriority, type: 'REGULAR' | 'AGENT' }) => void;
+    onAddTask: (task: {
+        title: string;
+        description?: string;
+        priority: TaskPriority,
+        type: 'REGULAR' | 'AGENT'
+    }) => void;
 }
 
 const TasksView: React.FC<TasksViewProps> = memo(({sendMessage, onAddTask}) => {
@@ -27,12 +38,16 @@ const TasksView: React.FC<TasksViewProps> = memo(({sendMessage, onAddTask}) => {
         sortOption,
         setSortOption,
         setSearchInputRef,
+        selectedTaskId,
+        setSelectedTaskId,
     } = useStore();
 
     const searchInput = useRef<HTMLInputElement>(null);
     const [selectedTaskIndex, setSelectedTaskIndex] = useState(-1);
     const [showFilters, setShowFilters] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const [currentView, setCurrentView] = useState<'list' | 'board' | 'prioritization' | 'analytics'>('list');
+    const [showPrioritization, setShowPrioritization] = useState(false);
 
     const {tasks: sortedAndFilteredTasks} = useTasks();
     const {stats, systemStatus, statsHistory, isLoading} = useDashboardStats();
@@ -84,6 +99,36 @@ const TasksView: React.FC<TasksViewProps> = memo(({sendMessage, onAddTask}) => {
             }
         },
         'f': () => setShowFilters(prev => !prev),
+        'v': () => setCurrentView(prev => {
+            const views: Array<'list' | 'board' | 'prioritization' | 'analytics'> = ['list', 'board', 'prioritization', 'analytics'];
+            const currentIndex = views.indexOf(prev);
+            return views[(currentIndex + 1) % views.length];
+        }),
+        // New keyboard shortcuts for task management
+        'e': () => {
+            if (selectedTaskIndex !== -1) {
+                // TODO: Implement edit task
+                console.log('Edit task:', sortedAndFilteredTasks[selectedTaskIndex].id);
+            }
+        },
+        'd': () => {
+            if (selectedTaskIndex !== -1) {
+                // TODO: Implement delete task
+                console.log('Delete task:', sortedAndFilteredTasks[selectedTaskIndex].id);
+            }
+        },
+        'c': () => {
+            if (selectedTaskIndex !== -1) {
+                // TODO: Implement complete task
+                console.log('Complete task:', sortedAndFilteredTasks[selectedTaskIndex].id);
+            }
+        },
+        'p': () => {
+            if (selectedTaskIndex !== -1) {
+                // TODO: Implement change priority
+                console.log('Change priority for task:', sortedAndFilteredTasks[selectedTaskIndex].id);
+            }
+        }
     }, [sortedAndFilteredTasks, selectedTaskIndex]);
 
     // Filter options with proper display names
@@ -105,8 +150,26 @@ const TasksView: React.FC<TasksViewProps> = memo(({sendMessage, onAddTask}) => {
         {value: 'AGENT', label: 'Agent'}
     ];
 
+    const handleTaskSelect = useCallback((taskId: string | null) => {
+        setSelectedTaskId(taskId);
+    }, [setSelectedTaskId]);
+
+    const handleTaskEditStart = useCallback((taskId: string) => {
+        console.log('Edit task started:', taskId);
+    }, []);
+
+    const handleTaskEditEnd = useCallback((taskId: string) => {
+        console.log('Edit task ended:', taskId);
+    }, []);
+
+    const handlePrioritizationSave = useCallback(() => {
+        setShowPrioritization(false);
+        // Refresh tasks to reflect new priorities
+        // In a real implementation, this would be handled by the CRDT sync
+    }, []);
+
     return (
-        <motion.div 
+        <motion.div
             className={styles.tasksView}
             initial={{opacity: 0}}
             animate={{opacity: 1}}
@@ -121,7 +184,7 @@ const TasksView: React.FC<TasksViewProps> = memo(({sendMessage, onAddTask}) => {
 
             <AnimatePresence>
                 {error && (
-                    <motion.div 
+                    <motion.div
                         className={styles.errorBanner}
                         initial={{opacity: 0, y: -20}}
                         animate={{opacity: 1, y: 0}}
@@ -148,20 +211,23 @@ const TasksView: React.FC<TasksViewProps> = memo(({sendMessage, onAddTask}) => {
                     />
                 </div>
 
-                <motion.button
-                    onClick={() => setShowFilters(!showFilters)}
-                    className={styles.toggleFiltersBtn}
-                    whileHover={{scale: 1.03}}
-                    whileTap={{scale: 0.98}}
-                >
-                    <FaFilter/> Filters
-                    {showFilters ? <FaChevronUp /> : <FaChevronDown />}
-                </motion.button>
+                <div className={styles.viewAndFilterControls}>
+                    <TaskViewSwitcher currentView={currentView} onViewChange={setCurrentView}/>
+                    <motion.button
+                        onClick={() => setShowFilters(!showFilters)}
+                        className={styles.toggleFiltersBtn}
+                        whileHover={{scale: 1.03}}
+                        whileTap={{scale: 0.98}}
+                    >
+                        <FaFilter/> Filters
+                        {showFilters ? <FaChevronUp/> : <FaChevronDown/>}
+                    </motion.button>
+                </div>
             </div>
 
             <AnimatePresence>
                 {showFilters && (
-                    <motion.div 
+                    <motion.div
                         className={styles.filters}
                         initial={{opacity: 0, height: 0}}
                         animate={{opacity: 1, height: 'auto'}}
@@ -236,11 +302,65 @@ const TasksView: React.FC<TasksViewProps> = memo(({sendMessage, onAddTask}) => {
                 )}
             </AnimatePresence>
 
-            <TaskList
-                tasks={sortedAndFilteredTasks}
-                sendMessage={handleTaskAction}
-                selectedTaskIndex={selectedTaskIndex}
-            />
+            {currentView === 'list' && (
+                <TaskCollection
+                    tasks={sortedAndFilteredTasks}
+                    selectedTaskId={selectedTaskId}
+                    onTaskSelect={handleTaskSelect}
+                    onTaskEditStart={handleTaskEditStart}
+                    onTaskEditEnd={handleTaskEditEnd}
+                />
+            )}
+
+            {currentView === 'board' && (
+                <TaskBoard
+                    tasks={sortedAndFilteredTasks}
+                    selectedTaskId={selectedTaskId}
+                    onTaskSelect={handleTaskSelect}
+                    onTaskEditStart={handleTaskEditStart}
+                    onTaskEditEnd={handleTaskEditEnd}
+                />
+            )}
+
+            {currentView === 'prioritization' && (
+                <div style={{padding: '16px'}}>
+                    <button
+                        onClick={() => setShowPrioritization(true)}
+                        style={{
+                            padding: '12px 24px',
+                            backgroundColor: '#4a6cf7',
+                            color: 'white',
+                            border: 'none',
+                            borderRadius: '6px',
+                            fontSize: '16px',
+                            fontWeight: '500',
+                            cursor: 'pointer',
+                            transition: 'all 0.2s ease'
+                        }}
+                        onMouseOver={(e) => e.currentTarget.style.transform = 'translateY(-2px)'}
+                        onMouseOut={(e) => e.currentTarget.style.transform = 'translateY(0)'}
+                    >
+                        Open Task Prioritization View
+                    </button>
+                </div>
+            )}
+
+            {currentView === 'analytics' && (
+                <div style={{padding: '16px'}}>
+                    <h2>Analytics View</h2>
+                    <p>Analytics features would be implemented here.</p>
+                </div>
+            )}
+
+            <AnimatePresence>
+                {showPrioritization && (
+                    <TaskPrioritizationView
+                        tasks={sortedAndFilteredTasks}
+                        onClose={() => setShowPrioritization(false)}
+                        onSave={handlePrioritizationSave}
+                    />
+                )}
+            </AnimatePresence>
         </motion.div>
     );
 });

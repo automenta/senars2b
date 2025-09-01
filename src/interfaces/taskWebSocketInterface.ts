@@ -45,7 +45,7 @@ export class TaskWebSocketHandler {
         if (!payload) {
             throw new Error('Missing payload for addTask');
         }
-        
+
         try {
             const task = this.taskManager.addTask(payload);
             return {task};
@@ -58,7 +58,7 @@ export class TaskWebSocketHandler {
         if (!payload?.taskId) {
             throw new Error('Missing required field: taskId');
         }
-        
+
         const task = this.taskManager.updateTask(payload.taskId, payload.updates);
         if (!task) {
             throw new Error(`Task with ID ${payload.taskId} not found`);
@@ -70,7 +70,7 @@ export class TaskWebSocketHandler {
         if (!payload?.taskId) {
             throw new Error('Missing required field: taskId');
         }
-        
+
         const success = this.taskManager.removeTask(payload.taskId);
         return {
             success,
@@ -82,10 +82,10 @@ export class TaskWebSocketHandler {
         if (!payload?.taskId) {
             throw new Error('Missing required field: taskId');
         }
-        
+
         const task = this.taskManager.getTask(payload.taskId);
         if (!task) {
-            return { task: null, message: `Task with ID ${payload.taskId} not found` };
+            return {task: null, message: `Task with ID ${payload.taskId} not found`};
         }
         return {task};
     }
@@ -103,7 +103,7 @@ export class TaskWebSocketHandler {
         if (!payload?.taskId || !payload?.status) {
             throw new Error('Missing required fields: taskId, status');
         }
-        
+
         const task = this.taskManager.updateTaskStatus(payload.taskId, payload.status);
         if (!task) {
             throw new Error(`Task with ID ${payload.taskId} not found`);

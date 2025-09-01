@@ -19,17 +19,17 @@ export const useTasks = () => {
                     if (searchTerm && !task.title.toLowerCase().includes(searchTerm.toLowerCase())) {
                         return false;
                     }
-                    
+
                     // Status filter
                     if (statusFilter !== 'ALL' && task.status !== statusFilter) {
                         return false;
                     }
-                    
+
                     // Type filter
                     if (typeFilter !== 'ALL' && task.type !== typeFilter) {
                         return false;
                     }
-                    
+
                     return true;
                 })
                 .sort((a, b) => {
@@ -61,10 +61,10 @@ export const useTasks = () => {
             return {
                 total: tasks.length,
                 pending: tasks.filter(t => t.status === 'pending').length,
-                inProgress: tasks.filter(t => 
-                    t.status === 'awaiting_dependencies' || 
-                    t.status === 'decomposing' || 
-                    t.status === 'awaiting_subtasks' || 
+                inProgress: tasks.filter(t =>
+                    t.status === 'awaiting_dependencies' ||
+                    t.status === 'decomposing' ||
+                    t.status === 'awaiting_subtasks' ||
                     t.status === 'ready_for_execution'
                 ).length,
                 completed: tasks.filter(t => t.status === 'completed').length,

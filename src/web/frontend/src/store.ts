@@ -1,6 +1,7 @@
 import {create} from 'zustand';
 import {Notification, Prompt, Task, TaskPriority, TaskStatus} from './types';
 import React from 'react';
+import {crdtTaskManager} from './crdtTaskManager';
 
 export type SortOption = 'priority-desc' | 'priority-asc' | 'date-desc' | 'date-asc' | 'title-asc' | 'title-desc';
 export type StatusFilter = 'ALL' | TaskStatus;
@@ -19,12 +20,17 @@ interface AppState {
     notificationsEnabled: boolean;
     searchInputRef: React.RefObject<HTMLInputElement> | null;
     selectedTaskId: string | null;
+    isConnected: boolean;
+    taskGroups: Record<string, Task[]>;
 
     // Actions
     setTasks: (tasks: Task[]) => void;
     addTask: (task: Task) => void;
     updateTask: (id: string, updates: Partial<Task>) => void;
     removeTask: (id: string) => void;
+    reorderTasks: (orderedTaskIds: string[]) => void;
+    addTaskToGroup: (groupId: string, taskId: string) => void;
+    removeTaskFromGroup: (groupId: string, taskId: string) => void;
     setSearchTerm: (term: string) => void;
     setStatusFilter: (filter: StatusFilter) => void;
     setTypeFilter: (filter: TypeFilter) => void;
@@ -37,6 +43,8 @@ interface AppState {
     removeNotification: (id: string) => void;
     addPrompt: (prompt: Prompt) => void;
     updatePrompt: (id: string, updates: Partial<Prompt>) => void;
+    setConnectionStatus: (connected: boolean) => void;
+    setTaskGroups: (groups: Record<string, Task[]>) => void;
 
     // Derived actions
     getTaskById: (id: string) => Task | undefined;
@@ -65,18 +73,35 @@ export const useStore = create<AppState>((set, get) => ({
     notificationsEnabled: true,
     searchInputRef: null,
     selectedTaskId: null,
+    isConnected: false,
+    taskGroups: {},
 
     // Actions
     setTasks: (tasks) => set({tasks}),
-    addTask: (task) => set((state) => ({tasks: [...state.tasks, task]})),
-    updateTask: (id, updates) => set((state) => ({
-        tasks: state.tasks.map(task =>
-            task.id === id ? {...task, ...updates} : task
-        )
-    })),
-    removeTask: (id) => set((state) => ({
-        tasks: state.tasks.filter(task => task.id !== id)
-    })),
+    addTask: (task) => {
+        // Add to CRDT store
+        crdtTaskManager.addTask(task);
+    },
+    updateTask: (id, updates) => {
+        // Update in CRDT store
+        crdtTaskManager.updateTask(id, updates);
+    },
+    removeTask: (id) => {
+        // Remove from CRDT store
+        crdtTaskManager.removeTask(id);
+    },
+    reorderTasks: (orderedTaskIds) => {
+        // Reorder in CRDT store
+        crdtTaskManager.reorderTasks(orderedTaskIds);
+    },
+    addTaskToGroup: (groupId, taskId) => {
+        // Add task to group in CRDT store
+        crdtTaskManager.addTaskToGroup(groupId, taskId);
+    },
+    removeTaskFromGroup: (groupId, taskId) => {
+        // Remove task from group in CRDT store
+        crdtTaskManager.removeTaskFromGroup(groupId, taskId);
+    },
     setSearchTerm: (term) => set({searchTerm: term}),
     setStatusFilter: (filter) => set({statusFilter: filter}),
     setTypeFilter: (filter) => set({typeFilter: filter}),
@@ -105,7 +130,8 @@ export const useStore = create<AppState>((set, get) => ({
             p.id === id ? {...p, ...updates} : p
         )
     })),
-
+    setConnectionStatus: (connected) => set({isConnected: connected}),
+    setTaskGroups: (groups) => set({taskGroups: groups}),
 
     // Derived actions (these should not be used directly in components)
     getTaskById: (id) => {
@@ -134,7 +160,18 @@ export const useSubtasks = (parentId: string) => {
 };
 
 export const usePendingPrompts = () => {
-    return useStore(state => 
-        state.prompts.filter(p => p.status === 'pending')
-    );
+    return useStore(state => state.getPendingPrompts());
 };
+
+// Initialize CRDT synchronization
+if (typeof window !== 'undefined') {
+    // Subscribe to task changes
+    crdtTaskManager.subscribeToTasks((tasks) => {
+        useStore.getState().setTasks(tasks);
+    });
+
+    // Subscribe to connection status
+    crdtTaskManager.subscribeToConnection((connected) => {
+        useStore.getState().setConnectionStatus(connected);
+    });
+}

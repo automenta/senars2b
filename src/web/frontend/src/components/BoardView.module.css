@@ -1,0 +1,50 @@
+.board {
+    display: flex;
+    gap: var(--spacing-lg);
+    overflow-x: auto;
+    padding: var(--spacing-md);
+    height: calc(100vh - 200px); /* Adjust based on header and other elements */
+}
+
+.column {
+    display: flex;
+    flex-direction: column;
+    width: 300px;
+    flex-shrink: 0;
+    background-color: var(--background-color-secondary);
+    border-radius: var(--border-radius-lg);
+    border: 1px solid var(--color-card-border);
+}
+
+.columnHeader {
+    padding: var(--spacing-md);
+    border-bottom: 1px solid var(--color-card-border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.columnHeader h3 {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text-color-primary);
+}
+
+.taskCount {
+    background-color: var(--color-primary);
+    color: white;
+    border-radius: var(--border-radius-sm);
+    padding: 0.25rem 0.5rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.taskList {
+    padding: var(--spacing-md);
+    flex-grow: 1;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-md);
+}

@@ -9,8 +9,8 @@ import {useHotkeys} from './hooks/useHotkeys';
 import {useNotifier} from './context/NotificationProvider';
 
 // Error Boundary Component
-class ErrorBoundary extends React.Component<{children: React.ReactNode}, {hasError: boolean}> {
-    constructor(props: {children: React.ReactNode}) {
+class ErrorBoundary extends React.Component<{ children: React.ReactNode }, { hasError: boolean }> {
+    constructor(props: { children: React.ReactNode }) {
         super(props);
         this.state = {hasError: false};
     }
@@ -60,11 +60,11 @@ function App() {
                     const newTasks = message.payload.tasks;
                     const tempId = message.payload.tempId;
                     if (tempId) {
-                                                                                                setTasks(
-                                                    tasks.map(task =>
-                                                        task.id === tempId ? newTasks.find((t: Task) => t.title === task.title) || task : task
-                                                    )
-                                                );
+                        setTasks(
+                            tasks.map(task =>
+                                task.id === tempId ? newTasks.find((t: Task) => t.title === task.title) || task : task
+                            )
+                        );
                         addToastNotification('Task created successfully!', 'success');
                     } else {
                         setTasks(newTasks);
@@ -94,7 +94,7 @@ function App() {
                     // This is handled by the useDashboardStats hook now
                     break;
                 default:
-                    // console.log('Unknown message type:', message.type);
+                // console.log('Unknown message type:', message.type);
             }
         } catch (error) {
             console.error('Error processing WebSocket message:', error);
@@ -106,12 +106,12 @@ function App() {
 
     // Notify user about connection status
     const prevConnectionStatus = useRef({isConnected: false, hasError: false});
-    
+
     useEffect(() => {
         // Only show notifications when connection status actually changes
-        if (prevConnectionStatus.current.isConnected !== isConnected || 
+        if (prevConnectionStatus.current.isConnected !== isConnected ||
             prevConnectionStatus.current.hasError !== !!connectionError) {
-            
+
             if (connectionError) {
                 addToastNotification(`Connection error: ${connectionError}`, 'error');
             } else if (isConnected) {
@@ -119,7 +119,7 @@ function App() {
             } else {
                 addToastNotification('Disconnected from server', 'warning');
             }
-            
+
             // Update previous status
             prevConnectionStatus.current = {
                 isConnected,
