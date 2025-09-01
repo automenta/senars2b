@@ -1,5 +1,5 @@
-import {CognitiveItem, SemanticAtom} from '../interfaces/types';
-import {CognitiveSchema, WorldModel} from '../core/worldModel';
+import {CognitiveItem, SemanticAtom} from '@/interfaces/types';
+import {CognitiveSchema, WorldModel} from '@/core/worldModel';
 import {v4 as uuidv4} from 'uuid';
 import logger from '../services/logger';
 

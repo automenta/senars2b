@@ -1,4 +1,4 @@
-import {CognitiveItem, TruthValue} from '../interfaces/types';
+import {CognitiveItem, TruthValue} from '@/interfaces/types';
 
 export interface BeliefRevisionEngine {
     merge(existing: TruthValue, newTv: TruthValue): TruthValue;

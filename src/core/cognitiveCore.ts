@@ -4,26 +4,26 @@ import {AttentionModule} from './attentionModule';
 import {ResonanceModule} from './resonanceModule';
 import {SchemaMatcher} from './schemaMatcher';
 import {GoalTreeManager} from './goalTreeManager';
-import {CognitiveItemFactory} from '../modules/cognitiveItemFactory';
+import {CognitiveItemFactory} from '@/modules/cognitiveItemFactory';
 import {ReflectionLoop} from './reflectionLoop';
-import {ActionSubsystem} from '../actions/actionSubsystem';
-import {SchemaLearningModule} from '../modules/schemaLearningModule';
-import {HistoryAnalysisSchema, HistoryRecordingSchema} from '../modules/systemSchemas';
-import {DecompositionSchema} from '../modules/decompositionSchema';
-import {AttentionValue, CognitiveItem, SemanticAtom, TruthValue} from '../interfaces/types';
+import {ActionSubsystem} from '@/actions/actionSubsystem';
+import {SchemaLearningModule} from '@/modules/schemaLearningModule';
+import {HistoryAnalysisSchema, HistoryRecordingSchema} from '@/modules/systemSchemas';
+import {DecompositionSchema} from '@/modules/decompositionSchema';
+import {AttentionValue, CognitiveItem, SemanticAtom, TruthValue} from '@/interfaces/types';
 import {Agenda} from './agenda';
 import {v4 as uuidv4} from 'uuid';
-import {embeddingService} from '../services/embeddingService';
-import {TaskManager} from '../modules/taskManager';
-import {TaskOrchestrator} from '../modules/taskOrchestrator';
-import {AddBeliefSchema, AddGoalSchema, AddSchemaSchema} from '../utils/validators';
+import {embeddingService} from '@/services/embeddingService';
+import {TaskManager} from '@/modules/taskManager';
+import {TaskOrchestrator} from '@/modules/taskOrchestrator';
+import {AddBeliefSchema, AddGoalSchema, AddSchemaSchema} from '@/utils/validators';
 import {
     META_SOURCE_SYSTEM,
     META_SOURCE_USER_INPUT,
     META_TYPE_COGNITIVE_SCHEMA,
     META_TYPE_FACT,
     SYSTEM_VERSION
-} from '../utils/constants';
+} from '@/utils/constants';
 import logger from '../services/logger';
 
 export interface CognitiveCoreConfig {

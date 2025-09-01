@@ -1,4 +1,4 @@
-import {CognitiveItem, SemanticAtom} from '../interfaces/types';
+import {CognitiveItem, SemanticAtom} from '@/interfaces/types';
 import {v4 as uuidv4} from 'uuid';
 
 export interface SystemComponent {

@@ -1,18 +1,18 @@
-import {DecentralizedCognitiveCore} from '../core/cognitiveCore';
-import {PriorityAgenda} from '../core/agenda';
-import {PersistentWorldModel} from '../core/worldModel';
-import {SimpleBeliefRevisionEngine} from '../core/beliefRevisionEngine';
-import {DynamicAttentionModule} from '../core/attentionModule';
-import {HybridResonanceModule} from '../core/resonanceModule';
-import {EfficientSchemaMatcher} from '../core/schemaMatcher';
-import {HierarchicalGoalTreeManager} from '../core/goalTreeManager';
-import {SchemaLearningModule} from '../modules/schemaLearningModule';
-import {UnifiedTaskManager} from '../modules/taskManager';
-import {TaskOrchestrator} from '../modules/taskOrchestrator';
-import {ReflectionLoop} from '../core/reflectionLoop';
-import {ActionSubsystem} from '../actions/actionSubsystem';
+import {DecentralizedCognitiveCore} from '@/core/cognitiveCore';
+import {PriorityAgenda} from '@/core/agenda';
+import {PersistentWorldModel} from '@/core/worldModel';
+import {SimpleBeliefRevisionEngine} from '@/core/beliefRevisionEngine';
+import {DynamicAttentionModule} from '@/core/attentionModule';
+import {HybridResonanceModule} from '@/core/resonanceModule';
+import {EfficientSchemaMatcher} from '@/core/schemaMatcher';
+import {HierarchicalGoalTreeManager} from '@/core/goalTreeManager';
+import {SchemaLearningModule} from '@/modules/schemaLearningModule';
+import {UnifiedTaskManager} from '@/modules/taskManager';
+import {TaskOrchestrator} from '@/modules/taskOrchestrator';
+import {ReflectionLoop} from '@/core/reflectionLoop';
+import {ActionSubsystem} from '@/actions/actionSubsystem';
 import {v4 as uuidv4} from 'uuid';
-import {CognitiveItem, SemanticAtom} from '../interfaces/types';
+import {CognitiveItem, SemanticAtom} from '@/interfaces/types';
 
 /**
  * Test that refactored components still work correctly

@@ -9,11 +9,7 @@ import {
     FaPause,
     FaPlay,
     FaStop,
-    FaClone,
-    FaArrowUp,
-    FaArrowDown,
-    FaTag,
-    FaCalendarAlt
+    FaClone
 } from 'react-icons/fa';
 
 interface TaskContextMenuProps {

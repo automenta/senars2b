@@ -1,5 +1,5 @@
 import pino from 'pino';
-import {config} from '../config';
+import {config} from '@/config';
 
 const pinoConfig: pino.LoggerOptions = {
     level: config.NODE_ENV === 'development' ? 'debug' : 'info',

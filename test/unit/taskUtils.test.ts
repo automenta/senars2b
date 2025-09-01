@@ -1,6 +1,5 @@
 import {taskUtils} from '../src/web/frontend/src/utils/taskUtils';
 import {Task} from '../src/interfaces/task';
-import {TaskStatus} from '../src/interfaces/sharedTypes';
 
 describe('taskUtils', () => {
     const task: Task = {

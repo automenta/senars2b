@@ -1,7 +1,6 @@
 import React from 'react';
 import {TaskStatus} from '../types';
 import {
-    FaBolt,
     FaCheck,
     FaExclamationTriangle,
     FaHourglassHalf,

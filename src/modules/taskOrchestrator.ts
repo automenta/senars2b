@@ -1,5 +1,5 @@
-import {CognitiveItem, TaskMetadata, TaskStatus} from '../interfaces/types';
-import {WorldModel} from '../core/worldModel';
+import {CognitiveItem, TaskMetadata, TaskStatus} from '@/interfaces/types';
+import {WorldModel} from '@/core/worldModel';
 import {TaskManager} from './taskManager';
 import {CognitiveItemFactory} from './cognitiveItemFactory';
 import {v4 as uuidv4} from 'uuid';

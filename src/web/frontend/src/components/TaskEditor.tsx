@@ -1,7 +1,7 @@
 import React, {useState, useEffect} from 'react';
 import {Task, TaskPriority, TaskStatus} from '../types';
 import styles from './TaskEditor.module.css';
-import {FaTimes, FaSave, FaTrash, FaChevronLeft, FaChevronRight} from 'react-icons/fa';
+import {FaTimes, FaSave, FaTrash} from 'react-icons/fa';
 import PriorityBadge from './PriorityBadge';
 import StatusBadge from './StatusBadge';
 

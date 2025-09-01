@@ -1,5 +1,5 @@
-import {TaskValidator} from '../../src/utils/taskValidator';
-import {AttentionValue, CognitiveItem, TaskMetadata} from '../../src/interfaces/types';
+import {TaskValidator} from '@/utils/taskValidator';
+import {AttentionValue, CognitiveItem, TaskMetadata} from '@/interfaces/types';
 import {v4 as uuidv4} from 'uuid';
 
 // Helper to create a base for cognitive items

@@ -1,5 +1,5 @@
-import {PerceptionSubsystem} from '../modules/perceptionSubsystem';
-import {AttentionValue, TruthValue} from '../interfaces/types';
+import {PerceptionSubsystem} from '@/modules/perceptionSubsystem';
+import {AttentionValue, TruthValue} from '@/interfaces/types';
 import {createCoreWithRealDependencies} from './testUtils';
 
 async function runInteractiveDemo() {

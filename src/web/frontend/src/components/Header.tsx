@@ -1,5 +1,5 @@
 import React from 'react';
-import {FaMoon, FaSun, FaWifi, FaWifiSlash, FaBrain, FaChartLine, FaTasks} from 'react-icons/fa';
+import {FaMoon, FaSun, FaBrain, FaChartLine, FaTasks} from 'react-icons/fa';
 import styles from './Header.module.css';
 
 interface HeaderProps {

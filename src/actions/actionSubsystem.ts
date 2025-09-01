@@ -1,4 +1,4 @@
-import {CognitiveItem} from '../interfaces/types';
+import {CognitiveItem} from '@/interfaces/types';
 import {
     AtomicTaskExecutor,
     DiagnosticExecutor,
@@ -6,8 +6,8 @@ import {
     PlanningExecutor,
     WebSearchExecutor
 } from './action';
-import {CognitiveItemFactory} from '../modules/cognitiveItemFactory';
-import {TaskManager} from '../modules/taskManager';
+import {CognitiveItemFactory} from '@/modules/cognitiveItemFactory';
+import {TaskManager} from '@/modules/taskManager';
 import logger from "../services/logger";
 
 export interface Executor {

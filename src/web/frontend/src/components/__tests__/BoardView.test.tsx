@@ -2,7 +2,6 @@ import React from 'react';
 import {render, screen} from '@testing-library/react';
 import '@testing-library/jest-dom';
 import BoardView from '../BoardView';
-import {Task} from '../../types';
 
 const mockProps = {
     tasks: [

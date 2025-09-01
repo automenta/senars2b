@@ -1,4 +1,4 @@
-import {AttentionValue, CognitiveItem} from '../interfaces/types';
+import {AttentionValue, CognitiveItem} from '@/interfaces/types';
 import {CognitiveItemFactory} from './cognitiveItemFactory';
 
 /**

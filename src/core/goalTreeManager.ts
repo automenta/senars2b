@@ -1,5 +1,5 @@
-import {AttentionValue, CognitiveItem} from '../interfaces/types';
-import {CognitiveItemFactory} from '../modules/cognitiveItemFactory';
+import {AttentionValue, CognitiveItem} from '@/interfaces/types';
+import {CognitiveItemFactory} from '@/modules/cognitiveItemFactory';
 
 export interface GoalTreeManager {
     decompose(goal: CognitiveItem): CognitiveItem[];

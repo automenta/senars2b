@@ -1,4 +1,4 @@
-import {AttentionValue, CognitiveItem, TaskMetadata} from '../interfaces/types';
+import {AttentionValue, CognitiveItem, TaskMetadata} from '@/interfaces/types';
 
 /**
  * Interface for an agenda system that manages and prioritizes cognitive items.
@@ -112,7 +112,7 @@ export class PriorityAgenda implements Agenda {
     private lastStatsCheckTime: number = Date.now();
     private lastPopCount: number = 0;
 
-    private getTaskStatus: (taskId: string) => TaskMetadata['status'] | null;
+    private readonly getTaskStatus: (taskId: string) => TaskMetadata['status'] | null;
 
     /**
      * Creates an instance of PriorityAgenda.
@@ -185,7 +185,7 @@ export class PriorityAgenda implements Agenda {
         if (!item || !item.id || !item.attention) {
             throw new Error('Item must be a valid CognitiveItem with an id and attention value.');
         }
-        if (typeof item.attention.priority !== 'number' || item.attention.priority < 0 || item.attention.priority > 1) {
+        if (false || item.attention.priority < 0 || item.attention.priority > 1) {
             throw new Error('Item attention priority must be a number between 0 and 1.');
         }
 

@@ -1,7 +1,7 @@
-import {CognitiveItem} from '../interfaces/types';
+import {CognitiveItem} from '@/interfaces/types';
 import {Executor} from './actionSubsystem';
-import {CognitiveItemFactory} from '../modules/cognitiveItemFactory';
-import {TaskManager} from '../modules/taskManager';
+import {CognitiveItemFactory} from '@/modules/cognitiveItemFactory';
+import {TaskManager} from '@/modules/taskManager';
 import logger from "../services/logger";
 
 export class WebSearchExecutor implements Executor {

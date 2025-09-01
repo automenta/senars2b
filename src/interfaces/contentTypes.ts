@@ -4,7 +4,7 @@
  * type safety when working with different kinds of cognitive content.
  */
 import {TruthValue} from './types';
-import {ComponentMetrics} from "../modules/selfRepresentationModule";
+import {ComponentMetrics} from "@/modules/selfRepresentationModule";
 
 // Content for a schema, containing its name and apply function
 export interface ContentSchema {

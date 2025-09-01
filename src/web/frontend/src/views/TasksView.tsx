@@ -1,6 +1,4 @@
 import React, {memo, useEffect, useRef, useState, useCallback} from 'react';
-import EnhancedTaskList from '../components/EnhancedTaskList';
-import BoardView from '../components/BoardView';
 import {useStore} from '../store';
 import styles from './TasksView.module.css';
 import {useHotkeys} from '../hooks/useHotkeys';
@@ -15,7 +13,6 @@ import TaskCollection from '../components/task/TaskCollection';
 import TaskBoard from '../components/task/TaskBoard';
 import TaskPrioritizationView from '../components/task/TaskPrioritization';
 import TaskViewSwitcher from '../components/task/TaskViewSwitcher';
-import {crdtTaskManager} from '../crdtTaskManager';
 
 interface TasksViewProps {
     sendMessage: (message: any) => void;

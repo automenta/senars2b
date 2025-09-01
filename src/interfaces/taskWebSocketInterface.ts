@@ -1,5 +1,5 @@
-import {CognitiveItem, TaskStatus} from '../interfaces/types';
-import {TaskManager} from '../modules/taskManager';
+import {CognitiveItem, TaskStatus} from '@/interfaces/types';
+import {TaskManager} from '@/modules/taskManager';
 
 
 /**

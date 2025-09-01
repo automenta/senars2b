@@ -1,6 +1,6 @@
-import {TaskFactory} from '../../src/modules/taskFactory';
-import {TaskValidator} from '../../src/utils/taskValidator';
-import {AttentionValue} from '../../src/interfaces/types';
+import {TaskFactory} from '@/modules/taskFactory';
+import {TaskValidator} from '@/utils/taskValidator';
+import {AttentionValue} from '@/interfaces/types';
 
 describe('TaskFactory', () => {
     const mockAttention: AttentionValue = {

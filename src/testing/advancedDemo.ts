@@ -7,7 +7,7 @@
  * with a complex, multi-domain scenario.
  */
 
-import {PerceptionSubsystem} from '../modules/perceptionSubsystem';
+import {PerceptionSubsystem} from '@/modules/perceptionSubsystem';
 import {createCoreWithRealDependencies} from './testUtils';
 
 async function runAdvancedDemo() {

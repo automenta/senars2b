@@ -1,5 +1,5 @@
-import {CognitiveItem} from '../interfaces/types';
-import {CognitiveSchema, WorldModel} from '../core/worldModel';
+import {CognitiveItem} from '@/interfaces/types';
+import {CognitiveSchema, WorldModel} from '@/core/worldModel';
 import {TaskFactory} from './taskFactory';
 import logger from '../services/logger';
 

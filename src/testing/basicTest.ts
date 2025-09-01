@@ -1,10 +1,10 @@
-import {PriorityAgenda} from '../core/agenda';
-import {PersistentWorldModel} from '../core/worldModel';
-import {SimpleBeliefRevisionEngine} from '../core/beliefRevisionEngine';
-import {DynamicAttentionModule} from '../core/attentionModule';
-import {EfficientSchemaMatcher} from '../core/schemaMatcher';
+import {PriorityAgenda} from '@/core/agenda';
+import {PersistentWorldModel} from '@/core/worldModel';
+import {SimpleBeliefRevisionEngine} from '@/core/beliefRevisionEngine';
+import {DynamicAttentionModule} from '@/core/attentionModule';
+import {EfficientSchemaMatcher} from '@/core/schemaMatcher';
 import {v4 as uuidv4} from 'uuid';
-import {CognitiveItem, SemanticAtom, TruthValue} from '../interfaces/types';
+import {CognitiveItem, SemanticAtom, TruthValue} from '@/interfaces/types';
 
 /**
  * Run basic component tests for the cognitive system

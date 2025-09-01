@@ -7,7 +7,7 @@
  * through a series of example interactions.
  */
 
-import {PerceptionSubsystem} from '../modules/perceptionSubsystem';
+import {PerceptionSubsystem} from '@/modules/perceptionSubsystem';
 import {createCoreWithRealDependencies} from './testUtils';
 
 async function runDemo() {

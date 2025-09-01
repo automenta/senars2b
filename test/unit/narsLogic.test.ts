@@ -1,17 +1,5 @@
-import {DecentralizedCognitiveCore} from '@/core/cognitiveCore';
 import {PersistentWorldModel} from '@/core/worldModel';
 import {PriorityAgenda} from '@/core/agenda';
-import {UnifiedTaskManager} from '@/modules/taskManager';
-import {TaskOrchestrator} from '@/modules/taskOrchestrator';
-import {DynamicAttentionModule} from '@/core/attentionModule';
-import {SimpleBeliefRevisionEngine} from '@/core/beliefRevisionEngine';
-import {HybridResonanceModule} from '@/core/resonanceModule';
-import {EfficientSchemaMatcher} from '@/core/schemaMatcher';
-import {HierarchicalGoalTreeManager} from '@/core/goalTreeManager';
-import {ReflectionLoop} from '@/core/reflectionLoop';
-import {ActionSubsystem} from '@/actions/actionSubsystem';
-import {SchemaLearningModule} from '@/modules/schemaLearningModule';
-import {CognitiveItem, TruthValue} from '@/interfaces/types';
 import {embeddingService} from '@/services/embeddingService';
 import {v4 as uuidv4} from 'uuid';
 import {CognitiveItemFactory} from '@/modules/cognitiveItemFactory';

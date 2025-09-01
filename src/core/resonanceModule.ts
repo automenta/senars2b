@@ -1,4 +1,4 @@
-import {CognitiveItem} from '../interfaces/types';
+import {CognitiveItem} from '@/interfaces/types';
 import {WorldModel} from './worldModel';
 
 export interface ResonanceModule {

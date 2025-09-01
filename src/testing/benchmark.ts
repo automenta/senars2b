@@ -1,4 +1,4 @@
-import {AttentionValue, TruthValue} from '../interfaces/types';
+import {AttentionValue, TruthValue} from '@/interfaces/types';
 import {createCoreWithRealDependencies} from './testUtils';
 
 async function runBenchmark() {

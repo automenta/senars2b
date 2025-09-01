@@ -1,6 +1,5 @@
 import React, {memo, useCallback, useState} from 'react';
 import {Task} from '../../types';
-import TaskEntity from './TaskEntity';
 import {useTaskActions} from '../../hooks/useTaskActions';
 import styles from './TaskEditor.module.css';
 

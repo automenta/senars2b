@@ -1,9 +1,9 @@
-import {AttentionValue, CognitiveItem, TaskStatus} from '../interfaces/types';
+import {AttentionValue, CognitiveItem, TaskStatus} from '@/interfaces/types';
 import {TaskFactory} from './taskFactory';
-import {Agenda} from '../core/agenda';
+import {Agenda} from '@/core/agenda';
 import logger from '../services/logger';
-import {WorldModel} from '../core/worldModel';
-import {DEFAULT_TASK_DURABILITY, TASK_PRIORITY_LEVELS, TASK_PRIORITY_VALUES} from '../utils/constants';
+import {WorldModel} from '@/core/worldModel';
+import {DEFAULT_TASK_DURABILITY, TASK_PRIORITY_LEVELS, TASK_PRIORITY_VALUES} from '@/utils/constants';
 
 // Type guard to check if a CognitiveItem is a Task
 function isTask(item: CognitiveItem): item is CognitiveItem & { type: 'TASK' } {

@@ -1,6 +1,6 @@
 import {Agenda} from './agenda';
 import {WorldModel} from './worldModel';
-import {CognitiveItemFactory} from '../modules/cognitiveItemFactory';
+import {CognitiveItemFactory} from '@/modules/cognitiveItemFactory';
 import logger from '../services/logger';
 
 export class ReflectionLoop {

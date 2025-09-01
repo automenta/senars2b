@@ -1,4 +1,4 @@
-import {AttentionValue, CognitiveItem, DerivationStamp, TaskMetadata, TruthValue} from '../interfaces/types';
+import {AttentionValue, CognitiveItem, DerivationStamp, TaskMetadata, TruthValue} from '@/interfaces/types';
 import {v4 as uuidv4} from 'uuid';
 
 /**

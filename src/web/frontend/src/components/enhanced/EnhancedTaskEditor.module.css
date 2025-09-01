@@ -65,11 +65,10 @@
 }
 
 .field label {
-    display: block;
+    display: flex;
     margin-bottom: 8px;
     font-weight: 500;
     color: var(--text-primary, #333333);
-    display: flex;
     align-items: center;
     gap: 8px;
 }

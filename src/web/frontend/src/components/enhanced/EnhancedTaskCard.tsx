@@ -6,7 +6,6 @@ import {
     FaChevronRight,
     FaEdit,
     FaSave,
-    FaTimes,
     FaGripVertical,
     FaStream,
     FaCommentAlt,

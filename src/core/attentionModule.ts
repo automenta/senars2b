@@ -1,6 +1,6 @@
 import {Agenda} from './agenda';
 import {CognitiveSchema, WorldModel} from './worldModel';
-import {AttentionValue, CognitiveItem} from '../interfaces/types';
+import {AttentionValue, CognitiveItem} from '@/interfaces/types';
 import logger from '../services/logger';
 
 export interface AttentionModule {

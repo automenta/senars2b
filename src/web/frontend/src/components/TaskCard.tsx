@@ -1,4 +1,4 @@
-import React, {memo, useEffect, useMemo, useRef, useState} from 'react';
+import React, {memo, useEffect, useMemo, useRef} from 'react';
 import {motion} from 'framer-motion';
 import {Task} from '../types';
 import {

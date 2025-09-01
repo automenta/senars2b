@@ -1,10 +1,10 @@
-import {DecentralizedCognitiveCore} from '../core/cognitiveCore';
+import {DecentralizedCognitiveCore} from '@/core/cognitiveCore';
 import {PerceptionSubsystem} from './perceptionSubsystem';
 import {CoverageData, TestAnalysisModule, TestResult} from './testAnalysisModule';
 import {SelfRepresentationModule} from './selfRepresentationModule';
 import {EnhancementProposal, EnhancementProposalModule} from './enhancementProposalModule';
 import {ImplementationModule} from './implementationModule';
-import {CognitiveItem} from '../interfaces/types';
+import {CognitiveItem} from '@/interfaces/types';
 import logger from '../services/logger';
 
 export class SelfDevelopmentManager {

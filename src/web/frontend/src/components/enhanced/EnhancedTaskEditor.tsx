@@ -5,13 +5,10 @@ import {
     FaTimes,
     FaSave,
     FaTrash,
-    FaChevronLeft,
-    FaChevronRight,
     FaTag,
     FaCalendarAlt,
     FaClock,
-    FaUser,
-    FaLink
+    FaUser
 } from 'react-icons/fa';
 import PriorityBadge from '../components/PriorityBadge';
 import StatusBadge from '../components/StatusBadge';

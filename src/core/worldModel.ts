@@ -1,7 +1,7 @@
-import {CognitiveItem, SemanticAtom} from '../interfaces/types';
+import {CognitiveItem, SemanticAtom} from '@/interfaces/types';
 import {v4 as uuidv4} from 'uuid';
 import {BeliefRevisionEngine, SimpleBeliefRevisionEngine} from './beliefRevisionEngine';
-import {CognitiveItemFactory} from '../modules/cognitiveItemFactory';
+import {CognitiveItemFactory} from '@/modules/cognitiveItemFactory';
 import logger from '../services/logger';
 
 export type CognitiveSchema = {
