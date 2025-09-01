@@ -6,7 +6,7 @@ import {useStore} from '../store';
 import styles from './EnhancedTasksView.module.css';
 import {useHotkeys} from '../hooks/useHotkeys';
 import {useTasks} from '../hooks/useTasks';
-import {FaFilter, FaSearch, FaSort, FaChevronDown, FaChevronUp, FaMagic} from 'react-icons/fa';
+import {FaFilter, FaSearch, FaSort, FaChevronDown, FaChevronUp, FaMagic, FaPlus} from 'react-icons/fa';
 import InlineAddTaskForm from '../components/InlineAddTaskForm';
 import {TaskPriority, TaskStatus} from '../types';
 import DashboardPanel from '../components/DashboardPanel';
@@ -43,6 +43,7 @@ const EnhancedTasksView: React.FC<EnhancedTasksViewProps> = memo(({sendMessage, 
     const [error, setError] = useState<string | null>(null);
     const [currentView, setCurrentView] = useState<'list' | 'board' | 'prioritize'>('list');
     const [showPrioritization, setShowPrioritization] = useState(false);
+    const [showAddForm, setShowAddForm] = useState(false);
 
     const {tasks: sortedAndFilteredTasks} = useTasks();
     const {stats, systemStatus, statsHistory, isLoading} = useDashboardStats();
@@ -95,6 +96,7 @@ const EnhancedTasksView: React.FC<EnhancedTasksViewProps> = memo(({sendMessage, 
         },
         'f': () => setShowFilters(prev => !prev),
         'v': () => setCurrentView(prev => prev === 'list' ? 'board' : prev === 'board' ? 'list' : 'list'),
+        'n': () => setShowAddForm(true),
         // New keyboard shortcuts for task management
         'e': () => {
             if (selectedTaskIndex !== -1) {
@@ -170,6 +172,11 @@ const EnhancedTasksView: React.FC<EnhancedTasksViewProps> = memo(({sendMessage, 
             animate={{opacity: 1}}
             transition={{duration: 0.3}}
         >
+            <div className={styles.header}>
+                <h1>Task Management</h1>
+                <p>Organize and track your tasks</p>
+            </div>
+
             <DashboardPanel
                 stats={stats}
                 systemStatus={systemStatus}
@@ -191,21 +198,16 @@ const EnhancedTasksView: React.FC<EnhancedTasksViewProps> = memo(({sendMessage, 
                 )}
             </AnimatePresence>
 
-            <InlineAddTaskForm onAddTask={(task) => onAddTask(task)}/>
-
-            <div className={styles.searchAndFilters}>
-                <div className={styles.searchContainer}>
-                    <FaSearch className={styles.searchIcon}/>
-                    <input
-                        ref={searchInput}
-                        type="text"
-                        placeholder="Search tasks... (/)"
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                        className={styles.searchInput}
-                    />
-                </div>
-
+            <div className={styles.controlsBar}>
+                <motion.button
+                    onClick={() => setShowAddForm(true)}
+                    className={styles.addButton}
+                    whileHover={{scale: 1.03}}
+                    whileTap={{scale: 0.98}}
+                >
+                    <FaPlus/> Add Task
+                </motion.button>
+                
                 <div className={styles.viewAndFilterControls}>
                     <ViewSwitcher currentView={currentView} onViewChange={setCurrentView}/>
                     <motion.button
@@ -225,6 +227,38 @@ const EnhancedTasksView: React.FC<EnhancedTasksViewProps> = memo(({sendMessage, 
                     >
                         <FaMagic/> Prioritize
                     </motion.button>
+                </div>
+            </div>
+
+            <AnimatePresence>
+                {showAddForm && (
+                    <motion.div
+                        initial={{opacity: 0}}
+                        animate={{opacity: 1}}
+                        exit={{opacity: 0}}
+                    >
+                        <InlineAddTaskForm 
+                            onAddTask={(task) => {
+                                onAddTask(task);
+                                setShowAddForm(false);
+                            }} 
+                            onCancel={() => setShowAddForm(false)}
+                        />
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
+            <div className={styles.searchAndFilters}>
+                <div className={styles.searchContainer}>
+                    <FaSearch className={styles.searchIcon}/>
+                    <input
+                        ref={searchInput}
+                        type="text"
+                        placeholder="Search tasks... (/)"
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        className={styles.searchInput}
+                    />
                 </div>
             </div>
 

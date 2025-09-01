@@ -1,13 +1,13 @@
 import React, {useCallback, useEffect, useRef, useState} from 'react';
 import {motion} from 'framer-motion';
 import styles from './CommandBar.module.css';
-import {FaChevronDown, FaChevronUp, FaTerminal, FaVial} from 'react-icons/fa';
+import {FaChevronDown, FaChevronUp, FaTerminal, FaVial, FaRobot} from 'react-icons/fa';
 import {useWebSocket} from "../hooks/useWebSocket";
 import {CognitiveItem} from "../types";
 
 const CommandBar: React.FC = () => {
     const [isExpanded, setIsExpanded] = useState(false);
-    const [activeTab, setActiveTab] = useState<'CLI' | 'PROCESS'>('CLI');
+    const [activeTab, setActiveTab] = useState<'CLI' | 'PROCESS' | 'AGENT'>('CLI');
 
     // Merged logic from both views
     const [cliHistory, setCliHistory] = useState<string[]>(['Welcome to the Senars3 Web CLI!']);
@@ -15,6 +15,9 @@ const CommandBar: React.FC = () => {
     const [processingInput, setProcessingInput] = useState('');
     const [processingResults, setProcessingResults] = useState<any[]>([]);
     const [isProcessing, setIsProcessing] = useState(false);
+    const [agentInput, setAgentInput] = useState('');
+    const [agentResults, setAgentResults] = useState<any[]>([]);
+    const [isAgentProcessing, setIsAgentProcessing] = useState(false);
 
     const endOfHistoryRef = useRef<null | HTMLDivElement>(null);
 
@@ -31,6 +34,11 @@ const CommandBar: React.FC = () => {
             if (message.type === 'response' && message.id?.startsWith('process-')) {
                 setProcessingResults(prevResults => [message.payload, ...prevResults]);
                 setIsProcessing(false);
+            }
+        } else if (activeTab === 'AGENT') {
+            if (message.type === 'response' && message.id?.startsWith('agent-')) {
+                setAgentResults(prevResults => [message.payload, ...prevResults]);
+                setIsAgentProcessing(false);
             }
         }
     }, [activeTab]);
@@ -86,6 +94,18 @@ const CommandBar: React.FC = () => {
                 method: 'processInput',
                 payload: {input: processingInput},
                 id: `process-${Date.now()}`
+            });
+        }
+    };
+
+    const handleAgentInput = () => {
+        if (agentInput.trim()) {
+            setIsAgentProcessing(true);
+            sendMessage({
+                target: 'agent',
+                method: 'processGoal',
+                payload: {goal: agentInput},
+                id: `agent-${Date.now()}`
             });
         }
     };
@@ -167,6 +187,50 @@ const CommandBar: React.FC = () => {
         </div>
     );
 
+    const AgentResult: React.FC<{ result: any }> = ({result}) => {
+        return (
+            <div className={styles.resultCard}>
+                <div className={styles.resultHeader}>
+                    <strong>Goal:</strong> {result.goal}
+                </div>
+                <div className={styles.resultContent}>
+                    <div><strong>Status:</strong> {result.status}</div>
+                    <div><strong>Tasks Created:</strong> {result.tasksCreated || 0}</div>
+                    {result.message && <div><strong>Message:</strong> {result.message}</div>}
+                </div>
+            </div>
+        );
+    };
+
+    const AgentPanel = () => (
+        <div className={styles.panelContainer}>
+            <div className={styles.processingControls}>
+                 <textarea
+                     value={agentInput}
+                     onChange={(e) => setAgentInput(e.target.value)}
+                     placeholder="Enter a goal for the agent to process..."
+                     className={styles.processingTextarea}
+                 />
+                <button
+                    onClick={handleAgentInput}
+                    disabled={isAgentProcessing}
+                    className={styles.processingButton}
+                >
+                    {isAgentProcessing ? 'Processing...' : 'Submit Goal'}
+                </button>
+            </div>
+            <div className={styles.resultsContainer}>
+                {agentResults.length > 0 ? (
+                    agentResults.map((result, index) => (
+                        <AgentResult key={index} result={result}/>
+                    ))
+                ) : (
+                    <p>No agent results yet. Submit a goal to see the results here.</p>
+                )}
+            </div>
+        </div>
+    );
+
     const commandBarVariants = {
         collapsed: {
             height: "48px",
@@ -202,13 +266,22 @@ const CommandBar: React.FC = () => {
                         <FaVial/>
                         <span>Process</span>
                     </button>
+                    <button
+                        className={`${styles.tab} ${activeTab === 'AGENT' ? styles.active : ''}`}
+                        onClick={() => setActiveTab('AGENT')}
+                    >
+                        <FaRobot/>
+                        <span>Agent</span>
+                    </button>
                 </div>
                 <button className={styles.toggleButton} onClick={() => setIsExpanded(!isExpanded)}>
                     {isExpanded ? <FaChevronDown/> : <FaChevronUp/>}
                 </button>
             </div>
             <div className={styles.content}>
-                {activeTab === 'CLI' ? <CliPanel/> : <ProcessingPanel/>}
+                {activeTab === 'CLI' ? <CliPanel/> : 
+                 activeTab === 'PROCESS' ? <ProcessingPanel/> : 
+                 <AgentPanel/>}
             </div>
         </motion.footer>
     );

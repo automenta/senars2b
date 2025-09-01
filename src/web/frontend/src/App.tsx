@@ -1,12 +1,14 @@
-import React, {useCallback, useEffect, useRef} from 'react';
+import React, {useCallback, useEffect, useRef, useState} from 'react';
 import Header from './components/Header';
-import TasksView from './views/TasksView';
 import {useWebSocket} from './hooks/useWebSocket';
 import {useStore} from './store';
 import CommandBar from "./components/CommandBar";
-import {Task, TaskPriority} from './types';
+import {Task, TaskPriority, TaskStatus} from './types';
 import {useHotkeys} from './hooks/useHotkeys';
 import {useNotifier} from './context/NotificationProvider';
+import DashboardView from './views/DashboardView';
+import EnhancedTasksView from './views/EnhancedTasksView';
+import ConfigurationView from './views/ConfigurationView';
 
 // Error Boundary Component
 class ErrorBoundary extends React.Component<{ children: React.ReactNode }, { hasError: boolean }> {
@@ -45,11 +47,15 @@ function App() {
     } = useStore();
 
     const {addNotification: addToastNotification} = useNotifier();
+    const [currentView, setCurrentView] = useState<'dashboard' | 'tasks' | 'configuration'>('dashboard');
 
     // Setup keyboard shortcuts
     useHotkeys({
         // 'n' is now free, could be used for 'new task' focus
         '/': () => searchInputRef?.current?.focus(),
+        'd': () => setCurrentView('dashboard'),
+        't': () => setCurrentView('tasks'),
+        'c': () => setCurrentView('configuration'),
     }, [searchInputRef]);
 
     // Handle WebSocket messages
@@ -134,7 +140,7 @@ function App() {
         description?: string;
         priority: TaskPriority,
         type: 'REGULAR' | 'AGENT'
-    }) => {
+    }, status?: TaskStatus) => {
         const tempId = `temp-${Date.now()}`;
         const newTask: Task = {
             id: tempId,
@@ -142,7 +148,7 @@ function App() {
             description: task.description,
             priority: task.priority,
             type: task.type,
-            status: 'pending', // Use consistent status format
+            status: status || 'pending', // Use provided status or default to pending
             completion_percentage: 0,
             parent_id: undefined,
             subtasks: [],
@@ -159,9 +165,28 @@ function App() {
                 priority_level: task.priority,
                 type: task.type === 'AGENT' ? 'AGENT' : 'REGULAR',
                 tempId: tempId,
+                status: status // Include status if provided
             }
         });
     }, [addTask, sendMessage]);
+
+    const renderCurrentView = () => {
+        switch (currentView) {
+            case 'dashboard':
+                return <DashboardView />;
+            case 'tasks':
+                return (
+                    <EnhancedTasksView
+                        sendMessage={sendMessage}
+                        onAddTask={handleAddTask}
+                    />
+                );
+            case 'configuration':
+                return <ConfigurationView />;
+            default:
+                return <DashboardView />;
+        }
+    };
 
     return (
         <ErrorBoundary>
@@ -171,12 +196,10 @@ function App() {
                         theme={theme}
                         toggleTheme={toggleTheme}
                         isConnected={isConnected}
-                        onNavigate={(view) => alert(`Would navigate to ${view}`)}
+                        onNavigate={setCurrentView}
+                        currentView={currentView}
                     />
-                    <TasksView
-                        sendMessage={sendMessage}
-                        onAddTask={handleAddTask}
-                    />
+                    {renderCurrentView()}
                 </main>
                 <CommandBar/>
             </div>

@@ -7,6 +7,52 @@
     margin: 0 auto;
 }
 
+.header {
+    margin-bottom: var(--spacing-lg);
+}
+
+.header h1 {
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: var(--spacing-sm);
+    color: var(--text-color-primary);
+}
+
+.header p {
+    font-size: 1.1rem;
+    color: var(--text-color-secondary);
+    margin: 0;
+}
+
+.controlsBar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: var(--spacing-md);
+    margin-bottom: var(--spacing-lg);
+}
+
+.addButton {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    padding: var(--spacing-sm) var(--spacing-md);
+    border: 1px solid var(--color-primary);
+    border-radius: var(--border-radius-md);
+    background: var(--color-primary);
+    color: white;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: all var(--transition-fast);
+    font-weight: 500;
+}
+
+.addButton:hover {
+    background: var(--color-primary-dark);
+    border-color: var(--color-primary-dark);
+}
+
 .errorBanner {
     background: var(--color-danger-translucent);
     color: var(--color-danger);
@@ -185,17 +231,30 @@
     .tasksView {
         padding: var(--spacing-sm);
     }
-
+    
+    .header h1 {
+        font-size: 1.5rem;
+    }
+    
+    .header p {
+        font-size: 1rem;
+    }
+    
+    .controlsBar {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
     .viewAndFilterControls {
         flex-direction: column;
     }
-
+    
     .filters {
         grid-template-columns: 1fr;
         gap: var(--spacing-lg);
         padding: var(--spacing-md);
     }
-
+    
     .searchInput {
         padding: var(--spacing-md);
         padding-left: calc(var(--spacing-xl) + var(--spacing-md));

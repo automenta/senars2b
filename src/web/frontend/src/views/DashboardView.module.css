@@ -1,0 +1,91 @@
+.dashboardView {
+    padding: var(--spacing-xl);
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+.header {
+    margin-bottom: var(--spacing-xl);
+}
+
+.header h1 {
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: var(--spacing-sm);
+    color: var(--text-color-primary);
+}
+
+.header p {
+    font-size: 1.1rem;
+    color: var(--text-color-secondary);
+    margin: 0;
+}
+
+.statsGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: var(--spacing-lg);
+    margin-bottom: var(--spacing-xl);
+}
+
+.chartsSection {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+    gap: var(--spacing-xl);
+    margin-bottom: var(--spacing-xl);
+}
+
+.chartContainer {
+    background: var(--color-card-background);
+    border: 1px solid var(--color-card-border);
+    border-radius: var(--border-radius-lg);
+    padding: var(--spacing-lg);
+    box-shadow: var(--box-shadow-sm);
+}
+
+.chartContainer h2 {
+    margin-top: 0;
+    margin-bottom: var(--spacing-lg);
+    color: var(--text-color-primary);
+}
+
+.systemStatus {
+    margin-bottom: var(--spacing-xl);
+}
+
+.performanceChart {
+    background: var(--color-card-background);
+    border: 1px solid var(--color-card-border);
+    border-radius: var(--border-radius-lg);
+    padding: var(--spacing-lg);
+    box-shadow: var(--box-shadow-sm);
+    margin-bottom: var(--spacing-xl);
+}
+
+.performanceChart h2 {
+    margin-top: 0;
+    color: var(--text-color-primary);
+}
+
+@media (max-width: 768px) {
+    .dashboardView {
+        padding: var(--spacing-md);
+    }
+    
+    .statsGrid {
+        grid-template-columns: 1fr 1fr;
+        gap: var(--spacing-md);
+    }
+    
+    .chartsSection {
+        grid-template-columns: 1fr;
+    }
+    
+    .header h1 {
+        font-size: 1.5rem;
+    }
+    
+    .header p {
+        font-size: 1rem;
+    }
+}

@@ -2,7 +2,6 @@ import React, {createContext, useCallback, useContext, useEffect, useState} from
 import {AnimatePresence, motion} from 'framer-motion';
 import {FaCheckCircle, FaExclamationCircle, FaInfoCircle, FaTimes} from 'react-icons/fa';
 import styles from './Notification.module.css';
-import {useStore} from '../store';
 
 type NotificationType = 'success' | 'error' | 'info' | 'warning';
 
@@ -44,20 +43,17 @@ const TYPE_LABELS: Record<NotificationType, string> = {
 
 export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({children}) => {
     const [notifications, setNotifications] = useState<Notification[]>([]);
-    const {notificationsEnabled} = useStore();
 
     const removeNotification = useCallback((id: number) => {
         setNotifications(prev => prev.filter(n => n.id !== id));
     }, []);
 
     const addNotification = useCallback((message: string, type: NotificationType, duration: number = 5000) => {
-        if (!notificationsEnabled) return;
-
         const id = Date.now() + Math.floor(Math.random() * 1000);
         const newNotification: Notification = {id, message, type, duration};
 
         setNotifications(prev => [...prev, newNotification]);
-    }, [notificationsEnabled]);
+    }, []);
 
     // Clean up notifications when component unmounts
     useEffect(() => {
