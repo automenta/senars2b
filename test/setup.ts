@@ -1,16 +1,14 @@
-import '@testing-library/jest-dom';
+// Set timeout for all tests
+jest.setTimeout(5000);
 
-// Mock window.matchMedia
-Object.defineProperty(window, 'matchMedia', {
-    writable: true,
-    value: jest.fn().mockImplementation(query => ({
-        matches: false,
-        media: query,
-        onchange: null,
-        addListener: jest.fn(),
-        removeListener: jest.fn(),
-        addEventListener: jest.fn(),
-        removeEventListener: jest.fn(),
-        dispatchEvent: jest.fn(),
-    })),
-});
+// Mock expensive operations
+jest.mock('@/services/embeddingService', () => require('./unit/__mocks__/embeddingService'));
+
+// Mock console.log, console.info, console.warn to reduce test output noise
+global.console = {
+    ...console,
+    log: jest.fn(),
+    info: jest.fn(),
+    warn: jest.fn(),
+    error: jest.fn()
+};

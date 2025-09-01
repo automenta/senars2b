@@ -5,6 +5,9 @@ import {EfficientSchemaMatcher} from '@/core/schemaMatcher';
 import {SemanticAtom} from '@/interfaces/types';
 import {createBeliefItem, createSemanticAtom} from './testUtils';
 
+// Use fake timers to speed up tests with delays
+jest.useFakeTimers();
+
 describe('PersistentWorldModel', () => {
     let worldModel: PersistentWorldModel;
     let revisionEngine: SimpleBeliefRevisionEngine;
@@ -20,8 +23,8 @@ describe('PersistentWorldModel', () => {
             id: HistoryRecordingSchema.atom_id,
             content: {type: 'schema', name: 'HistoryRecordingSchema', apply: HistoryRecordingSchema.apply},
             embedding: [],
-            creationTime: Date.now(), // Added
-            lastAccessTime: Date.now(), // Added
+            creationTime: Date.now(),
+            lastAccessTime: Date.now(),
             meta: {
                 type: "CognitiveSchema",
                 source: "system",
@@ -69,10 +72,10 @@ describe('PersistentWorldModel', () => {
 
     describe('query_by_semantic', () => {
         it('should return semantic query results', () => {
-            const embedding = Array(768).fill(0.5);
-            const results = worldModel.query_by_semantic(embedding, 5);
+            // Use smaller embedding for faster tests
+            const embedding = Array(32).fill(0.5);
+            const results = worldModel.query_by_semantic(embedding, 3);
 
-            // Should return an array (could be empty depending on implementation)
             expect(Array.isArray(results)).toBe(true);
         });
     });
@@ -80,9 +83,8 @@ describe('PersistentWorldModel', () => {
     describe('query_by_symbolic', () => {
         it('should return symbolic query results', () => {
             const pattern = {test: "pattern"};
-            const results = worldModel.query_by_symbolic(pattern, 5);
+            const results = worldModel.query_by_symbolic(pattern, 3);
 
-            // Should return an array (could be empty depending on implementation)
             expect(Array.isArray(results)).toBe(true);
         });
     });
@@ -111,7 +113,7 @@ describe('PersistentWorldModel', () => {
 
             expect(revisedItem).toBeDefined();
             expect(revisedItem!.id).toBe('belief-1');
-            expect(revisedItem!.truth!.frequency).not.toBe(0.8); // Should have been merged
+            expect(revisedItem!.truth!.frequency).not.toBe(0.8);
 
             expect(event).toBeDefined();
             expect(event!.type).toBe('EVENT');
@@ -153,22 +155,28 @@ describe('PersistentWorldModel', () => {
             expect(history[0].id).toBe(historicalBelief.id);
         });
 
-        it('should retrieve multiple historical records for an item', async () => {
+        it('should retrieve multiple historical records for an item', () => {
             const itemId = 'belief-3';
             const item1 = createBeliefItem({id: itemId, truth: {frequency: 0.1, confidence: 0.2}});
             worldModel.add_item(item1);
 
             // First revision
-            const item2 = createBeliefItem({id: itemId, truth: {frequency: 0.3, confidence: 0.4}});
+            const item2 = createBeliefItem({
+                id: itemId,
+                truth: {frequency: 0.3, confidence: 0.4}
+            });
             const [, event1] = worldModel.revise_belief(item2);
             const [hist1] = HistoryRecordingSchema.apply(event1!, {} as any, worldModel);
             worldModel.add_item(hist1);
 
-            // Introduce a small delay to ensure a different timestamp
-            await new Promise(resolve => setTimeout(resolve, 5));
+            // Advance fake timers to ensure different timestamps
+            jest.advanceTimersByTime(1000);
 
             // Second revision
-            const item3 = createBeliefItem({id: itemId, truth: {frequency: 0.5, confidence: 0.6}});
+            const item3 = createBeliefItem({
+                id: itemId,
+                truth: {frequency: 0.5, confidence: 0.6}
+            });
             const [, event2] = worldModel.revise_belief(item3);
             const [hist2] = HistoryRecordingSchema.apply(event2!, {} as any, worldModel);
             worldModel.add_item(hist2);

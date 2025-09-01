@@ -14,11 +14,12 @@ describe('NARS Logic Tests', () => {
     const mockEmbeddingService = embeddingService as jest.Mocked<typeof embeddingService>;
 
     beforeEach(() => {
-        // Setup mock embeddings
+        // Setup mock embeddings with smaller arrays for faster tests
         mockEmbeddingService.generateEmbedding.mockImplementation(async (text: string) => {
             // Generate a deterministic embedding based on the text
             const hash = text.split('').reduce((a, b) => ((a << 5) - a + b.charCodeAt(0)) | 0, 0);
-            return Array(384).fill(0).map((_, i) => Math.abs(Math.sin(hash + i)) * 0.5 + 0.25);
+            // Use smaller embedding size for faster tests
+            return Array(32).fill(0).map((_, i) => Math.abs(Math.sin(hash + i)) * 0.5 + 0.25);
         });
 
         // Create world model and agenda directly
@@ -87,7 +88,7 @@ describe('NARS Logic Tests', () => {
 
             expect(foundBirdAnimalBelief).toBeDefined();
             expect(foundTweetyBirdBelief).toBeDefined();
-        }, 10000); // 10 second timeout
+        });
 
         it('should perform similarity reasoning', async () => {
             // Create semantic atoms for the beliefs
@@ -146,7 +147,7 @@ describe('NARS Logic Tests', () => {
 
             expect(foundSimilarityBelief).toBeDefined();
             expect(foundWheelBelief).toBeDefined();
-        }, 10000); // 10 second timeout
+        });
     });
 
     describe('Procedural Reasoning', () => {
@@ -206,7 +207,7 @@ describe('NARS Logic Tests', () => {
 
             expect(foundGoal).toBeDefined();
             expect(foundProcedure).toBeDefined();
-        }, 10000); // 10 second timeout
+        });
 
         it('should perform conditional reasoning (If-Then)', async () => {
             // Create semantic atoms for the beliefs
@@ -265,7 +266,7 @@ describe('NARS Logic Tests', () => {
 
             expect(foundConditional).toBeDefined();
             expect(foundObservation).toBeDefined();
-        }, 10000); // 10 second timeout
+        });
     });
 
     describe('Reasoning with Negations', () => {
@@ -326,7 +327,7 @@ describe('NARS Logic Tests', () => {
 
             expect(foundInitialBelief).toBeDefined();
             expect(foundContradictingEvidence).toBeDefined();
-        }, 10000); // 10 second timeout
+        });
 
         it('should perform contrapositive reasoning', async () => {
             // Create semantic atoms for the beliefs
@@ -385,7 +386,7 @@ describe('NARS Logic Tests', () => {
 
             expect(foundConditional).toBeDefined();
             expect(foundNegativeEvidence).toBeDefined();
-        }, 10000); // 10 second timeout
+        });
     });
 
     describe('Compatibility with LM Text', () => {
@@ -428,7 +429,7 @@ describe('NARS Logic Tests', () => {
 
             expect(foundNlBelief).toBeDefined();
             expect(foundNlBelief?.meta?.source).toBe("nl_input");
-        }, 10000); // 10 second timeout
+        });
 
         it('should handle uncertain LM outputs', async () => {
             // Simulate an uncertain LM output
@@ -468,7 +469,7 @@ describe('NARS Logic Tests', () => {
             expect(foundUncertainBelief).toBeDefined();
             expect(foundUncertainBelief?.truth?.frequency).toBeCloseTo(0.6);
             expect(foundUncertainBelief?.truth?.confidence).toBeCloseTo(0.5);
-        }, 10000); // 10 second timeout
+        });
     });
 
     describe('Diverse Application Domains', () => {
@@ -532,7 +533,7 @@ describe('NARS Logic Tests', () => {
             expect(foundSymptomBelief).toBeDefined();
             expect(foundPatientBelief).toBeDefined();
             expect(foundPatientBelief?.meta?.domain).toBe("medicine");
-        }, 10000); // 10 second timeout
+        });
 
         it('should handle scientific domain reasoning', async () => {
             // Create semantic atoms for the beliefs
@@ -591,7 +592,7 @@ describe('NARS Logic Tests', () => {
 
             expect(foundBoilingPointBelief).toBeDefined();
             expect(foundAltitudeBelief).toBeDefined();
-        }, 10000); // 10 second timeout
+        });
 
         it('should handle business domain reasoning', async () => {
             // Create semantic atoms for the beliefs
@@ -650,6 +651,6 @@ describe('NARS Logic Tests', () => {
 
             expect(foundSatisfactionBelief).toBeDefined();
             expect(foundScoreBelief).toBeDefined();
-        }, 10000); // 10 second timeout
+        });
     });
 });

@@ -19,6 +19,9 @@ import {ReflectionLoop} from '@/core/reflectionLoop';
 import {ActionSubsystem} from '@/actions/actionSubsystem';
 import {SchemaLearningModule} from '@/modules/schemaLearningModule';
 
+// Cache for reusable objects to reduce object creation overhead
+const EMBEDDING_CACHE = new Map<string, number[]>();
+
 /**
  * Creates a basic CognitiveItem with default values
  * @param overrides Partial CognitiveItem properties to override defaults
@@ -29,15 +32,19 @@ export function createCognitiveItem(overrides: Partial<CognitiveItem> = {}): Cog
         id: uuidv4(),
         atom_id: uuidv4(),
         type: 'BELIEF',
-        label: 'Test Item', // Added default label
+        label: 'Test Item',
         attention: {priority: 0.5, durability: 0.7},
         stamp: {timestamp: Date.now(), parent_ids: [], schema_id: uuidv4()},
         ...overrides
     };
 }
 
-
-export function createCoreWithRealDependencies(config: CognitiveCoreConfig = {}): DecentralizedCognitiveCore {
+/**
+ * Creates a lightweight core with minimal dependencies for faster tests
+ * @param config Optional configuration for the cognitive core
+ * @returns A new DecentralizedCognitiveCore with minimal dependencies
+ */
+export function createLightweightCore(config: CognitiveCoreConfig = {}): DecentralizedCognitiveCore {
     const worldModel = new PersistentWorldModel();
     const agenda = new PriorityAgenda((taskId: string) => {
         const task = worldModel.get_item(taskId);
@@ -61,6 +68,10 @@ export function createCoreWithRealDependencies(config: CognitiveCoreConfig = {})
     };
 
     return new DecentralizedCognitiveCore(dependencies, config);
+}
+
+export function createCoreWithRealDependencies(config: CognitiveCoreConfig = {}): DecentralizedCognitiveCore {
+    return createLightweightCore(config);
 }
 
 export function createTaskItem(overrides: Partial<CognitiveItem> = {}): CognitiveItem {
@@ -152,17 +163,27 @@ export function createMockSchema(overrides: Partial<CognitiveSchema> = {}): Cogn
 }
 
 /**
- * Creates a SemanticAtom
+ * Creates a SemanticAtom with cached embeddings for better performance
  * @param overrides Partial SemanticAtom properties to override defaults
  * @returns A new SemanticAtom with default values and any provided overrides
  */
 export function createSemanticAtom(overrides: Partial<SemanticAtom> = {}): SemanticAtom {
+    const content = typeof overrides.content === 'string' ? overrides.content : 'Test content';
+    
+    // Use cached embeddings when possible
+    let embedding = EMBEDDING_CACHE.get(content);
+    if (!embedding) {
+        // Use smaller embedding size for faster tests
+        embedding = Array(32).fill(0.5);
+        EMBEDDING_CACHE.set(content, embedding);
+    }
+    
     return {
         id: uuidv4(),
-        content: 'Test content',
-        embedding: Array(768).fill(0.5),
-        creationTime: Date.now(), // Added
-        lastAccessTime: Date.now(), // Added
+        content: content,
+        embedding: [...embedding], // Create a copy to avoid mutation issues
+        creationTime: Date.now(),
+        lastAccessTime: Date.now(),
         meta: {
             type: 'Fact',
             source: 'test',
@@ -185,4 +206,18 @@ export function createCognitiveMetadata(overrides: Record<string, any> = {}): Re
         trust_score: 0.8,
         ...overrides
     };
+}
+
+/**
+ * Clears the embedding cache to free memory
+ */
+export function clearEmbeddingCache(): void {
+    EMBEDDING_CACHE.clear();
+}
+
+/**
+ * Resets all test utilities to their initial state
+ */
+export function resetTestUtils(): void {
+    clearEmbeddingCache();
 }

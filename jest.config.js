@@ -1,17 +1,18 @@
 module.exports = {
     preset: 'ts-jest',
-    testEnvironment: 'jsdom',
+    testEnvironment: 'node',
     transform: {
         '^.+\\.[tj]sx?$': [
             'ts-jest',
             {
                 tsconfig: 'tsconfig.test.json'
-            },
-        ],
+            }
+        ]
     },
     moduleNameMapper: {
-        '\\.module\\.css$': '<rootDir>/test/__mocks__/styleMock.js',
-        '^@/(.*)$': '<rootDir>/src/$1'
+        '^@/(.*)$': '<rootDir>/src/$1',
+        // Mock the embedding service to avoid expensive operations
+        '@/services/embeddingService': '<rootDir>/test/unit/__mocks__/embeddingService'
     },
     transformIgnorePatterns: [
         "/node_modules/(?!(@xenova/transformers|langchain|@langchain/community))"
@@ -27,6 +28,9 @@ module.exports = {
     ],
     coverageDirectory: 'coverage',
     coverageReporters: ['text', 'lcov', 'html'],
-    verbose: true,
-    setupFilesAfterEnv: ['<rootDir>/test/setup.ts']
+    verbose: false,
+    setupFilesAfterEnv: ['<rootDir>/test/setup.ts'],
+    // Added optimizations
+    maxWorkers: '50%',
+    testTimeout: 5000
 };
