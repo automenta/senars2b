@@ -470,7 +470,7 @@ export class DecentralizedCognitiveCore {
             this.reflectionLoop.recordSchemaUsage(schema.atom_id);
 
             // Apply schema to generate new items
-            const derived = schema.apply(itemA, itemB, this.worldModel);
+            const derived = schema.apply(itemA, itemB, this.worldModel as any);
 
             for (const newItem of derived) {
                 // Calculate attention for derived items

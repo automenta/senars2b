@@ -1,32 +1,15 @@
 import {Agenda} from './agenda';
-import {WorldModel} from './worldModel';
+import {BaseWorldModel} from './BaseWorldModel';
 import {CognitiveItemFactory} from '@/modules/cognitiveItemFactory';
-import logger from '../services/logger';
+import {BaseReflectionLoop} from './BaseReflectionLoop';
+import {Logger} from '@/utils/standardLogger';
 
-export class ReflectionLoop {
-    private worldModel: WorldModel;
-    private agenda: Agenda;
-    private readonly interval: number;
-    private lastRun: number = 0;
+export class ReflectionLoop extends BaseReflectionLoop {
     private schemaUsage: Map<string, number> = new Map(); // schema_id -> last_used_timestamp
-    private kpiHistory: { timestamp: number; kpi: string; value: number }[] = [];
-    private performanceMetrics: {
-        cyclesRun: number;
-        errorsEncountered: number;
-        lastError: string | null;
-        averageCycleTime: number;
-    } = {
-        cyclesRun: 0,
-        errorsEncountered: 0,
-        lastError: null,
-        averageCycleTime: 0
-    };
-    private cycleTimes: number[] = [];
+    private kpiHistory: { timestamp: number; kpi: string; value: number }[] = []
 
-    constructor(worldModel: WorldModel, agenda: Agenda, interval: number = 60000) {
-        this.worldModel = worldModel;
-        this.agenda = agenda;
-        this.interval = interval;
+    constructor(worldModel: BaseWorldModel, agenda: Agenda, interval: number = 60000) {
+        super(worldModel, agenda, interval);
     }
 
     start(): NodeJS.Timeout {
@@ -42,6 +25,8 @@ export class ReflectionLoop {
 
     runCycle(): void {
         const cycleStart = Date.now();
+        this.notifyCycleStarted();
+        
         try {
             const now = Date.now();
             this.lastRun = now;
@@ -118,32 +103,18 @@ export class ReflectionLoop {
 
             // Update performance metrics
             const cycleTime = Date.now() - cycleStart;
-            this.cycleTimes.push(cycleTime);
-            // Keep only the last 100 cycle times
-            if (this.cycleTimes.length > 100) {
-                this.cycleTimes = this.cycleTimes.slice(-100);
-            }
-
-            this.performanceMetrics.cyclesRun++;
-            this.performanceMetrics.averageCycleTime = this.cycleTimes.reduce((a, b) => a + b, 0) / this.cycleTimes.length;
+            this.notifyCycleCompleted(cycleTime);
         } catch (error) {
-            logger.error({error}, "Reflection loop error");
-            this.performanceMetrics.errorsEncountered++;
-            this.performanceMetrics.lastError = error instanceof Error ? error.message : String(error);
-
-            // Update performance metrics even on error
-            const cycleTime = Date.now() - cycleStart;
-            this.cycleTimes.push(cycleTime);
-            if (this.cycleTimes.length > 100) {
-                this.cycleTimes = this.cycleTimes.slice(-100);
-            }
-            this.performanceMetrics.averageCycleTime = this.cycleTimes.reduce((a, b) => a + b, 0) / this.cycleTimes.length;
+            this.notifyCycleError(error as Error);
+            throw error;
         }
     }
 
     recordSchemaUsage(schemaId: string): void {
         // Record that a schema was used
         this.schemaUsage.set(schemaId, Date.now());
+        // Call the base class implementation
+        super.recordSchemaUsage(schemaId);
     }
 
     /**
@@ -187,6 +158,9 @@ export class ReflectionLoop {
         if (this.kpiHistory.length > 100) {
             this.kpiHistory = this.kpiHistory.slice(-100);
         }
+        
+        // Notify listeners
+        this.notifyKpiUpdated(name, value);
     }
 
     private estimateMemorySize(): number {
@@ -258,6 +232,9 @@ export class ReflectionLoop {
     private triggerSchemaLearning(): void {
         // In a full implementation, this would call the schema learning module
         // For now, we'll just log that schema learning was triggered
-        logger.info("Schema learning cycle triggered");
+        Logger.info("Schema learning cycle triggered", {
+          component: 'ReflectionLoop',
+          operation: 'triggerSchemaLearning'
+        });
     }
 }

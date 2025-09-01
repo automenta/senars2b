@@ -1,9 +1,9 @@
-import {CognitiveItem, SemanticAtom} from '@/interfaces/types';
-import {CognitiveSchema, WorldModel} from './worldModel';
+import { CognitiveItem, SemanticAtom } from '@/interfaces/types';
+import { CognitiveSchema, WorldModel } from './worldModel';
+import { BaseSchemaManager } from './BaseSchemaManager';
 
 export interface SchemaMatcher {
     register_schema(schema: SemanticAtom, world_model: WorldModel): CognitiveSchema;
-
     find_applicable(a: CognitiveItem, b: CognitiveItem, world_model: WorldModel): CognitiveSchema[];
 }
 
@@ -28,15 +28,15 @@ class ReteNode {
     }
 }
 
-export class EfficientSchemaMatcher implements SchemaMatcher {
+export class EfficientSchemaMatcher extends BaseSchemaManager implements SchemaMatcher {
     private schemaIndex: Map<string, CognitiveSchema> = new Map();
-    private schemaAtoms: Map<string, SemanticAtom> = new Map();
     private reteNetwork: ReteNode | null = null;
     private patternIndex: Map<string, Set<string>> = new Map(); // pattern component -> schema_ids
 
     register_schema(schema: SemanticAtom, world_model: WorldModel): CognitiveSchema {
         const cognitiveSchema = world_model.register_schema_atom(schema);
         this.schemaIndex.set(schema.id, cognitiveSchema);
+        this.schemas.set(schema.id, cognitiveSchema);
         this.schemaAtoms.set(schema.id, schema);
 
         // Index schema for faster lookup

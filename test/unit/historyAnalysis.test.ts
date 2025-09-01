@@ -60,7 +60,7 @@ describe('HistoryAnalysisSchema', () => {
         const historyItem = createHistoryItem(baseBelief.id, {frequency: 1.0, confidence: 0.6}, Date.now() - 10000);
         worldModel.add_item(historyItem);
 
-        const insights = HistoryAnalysisSchema.apply(baseBelief, {} as CognitiveItem, worldModel);
+        const insights = HistoryAnalysisSchema.apply(baseBelief, {} as CognitiveItem, worldModel as any);
         expect(insights).toHaveLength(0);
     });
 
@@ -77,7 +77,7 @@ describe('HistoryAnalysisSchema', () => {
         baseBelief.truth = stableTruth; // Set current belief to match
         worldModel.add_item(baseBelief);
 
-        const insights = HistoryAnalysisSchema.apply(baseBelief, {} as CognitiveItem, worldModel);
+        const insights = HistoryAnalysisSchema.apply(baseBelief, {} as CognitiveItem, worldModel as any);
 
         expect(insights).toHaveLength(1);
         expect(insights[0].meta?.insightType).toBe('stability');
@@ -89,7 +89,7 @@ describe('HistoryAnalysisSchema', () => {
         worldModel.add_item(createHistoryItem(baseBelief.id, {frequency: 1.0, confidence: 0.6}, now - 20000));
         worldModel.add_item(createHistoryItem(baseBelief.id, {frequency: 1.0, confidence: 0.7}, now - 10000));
 
-        const insights = HistoryAnalysisSchema.apply(baseBelief, {} as CognitiveItem, worldModel);
+        const insights = HistoryAnalysisSchema.apply(baseBelief, {} as CognitiveItem, worldModel as any);
 
         expect(insights).toHaveLength(1);
         expect(insights[0].meta?.insightType).toBe('trend_increasing');
@@ -115,7 +115,7 @@ describe('HistoryAnalysisSchema', () => {
             confidence: constantConfidence
         }, now - 10000));
 
-        const insights = HistoryAnalysisSchema.apply(baseBelief, {} as CognitiveItem, worldModel);
+        const insights = HistoryAnalysisSchema.apply(baseBelief, {} as CognitiveItem, worldModel as any);
 
         expect(insights).toHaveLength(1);
         expect(insights[0].meta?.insightType).toBe('oscillation');
@@ -127,12 +127,12 @@ describe('HistoryAnalysisSchema', () => {
         worldModel.add_item(createHistoryItem(baseBelief.id, {frequency: 1.0, confidence: 0.6}, now - 20000));
         worldModel.add_item(createHistoryItem(baseBelief.id, {frequency: 1.0, confidence: 0.7}, now - 10000));
 
-        const firstPassInsights = HistoryAnalysisSchema.apply(baseBelief, {} as CognitiveItem, worldModel);
+        const firstPassInsights = HistoryAnalysisSchema.apply(baseBelief, {} as CognitiveItem, worldModel as any);
         expect(firstPassInsights).toHaveLength(1);
 
         worldModel.add_item(firstPassInsights[0]);
 
-        const secondPassInsights = HistoryAnalysisSchema.apply(baseBelief, {} as CognitiveItem, worldModel);
+        const secondPassInsights = HistoryAnalysisSchema.apply(baseBelief, {} as CognitiveItem, worldModel as any);
         expect(secondPassInsights).toHaveLength(0);
     });
 });

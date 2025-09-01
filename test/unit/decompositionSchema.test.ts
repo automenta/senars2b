@@ -57,7 +57,7 @@ describe('DecompositionSchema', () => {
         mockWorldModel.query_by_semantic.mockReturnValue([knowledgeItem]);
 
         // 2. Execute
-        const resultingSubtasks = DecompositionSchema.apply(decompositionGoal, taskToDecompose, mockWorldModel);
+        const resultingSubtasks = DecompositionSchema.apply(decompositionGoal, taskToDecompose, mockWorldModel as any);
 
         // 3. Assert
         // It should have found the task's atom
@@ -89,7 +89,7 @@ describe('DecompositionSchema', () => {
         mockWorldModel.get_atom.mockReturnValue(taskAtom);
         mockWorldModel.query_by_semantic.mockReturnValue([]); // No knowledge found
 
-        const result = DecompositionSchema.apply(decompositionGoal, taskToDecompose, mockWorldModel);
+        const result = DecompositionSchema.apply(decompositionGoal, taskToDecompose, mockWorldModel as any);
 
         expect(result).toHaveLength(0);
     });
@@ -100,7 +100,7 @@ describe('DecompositionSchema', () => {
 
         mockWorldModel.get_atom.mockReturnValue(null); // No atom found
 
-        const result = DecompositionSchema.apply(decompositionGoal, taskToDecompose, mockWorldModel);
+        const result = DecompositionSchema.apply(decompositionGoal, taskToDecompose, mockWorldModel as any);
 
         expect(result).toHaveLength(0);
         expect(mockWorldModel.query_by_semantic).not.toHaveBeenCalled();

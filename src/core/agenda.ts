@@ -1,76 +1,7 @@
 import {AttentionValue, CognitiveItem, TaskMetadata} from '@/interfaces/types';
+import {BaseAgenda} from './BaseAgenda';
 
-/**
- * Interface for an agenda system that manages and prioritizes cognitive items.
- */
-export interface Agenda {
-    /**
-     * Adds or updates a cognitive item in the agenda.
-     * @param item The cognitive item to add.
-     */
-    push(item: CognitiveItem): void;
-
-    /**
-     * Removes and returns the highest priority unblocked item from the agenda.
-     * @returns A promise that resolves to the highest priority item.
-     */
-    pop(): Promise<CognitiveItem>;
-
-    /**
-     * Returns the highest priority unblocked item without removing it.
-     * @returns The highest priority item or null if the agenda is empty.
-     */
-    peek(): CognitiveItem | null;
-
-    /**
-     * Returns the number of items in the agenda.
-     * @returns The size of the agenda.
-     */
-    size(): number;
-
-    /**
-     * Updates the attention value of a specific item.
-     * @param id The ID of the item to update.
-     * @param newVal The new attention value.
-     */
-    updateAttention(id: string, newVal: AttentionValue): void;
-
-    /**
-     * Removes an item from the agenda by its ID.
-     * @param id The ID of the item to remove.
-     * @returns True if the item was removed, false otherwise.
-     */
-    remove(id: string): boolean;
-
-    /**
-     * Retrieves an item by its ID without removing it.
-     * @param id The ID of the item to retrieve.
-     * @returns The cognitive item or null if not found.
-     */
-    get(id: string): CognitiveItem | null;
-
-    /**
-     * Updates the status of a specific task within the agenda.
-     * @param taskId The ID of the task to update.
-     * @param status The new status for the task.
-     * @returns `true` if the task was found and updated, `false` otherwise.
-     */
-    updateTaskStatus(taskId: string, status: TaskMetadata['status']): boolean;
-
-    /**
-     * Retrieves tasks from the agenda based on a set of filter criteria.
-     * @param filter The filter criteria, which can include tag, category, or status.
-     * @returns An array of cognitive items that match the filter criteria.
-     */
-    getTasksBy(filter: { tag?: string; category?: string; status?: TaskMetadata['status'] }): CognitiveItem[];
-
-    /**
-     * Retrieves all tasks belonging to a specific group.
-     * @param groupId The ID of the group to retrieve tasks for.
-     * @returns An array of cognitive items that belong to the specified group.
-     */
-    getTasksByGroup(groupId: string): CognitiveItem[];
-}
+export { Agenda } from './BaseAgenda';
 
 /**
  * Defines the weights for different factors in priority calculation.
@@ -95,7 +26,7 @@ const DEFAULT_WEIGHTING: PriorityWeighting = {
  * It sorts items based on a weighted priority score, handles task dependencies,
  * and provides detailed statistics for monitoring system performance.
  */
-export class PriorityAgenda implements Agenda {
+export class PriorityAgenda extends BaseAgenda {
     private static readonly DEADLINE_WINDOW_MS = 24 * 60 * 60 * 1000; // 1 day
 
     // Priority Calculation Configuration
@@ -123,6 +54,7 @@ export class PriorityAgenda implements Agenda {
         getTaskStatus: (taskId: string) => TaskMetadata['status'] | null,
         weighting: Partial<PriorityWeighting> = {}
     ) {
+        super();
         if (!getTaskStatus) {
             throw new Error("A getTaskStatus function must be provided for robust dependency checking.");
         }
@@ -169,6 +101,9 @@ export class PriorityAgenda implements Agenda {
                     }
                 }
             }
+            
+            // Notify listeners
+            this.notifyTaskStatusUpdated(taskId, status);
 
             return true;
         }
@@ -202,6 +137,9 @@ export class PriorityAgenda implements Agenda {
         this.itemMap.set(item.id, item);
         this.sortItemsByPriority();
 
+        // Notify listeners
+        this.notifyItemAdded(item);
+
         // An added or updated item might unblock a waiting pop() call.
         this.resolveWaitingPop();
     }
@@ -219,6 +157,7 @@ export class PriorityAgenda implements Agenda {
             this.itemMap.delete(item.id);
 
             this.trackPopStatistics();
+            this.notifyItemRemoved(item.id);
             return item;
         }
 
@@ -269,6 +208,7 @@ export class PriorityAgenda implements Agenda {
             item.attention = newVal;
             this.sortItemsByPriority();
             this.resolveWaitingPop();
+            this.notifyItemUpdated(item);
         }
     }
 
@@ -285,6 +225,7 @@ export class PriorityAgenda implements Agenda {
         this.itemMap.delete(id);
         // Removing an item could unblock a dependency.
         this.resolveWaitingPop();
+        this.notifyItemRemoved(id);
         return true;
     }
 
@@ -307,6 +248,9 @@ export class PriorityAgenda implements Agenda {
         averageWaitTime: number; // in milliseconds
         maxWaitTime: number; // in milliseconds
         totalPops: number;
+        totalItemsAdded: number;
+        totalItemsRemoved: number;
+        totalTaskStatusUpdates: number;
     } {
         const now = Date.now();
         const timeElapsedSeconds = (now - this.lastStatsCheckTime) / 1000;
@@ -320,12 +264,18 @@ export class PriorityAgenda implements Agenda {
 
         const averageWaitTime = this.popCount > 0 ? this.totalWaitTime / this.popCount : 0;
 
+        // Get base class statistics
+        const baseStats = super.getStatistics();
+
         return {
             size: this.items.length,
             popRate,
             averageWaitTime,
             maxWaitTime: this.maxWaitTime,
             totalPops: this.popCount,
+            totalItemsAdded: baseStats.totalItemsAdded,
+            totalItemsRemoved: baseStats.totalItemsRemoved,
+            totalTaskStatusUpdates: baseStats.totalTaskStatusUpdates
         };
     }
 

@@ -2,11 +2,12 @@ import {CognitiveItem, SemanticAtom} from '@/interfaces/types';
 import {v4 as uuidv4} from 'uuid';
 import {BeliefRevisionEngine, SimpleBeliefRevisionEngine} from './beliefRevisionEngine';
 import {CognitiveItemFactory} from '@/modules/cognitiveItemFactory';
+import {BaseWorldModel} from './BaseWorldModel';
 import logger from '../services/logger';
 
 export type CognitiveSchema = {
     atom_id: string;
-    apply: (a: CognitiveItem, b: CognitiveItem, worldModel: WorldModel) => CognitiveItem[];
+    apply: (a: CognitiveItem, b: CognitiveItem, worldModel: BaseWorldModel) => CognitiveItem[];
 };
 
 export interface WorldModel {
@@ -50,7 +51,7 @@ export interface WorldModel {
     getAllItems(): CognitiveItem[];
 }
 
-export class PersistentWorldModel implements WorldModel {
+export class PersistentWorldModel extends BaseWorldModel implements WorldModel {
     private atoms: Map<string, SemanticAtom> = new Map();
     private items: Map<string, CognitiveItem> = new Map();
     private schemas: Map<string, CognitiveSchema> = new Map();
@@ -64,6 +65,7 @@ export class PersistentWorldModel implements WorldModel {
     private metaIndex: Map<string, Map<any, Set<string>>> = new Map(); // metaKey -> metaValue -> itemIds
 
     constructor() {
+        super();
         this.beliefRevisionEngine = new SimpleBeliefRevisionEngine();
     }
 
@@ -140,6 +142,9 @@ export class PersistentWorldModel implements WorldModel {
                 valueMap.get(value)!.add(item.id);
             }
         }
+        
+        // Notify listeners
+        this.notifyItemAdded(item);
     }
 
     get_atom(id: string): SemanticAtom | null {
@@ -160,6 +165,9 @@ export class PersistentWorldModel implements WorldModel {
         // Update relevant indexes
         this.attentionIndex.set(item.id, item.attention.durability);
         // Note: a full implementation should also update metaIndex and temporalIndex if relevant fields change.
+        
+        // Notify listeners
+        this.notifyItemUpdated(item);
     }
 
     remove_item(id: string): boolean {
@@ -193,6 +201,9 @@ export class PersistentWorldModel implements WorldModel {
                 }
             }
         }
+        
+        // Notify listeners
+        this.notifyItemRemoved(id);
         return true;
     }
 
@@ -312,7 +323,7 @@ export class PersistentWorldModel implements WorldModel {
     register_schema_atom(atom: SemanticAtom): CognitiveSchema {
         const schema: CognitiveSchema = {
             atom_id: atom.id,
-            apply: (a: CognitiveItem, b: CognitiveItem, worldModel: WorldModel) => {
+            apply: (a: CognitiveItem, b: CognitiveItem, worldModel: BaseWorldModel) => {
                 if (atom.content && typeof atom.content === 'object') {
                     // Case 1: The content is a well-defined schema with its own apply function
                     if (atom.content.type === 'schema' && 'apply' in atom.content && typeof atom.content.apply === 'function') {
@@ -376,6 +387,7 @@ export class PersistentWorldModel implements WorldModel {
             }
         };
         this.schemas.set(atom.id, schema);
+        this.notifySchemaRegistered(atom.id);
         return schema;
     }
 

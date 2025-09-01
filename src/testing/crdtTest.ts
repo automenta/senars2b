@@ -14,7 +14,7 @@ const provider = new WebsocketProvider('ws://localhost:3000/yjs', 'tasks-room', 
 // Listen for changes
 yTasks.observe((event) => {
     console.log('Tasks updated:');
-    yTasks.forEach((task, id) => {
+    yTasks.forEach((task: any, id) => {
         console.log(`- ${id}: ${task.title}`);
     });
 });
